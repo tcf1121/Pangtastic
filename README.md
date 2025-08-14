@@ -23,7 +23,7 @@ dev 브랜치:
 
 기능별 브랜치:
 기능명/이니셜 형식
-예시: inventory/MIN
+예시: inventory/SCR
 
 🧱 코드 컨벤션
 ✅ 네이밍 규칙
