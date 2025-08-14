@@ -1,2 +1,2 @@
-# Pantastic
+# Pangtastic
 
