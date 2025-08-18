@@ -47,8 +47,9 @@
 
 |요소|규칙|예시|
 |---|---|---|
-|클래스 / 인터페이스 / 필드 (public)|PascalCase|`PlayerController`, `IGameService`|
+|클래스 / 인터페이스|PascalCase|`PlayerController`, `IGameService`|
 |메서드|PascalCase|`StartGame()`, `GetData()`|
+|변수 / 필드 (public)|PascalCase|`PlayerName`, `CurrentHealth`|
 |변수 / 필드 (private)|camelCase + `_` 접두어|`_playerName`, `_currentHealth`|
 |상수 / readonly|대문자 + `_`|`MAX_HEALTH`, `DEFAULT_SPEED`|
 |이벤트|PascalCase + 동사|`OnDamageTaken`, `PlayerDied`|
