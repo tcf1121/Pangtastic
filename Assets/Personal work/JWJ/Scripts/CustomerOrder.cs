@@ -15,6 +15,10 @@ public class CustomerOrder : MonoBehaviour
     private List<Dictionary<IngredientSO, int>> _collectedPerRecipe = new List<Dictionary<IngredientSO, int>>(); // 레시피별 누적 재료 딕셔너리
     private List<bool> isRecipeCompleted = new List<bool>(); // 레시피별 완료 여부
 
+    [Header("UI")]
+    [SerializeField] private GameObject orderItem;
+    [SerializeField] private Transform orderItemParent;
+
     private void Awake()
     {
         if (_stageSetting == null)
@@ -22,6 +26,50 @@ public class CustomerOrder : MonoBehaviour
             _stageSetting = FindObjectOfType<StageSetting>();
         }
     }
+
+    public void OnOrderReceived() // 주문이 들어왔을 때 호출할 함수
+    {
+        _requiredPerRecipe.Clear(); // 이전 주문리스트 초기화
+        _collectedPerRecipe.Clear(); // 이전 주문리스트 초기화
+        isRecipeCompleted.Clear(); // 이전 주문리스트 초기화
+
+        for (int i = 0; i < CurRecipes.Count; i++) // 레시피 리스트를 순회
+        {
+            RecipeSO recipe = CurRecipes[i]; // i번째 레시피 가져오기
+
+            Dictionary<IngredientSO, int> required; // 필요한 재료 저장용 딕셔너리
+            _stageSetting.CurRecipe = recipe; // 현재 레시피를 StageSetting에 전달
+            _stageSetting.InitStageRecipe(); // 스테이지 보정 계산 수행
+            required = _stageSetting.GetRequiredIngs(); // 최종 요구 재료 딕셔너리 가져오기
+
+            Dictionary<IngredientSO, int> reqCopy = new Dictionary<IngredientSO, int>(); // StageRecipeSet 내부 딕셔너리를 복사할 새로운 딕셔너리
+            foreach (KeyValuePair<IngredientSO, int> ing in required) // 복사
+            {
+                reqCopy[ing.Key] = ing.Value; // 키와 값 복사
+            }
+            _requiredPerRecipe.Add(reqCopy); // 레시피별 요구 목록에 추가
+
+            Dictionary<IngredientSO, int> colInit = new Dictionary<IngredientSO, int>(); // 누적 딕셔너리 초기화용
+            foreach (KeyValuePair<IngredientSO, int> kv2 in reqCopy) // 요구 키들을 기준으로
+            {
+                colInit[kv2.Key] = 0; // 시작 누적값 0으로 세팅
+            }
+            _collectedPerRecipe.Add(colInit); // 레시피별 누적 목록에 추가
+
+            isRecipeCompleted.Add(false); // 아직 완료되지 않았다고 표시
+
+            Debug.Log("주문메뉴: " + recipe.Name); // 레시피 이름
+
+            foreach (KeyValuePair<IngredientSO, int> _ing in reqCopy) // 요구 재료 순회
+            {
+                IngredientSO ingredient = _ing.Key; // 재료 SO
+                int amount = _ing.Value; // 필요 수량
+                string ingName = (ingredient != null) ? ingredient.Name : "Unknown"; // 이름 확인
+                Debug.Log(" - " + ingName + " x" + amount.ToString()); // 로그 출력
+            }
+        }
+    }
+
     public void AddIngredient(IngredientSO ingredient) // 블록이 터질 때 들어오는 재료
     {
         if (_requiredPerRecipe == null || _requiredPerRecipe.Count == 0) // 주문이 없으면
@@ -81,48 +129,6 @@ public class CustomerOrder : MonoBehaviour
         }
     }
 
-    public void OnOrderReceived() // 주문이 들어왔을 때 호출할 함수
-    {
-        _requiredPerRecipe.Clear(); // 이전 주문리스트 초기화
-        _collectedPerRecipe.Clear(); // 이전 주문리스트 초기화
-        isRecipeCompleted.Clear(); // 이전 주문리스트 초기화
-
-        for (int i = 0; i < CurRecipes.Count; i++) // 레시피 리스트를 순회
-        {
-            RecipeSO recipe = CurRecipes[i]; // i번째 레시피 가져오기
-
-            Dictionary<IngredientSO, int> required; // 필요한 재료 저장용 딕셔너리
-            _stageSetting.CurRecipe = recipe; // 현재 레시피를 StageSetting에 전달
-            _stageSetting.InitStageRecipe(); // 스테이지 보정 계산 수행
-            required = _stageSetting.GetRequiredIngs(); // 최종 요구 재료 딕셔너리 가져오기
-
-            Dictionary<IngredientSO, int> reqCopy = new Dictionary<IngredientSO, int>(); // StageRecipeSet 내부 딕셔너리를 복사할 새로운 딕셔너리
-            foreach (KeyValuePair<IngredientSO, int> ing in required) // 복사
-            {
-                reqCopy[ing.Key] = ing.Value; // 키와 값 복사
-            }
-            _requiredPerRecipe.Add(reqCopy); // 레시피별 요구 목록에 추가
-
-            Dictionary<IngredientSO, int> colInit = new Dictionary<IngredientSO, int>(); // 누적 딕셔너리 초기화용
-            foreach (KeyValuePair<IngredientSO, int> kv2 in reqCopy) // 요구 키들을 기준으로
-            {
-                colInit[kv2.Key] = 0; // 시작 누적값 0으로 세팅
-            }
-            _collectedPerRecipe.Add(colInit); // 레시피별 누적 목록에 추가
-
-            isRecipeCompleted.Add(false); // 아직 완료되지 않았다고 표시
-
-            Debug.Log("주문메뉴: " + recipe.Name); // 레시피 이름
-
-            foreach (KeyValuePair<IngredientSO, int> _ing in reqCopy) // 요구 재료 순회
-            {
-                IngredientSO ingredient = _ing.Key; // 재료 SO
-                int amount = _ing.Value; // 필요 수량
-                string ingName = (ingredient != null) ? ingredient.Name : "Unknown"; // 이름 확인
-                Debug.Log(" - " + ingName + " x" + amount.ToString()); // 로그 출력
-            }
-        }
-    }
 
     private bool IsRecipeComplete(int index) // 특정 레시피가 완료되었는지 검사하는 함수
     {
