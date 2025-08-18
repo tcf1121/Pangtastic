@@ -51,6 +51,7 @@
 |메서드|PascalCase|`StartGame()`, `GetData()`|
 |변수 / 필드 (public)|PascalCase|`PlayerName`, `CurrentHealth`|
 |변수 / 필드 (private)|camelCase + `_` 접두어|`_playerName`, `_currentHealth`|
+|변수 / 필드 (protected)|camelCase + `_` 접두어|`_playerName`, `_currentHealth`|
 |상수 / readonly|대문자 + `_`|`MAX_HEALTH`, `DEFAULT_SPEED`|
 |이벤트|PascalCase + 동사|`OnDamageTaken`, `PlayerDied`|
 |로컬 변수|camelCase|`index`, `tempScore`|
