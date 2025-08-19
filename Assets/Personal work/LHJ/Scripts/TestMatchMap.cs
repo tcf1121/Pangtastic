@@ -1,3 +1,4 @@
+using LHJ;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -8,14 +9,14 @@ public class TestMatchMap : MonoBehaviour
     [SerializeField] private List<GameObject> _blockPrefabs;
 
     [SerializeField]
-    private int[,] _mapArray = new int[,]
+    private BlockNum[,] _mapArray = new BlockNum[,]
     {
-            { 1, 1, 1, 0, 2, 2 },
-            { 1, 2, 1, 2, 1, 2 },
-            { 2, 1, 2, 1, 2, 1 },
-            { 0, 1, 1, 2, 2, 2 },
-            { 1, 2, 2, 1, 1, 1 },
-            { 1, 0, 0, 2, 0, 2 }
+        { BlockNum.Carrot, BlockNum.Carrot, BlockNum.Carrot, BlockNum.Lemon, BlockNum.Carrot, BlockNum.Lemon },
+        { BlockNum.Carrot, BlockNum.Lemon, BlockNum.Carrot, BlockNum.Lemon, BlockNum.Carrot, BlockNum.Lemon },
+        { BlockNum.Carrot, BlockNum.Carrot, BlockNum.Lemon, BlockNum.Carrot, BlockNum.Lemon, BlockNum.Lemon },
+        { BlockNum.Grape,   BlockNum.Carrot, BlockNum.Carrot, BlockNum.Lemon, BlockNum.Carrot, BlockNum.Lemon },
+        { BlockNum.Carrot, BlockNum.Lemon, BlockNum.Lemon, BlockNum.Carrot, BlockNum.Carrot, BlockNum.Lemon },
+        { BlockNum.Carrot, BlockNum.Grape, BlockNum.Grape, BlockNum.Lemon, BlockNum.Grape, BlockNum.Carrot }
     };
 
     [SerializeField] private MatchChecker _matchChecker; 
@@ -40,7 +41,7 @@ public class TestMatchMap : MonoBehaviour
             if (_matchChecker != null)
             {
                 Debug.Log("스페이스바 입력됨 → 매치 검사 시작");
-                _matchChecker.SetBoard(_mapArray, _blockObjects, transform);
+                _matchChecker.SetBoard(_mapArray, _blockObjects);
             }
             else
             {
@@ -55,8 +56,8 @@ public class TestMatchMap : MonoBehaviour
         {
             for (int x = 0; x < _width; x++)
             {
-                int id = _mapArray[y, x];
-                if (id == 0) continue;
+                BlockNum blockType = _mapArray[y, x];
+                int id = (int)blockType;
 
                 Vector3 pos = new Vector3(
                     x - _width / 2 + 0.5f,

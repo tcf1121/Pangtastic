@@ -5,19 +5,19 @@ using UnityEngine;
 
 namespace LHJ
 {
-    public enum BonusGemType
-    {
-        Horizontal,
-        Vertical,
-        Bomb,
-        Honey,
-        Milk,
-        Coffee
-    }
+    //public enum BonusGemType
+    //{
+    //    Horizontal,
+    //    Vertical,
+    //    Bomb,
+    //    Honey,
+    //    Milk,
+    //    Coffee
+    //}
     [CreateAssetMenu(fileName = "New Bonus Gem", menuName = "Gem/Bonus Gem")]
     public class BonusGem : ScriptableObject
     {
-        public BonusGemType bonusGemType;
+        public BlockNum bonusGemType;
 
         [Header("Prefab")]
         public GameObject gemPrefabs;
