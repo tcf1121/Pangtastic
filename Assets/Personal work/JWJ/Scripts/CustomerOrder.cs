@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using Unity.VisualScripting;
@@ -19,12 +20,21 @@ public class CustomerOrder : MonoBehaviour
     private List<bool> isRecipeCompleted = new List<bool>(); // 레시피별 완료 여부
     private List<OrderItem> _orderItems = new List<OrderItem>();
 
-
-
-    [Header("OrderItemUI")]
+    [Header("UI")]
     [SerializeField] private GameObject orderItemPrefab;
     [SerializeField] private Transform orderItemParent;
     private GameObject orderItemObj;
+
+    //인내심 관련
+    [SerializeField] private Slider patienceSlider;
+    private CustomerSO _curCustomer;
+    private float _maxPatience;
+    private float _curPatience;
+    private Coroutine patienceCo;
+
+    //주문 성공,실패 이벤트
+    public event Action<float> OnOrderSucceeded;
+    public event Action OnOrderFailed;
 
     private void Awake()
     {
@@ -34,12 +44,19 @@ public class CustomerOrder : MonoBehaviour
         }
     }
 
+    public void SetCurrentCustomer(CustomerSO customer)
+    {
+        _curCustomer = customer;
+    }
+
     public void OnOrderReceived() // 주문이 들어왔을 때 호출할 함수
     {
         _requiredPerRecipe.Clear(); // 이전 주문리스트 초기화
         _collectedPerRecipe.Clear(); // 이전 주문리스트 초기화
         isRecipeCompleted.Clear(); // 이전 주문리스트 초기화
         ClearOrderItemUI(); //주문 아이템 파괴
+
+        StartPatience();//인내심 타이머 시작
 
         for (int i = 0; i < CurRecipes.Count; i++) // 레시피 리스트를 순회
         {
@@ -48,10 +65,11 @@ public class CustomerOrder : MonoBehaviour
             orderItemObj = Instantiate(orderItemPrefab, orderItemParent); //유아이 아이템 생성
             OrderItem orderItem = orderItemObj.GetComponent<OrderItem>();
             orderItem.SetMenu(recipe.FoodPic); //메뉴 사진 설정
-
-            Dictionary<IngredientSO, int> required; // 필요한 재료 저장용 딕셔너리
+            
             _stageSetting.CurRecipe = recipe; // 현재 레시피를 StageSetting에 전달
             _stageSetting.InitStageRecipe(); // 스테이지 보정 계산 수행
+
+            Dictionary<IngredientSO, int> required; // 필요한 재료 저장용 딕셔너리
             required = _stageSetting.GetRequiredIngs(); // 최종 요구 재료 딕셔너리 가져오기
 
             Dictionary<IngredientSO, int> reqCopy = new Dictionary<IngredientSO, int>(); // StageRecipeSet 내부 딕셔너리를 복사할 새로운 딕셔너리
@@ -62,9 +80,9 @@ public class CustomerOrder : MonoBehaviour
             _requiredPerRecipe.Add(reqCopy); // 레시피별 요구 목록에 추가
 
             Dictionary<IngredientSO, int> colInit = new Dictionary<IngredientSO, int>(); // 누적 딕셔너리 초기화용
-            foreach (KeyValuePair<IngredientSO, int> kv2 in reqCopy) // 요구 키들을 기준으로
+            foreach (KeyValuePair<IngredientSO, int> kv in reqCopy) // 요구 키들을 기준으로
             {
-                colInit[kv2.Key] = 0; // 시작 누적값 0으로 세팅
+                colInit[kv.Key] = 0; // 시작 누적값 0으로 세팅
             }
             _collectedPerRecipe.Add(colInit); // 레시피별 누적 목록에 추가
 
@@ -129,17 +147,31 @@ public class CustomerOrder : MonoBehaviour
 
                 if (IsAllComplete()) // 모든 레시피가 완료되었는지 검사
                 {
-                    Debug.Log("모든 주문 완료!"); 
-                    if (onAllOrdersComplete != null)
+                    StopPatience();
+
+                    if (_curPatience > 50f)
                     {
-                        onAllOrdersComplete.Invoke(); // 손님 클리어 이벤트 발생
+                        Debug.Log($"주문 성공 인내심: {_curPatience}");
                     }
+                    else if (_curPatience > 0f)
+                    {
+                        Debug.Log($"주문 성공 인내심: {_curPatience}");
+                    }
+                    else
+                    {
+                        Debug.Log($"0%에 성공하는게 가능한가? 성공 퍼센트: {_curPatience}");
+                    }
+
+                    OnOrderSucceeded(_curPatience);
+
+                    Debug.Log("모든 주문 완료!");
+
+                    onAllOrdersComplete.Invoke(); // 손님 클리어 이벤트 발생(안쓰면 지울예정)
                 }
             }
             break; // 재료가 들어가면 반복문 종료
         }
     }
-
 
     private bool IsRecipeComplete(int index) // 특정 레시피가 완료되었는지 검사하는 함수
     {
@@ -162,6 +194,49 @@ public class CustomerOrder : MonoBehaviour
             }
         }
         return true; // 모든 요구 항목이 충족되면 완료
+    }
+
+    private void StartPatience()
+    {
+        _maxPatience = _curCustomer.BASE_PATIENCE;
+        _curPatience = _maxPatience;
+
+        patienceSlider.minValue = 0f;
+        patienceSlider.maxValue = _curPatience;
+
+        //StopPatience();
+        patienceCo = StartCoroutine(PatienceRoutine());
+    }
+
+    private void StopPatience()
+    {
+        StopCoroutine(patienceCo);
+        patienceCo = null;
+    }
+
+    private IEnumerator PatienceRoutine()
+    {
+        float decreasingSpeed = _curCustomer.DropPerSecond;
+
+        while (true)
+        {
+            yield return new WaitForSeconds(1);
+            _curPatience = _curPatience - decreasingSpeed;
+
+            patienceSlider.value = _curPatience;
+
+            //퍼센트별 색상변경로직 여기에 넣으면 됨
+
+            if(_curPatience <= 0)
+            {
+                StopPatience();
+                Debug.Log("시간초과. 주문 실패");
+
+                OnOrderFailed();
+
+                break;
+            }
+        }
     }
 
     private bool IsAllComplete() // 모든 레시피가 완료되었는지 검사하는 함수

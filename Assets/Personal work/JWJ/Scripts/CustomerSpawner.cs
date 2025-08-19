@@ -5,9 +5,9 @@ using UnityEngine.UI;
 
 public class CustomerSpawner : MonoBehaviour
 {
-    [SerializeField] private StageSetting _stageSetting; // ½ºÅ×ÀÌÁö ¼¼ÆÃ ½ºÅ©¸³Æ®
-    [SerializeField] private CustomerOrder _customerOrder; // ÁÖ¹® Ã³¸® ½ºÅ©¸³Æ®
-    [SerializeField] private Button spawnButton; //Å×½ºÆ®¿ë ¹öÆ°
+    [SerializeField] private StageSetting _stageSetting; // ìŠ¤í…Œì´ì§€ ì„¸íŒ… ìŠ¤í¬ë¦½íŠ¸
+    [SerializeField] private CustomerOrder _customerOrder; // ì£¼ë¬¸ ì²˜ë¦¬ ìŠ¤í¬ë¦½íŠ¸
+    [SerializeField] private Button spawnButton; //í…ŒìŠ¤íŠ¸ìš© ë²„íŠ¼
 
     private List<int> _recipeList = new List<int>();
 
@@ -15,11 +15,16 @@ public class CustomerSpawner : MonoBehaviour
     private List<CustomerSO> _uniqueCus = new List<CustomerSO>();
     private List<CustomerSO> _specialCus = new List<CustomerSO>();
 
-    [SerializeField] private Image customerImage; // ¼Õ´Ô ÀÌ¹ÌÁö
+    [SerializeField] private int _successCount;
+    [SerializeField] private int _failureCount;
+
+    [SerializeField] private Image customerImage; // ì†ë‹˜ ì´ë¯¸ì§€
 
     private void Awake()
     {
-        spawnButton.onClick.AddListener(SpawnRandomCustomer);
+        spawnButton.onClick.AddListener(SpawnRandomCustomer); //í…ŒìŠ¤íŠ¸ìš© ë²„íŠ¼
+        _customerOrder.OnOrderSucceeded += OnOrderSucceeded;
+        _customerOrder.OnOrderFailed += OnOrderFailed;
 
         if(_stageSetting == null)
         {
@@ -29,18 +34,18 @@ public class CustomerSpawner : MonoBehaviour
 
     public void SpawnRandomCustomer()
     {
-        _customerOrder.CurRecipes.Clear(); // ±âÁ¸ ÁÖ¹® ºñ¿ì±â
+        _customerOrder.CurRecipes.Clear(); // ê¸°ì¡´ ì£¼ë¬¸ ë¹„ìš°ê¸°
 
         CustomerSO chosen = PickCustomerByWeight(_stageSetting.CurStage);
 
-        Debug.Log($"{chosen.Name} µîÀå"); // ¼Õ´Ô ÀÌ¸§ ·Î±× Ãâ·Â
-        customerImage.sprite = chosen.CustomerPic; //¼Õ´Ô »çÁø ¼³Á¤
+        Debug.Log($"{chosen.Name} ë“±ì¥"); // ì†ë‹˜ ì´ë¦„ ë¡œê·¸ ì¶œë ¥
+        customerImage.sprite = chosen.CustomerPic; //ì†ë‹˜ ì‚¬ì§„ ì„¤ì •
 
-
-        OrderMenu(chosen); //ÁÖ¹®
+        _customerOrder.SetCurrentCustomer(chosen);
+        OrderMenu(chosen); //ì£¼ë¬¸
     }
 
-    private CustomerSO PickCustomerByWeight(StageSO stage)
+    private CustomerSO PickCustomerByWeight(StageSO stage) //ê°€ì¤‘ì¹˜ì— ë”°ë¥¸ ëœë¤íƒ€ì… ì†ë‹˜ ë½‘ê¸°
     {
         CustomerSO randomCustomer;
 
@@ -48,7 +53,7 @@ public class CustomerSpawner : MonoBehaviour
         _uniqueCus.Clear();
         _specialCus.Clear();
 
-        var cusList = stage.CustomerList; //ÇöÀç ½ºÅ×ÀÌÁö ¼Õ´Ô ¸®½ºÆ®
+        var cusList = stage.CustomerList; //í˜„ì¬ ìŠ¤í…Œì´ì§€ ì†ë‹˜ ë¦¬ìŠ¤íŠ¸
 
         for (int i = 0; i < cusList.Length; i++)
         {
@@ -57,29 +62,29 @@ public class CustomerSpawner : MonoBehaviour
                 continue; 
             }
 
-            if (cusList[i].Type == CustomerType.Normal) //¼Õ´Ô Å¸ÀÔÀÌ ³ë¸ÖÀÌ¸é
+            if (cusList[i].Type == CustomerType.Normal) //ì†ë‹˜ íƒ€ì…ì´ ë…¸ë©€ì´ë©´
             {
                 _normalCus.Add(cusList[i]);
             }
 
-            else if (cusList[i].Type == CustomerType.Unique) //¼Õ´Ô Å¸ÀÔÀÌ À¯´ÏÅ©¸é
+            else if (cusList[i].Type == CustomerType.Unique) //ì†ë‹˜ íƒ€ì…ì´ ìœ ë‹ˆí¬ë©´
             {
                 _uniqueCus.Add(cusList[i]);
             }
 
-            else if (cusList[i].Type == CustomerType.Special) //¼Õ´Ô Å¸ÀÔÀÌ ½ºÆä¼ÈÀÌ¸é
+            else if (cusList[i].Type == CustomerType.Special) //ì†ë‹˜ íƒ€ì…ì´ ìŠ¤í˜ì…œì´ë©´
             {
                 _specialCus.Add(cusList[i]);
             }
         }
 
-        //Debug.Log($"³ë¸ÖÅ¸ÀÔ ¼ö : {_normalCus.Count}, À¯´ÏÅ©Å¸ÀÔ ¼ö : {_uniqueCus.Count}, ½ºÆäÅ¸ÀÔ ¼ö : {_specialCus.Count}");
+        //Debug.Log($"ë…¸ë©€íƒ€ì… ìˆ˜ : {_normalCus.Count}, ìœ ë‹ˆí¬íƒ€ì… ìˆ˜ : {_uniqueCus.Count}, ìŠ¤í˜íƒ€ì… ìˆ˜ : {_specialCus.Count}");
 
         int weightNormal = stage.WeightNormal;
         int weightUnique = stage.WeightUnique;
         int weightSpecial = stage.WeightSpecial;
 
-        //Æ¯Á¤ Å¸ÀÔÀÇ ¼Õ´ÔÀÌ ¾øÀ»°æ¿ì °¡ÁßÄ¡´Â 0À¸·Î ¹Ù²ãÁÜ
+        //íŠ¹ì • íƒ€ì…ì˜ ì†ë‹˜ì´ ì—†ì„ê²½ìš° ê°€ì¤‘ì¹˜ëŠ” 0ìœ¼ë¡œ ë°”ê¿”ì¤Œ
         if (_normalCus.Count == 0)
         { 
             weightNormal = 0; 
@@ -93,18 +98,18 @@ public class CustomerSpawner : MonoBehaviour
             weightSpecial = 0; 
         }
 
-        //Debug.Log($"[°¡ÁßÄ¡] ³ë¸Ö: {weightNormal}, À¯´ÏÅ©:{weightUnique}, ½ºÆä¼È: {weightSpecial}");
+        //Debug.Log($"[ê°€ì¤‘ì¹˜] ë…¸ë©€: {weightNormal}, ìœ ë‹ˆí¬:{weightUnique}, ìŠ¤í˜ì…œ: {weightSpecial}");
 
         int totalNumber = weightNormal + weightUnique + weightSpecial;
 
         int randomNum = Random.Range(0, totalNumber);
-        //Debug.Log($"·£´ı¼ıÀÚ : {randomNum}");
+        //Debug.Log($"ëœë¤ìˆ«ì : {randomNum}");
         {
             if(randomNum < weightNormal)
             {
                 int rand = Random.Range(0, _normalCus.Count);
                 randomCustomer = _normalCus[rand];
-                //Debug.Log($"³ë¸Ö »ÌÀ½ : {randomCustomer.Name}");
+                //Debug.Log($"ë…¸ë©€ ë½‘ìŒ : {randomCustomer.Name}");
                 return randomCustomer;
             }
 
@@ -112,7 +117,7 @@ public class CustomerSpawner : MonoBehaviour
             {
                 int rand = Random.Range(0, _uniqueCus.Count);
                 randomCustomer = _uniqueCus[rand];
-                //Debug.Log($"À¯´ÏÅ© »ÌÀ½ : {randomCustomer.Name}");
+                //Debug.Log($"ìœ ë‹ˆí¬ ë½‘ìŒ : {randomCustomer.Name}");
                 return randomCustomer;
             }
 
@@ -120,7 +125,7 @@ public class CustomerSpawner : MonoBehaviour
             {
                 int rand = Random.Range(0, _specialCus.Count);
                 randomCustomer = _specialCus[rand];
-                //Debug.Log($"½ºÆä¼È »ÌÀ½ : {randomCustomer.Name}");
+                //Debug.Log($"ìŠ¤í˜ì…œ ë½‘ìŒ : {randomCustomer.Name}");
                 return randomCustomer;
             }
         }
@@ -130,25 +135,46 @@ public class CustomerSpawner : MonoBehaviour
     {
         int orderNum = Random.Range(2, 4);
 
-        _recipeList.Clear(); // ·¹½ÃÇÇ ¸ñ·Ï ÃÊ±âÈ­
+        _recipeList.Clear(); // ë ˆì‹œí”¼ ëª©ë¡ ì´ˆê¸°í™”
 
-        for(int i = 0; i < customer.FavoriteRecipes.Length; i++)  //Áßº¹ÁÖ¹® ¹æÁö¿ë. ¸®½ºÆ®¿¡ ¼Õ´Ô ÁÖ¹®¸ñ·Ï ³ÖÀ½
+        for(int i = 0; i < customer.FavoriteRecipes.Length; i++)  //ì¤‘ë³µì£¼ë¬¸ ë°©ì§€ìš©. ë¦¬ìŠ¤íŠ¸ì— ì†ë‹˜ ì£¼ë¬¸ëª©ë¡ ë„£ìŒ
         {
             _recipeList.Add(i);
         }
 
-        for (int i = 0; i < orderNum && _recipeList.Count > 0; i++) // ½ºÅ×ÀÌÁö ÁÖ¹®°¡´É ¼ö¸¸Å­ ¹İº¹ÇÏÁö¸¸ ÁÖ¹® ¸ñ·ÏÀÌ ºÎÁ·ÇÏ¸é ¸ØÃã
+        for (int i = 0; i < orderNum && _recipeList.Count > 0; i++) // ìŠ¤í…Œì´ì§€ ì£¼ë¬¸ê°€ëŠ¥ ìˆ˜ë§Œí¼ ë°˜ë³µí•˜ì§€ë§Œ ì£¼ë¬¸ ëª©ë¡ì´ ë¶€ì¡±í•˜ë©´ ë©ˆì¶¤
         {
-            int randIndex = Random.Range(0, _recipeList.Count); //·¹½ÃÇÇ ¸ñ·Ï¿¡¼­ ·£´ıÀ¸·Î »ÌÀ½
+            int randIndex = Random.Range(0, _recipeList.Count); //ë ˆì‹œí”¼ ëª©ë¡ì—ì„œ ëœë¤ìœ¼ë¡œ ë½‘ìŒ
 
             int recipeIndex = _recipeList[randIndex];
 
-            _customerOrder.CurRecipes.Add(customer.FavoriteRecipes[recipeIndex]); //ÁÖ¹®ÇÒ ¸®½ºÆ®¿¡ Ãß°¡
+            _customerOrder.CurRecipes.Add(customer.FavoriteRecipes[recipeIndex]); //ì£¼ë¬¸í•  ë¦¬ìŠ¤íŠ¸ì— ì¶”ê°€
 
-            _recipeList.RemoveAt(randIndex); //ÁÖ¹®°¡´É ¸ñ·Ï¿¡¼­ ÀÎµ¥½º Á¦°Å
+            _recipeList.RemoveAt(randIndex); //ì£¼ë¬¸ê°€ëŠ¥ ëª©ë¡ì—ì„œ ì¸ë°ìŠ¤ ì œê±°
 
         }
 
-        _customerOrder.OnOrderReceived(); // ÁÖ¹® Á¢¼ö
+        _customerOrder.OnOrderReceived(); // ì£¼ë¬¸ ì ‘ìˆ˜
     }
+
+    public void OnOrderSucceeded(float ratio) //ì£¼ë¬¸ ì„±ê³µì‹œ ì´ë²¤íŠ¸ í˜¸ì¶œ
+    {
+        _successCount = _successCount + 1;
+        Debug.Log("ì£¼ë¬¸ ì„±ê³µ. ë‚¨ì€ ë¹„ìœ¨: " + ratio.ToString("P0") + " / ì„±ê³µ ëˆ„ì : " + _successCount.ToString());
+
+        //ì¡°ê±´ë¬¸: ìŠ¤í…Œì´ì§€ ì´ ì†ë‹˜ìˆ˜ê°€ ì¶©ì¡±ì´ ì•ˆëì„ë•Œ
+        SpawnRandomCustomer();
+    }
+
+    public void OnOrderFailed() //ì£¼ë¬¸ ì‹¤íŒ¨ì‹œ ì´ë²¤íŠ¸ í˜¸ì¶œ
+    {
+        _failureCount = _failureCount + 1;
+        Debug.Log("ì£¼ë¬¸ ì‹¤íŒ¨(ì‹œê°„ì´ˆê³¼). ì‹¤íŒ¨ ëˆ„ì : " + _failureCount.ToString());
+
+        //ì¡°ê±´ë¬¸: ìŠ¤í…Œì´ì§€ ì´ ì†ë‹˜ìˆ˜ê°€ ì¶©ì¡±ì´ ì•ˆëì„ë•Œ
+        SpawnRandomCustomer();
+
+        //ì¡°ê±´ë¬¸: (ë‚¨ì€ì†ë‹˜ë“±ì¥ìˆ˜ + í˜„ì¬ê¹Œì§€ì„±ê³µìˆ˜) < ëª©í‘œì¸ì›ìˆ˜ = ì¦‰ì‹œ ìŠ¤í…Œì´ì§€ ì‹¤íŒ¨
+    }
+
 }
