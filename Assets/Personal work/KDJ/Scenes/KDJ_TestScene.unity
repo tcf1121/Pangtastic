@@ -183,6 +183,8 @@ MonoBehaviour:
   _block1: {fileID: 7088734555180354253, guid: 75f2eac9bbb11ed40a9aa1e3393e89c7, type: 3}
   _block2: {fileID: 3880412606918493069, guid: 02a7f5e949030dc4f8fc2ac6df20871c, type: 3}
   _block3: {fileID: 6871975960795904996, guid: 3dc7c23fd6c93f346bda2050929be5c6, type: 3}
+  _block4: {fileID: 2782270177601225955, guid: 6b2a28eaa0565cf43ac59b5cf8b82e6c, type: 3}
+  _block5: {fileID: 1914022498431496887, guid: eb43f7e969e2b73468afacad7196924c, type: 3}
   _blockPlate: {fileID: 1224732538}
 --- !u!1 &729228886
 GameObject:
@@ -363,7 +365,7 @@ MonoBehaviour:
   _backPlate: {fileID: 0}
   BlockPlateWidth: 6
   BlockPlateHeight: 6
-  BlockPlateSize: 3
+  BlockPlateSize: 2
 --- !u!156049354 &1224732539
 Grid:
   m_ObjectHideFlags: 0
@@ -479,6 +481,50 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: -15}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1260281569
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1260281571}
+  - component: {fileID: 1260281570}
+  m_Layer: 0
+  m_Name: BoardManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1260281570
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1260281569}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c0d072242d2ac8940af8eaadf516936e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!4 &1260281571
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1260281569}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -730,3 +776,4 @@ SceneRoots:
   - {fileID: 1991081043}
   - {fileID: 560249533}
   - {fileID: 1224732540}
+  - {fileID: 1260281571}
