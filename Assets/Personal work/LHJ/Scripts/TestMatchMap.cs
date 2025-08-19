@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Tilemaps;
@@ -40,7 +40,7 @@ public class TestMatchMap : MonoBehaviour
             if (_matchChecker != null)
             {
                 Debug.Log("스페이스바 입력됨 → 매치 검사 시작");
-                _matchChecker.SetBoard(_mapArray, _blockObjects);
+                _matchChecker.SetBoard(_mapArray, _blockObjects, transform);
             }
             else
             {
