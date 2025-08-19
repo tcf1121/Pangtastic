@@ -32,10 +32,10 @@ namespace SCR
     {
         private static Board instance;
 
-        public List<Vector3Int> EmptyCell = new();
         public List<Vector3Int> SpawnPoint = new();
-        public Dictionary<Vector3Int, GemType> CellContent = new();
+        public Dictionary<Vector3Int, GemType> CellType = new();
         public Dictionary<Vector3Int, GemType> CellNonCollider = new();
+        public Dictionary<Vector3Int, BoardCell> CellContent = new();
         public GemType[,] BlockTypesBoard;
 
         private Grid _grid;
@@ -54,7 +54,7 @@ namespace SCR
                 instance = GameObject.Find("Grid").GetComponent<Board>();
                 instance.GetReference();
             }
-            instance.EmptyCell.Add(pos);
+            instance.CellContent.Add(pos, new BoardCell());
         }
 
         // 스포너 추가
@@ -69,6 +69,13 @@ namespace SCR
         }
 
         // 블록 추가
+        public static void AddObstacle(Vector3Int pos, Obstacle obstacle)
+        {
+            AddGem(pos, obstacle.GetBlockType());
+            instance.CellContent[pos].Obstacle = obstacle;
+        }
+
+        // 블록 추가
         public static void AddGem(Vector3Int pos, GemType gemType)
         {
             if (instance == null)
@@ -79,18 +86,30 @@ namespace SCR
             if (gemType == GemType.Dirt || gemType == GemType.Syrup)
                 instance.CellNonCollider.Add(pos, gemType);
             else
-                instance.CellContent.Add(pos, gemType);
+                instance.CellType.Add(pos, gemType);
+        }
+
+        // 블록 삭제
+        public static void RemoveGem(Vector3Int pos)
+        {
+            if (instance == null)
+            {
+                instance = GameObject.Find("Grid").GetComponent<Board>();
+                instance.GetReference();
+            }
+            instance.CellType.Remove(pos);
+            instance.CellContent[pos].RemoveCell();
         }
 
         // 움직일 수 있는 블럭인지 확인
         public static bool IsCanMove(Vector3Int pos)
         {
-            if (!instance.CellContent.ContainsKey(pos))
+            if (!instance.CellType.ContainsKey(pos))
                 return false;
 
-            if (instance.CellContent[pos] == GemType.Syrup ||
-                instance.CellContent[pos] == GemType.CatStatues ||
-                instance.CellContent[pos] == GemType.Dirt
+            if (instance.CellType[pos] == GemType.Syrup ||
+                instance.CellType[pos] == GemType.CatStatues ||
+                instance.CellType[pos] == GemType.Dirt
                 /*|| instance.CellContent[pos]가 아이스 상태일때*/ )
                 return false;
 
@@ -101,7 +120,7 @@ namespace SCR
         {
             Vector3Int movePos;
             // 비어있으면
-            if (!instance.CellContent.ContainsKey(pos))
+            if (!instance.CellType.ContainsKey(pos))
             {
                 // 위에 부터 확인
                 if (IsCanMove(movePos = new Vector3Int(pos.x, pos.y - 1)))
@@ -129,10 +148,10 @@ namespace SCR
         // 비어있으면 위에서 가져옴
         public static void MoveDown(Vector3Int pos, Vector3Int moveToPos)
         {
-            GemType value = instance.CellContent[pos];
-            instance.CellContent.Remove(pos);
+            GemType value = instance.CellType[pos];
+            instance.CellType.Remove(pos);
 
-            instance.CellContent.Add(moveToPos, value);
+            instance.CellType.Add(moveToPos, value);
         }
 
 
