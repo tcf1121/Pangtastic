@@ -1,143 +1,246 @@
 using UnityEngine;
 
-public class BlockSpawner : MonoBehaviour
+namespace KDJ
 {
-    [SerializeField] private GameObject _gemTile1;
-    [SerializeField] private GameObject _gemTile2;
-    [SerializeField] private GameObject _gemTile3;
-    [SerializeField] private BlockPlate _blockPlate;
-
-    private GameObject[,] _blockArray;
-    // 0 = 빈 블록, 1 = 보석1, 2 = 보석2, 3 = 보석3
-    private int[,] _blockDataArray;
-
-    private void Start()
+    public class BlockSpawner : MonoBehaviour
     {
-        InitBlockArray();
-        DrawBlock();
-    }
+        [SerializeField] private GameObject _block1;
+        [SerializeField] private GameObject _block2;
+        [SerializeField] private GameObject _block3;
+        [SerializeField] private GameObject _block4;
+        [SerializeField] private GameObject _block5;
+        [SerializeField] private BlockPlate _blockPlate;
 
-    private void DrawBlock()
-    {
-        for (int x = 0; x < _blockPlate.BlockPlateWidth; x++)
+        private GameObject[,] _blockArray;
+        private int[,] _blockDataArray;
+
+        /// <summary>
+        /// 블럭 배열 초기화
+        /// </summary>
+        public void InitBlockArray()
         {
-            for (int y = 0; y < _blockPlate.BlockPlateHeight; y++)
+            _blockDataArray = new int[_blockPlate.BlockPlateWidth, _blockPlate.BlockPlateHeight];
+            _blockArray = new GameObject[_blockPlate.BlockPlateWidth, _blockPlate.BlockPlateHeight];
+
+            for (int x = 0; x < _blockDataArray.GetLength(0); x++)
             {
-                if (_blockDataArray[y, x] != 0)
+                for (int y = 0; y < _blockDataArray.GetLength(1); y++)
                 {
-                    Vector3 position = new Vector3(x - _blockPlate.BlockPlateWidth / 2 + 0.5f, y - _blockPlate.BlockPlateHeight / 2 + 0.5f, 0);
-                    GameObject gemPrefab = GetRandomGemTile(_blockDataArray[y, x]);
-                    _blockArray[y, x] = Instantiate(gemPrefab, position, Quaternion.identity);
-                }
-                else
-                {
+                    if (_blockPlate.BlockPlateArray[y, x])
+                    {
+                        _blockDataArray[y, x] = Random.Range(1, 6);
+                    }
+                    else
+                    {
+                        _blockDataArray[y, x] = 0; // 빈 블록
+                    }
+
                     _blockArray[y, x] = null;
                 }
             }
         }
-    }
 
-    private void CheckBlockDataArray()
-    {
-        int blankCount = 0;
-
-        for (int x = 0; x < _blockPlate.BlockPlateWidth; x++)
+        /// <summary>
+        /// 초기 블럭 생성
+        /// </summary>
+        public void DrawBlock()
         {
-            for (int y = 0; y < _blockPlate.BlockPlateHeight; y++)
+            for (int x = 0; x < _blockPlate.BlockPlateWidth; x++)
             {
-                if (_blockDataArray[y, x] == 0)
+                for (int y = 0; y < _blockPlate.BlockPlateHeight; y++)
                 {
-                    blankCount++;
-                }
-            }
-        }
-
-        if (blankCount > 0)
-        {
-            SortBlockDataArray();
-
-            for (int i = 0; i < blankCount; i++)
-            {
-                SpawnBlock();
-            }
-        }
-    }
-
-    private void SortBlockDataArray()
-    {
-        for (int x = 0; x < _blockPlate.BlockPlateWidth; x++)
-        {
-            for (int y = _blockPlate.BlockPlateHeight - 1; y >= 0; y--)
-            {
-                if (_blockDataArray[y, x] == 0)
-                {
-                    for (int k = y - 1; k >= 0; k--)
+                    if (_blockPlate.BlockPlateWidth % 2 == 0)
                     {
-                        if (_blockDataArray[k, x] != 0)
+                        if (_blockDataArray[y, x] != 0)
                         {
-                            _blockDataArray[y, x] = _blockDataArray[k, x];
-                            _blockDataArray[k, x] = 0;
-                            break;
+                            Vector3 position = new Vector3(x - _blockPlate.BlockPlateWidth / 2 + 0.5f, y - _blockPlate.BlockPlateHeight / 2 + 0.5f, 0);
+                            GameObject blockPrefab = GetBlockTile(_blockDataArray[y, x]);
+                            _blockArray[y, x] = Instantiate(blockPrefab, position, Quaternion.identity);
+                        }
+                        else
+                        {
+                            _blockArray[y, x] = null;
+                        }
+                    }
+                    else
+                    {
+                        if (_blockDataArray[y, x] != 0)
+                        {
+                            Vector3 position = new Vector3(x - _blockPlate.BlockPlateWidth / 2, y - _blockPlate.BlockPlateHeight / 2, 0);
+                            GameObject blockPrefab = GetBlockTile(_blockDataArray[y, x]);
+                            _blockArray[y, x] = Instantiate(blockPrefab, position, Quaternion.identity);
+                        }
+                        else
+                        {
+                            _blockArray[y, x] = null;
                         }
                     }
                 }
             }
         }
-    }
 
-    private void SpawnBlock()
-    {
-        for (int x = 0; x < _blockPlate.BlockPlateWidth; x++)
+        /// <summary>
+        /// 블럭 데이터 배열 정렬
+        /// </summary>
+        public void SortBlockDataArray()
         {
-            for (int y = 0; y < _blockPlate.BlockPlateHeight; y++)
+            for (int x = 0; x < _blockPlate.BlockPlateWidth; x++)
             {
-                if (_blockDataArray[y, x] == 0)
+                for (int y = 0; y < _blockPlate.BlockPlateHeight; y++)
                 {
-                    _blockDataArray[y, x] = Random.Range(1, 4);
-                    Vector3 position = new Vector3(x - _blockPlate.BlockPlateWidth / 2 + 0.5f, y - _blockPlate.BlockPlateHeight / 2 + 0.5f, 0);
-                    GameObject gemPrefab = GetRandomGemTile(_blockDataArray[y, x]);
-                    _blockArray[y, x] = Instantiate(gemPrefab, position, Quaternion.identity);
-                    return;
+                    if (_blockDataArray[y, x] == 0 && _blockPlate.BlockPlateArray[y, x])
+                    {
+                        for (int k = y + 1; k < _blockPlate.BlockPlateHeight; k++)
+                        {
+                            if (_blockDataArray[k, x] != 0)
+                            {
+                                _blockDataArray[y, x] = _blockDataArray[k, x];
+                                _blockDataArray[k, x] = 0;
+                                break;
+                            }
+                        }
+                    }
                 }
             }
         }
-    }
 
-    private void InitBlockArray()
-    {
-        _blockDataArray = new int[_blockPlate.BlockPlateWidth, _blockPlate.BlockPlateHeight];
-        _blockArray = new GameObject[_blockPlate.BlockPlateWidth, _blockPlate.BlockPlateHeight];
-
-        for (int x = 0; x < _blockDataArray.GetLength(0); x++)
+        /// <summary>
+        /// 빈 공간에 블럭 생성
+        /// </summary>
+        public void SpawnBlock()
         {
-            for (int y = 0; y < _blockDataArray.GetLength(1); y++)
+            for (int x = 0; x < _blockPlate.BlockPlateWidth; x++)
             {
-                if (_blockPlate.BlockPlateArray[y, x])
+                for (int y = 0; y < _blockPlate.BlockPlateHeight; y++)
                 {
-                    _blockDataArray[y, x] = Random.Range(1, 4);
+                    if (_blockDataArray[y, x] == 0 && _blockPlate.BlockPlateArray[y, x])
+                    {
+                        _blockDataArray[y, x] = Random.Range(1, 4);
+                        Vector3 position;
+                        if (_blockPlate.BlockPlateWidth % 2 == 0)
+                        {
+                            position = new Vector3(x - _blockPlate.BlockPlateWidth / 2 + 0.5f, y - _blockPlate.BlockPlateHeight / 2 + 0.5f, 0);
+                        }
+                        else
+                        {
+                            position = new Vector3(x - _blockPlate.BlockPlateWidth / 2, y - _blockPlate.BlockPlateHeight / 2, 0);
+                        }
+                        GameObject gemPrefab = GetBlockTile(_blockDataArray[y, x]);
+                        _blockArray[y, x] = Instantiate(gemPrefab, position, Quaternion.identity);
+                    }
                 }
-                else
-                {
-                    _blockDataArray[y, x] = 0; // 빈 블록
-                }
-
-                _blockArray[y, x] = null;
             }
         }
-    }
 
-    private GameObject GetRandomGemTile(int blockNum)
-    {
-        switch (blockNum)
+        /// <summary>
+        /// 블럭 리프레쉬, 블럭 파괴 후 다시 생성함
+        /// </summary>
+        public void RefreshBlock()
         {
-            case 1:
-                return _gemTile1;
-            case 2:
-                return _gemTile2;
-            case 3:
-                return _gemTile3;
-            default:
-                return null; // Should not happen
+            for (int x = 0; x < _blockPlate.BlockPlateWidth; x++)
+            {
+                for (int y = 0; y < _blockPlate.BlockPlateHeight; y++)
+                {
+                    // 데이터에는 빈 블록인데 뷰에는 블록이 있는 경우
+                    if (_blockDataArray[y, x] == 0 && _blockArray[y, x] != null)
+                    {
+                        Destroy(_blockArray[y, x]);
+                        _blockArray[y, x] = null;
+                    }
+                    // 데이터에는 블록이 있는데 뷰에는 블록이 없는 경우
+                    else if (_blockPlate.BlockPlateArray[y, x] && _blockDataArray[y, x] != 0)
+                    {
+                        if (_blockArray[y, x] != null) Destroy(_blockArray[y, x]);
+
+                        Vector3 position;
+                        if (_blockPlate.BlockPlateWidth % 2 == 0)
+                        {
+                            position = new Vector3(x - _blockPlate.BlockPlateWidth / 2 + 0.5f, y - _blockPlate.BlockPlateHeight / 2 + 0.5f, 0);
+                        }
+                        else
+                        {
+                            position = new Vector3(x - _blockPlate.BlockPlateWidth / 2, y - _blockPlate.BlockPlateHeight / 2, 0);
+                        }
+                        GameObject gemPrefab = GetBlockTile(_blockDataArray[y, x]);
+                        _blockArray[y, x] = Instantiate(gemPrefab, position, Quaternion.identity);
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// 테스트 코드. 하단 블럭을 ㅗ자 형태로 파괴
+        /// </summary>
+        /// <returns></returns>
+        public bool TestDeleteBlock()
+        {
+            bool deleted = false;
+            if (_blockDataArray[0, 1] != 0)
+            {
+                _blockDataArray[0, 1] = 0;
+                Destroy(_blockArray[0, 1]);
+                _blockArray[0, 1] = null;
+                deleted = true;
+            }
+            if (_blockDataArray[0, 2] != 0)
+            {
+                _blockDataArray[0, 2] = 0;
+                Destroy(_blockArray[0, 2]);
+                _blockArray[0, 2] = null;
+                deleted = true;
+            }
+            if (_blockDataArray[0, 3] != 0)
+            {
+                _blockDataArray[0, 3] = 0;
+                Destroy(_blockArray[0, 3]);
+                _blockArray[0, 3] = null;
+                deleted = true;
+            }
+            if (_blockDataArray[1, 2] != 0)
+            {
+                _blockDataArray[1, 2] = 0;
+                Destroy(_blockArray[1, 2]);
+                _blockArray[1, 2] = null;
+                deleted = true;
+            }
+            return deleted;
+        }
+
+        /// <summary>
+        /// 입력받은 블럭 번호에 해당하는 블럭 프리팹을 반환
+        /// </summary>
+        /// <param name="blockNum"></param>
+        /// <returns></returns>
+        private GameObject GetBlockTile(int blockNum)
+        {
+            switch (blockNum)
+            {
+                case 1: return _block1;
+                case 2: return _block2;
+                case 3: return _block3;
+                case 4: return _block4;
+                case 5: return _block5;
+                default: return null;
+            }
+        }
+
+        /// <summary>
+        /// 블록 데이터 배열에 빈 블록이 있는지 확인
+        /// </summary>
+        /// <returns></returns>
+        public bool HasEmptyBlocks()
+        {
+            for (int x = 0; x < _blockPlate.BlockPlateWidth; x++)
+            {
+                for (int y = 0; y < _blockPlate.BlockPlateHeight; y++)
+                {
+                    if (_blockPlate.BlockPlateArray[y, x] && _blockDataArray[y, x] == 0)
+                    {
+                        return true;
+                    }
+                }
+            }
+            return false;
         }
     }
 }

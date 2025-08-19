@@ -1,46 +1,103 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.ComponentModel;
 using UnityEngine;
 using UnityEngine.Tilemaps;
 
-public class BlockPlate : MonoBehaviour
+namespace KDJ
 {
-    [SerializeField] private Tilemap _blockPlate;
-    [SerializeField] private TileBase _blockTile;
-    [SerializeField] private GameObject _backPlate;
-
-    public bool[,] BlockPlateArray;
-    public int BlockPlateWidth;
-    public int BlockPlateHeight;
-
-
-    private void Awake()
+    public class BlockPlate : MonoBehaviour
     {
-        BlockPlateArray = new bool[,]
-        {
-            { true, true, false, false, true, true },
-            { true, true, true, true, true, true },
-            { true, true, true, true, true, true },
-            { true, true, true, true, true, true },
-            { true, true, true, true, true, true },
-            { true, true, false, false, true, true }
-        };
+        [SerializeField] private Tilemap _blockPlate;
+        [SerializeField] private TileBase _blockTile;
+        [SerializeField] private GameObject _backPlate;
 
-        // _backPlate.transform.localScale = new Vector3(BlockPlateWidth + 0.1f, BlockPlateHeight + 0.1f, 1);
+        public bool[,] BlockPlateArray;
+        public int BlockPlateWidth;
+        public int BlockPlateHeight;
+        [Header("블록 판 설정 (1 = 6x6, 2 = 7x7, 3 = 8x8)")]
+        public int BlockPlateSize;
 
-        DrawTile();
-    }
-    private void DrawTile()
-    {
-        for (int x = 0; x < BlockPlateArray.GetLength(0); x++)
+
+        private void Awake()
         {
-            for (int y = 0; y < BlockPlateArray.GetLength(1); y++)
+            SetBackPlate(BlockPlateSize);
+
+            // _backPlate.transform.localScale = new Vector3(BlockPlateWidth + 0.1f, BlockPlateHeight + 0.1f, 1);
+
+            DrawTile();
+        }
+        private void DrawTile()
+        {
+            for (int x = 0; x < BlockPlateArray.GetLength(0); x++)
             {
-                if (BlockPlateArray[y, x])
+                for (int y = 0; y < BlockPlateArray.GetLength(1); y++)
                 {
-                    _blockPlate.SetTile(new Vector3Int(x - BlockPlateWidth / 2, y - BlockPlateHeight / 2, 0), _blockTile);
+                    // 블록판 가로칸이 짝수일때 생성
+                    if (BlockPlateArray.GetLength(0) % 2 == 0)
+                    {
+                        if (BlockPlateArray[y, x])
+                        {
+                            _blockPlate.SetTile(new Vector3Int(x - BlockPlateWidth / 2, y - BlockPlateHeight / 2, 0), _blockTile);
+                            _blockPlate.transform.position = new Vector3(0, 0, 0);
+                        }
+                    }
+                    else
+                    {
+                        if (BlockPlateArray[y, x])
+                        {
+                            _blockPlate.SetTile(new Vector3Int(x - BlockPlateWidth / 2, y - BlockPlateHeight / 2, 0), _blockTile);
+                            _blockPlate.transform.position = new Vector3(-0.5f, -0.5f, 0);
+                        }
+                    }
                 }
             }
+        }
+
+        private void SetBackPlate(int value)
+        {
+            switch (value)
+            {
+                case 1:
+                    BlockPlateArray = new bool[,]
+                    {
+                        { true, true, true, true, true, true },
+                        { true, true, true, true, true, true },
+                        { true, true, false, false, true, true },
+                        { true, true, false, false, true, true },
+                        { true, true, true, true, true, true },
+                        { true, true, true, true, true, true }
+                    };
+                    break;
+                case 2:
+                    BlockPlateArray = new bool[,]
+                    {
+                        { true, true, true, true, true, true, true },
+                        { true, true, true, true, true, true, true },
+                        { true, true, true, false, true, true, true },
+                        { true, true, false, false, false, true, true },
+                        { true, true, true, false, true, true, true },
+                        { true, true, true, true, true, true, true },
+                        { true, true, true, true, true, true, true }
+                    };
+                    break;
+                case 3:
+                    BlockPlateArray = new bool[,]
+                    {
+                        { true, true, true, true, true, true, true, true },
+                        { true, true, true, true, true, true, true, true },
+                        { true, true, true, true, true, true, true, true },
+                        { true, true, true, true, true, true, true, true },
+                        { true, true, true, true, true, true, true, true },
+                        { true, true, true, true, true, true, true, true },
+                        { true, true, true, true, true, true, true, true },
+                        { true, true, true, true, true, true, true, true }
+                    };
+                    break;
+            }
+
+            BlockPlateWidth = BlockPlateArray.GetLength(0);
+            BlockPlateHeight = BlockPlateArray.GetLength(1);
         }
     }
 }
