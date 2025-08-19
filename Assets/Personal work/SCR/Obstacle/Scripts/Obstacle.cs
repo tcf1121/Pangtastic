@@ -18,7 +18,7 @@ namespace SCR
 
         protected Vector3Int _cellPos;
 
-        public int BlockNum;
+        protected GemType _blockType;
         protected int _currentHP;
         protected int _score;
         protected bool _canMove;
@@ -36,7 +36,12 @@ namespace SCR
 
             transform.position = new Vector3(cell.x + 0.5f, cell.y + 0.5f, 0);
             //보드의 cell 위치에 장애 블록 추가
-            // Broad.SetCell(cell, BlockNum);
+            Board.AddGem(cell, _blockType);
+        }
+
+        public virtual GemType GetBlockType()
+        {
+            return _blockType;
         }
 
         public virtual void Clear()
