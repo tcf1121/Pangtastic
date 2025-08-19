@@ -17,6 +17,12 @@ public class StageSO : ScriptableObject
     [Header("재료 추가 개수")]
     public IngredientAdjustment[] IngredientAdjustments;
 
+    [Header("손님 타입별 가중치")]
+
+    [Range(0, 100)] public int WeightNormal = 80;
+    [Range(0, 100)] public int WeightUnique = 18;
+    [Range(0, 100)] public int WeightSpecial = 2;
+
     [System.Serializable]
     public struct IngredientAdjustment
     {
