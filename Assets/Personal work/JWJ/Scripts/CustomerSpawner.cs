@@ -73,7 +73,7 @@ public class CustomerSpawner : MonoBehaviour
             }
         }
 
-        Debug.Log($"노멀타입 수 : {_normalCus.Count}, 유니크타입 수 : {_uniqueCus.Count}, 스페타입 수 : {_specialCus.Count}");
+        //Debug.Log($"노멀타입 수 : {_normalCus.Count}, 유니크타입 수 : {_uniqueCus.Count}, 스페타입 수 : {_specialCus.Count}");
 
         int weightNormal = stage.WeightNormal;
         int weightUnique = stage.WeightUnique;
@@ -93,18 +93,18 @@ public class CustomerSpawner : MonoBehaviour
             weightSpecial = 0; 
         }
 
-        Debug.Log($"[가중치] 노멀: {weightNormal}, 유니크:{weightUnique}, 스페셜: {weightSpecial}");
+        //Debug.Log($"[가중치] 노멀: {weightNormal}, 유니크:{weightUnique}, 스페셜: {weightSpecial}");
 
         int totalNumber = weightNormal + weightUnique + weightSpecial;
 
         int randomNum = Random.Range(0, totalNumber);
-        Debug.Log($"랜덤숫자 : {randomNum}");
+        //Debug.Log($"랜덤숫자 : {randomNum}");
         {
             if(randomNum < weightNormal)
             {
                 int rand = Random.Range(0, _normalCus.Count);
                 randomCustomer = _normalCus[rand];
-                Debug.Log($"노멀 뽑음 : {randomCustomer.Name}");
+                //Debug.Log($"노멀 뽑음 : {randomCustomer.Name}");
                 return randomCustomer;
             }
 
@@ -112,7 +112,7 @@ public class CustomerSpawner : MonoBehaviour
             {
                 int rand = Random.Range(0, _uniqueCus.Count);
                 randomCustomer = _uniqueCus[rand];
-                Debug.Log($"유니크 뽑음 : {randomCustomer.Name}");
+                //Debug.Log($"유니크 뽑음 : {randomCustomer.Name}");
                 return randomCustomer;
             }
 
@@ -120,7 +120,7 @@ public class CustomerSpawner : MonoBehaviour
             {
                 int rand = Random.Range(0, _specialCus.Count);
                 randomCustomer = _specialCus[rand];
-                Debug.Log($"스페셜 뽑음 : {randomCustomer.Name}");
+                //Debug.Log($"스페셜 뽑음 : {randomCustomer.Name}");
                 return randomCustomer;
             }
         }

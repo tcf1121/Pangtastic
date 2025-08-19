@@ -1,7 +1,10 @@
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Events;
+using UnityEngine.UI;
+using static UnityEditor.Progress;
 
 public class CustomerOrder : MonoBehaviour
 {
@@ -11,13 +14,17 @@ public class CustomerOrder : MonoBehaviour
 
     [SerializeField] private UnityEvent onAllOrdersComplete;
 
-    private List<Dictionary<IngredientSO, int>> _requiredPerRecipe = new List<Dictionary<IngredientSO, int>>(); // ·¹½ÃÇÇº° ÃÖÁ¾ ¿ä±¸ Àç·á µñ¼Å³Ê¸®
-    private List<Dictionary<IngredientSO, int>> _collectedPerRecipe = new List<Dictionary<IngredientSO, int>>(); // ·¹½ÃÇÇº° ´©Àû Àç·á µñ¼Å³Ê¸®
-    private List<bool> isRecipeCompleted = new List<bool>(); // ·¹½ÃÇÇº° ¿Ï·á ¿©ºÎ
+    private List<Dictionary<IngredientSO, int>> _requiredPerRecipe = new List<Dictionary<IngredientSO, int>>(); // ë ˆì‹œí”¼ë³„ ìµœì¢… ìš”êµ¬ ì¬ë£Œ ë”•ì…”ë„ˆë¦¬
+    private List<Dictionary<IngredientSO, int>> _collectedPerRecipe = new List<Dictionary<IngredientSO, int>>(); // ë ˆì‹œí”¼ë³„ ëˆ„ì  ì¬ë£Œ ë”•ì…”ë„ˆë¦¬
+    private List<bool> isRecipeCompleted = new List<bool>(); // ë ˆì‹œí”¼ë³„ ì™„ë£Œ ì—¬ë¶€
+    private List<OrderItem> _orderItems = new List<OrderItem>();
 
-    [Header("UI")]
-    [SerializeField] private GameObject orderItem;
+
+
+    [Header("OrderItemUI")]
+    [SerializeField] private GameObject orderItemPrefab;
     [SerializeField] private Transform orderItemParent;
+    private GameObject orderItemObj;
 
     private void Awake()
     {
@@ -27,141 +34,168 @@ public class CustomerOrder : MonoBehaviour
         }
     }
 
-    public void OnOrderReceived() // ÁÖ¹®ÀÌ µé¾î¿ÔÀ» ¶§ È£ÃâÇÒ ÇÔ¼ö
+    public void OnOrderReceived() // ì£¼ë¬¸ì´ ë“¤ì–´ì™”ì„ ë•Œ í˜¸ì¶œí•  í•¨ìˆ˜
     {
-        _requiredPerRecipe.Clear(); // ÀÌÀü ÁÖ¹®¸®½ºÆ® ÃÊ±âÈ­
-        _collectedPerRecipe.Clear(); // ÀÌÀü ÁÖ¹®¸®½ºÆ® ÃÊ±âÈ­
-        isRecipeCompleted.Clear(); // ÀÌÀü ÁÖ¹®¸®½ºÆ® ÃÊ±âÈ­
+        _requiredPerRecipe.Clear(); // ì´ì „ ì£¼ë¬¸ë¦¬ìŠ¤íŠ¸ ì´ˆê¸°í™”
+        _collectedPerRecipe.Clear(); // ì´ì „ ì£¼ë¬¸ë¦¬ìŠ¤íŠ¸ ì´ˆê¸°í™”
+        isRecipeCompleted.Clear(); // ì´ì „ ì£¼ë¬¸ë¦¬ìŠ¤íŠ¸ ì´ˆê¸°í™”
+        ClearOrderItemUI(); //ì£¼ë¬¸ ì•„ì´í…œ íŒŒê´´
 
-        for (int i = 0; i < CurRecipes.Count; i++) // ·¹½ÃÇÇ ¸®½ºÆ®¸¦ ¼øÈ¸
+        for (int i = 0; i < CurRecipes.Count; i++) // ë ˆì‹œí”¼ ë¦¬ìŠ¤íŠ¸ë¥¼ ìˆœíšŒ
         {
-            RecipeSO recipe = CurRecipes[i]; // i¹øÂ° ·¹½ÃÇÇ °¡Á®¿À±â
+            RecipeSO recipe = CurRecipes[i]; // ië²ˆì§¸ ë ˆì‹œí”¼ ê°€ì ¸ì˜¤ê¸°
 
-            Dictionary<IngredientSO, int> required; // ÇÊ¿äÇÑ Àç·á ÀúÀå¿ë µñ¼Å³Ê¸®
-            _stageSetting.CurRecipe = recipe; // ÇöÀç ·¹½ÃÇÇ¸¦ StageSetting¿¡ Àü´Ş
-            _stageSetting.InitStageRecipe(); // ½ºÅ×ÀÌÁö º¸Á¤ °è»ê ¼öÇà
-            required = _stageSetting.GetRequiredIngs(); // ÃÖÁ¾ ¿ä±¸ Àç·á µñ¼Å³Ê¸® °¡Á®¿À±â
+            orderItemObj = Instantiate(orderItemPrefab, orderItemParent); //ìœ ì•„ì´ ì•„ì´í…œ ìƒì„±
+            OrderItem orderItem = orderItemObj.GetComponent<OrderItem>();
+            orderItem.SetMenu(recipe.FoodPic); //ë©”ë‰´ ì‚¬ì§„ ì„¤ì •
 
-            Dictionary<IngredientSO, int> reqCopy = new Dictionary<IngredientSO, int>(); // StageRecipeSet ³»ºÎ µñ¼Å³Ê¸®¸¦ º¹»çÇÒ »õ·Î¿î µñ¼Å³Ê¸®
-            foreach (KeyValuePair<IngredientSO, int> ing in required) // º¹»ç
+            Dictionary<IngredientSO, int> required; // í•„ìš”í•œ ì¬ë£Œ ì €ì¥ìš© ë”•ì…”ë„ˆë¦¬
+            _stageSetting.CurRecipe = recipe; // í˜„ì¬ ë ˆì‹œí”¼ë¥¼ StageSettingì— ì „ë‹¬
+            _stageSetting.InitStageRecipe(); // ìŠ¤í…Œì´ì§€ ë³´ì • ê³„ì‚° ìˆ˜í–‰
+            required = _stageSetting.GetRequiredIngs(); // ìµœì¢… ìš”êµ¬ ì¬ë£Œ ë”•ì…”ë„ˆë¦¬ ê°€ì ¸ì˜¤ê¸°
+
+            Dictionary<IngredientSO, int> reqCopy = new Dictionary<IngredientSO, int>(); // StageRecipeSet ë‚´ë¶€ ë”•ì…”ë„ˆë¦¬ë¥¼ ë³µì‚¬í•  ìƒˆë¡œìš´ ë”•ì…”ë„ˆë¦¬
+            foreach (KeyValuePair<IngredientSO, int> ing in required) // ë³µì‚¬
             {
-                reqCopy[ing.Key] = ing.Value; // Å°¿Í °ª º¹»ç
+                reqCopy[ing.Key] = ing.Value; // í‚¤ì™€ ê°’ ë³µì‚¬
             }
-            _requiredPerRecipe.Add(reqCopy); // ·¹½ÃÇÇº° ¿ä±¸ ¸ñ·Ï¿¡ Ãß°¡
+            _requiredPerRecipe.Add(reqCopy); // ë ˆì‹œí”¼ë³„ ìš”êµ¬ ëª©ë¡ì— ì¶”ê°€
 
-            Dictionary<IngredientSO, int> colInit = new Dictionary<IngredientSO, int>(); // ´©Àû µñ¼Å³Ê¸® ÃÊ±âÈ­¿ë
-            foreach (KeyValuePair<IngredientSO, int> kv2 in reqCopy) // ¿ä±¸ Å°µéÀ» ±âÁØÀ¸·Î
+            Dictionary<IngredientSO, int> colInit = new Dictionary<IngredientSO, int>(); // ëˆ„ì  ë”•ì…”ë„ˆë¦¬ ì´ˆê¸°í™”ìš©
+            foreach (KeyValuePair<IngredientSO, int> kv2 in reqCopy) // ìš”êµ¬ í‚¤ë“¤ì„ ê¸°ì¤€ìœ¼ë¡œ
             {
-                colInit[kv2.Key] = 0; // ½ÃÀÛ ´©Àû°ª 0À¸·Î ¼¼ÆÃ
+                colInit[kv2.Key] = 0; // ì‹œì‘ ëˆ„ì ê°’ 0ìœ¼ë¡œ ì„¸íŒ…
             }
-            _collectedPerRecipe.Add(colInit); // ·¹½ÃÇÇº° ´©Àû ¸ñ·Ï¿¡ Ãß°¡
+            _collectedPerRecipe.Add(colInit); // ë ˆì‹œí”¼ë³„ ëˆ„ì  ëª©ë¡ì— ì¶”ê°€
 
-            isRecipeCompleted.Add(false); // ¾ÆÁ÷ ¿Ï·áµÇÁö ¾Ê¾Ò´Ù°í Ç¥½Ã
+            isRecipeCompleted.Add(false); // ì•„ì§ ì™„ë£Œë˜ì§€ ì•Šì•˜ë‹¤ê³  í‘œì‹œ
 
-            Debug.Log("ÁÖ¹®¸Ş´º: " + recipe.Name); // ·¹½ÃÇÇ ÀÌ¸§
+            Debug.Log("ì£¼ë¬¸ë©”ë‰´: " + recipe.Name); // ë ˆì‹œí”¼ ì´ë¦„
 
-            foreach (KeyValuePair<IngredientSO, int> _ing in reqCopy) // ¿ä±¸ Àç·á ¼øÈ¸
-            {
-                IngredientSO ingredient = _ing.Key; // Àç·á SO
-                int amount = _ing.Value; // ÇÊ¿ä ¼ö·®
-                string ingName = (ingredient != null) ? ingredient.Name : "Unknown"; // ÀÌ¸§ È®ÀÎ
-                Debug.Log(" - " + ingName + " x" + amount.ToString()); // ·Î±× Ãâ·Â
-            }
+            orderItem.BuildRows(reqCopy);
+            _orderItems.Add(orderItem);
         }
     }
 
-    public void AddIngredient(IngredientSO ingredient) // ºí·ÏÀÌ ÅÍÁú ¶§ µé¾î¿À´Â Àç·á
+    public void AddIngredient(IngredientSO ingredient) // ë¸”ë¡ì´ í„°ì§ˆ ë•Œ ë“¤ì–´ì˜¤ëŠ” ì¬ë£Œ
     {
-        if (_requiredPerRecipe == null || _requiredPerRecipe.Count == 0) // ÁÖ¹®ÀÌ ¾øÀ¸¸é
+        if (_requiredPerRecipe == null || _requiredPerRecipe.Count == 0) // ì£¼ë¬¸ì´ ì—†ìœ¼ë©´
         {
-            Debug.LogWarning("ÁÖ¹®ÀÌ ¾ø½À´Ï´Ù.");
+            Debug.LogWarning("ì£¼ë¬¸ì´ ì—†ìŠµë‹ˆë‹¤.");
             return;
         }
 
-        for (int i = 0; i < _requiredPerRecipe.Count; i++) // °¢ ·¹½ÃÇÇ¸¦ ¼ø¼­´ë·Î °Ë»ç
+        for (int i = 0; i < _requiredPerRecipe.Count; i++) // ê° ë ˆì‹œí”¼ë¥¼ ìˆœì„œëŒ€ë¡œ ê²€ì‚¬
         {
-            if (isRecipeCompleted[i]) // ÀÌ¹Ì ¿Ï·áµÈ ·¹½ÃÇÇ¸é
+            if (isRecipeCompleted[i]) // ì´ë¯¸ ì™„ë£Œëœ ë ˆì‹œí”¼ë©´
             {
-                continue; // °Ç³Ê¶Ü
+                continue; // ê±´ë„ˆëœ€
             }
 
-            Dictionary<IngredientSO, int> reqIng = _requiredPerRecipe[i]; // ÇÊ¿äÇÑ Àç·á µñ¼Å³Ê¸®
-            Dictionary<IngredientSO, int> colIng = _collectedPerRecipe[i]; // ¸ğÀº Àç·á µñ¼Å³Ê¸®
+            Dictionary<IngredientSO, int> reqIng = _requiredPerRecipe[i]; // í•„ìš”í•œ ì¬ë£Œ ë”•ì…”ë„ˆë¦¬
+            Dictionary<IngredientSO, int> colIng = _collectedPerRecipe[i]; // ëª¨ì€ ì¬ë£Œ ë”•ì…”ë„ˆë¦¬
 
-            if (reqIng.ContainsKey(ingredient) == false) // ÀÌ ·¹½ÃÇÇ¿¡ ¹ŞÀº Àç·á°¡ ÇÊ¿ä¾øÀ¸¸é
+            if (reqIng.ContainsKey(ingredient) == false) // ì´ ë ˆì‹œí”¼ì— ë°›ì€ ì¬ë£Œê°€ í•„ìš”ì—†ìœ¼ë©´
             {
-                continue; // ´ÙÀ½ ·¹½ÃÇÇ·Î ³Ñ¾î°¨
+                continue; // ë‹¤ìŒ ë ˆì‹œí”¼ë¡œ ë„˜ì–´ê°
             }
 
-            int need = reqIng[ingredient]; // Àç·á ¿ä±¸ ¼ö·®
-            int cur = 0; // ÇöÀç ´©Àû ¼ö·®
+            int need = reqIng[ingredient]; // ì¬ë£Œ ìš”êµ¬ ìˆ˜ëŸ‰
+            int cur = 0; // í˜„ì¬ ëˆ„ì  ìˆ˜ëŸ‰
 
-            if (colIng.TryGetValue(ingredient, out cur) == false) // ´©Àû µñ¼Å³Ê¸®¿¡ Å°°¡ ¾øÀ¸¸é
+            if (colIng.TryGetValue(ingredient, out cur) == false) // ëˆ„ì  ë”•ì…”ë„ˆë¦¬ì— í‚¤ê°€ ì—†ìœ¼ë©´
             {
                 cur = 0;
             }
 
-            if (cur >= need) // ÀÌ¹Ì ¿ä±¸Ä¡¿¡ µµ´ŞÇß´Ù¸é
+            if (cur >= need) // ì´ë¯¸ ìš”êµ¬ì¹˜ì— ë„ë‹¬í–ˆë‹¤ë©´
             {
-                continue; // ´ÙÀ½ ·¹½ÃÇÇ¿¡ ÇÊ¿äÇÑÁö °Ë»ç
+                continue; // ë‹¤ìŒ ë ˆì‹œí”¼ì— í•„ìš”í•œì§€ ê²€ì‚¬
             }
 
-            colIng[ingredient] = cur + 1; // Àç·á 1°³ ´©Àû
+            colIng[ingredient] = cur + 1; // ì¬ë£Œ 1ê°œ ëˆ„ì 
 
-            Debug.Log($"{CurRecipes[i].Name} Àç·á {ingredient.Name} {colIng[ingredient].ToString()} / {need.ToString()}"); 
-            // ÁøÇà »óÈ²
+            _orderItems[i].UpdateRow(ingredient, colIng[ingredient], need); // í•´ë‹¹ ì¬ë£Œ í–‰ UI ì—…ë°ì´íŠ¸
 
-            if (IsRecipeComplete(i)) // ÇØ´ç ·¹½ÃÇÇ°¡ ¿Ï¼ºµÇ¾ú´ÂÁö °Ë»ç
+            Debug.Log($"{CurRecipes[i].Name} ì¬ë£Œ {ingredient.Name} {colIng[ingredient].ToString()} / {need.ToString()}");
+            // ì§„í–‰ ìƒí™©
+
+            if (IsRecipeComplete(i)) // í•´ë‹¹ ë ˆì‹œí”¼ê°€ ì™„ì„±ë˜ì—ˆëŠ”ì§€ ê²€ì‚¬
             {
-                isRecipeCompleted[i] = true; // ¿Ï·á ÇÃ·¡±× ¼³Á¤
-                Debug.Log("[¿Ï·á] ·¹½ÃÇÇ Å¬¸®¾î: " + CurRecipes[i].Name); // ¿Ï·á ·Î±×
+                isRecipeCompleted[i] = true; // ì™„ë£Œ í”Œë˜ê·¸ ì„¤ì •
+                Debug.Log("[ì™„ë£Œ] ë ˆì‹œí”¼ í´ë¦¬ì–´: " + CurRecipes[i].Name); // ì™„ë£Œ ë¡œê·¸
 
-                if (IsAllComplete()) // ¸ğµç ·¹½ÃÇÇ°¡ ¿Ï·áµÇ¾ú´ÂÁö °Ë»ç
+                _orderItems[i].RecipeComplete(true);
+
+                if (IsAllComplete()) // ëª¨ë“  ë ˆì‹œí”¼ê°€ ì™„ë£Œë˜ì—ˆëŠ”ì§€ ê²€ì‚¬
                 {
-                    Debug.Log("¸ğµç ÁÖ¹® ¿Ï·á!"); 
+                    Debug.Log("ëª¨ë“  ì£¼ë¬¸ ì™„ë£Œ!"); 
                     if (onAllOrdersComplete != null)
                     {
-                        onAllOrdersComplete.Invoke(); // ¼Õ´Ô Å¬¸®¾î ÀÌº¥Æ® ¹ß»ı
+                        onAllOrdersComplete.Invoke(); // ì†ë‹˜ í´ë¦¬ì–´ ì´ë²¤íŠ¸ ë°œìƒ
                     }
                 }
             }
-            break; // Àç·á°¡ µé¾î°¡¸é ¹İº¹¹® Á¾·á
+            break; // ì¬ë£Œê°€ ë“¤ì–´ê°€ë©´ ë°˜ë³µë¬¸ ì¢…ë£Œ
         }
     }
 
 
-    private bool IsRecipeComplete(int index) // Æ¯Á¤ ·¹½ÃÇÇ°¡ ¿Ï·áµÇ¾ú´ÂÁö °Ë»çÇÏ´Â ÇÔ¼ö
+    private bool IsRecipeComplete(int index) // íŠ¹ì • ë ˆì‹œí”¼ê°€ ì™„ë£Œë˜ì—ˆëŠ”ì§€ ê²€ì‚¬í•˜ëŠ” í•¨ìˆ˜
     {
 
-        Dictionary<IngredientSO, int> req = _requiredPerRecipe[index]; // ¿ä±¸ µñ¼Å³Ê¸® ÂüÁ¶
-        Dictionary<IngredientSO, int> col = _collectedPerRecipe[index]; // ´©Àû µñ¼Å³Ê¸® ÂüÁ¶
+        Dictionary<IngredientSO, int> req = _requiredPerRecipe[index]; // ìš”êµ¬ ë”•ì…”ë„ˆë¦¬ ì°¸ì¡°
+        Dictionary<IngredientSO, int> col = _collectedPerRecipe[index]; // ëˆ„ì  ë”•ì…”ë„ˆë¦¬ ì°¸ì¡°
 
-        foreach (KeyValuePair<IngredientSO, int> kv in req) // ¸ğµç ¿ä±¸ Ç×¸ñÀ» ¼øÈ¸
+        foreach (KeyValuePair<IngredientSO, int> kv in req) // ëª¨ë“  ìš”êµ¬ í•­ëª©ì„ ìˆœíšŒ
         {
-            IngredientSO ing = kv.Key; // ÇöÀç °Ë»ç ÁßÀÎ Àç·á
-            int need = kv.Value; // ¿ä±¸ ¼ö·®
-            int have = 0; // º¸À¯ ¼ö·® º¯¼ö
-            if (col.TryGetValue(ing, out have) == false) // ´©Àû¿¡ Å°°¡ ¾øÀ¸¸é
+            IngredientSO ing = kv.Key; // í˜„ì¬ ê²€ì‚¬ ì¤‘ì¸ ì¬ë£Œ
+            int need = kv.Value; // ìš”êµ¬ ìˆ˜ëŸ‰
+            int have = 0; // ë³´ìœ  ìˆ˜ëŸ‰ ë³€ìˆ˜
+            if (col.TryGetValue(ing, out have) == false) // ëˆ„ì ì— í‚¤ê°€ ì—†ìœ¼ë©´
             {
-                return false; // ¾ÆÁ÷ ¼öÁıµÇÁö ¾ÊÀº °ÍÀ¸·Î °£ÁÖ
+                return false; // ì•„ì§ ìˆ˜ì§‘ë˜ì§€ ì•Šì€ ê²ƒìœ¼ë¡œ ê°„ì£¼
             }
-            if (have < need) // ¿ä±¸ ¼ö·®¿¡ ¹Ì´ŞÀÌ¸é
+            if (have < need) // ìš”êµ¬ ìˆ˜ëŸ‰ì— ë¯¸ë‹¬ì´ë©´
             {
-                return false; // ¹Ì¿Ï·á
+                return false; // ë¯¸ì™„ë£Œ
             }
         }
-        return true; // ¸ğµç ¿ä±¸ Ç×¸ñÀÌ ÃæÁ·µÇ¸é ¿Ï·á
+        return true; // ëª¨ë“  ìš”êµ¬ í•­ëª©ì´ ì¶©ì¡±ë˜ë©´ ì™„ë£Œ
     }
 
-    private bool IsAllComplete() // ¸ğµç ·¹½ÃÇÇ°¡ ¿Ï·áµÇ¾ú´ÂÁö °Ë»çÇÏ´Â ÇÔ¼ö
+    private bool IsAllComplete() // ëª¨ë“  ë ˆì‹œí”¼ê°€ ì™„ë£Œë˜ì—ˆëŠ”ì§€ ê²€ì‚¬í•˜ëŠ” í•¨ìˆ˜
     {
-        for (int i = 0; i < isRecipeCompleted.Count; i++) // ¿Ï·á ÇÃ·¡±× ¹è¿­À» ¼øÈ¸
+        for (int i = 0; i < isRecipeCompleted.Count; i++) // ì™„ë£Œ í”Œë˜ê·¸ ë°°ì—´ì„ ìˆœíšŒ
         {
-            if (isRecipeCompleted[i] == false) // ÇÏ³ª¶óµµ ¹Ì¿Ï·á°¡ ÀÖÀ¸¸é
+            if (isRecipeCompleted[i] == false) // í•˜ë‚˜ë¼ë„ ë¯¸ì™„ë£Œê°€ ìˆìœ¼ë©´
             {
-                return false; // ÀüÃ¼ ¹Ì¿Ï·á
+                return false; // ì „ì²´ ë¯¸ì™„ë£Œ
             }
         }
-        return true; // ÀüºÎ ¿Ï·á¸é true
+        return true; // ì „ë¶€ ì™„ë£Œë©´ true
+    }
+
+    private void ClearOrderItemUI()
+    {
+        if (orderItemParent.childCount == 0)
+        {
+            Debug.Log("ìƒì„±ëœ ì•„ì´í…œ ì—†ìŒ. ìƒˆë¡œ ìƒì„±");
+            return;
+        }
+
+        for (int i = orderItemParent.childCount - 1; i >= 0; i--) // ìì‹ë“¤ì„ ë’¤ì—ì„œë¶€í„° ì§€ì›Œì¤Œ
+        {
+            Transform child = orderItemParent.GetChild(i);
+            if (child != null)
+            {
+                Destroy(child.gameObject);
+            }
+        }
+
+        if (_orderItems != null)
+        {
+            _orderItems.Clear();
+        }
     }
 }
