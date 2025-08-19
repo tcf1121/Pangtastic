@@ -22,9 +22,9 @@ namespace SCR
             _isSplashDamage = true;
             transform.position = new Vector3(cell.x + 1, cell.y + 1, 0);
             _blockType = GemType.CatStatues;
-            Board.AddObstacle(_fourCellPos[0], this);
-            Board.AddObstacle(_fourCellPos[1], this);
-            Board.AddObstacle(_fourCellPos[2], this);
+            Board.AddGem(_fourCellPos[0], _blockType);
+            Board.AddGem(_fourCellPos[1], _blockType);
+            Board.AddGem(_fourCellPos[2], _blockType);
         }
     }
 }
