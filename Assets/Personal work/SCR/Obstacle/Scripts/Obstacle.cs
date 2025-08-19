@@ -18,11 +18,13 @@ namespace SCR
 
         protected Vector3Int _cellPos;
 
+        public int BlockNum;
         protected int _currentHP;
         protected int _score;
         protected bool _canMove;
         protected bool _onCollider;
         protected bool _isSpawn;
+        protected bool _isSplashDamage;
 
         private bool _isDone = false;
 
@@ -32,17 +34,22 @@ namespace SCR
             spriteRenderer.sprite = LockStates[0].Sprite;
             _cellPos = cell;
 
+            transform.position = new Vector3(cell.x + 0.5f, cell.y + 0.5f, 0);
             //보드의 cell 위치에 장애 블록 추가
+            // Broad.SetCell(cell, BlockNum);
         }
 
         public virtual void Clear()
         {
-
+            //해당 오브젝트 삭제
+            Destroy(gameObject);
         }
 
-        public virtual bool IsDamage()
+
+        // 매치 시 주변에 있을 때 파괴되는건지 확인
+        public bool IsSplash()
         {
-            return true;
+            return _isSplashDamage;
         }
 
         public void Damage(int amount)
@@ -66,7 +73,6 @@ namespace SCR
             _isDone = true;
             return true;
         }
-
     }
 
 }
