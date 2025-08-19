@@ -12,6 +12,7 @@ namespace SCR
             _canMove = false;
             _onCollider = false;
             _isSpawn = false;
+            _isSplashDamage = false;
         }
 
         public override void Clear()

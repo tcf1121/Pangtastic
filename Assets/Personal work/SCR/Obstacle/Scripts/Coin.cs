@@ -12,6 +12,7 @@ namespace SCR
             _canMove = true;
             _onCollider = true;
             _isSpawn = true;
+            _isSplashDamage = true;
         }
     }
 }
