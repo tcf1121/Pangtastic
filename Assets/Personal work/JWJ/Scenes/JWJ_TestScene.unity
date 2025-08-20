@@ -860,17 +860,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 552917656}
   m_CullTransparentMesh: 1
---- !u!114 &716866408 stripped
-MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 4537126015387644510, guid: 79ed12a5a9e8897488627b675d5f4fb0, type: 3}
-  m_PrefabInstance: {fileID: 4038799936224623757}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 67db9e8f0e2ae9c40bc1e2b64352a6b4, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!1 &731535723
 GameObject:
   m_ObjectHideFlags: 0
@@ -2634,14 +2623,14 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 4569874686876955917, guid: 79ed12a5a9e8897488627b675d5f4fb0, type: 3}
+      propertyPath: CurStage
+      value: 
+      objectReference: {fileID: 11400000, guid: 13b0837ac34a80c42901d6ab81d6d8a4, type: 2}
     - target: {fileID: 4691076956416611558, guid: 79ed12a5a9e8897488627b675d5f4fb0, type: 3}
       propertyPath: spawnButton
       value: 
       objectReference: {fileID: 2008726934}
-    - target: {fileID: 4955664520878629964, guid: 79ed12a5a9e8897488627b675d5f4fb0, type: 3}
-      propertyPath: patienceSlider
-      value: 
-      objectReference: {fileID: 716866408}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []

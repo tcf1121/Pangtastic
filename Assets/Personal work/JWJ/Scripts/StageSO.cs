@@ -5,19 +5,25 @@ using UnityEngine;
 [CreateAssetMenu(fileName = "New Stage", menuName = "PangTasticSO/Stage")]
 public class StageSO : ScriptableObject
 {
-    [Header("½ºÅ×ÀÌÁö ID")]
+    [Header("ìŠ¤í…Œì´ì§€ ID")]
     public int StageID;
 
-    [Header("¼Õ´Ô µîÀå ¼ö")]
-    public int TotalCustomerCount;
+    [Header("ìŠ¤í…Œì´ì§€ í´ë¦¬ì–´ ì†ë‹˜ ìˆ˜")]
+    public int StageClearCustomerCount;
 
-    [Header("µîÀå ¼Õ´Ô ¸ñ·Ï")]
+    [Header("ìµœì†Œ ì£¼ë¬¸ ìˆ˜")]
+    [Range(2, 4)] public int MinOrderNum;
+
+    [Header("ë“±ì¥ ì†ë‹˜ ëª©ë¡")]
     public CustomerSO[] CustomerList;
 
-    [Header("Àç·á Ãß°¡ °³¼ö")]
+    [Header("ìŠ¤í…Œì´ì§€ ë“±ì¥ ë ˆì‹œí”¼ ëª©ë¡")]
+    public RecipeSO[] StageRecipes;
+
+    [Header("ì¬ë£Œ ì¶”ê°€ ê°œìˆ˜")]
     public IngredientAdjustment[] IngredientAdjustments;
 
-    [Header("¼Õ´Ô Å¸ÀÔº° °¡ÁßÄ¡")]
+    [Header("ì†ë‹˜ íƒ€ì…ë³„ ê°€ì¤‘ì¹˜")]
 
     [Range(0, 100)] public int WeightNormal = 80;
     [Range(0, 100)] public int WeightUnique = 18;

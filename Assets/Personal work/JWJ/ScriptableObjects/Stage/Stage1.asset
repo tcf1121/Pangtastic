@@ -13,14 +13,18 @@ MonoBehaviour:
   m_Name: Stage1
   m_EditorClassIdentifier: 
   StageID: 4001
-  TotalCustomerCount: 2
+  TotalCustomerCount: 5
+  StageClearCustomerCount: 2
   CustomerList:
   - {fileID: 11400000, guid: 0076220137ac8034aa5cb5d6c08c042a, type: 2}
   - {fileID: 11400000, guid: 835a35187f6205440a878e4e752d6849, type: 2}
   - {fileID: 11400000, guid: 0deb29dd5c686d44da5a86d19c53d6fa, type: 2}
   - {fileID: 11400000, guid: 3effd1adf81ead64dad0982c867675ad, type: 2}
   - {fileID: 11400000, guid: 95e0d640704567d4ab3a1c2b78ffe36e, type: 2}
-  IngredientAdjustments: []
+  StageRecipes: []
+  IngredientAdjustments:
+  - Ingredient: {fileID: 11400000, guid: afcdf0bf89f8f2947958b635b002a0d8, type: 2}
+    ExtraAmount: 5
   WeightNormal: 80
   WeightUnique: 18
-  WeightSpecial: 2
+  WeightSpecial: 26

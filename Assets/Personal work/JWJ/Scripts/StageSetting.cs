@@ -4,27 +4,31 @@ using UnityEditor;
 using UnityEngine;
 
 public class StageSetting : MonoBehaviour
-{//½ºÅ×ÀÌÁö¿¡ µû¶ó Àç·á·® º¯°æÀ» Ã¼Å©ÇÏ´Â ½ºÅ©¸³Æ®
+{
     public RecipeSO CurRecipe;
     public StageSO CurStage;
+    public int TotalCustomerCount { get; private set; }
+    public int StageClearCustomerCount { get; private set; }
 
     private Dictionary<IngredientSO, int> _finalRecipe;
 
-    public void SetStage(StageSO stage) //½ºÅ×ÀÌÁö ¼¼ÆÃ º¯°æ
+    public void SetStage(StageSO stage) //ìŠ¤í…Œì´ì§€ ì„¸íŒ… ë³€ê²½
     {
         CurStage = stage;
+        TotalCustomerCount = CurStage.CustomerList.Length;
+        StageClearCustomerCount = CurStage.StageClearCustomerCount;
     }
 
-    public void InitStageRecipe() //·¹½ÃÇÇ¿¡ ½ºÅ×ÀÌÁö Àç·á Áõ°¨Ä¡ Àû¿ë
+    public void InitStageRecipe() //ë ˆì‹œí”¼ì— ìŠ¤í…Œì´ì§€ ì¬ë£Œ ì¦ê°ì¹˜ ì ìš©
     {
         _finalRecipe = new Dictionary<IngredientSO, int>();
 
-        foreach (var _req in CurRecipe.Ingredients) //µñ¼Å³Ê¸®¿¡ ¿øº» ·¹½ÃÇÇ º¹»ç
+        foreach (var _req in CurRecipe.Ingredients) //ë”•ì…”ë„ˆë¦¬ì— ì›ë³¸ ë ˆì‹œí”¼ ë³µì‚¬
         {
             _finalRecipe[_req.Ingredient] = _req.Amount;
         }
             
-        foreach (var _adj in CurStage.IngredientAdjustments) //Ãß°¡µÈ Àç·á¸¦ ´õÇØ¼­ µñ¼Å³Ê¸® ¾÷µ¥ÀÌÆ®
+        foreach (var _adj in CurStage.IngredientAdjustments) //ì¶”ê°€ëœ ì¬ë£Œë¥¼ ë”í•´ì„œ ë”•ì…”ë„ˆë¦¬ ì—…ë°ì´íŠ¸
         {
             if (_finalRecipe.ContainsKey(_adj.Ingredient))
             {
@@ -33,7 +37,7 @@ public class StageSetting : MonoBehaviour
         } 
     }
 
-    public Dictionary<IngredientSO, int> GetRequiredIngs() //Àç·á Áõ°¨Ä¡ Àû¿ëµÈ ·¹½ÃÇÇ µñ¼Å³Ê¸® ¹İÈ¯
+    public Dictionary<IngredientSO, int> GetRequiredIngs() //ì¬ë£Œ ì¦ê°ì¹˜ ì ìš©ëœ ë ˆì‹œí”¼ ë”•ì…”ë„ˆë¦¬ ë°˜í™˜
     {
         return _finalRecipe;
     }
