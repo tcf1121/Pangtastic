@@ -1,5 +1,6 @@
 using System;
 using System.Linq.Expressions;
+using UnityEditor.U2D.Aseprite;
 using UnityEngine;
 
 namespace SCR
@@ -18,7 +19,7 @@ namespace SCR
 
         protected Vector3Int _cellPos;
 
-        public int BlockNum;
+        protected GemType _blockType;
         protected int _currentHP;
         protected int _score;
         protected bool _canMove;
@@ -36,12 +37,20 @@ namespace SCR
 
             transform.position = new Vector3(cell.x + 0.5f, cell.y + 0.5f, 0);
             //보드의 cell 위치에 장애 블록 추가
-            // Broad.SetCell(cell, BlockNum);
+            Board.AddObstacle(cell, this);
+        }
+
+        public virtual GemType GetBlockType()
+        {
+            return _blockType;
         }
 
         public virtual void Clear()
         {
             //해당 오브젝트 삭제
+            int x = (int)(transform.position.x - 0.5f);
+            int y = (int)(transform.position.y - 0.5f);
+            Board.RemoveGem(new Vector3Int(x, y, 0));
             Destroy(gameObject);
         }
 

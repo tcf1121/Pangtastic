@@ -13,6 +13,7 @@ namespace SCR
             _onCollider = true;
             _isSpawn = true;
             _isSplashDamage = true;
+            _blockType = GemType.GiftBox;
         }
 
         public override void Clear()
