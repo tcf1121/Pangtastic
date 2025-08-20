@@ -1,3 +1,4 @@
+using System.Collections;
 using UnityEngine;
 
 namespace KDJ
@@ -13,6 +14,8 @@ namespace KDJ
 
         private GameObject[,] _blockArray;
         private int[,] _blockDataArray;
+
+        public int BlankBlockCount = 0;
 
         /// <summary>
         /// 블럭 배열 초기화
@@ -105,7 +108,7 @@ namespace KDJ
         }
 
         /// <summary>
-        /// 빈 공간에 블럭 생성
+        /// 블럭 배열에 데이터는 존재하는데 뷰에는 블럭이 없는 경우
         /// </summary>
         public void SpawnBlock()
         {
@@ -113,20 +116,44 @@ namespace KDJ
             {
                 for (int y = 0; y < _blockPlate.BlockPlateHeight; y++)
                 {
-                    if (_blockDataArray[y, x] == 0 && _blockPlate.BlockPlateArray[y, x])
+                    if (_blockDataArray[y, x] != 0 && _blockPlate.BlockPlateArray[y, x] && _blockArray[y, x] == null)
                     {
-                        _blockDataArray[y, x] = Random.Range(1, 4);
                         Vector3 position;
+                        Vector3 spawnPosition;
+                        // 블럭을 블럭판 위에 생성 시킨 다음 자신의 위치까지 내려오도록 구성
                         if (_blockPlate.BlockPlateWidth % 2 == 0)
                         {
+                            // 목표 위치
                             position = new Vector3(x - _blockPlate.BlockPlateWidth / 2 + 0.5f, y - _blockPlate.BlockPlateHeight / 2 + 0.5f, 0);
+                            // 생성 위치 = x축은 동일하고 y축은 현재 위치에서 나를 포함한 내 위의 빈칸 수만큼 위로 생성
+                            spawnPosition = new Vector3(position.x, position.y + GetAboveEmptySpaceCount(y), 0);
                         }
                         else
                         {
                             position = new Vector3(x - _blockPlate.BlockPlateWidth / 2, y - _blockPlate.BlockPlateHeight / 2, 0);
+                            spawnPosition = new Vector3(position.x, position.y + GetAboveEmptySpaceCount(y), 0);
                         }
+                        // 생성 후 목표위치로 이동
                         GameObject gemPrefab = GetBlockTile(_blockDataArray[y, x]);
-                        _blockArray[y, x] = Instantiate(gemPrefab, position, Quaternion.identity);
+                        _blockArray[y, x] = Instantiate(gemPrefab, spawnPosition, Quaternion.identity);
+                        StartCoroutine(MoveBlockCoroutine(_blockArray[y, x], position, 0.5f));
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// 블럭 배열의 빈 공간에 데이터 생성
+        /// </summary>
+        public void SpawnBlockData()
+        {
+            for (int x = 0; x < _blockPlate.BlockPlateWidth; x++)
+            {
+                for (int y = 0; y < _blockPlate.BlockPlateHeight; y++)
+                {
+                    if (_blockDataArray[y, x] == 0 && _blockPlate.BlockPlateArray[y, x])
+                    {
+                        _blockDataArray[y, x] = Random.Range(1, 6);
                     }
                 }
             }
@@ -230,17 +257,71 @@ namespace KDJ
         /// <returns></returns>
         public bool HasEmptyBlocks()
         {
+            BlankBlockCount = 0; // 빈 블럭 카운트 초기화
+
             for (int x = 0; x < _blockPlate.BlockPlateWidth; x++)
             {
                 for (int y = 0; y < _blockPlate.BlockPlateHeight; y++)
                 {
                     if (_blockPlate.BlockPlateArray[y, x] && _blockDataArray[y, x] == 0)
                     {
-                        return true;
+                        BlankBlockCount++;
                     }
                 }
             }
-            return false;
+            return BlankBlockCount > 0;
+        }
+
+        /// <summary>
+        /// 주어진 y좌표 위에 있는 빈 공간의 개수를 반환
+        /// </summary>
+        /// <param name="y"></param>
+        /// <returns></returns>
+        public int GetAboveEmptySpaceCount(int y)
+        {
+            int count = 0;
+            for (int i = y; i < _blockPlate.BlockPlateHeight; i++)
+            {
+                if (_blockArray[i, y] == null && _blockPlate.BlockPlateArray[i, y])
+                {
+                    count++;
+                }
+                else
+                {
+                    break; // 빈 공간이 아니면 중단
+                }
+            }
+            return count + 1;
+        }
+
+        /// <summary>
+        /// 블럭 이동을 위한 코루틴. 이후 DOTween으로 교체될수도 있음
+        /// </summary>
+        /// <param name="block"></param>
+        /// <param name="targetPosition"></param>
+        /// <param name="duration"></param>
+        /// <returns></returns>
+        public IEnumerator MoveBlockCoroutine(GameObject block, Vector3 targetPosition, float duration)
+        {
+            Vector3 startPosition = block.transform.position;
+            float elapsedTime = 0f;
+
+            while (elapsedTime < duration)
+            {
+                block.transform.position = Vector3.Lerp(startPosition, targetPosition, elapsedTime / duration);
+                elapsedTime += Time.deltaTime;
+                yield return null;
+            }
+
+            block.transform.position = targetPosition;
+            // 블럭 이동이 완료되면 빈 블럭 카운트 감소
+
+            BlankBlockCount--;
+        }
+
+        public void StopCoroutine()
+        {
+            StopAllCoroutines();
         }
     }
 }

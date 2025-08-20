@@ -8,10 +8,18 @@ namespace KDJ.States
         public void OnEnter(BoardManager boardManager)
         {
             Debug.Log("블록 생성 상태");
-            boardManager.Spawner.StartCoroutine(SpawningCoroutine(boardManager));
+            boardManager.Spawner.SpawnBlockData();
+            boardManager.Spawner.SpawnBlock();
         }
 
-        public void OnUpdate(BoardManager boardManager) { }
+        public void OnUpdate(BoardManager boardManager)
+        {
+            if (boardManager.Spawner.BlankBlockCount == 0)
+            {
+                boardManager.Spawner.StopCoroutine();
+                boardManager.ChangeState(new MatchingState());
+            }
+        }
 
         public void OnExit(BoardManager boardManager) 
         {
@@ -22,9 +30,12 @@ namespace KDJ.States
         {
             yield return new WaitForSeconds(0.25f);
             boardManager.Spawner.SpawnBlock();
-            
-            // 생성이 끝나면 매칭 상태로 전환
-            boardManager.ChangeState(new MatchingState());
+
+            if (boardManager.Spawner.BlankBlockCount == 0)
+            {
+                boardManager.Spawner.StopCoroutine();
+                boardManager.ChangeState(new MatchingState());
+            }
         }
     }
 }
