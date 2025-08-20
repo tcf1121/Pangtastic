@@ -12,6 +12,7 @@ namespace SCR
             _canMove = true;
             _onCollider = true;
             _isSpawn = false;
+            _blockType = GemType.Egg;
         }
 
         public override void Clear()
