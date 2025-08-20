@@ -13,6 +13,7 @@ namespace SCR
             _onCollider = false;
             _isSpawn = false;
             _isSplashDamage = false;
+            _blockType = GemType.Dirt;
         }
     }
 }

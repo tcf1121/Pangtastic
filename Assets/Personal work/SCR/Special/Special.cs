@@ -10,7 +10,7 @@ namespace SCR
 
         protected Vector3Int _cellPos;
 
-        private bool _isDone = false;
+        //private bool _isDone = false;
 
         public virtual void Init(Vector3Int cell)
         {

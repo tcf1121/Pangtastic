@@ -3,17 +3,14 @@ using UnityEngine.Tilemaps;
 
 namespace SCR
 {
-    [CreateAssetMenu(fileName = "ObstacleTile", menuName = "Match/Tile/Obstacle Tile")]
-    public class ObstacleTile : TileBase
+    [CreateAssetMenu(fileName = "GemSpawner", menuName = "Match/Tile/GemSpawner")]
+    public class GemSpawner : TileBase
     {
         public Sprite PreviewEditorSprite;
-        public Color PreviewEditorColor;
-        public Obstacle ObstaclePrefab;
 
         public override void GetTileData(Vector3Int position, ITilemap tilemap, ref TileData tileData)
         {
             tileData.sprite = !Application.isPlaying ? PreviewEditorSprite : null;
-            tileData.color = !Application.isPlaying ? PreviewEditorColor : Color.white;
         }
 
         public override bool StartUp(Vector3Int position, ITilemap tilemap, GameObject go)
@@ -24,10 +21,9 @@ namespace SCR
 #endif
 
 
-            var newObstacle = Instantiate(ObstaclePrefab);
-            newObstacle.Init(position);
+            Board.AddSpawner(position);
 
-            return true;
+            return base.StartUp(position, tilemap, go);
         }
     }
 }
