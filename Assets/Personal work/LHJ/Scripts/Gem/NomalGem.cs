@@ -7,7 +7,7 @@ namespace LHJ
     [CreateAssetMenu(fileName = "NewNomalGem", menuName = "Gem/Nomal Gem")]
     public class NomalGem : ScriptableObject
     {
-        public NomalGemType nomalGemType;
+        public BlockNum nomalGemType;
 
         [Header("Prefab")]
         public GameObject gemPrefabs;

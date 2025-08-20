@@ -182,7 +182,7 @@ Camera:
   near clip plane: 0.3
   far clip plane: 1000
   field of view: 60
-  orthographic: 0
+  orthographic: 1
   orthographic size: 5
   m_Depth: -1
   m_CullingMask:
@@ -243,9 +243,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 78e9e510ee06ae24c921701db9ad12f9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _boardParent: {fileID: 0}
-  _gemList: {fileID: 0}
-  _coffeePercent: 0
+  _gemList: {fileID: 2139950994}
+  _coffeePercent: 3
 --- !u!4 &911964334
 Transform:
   m_ObjectHideFlags: 0
@@ -292,10 +291,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _blockPrefabs:
-  - {fileID: 0}
   - {fileID: 357163143499718715, guid: 2e25cb92767521749bb30bf05c915ccd, type: 3}
   - {fileID: 9006276583788223286, guid: 5873a7c44d23ce14da39fa54426c9310, type: 3}
+  - {fileID: 734591683590678352, guid: 2ee94707ab3e0804dad74768c009adfe, type: 3}
   _matchChecker: {fileID: 911964333}
+  _dragThreshold: 30
 --- !u!156049354 &1111763845
 Grid:
   m_ObjectHideFlags: 0
@@ -568,9 +568,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _gems:
-  - {fileID: 11400000, guid: 80de250de356a1a45aef0005e86ac7b5, type: 2}
   - {fileID: 11400000, guid: 8a84b2430a3814a4e9179f3b3c69f127, type: 2}
   - {fileID: 11400000, guid: 058cb52b269ae7e4daeb4247453505c4, type: 2}
+  - {fileID: 11400000, guid: ba257d59c07977946967b7e191b5ec82, type: 2}
+  - {fileID: 11400000, guid: 0dba355e60c8ce848a3517925e100fc7, type: 2}
+  - {fileID: 11400000, guid: 2c56b47058a60694d9a7d8419b93c078, type: 2}
+  - {fileID: 11400000, guid: 80de250de356a1a45aef0005e86ac7b5, type: 2}
 --- !u!4 &2139950995
 Transform:
   m_ObjectHideFlags: 0
