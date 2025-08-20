@@ -29,12 +29,12 @@ namespace KDJ
         }
         private void DrawTile()
         {
-            for (int x = 0; x < BlockPlateArray.GetLength(0); x++)
+            for (int x = 0; x < BlockPlateArray.GetLength(1); x++)
             {
-                for (int y = 0; y < BlockPlateArray.GetLength(1); y++)
+                for (int y = 0; y < BlockPlateArray.GetLength(0); y++)
                 {
                     // 블록판 가로칸이 짝수일때 생성
-                    if (BlockPlateArray.GetLength(0) % 2 == 0)
+                    if (BlockPlateArray.GetLength(1) % 2 == 0)
                     {
                         if (BlockPlateArray[y, x])
                         {
@@ -96,8 +96,15 @@ namespace KDJ
                     break;
             }
 
-            BlockPlateWidth = BlockPlateArray.GetLength(0);
-            BlockPlateHeight = BlockPlateArray.GetLength(1);
+            BlockPlateWidth = BlockPlateArray.GetLength(1);
+            BlockPlateHeight = BlockPlateArray.GetLength(0);
+        }
+
+        public bool IsBlockTile(int x, int y)
+        {
+            Vector3 position = new Vector3(x - BlockPlateWidth / 2, y - BlockPlateHeight / 2, 0);
+            Vector3Int cellPos = _blockPlate.WorldToCell(position);
+            return _blockPlate.HasTile(cellPos);
         }
     }
 }

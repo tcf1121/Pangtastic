@@ -9,6 +9,10 @@ namespace KDJ.States
         {
             Debug.Log("블록 낙하 상태");
             boardManager.Spawner.StartCoroutine(FallingCoroutine(boardManager));
+            // boardManager.Spawner.SortBlockDataArray();
+            // boardManager.Spawner.SortViewBlockArray();
+            // boardManager.Spawner.RefreshBlock();
+            // boardManager.ChangeState(new ReadyState());
         }
 
         public void OnUpdate(BoardManager boardManager) { }
@@ -22,8 +26,9 @@ namespace KDJ.States
         {
             yield return new WaitForSeconds(0.5f);
             boardManager.Spawner.SortBlockDataArray();
+            boardManager.Spawner.SortViewBlockArray();
             boardManager.Spawner.RefreshBlock();
-            boardManager.ChangeState(new SpawningState());
+            boardManager.ChangeState(new ReadyState());
         }
     }
 }
