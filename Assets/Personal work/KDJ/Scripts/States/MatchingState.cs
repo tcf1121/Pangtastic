@@ -9,7 +9,7 @@ namespace KDJ.States
             Debug.Log("블럭 매칭 상태");
             if (boardManager.Spawner.HasEmptyBlocks())
             {
-                boardManager.ChangeState(new FallingState());
+                boardManager.ChangeState(new SpawningState());
             }
             else
             {
