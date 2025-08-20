@@ -2,6 +2,13 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+public enum CustomerType
+{
+    Normal,
+    Unique,
+    Special
+}
+
 [CreateAssetMenu(fileName = "New Customer", menuName = "PangTasticSO/Customer")]
 public class CustomerSO : ScriptableObject
 {
@@ -10,6 +17,9 @@ public class CustomerSO : ScriptableObject
 
     [Header("이름")]
     public string Name;
+
+    [Header("손님 타입")]
+    public CustomerType Type;
 
     [Header("손님 이미지")]
     public Sprite CustomerPic;

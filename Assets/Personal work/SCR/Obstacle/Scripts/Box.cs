@@ -12,6 +12,9 @@ namespace SCR
             _canMove = false;
             _onCollider = true;
             _isSpawn = false;
+            _isSplashDamage = true;
+            _blockType = GemType.Box;
         }
+
     }
 }
