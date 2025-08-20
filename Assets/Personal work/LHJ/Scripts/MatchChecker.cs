@@ -149,11 +149,13 @@ public class MatchChecker : MonoBehaviour
                 Destroy(_blockObjects[p.y, p.x]);
                 _blockObjects[p.y, p.x] = null;
             }
+            _boardData[p.y, p.x] = (BlockNum)(-1);
         }
 
         // 특수 블럭 생성
         foreach (var r in spawnQueue)
         {
+            matched.Remove(r.cell);
             if (_gemList == null) continue;
 
             Vector3 world = CellToWorld(r.cell.x, r.cell.y);
@@ -188,6 +190,48 @@ public class MatchChecker : MonoBehaviour
         float wx = x - _width / 2f + 0.5f;
         float wy = y - _height / 2f + 0.5f;
         return new Vector3(wx, wy, 0f);
+    }
+    public bool HasAnyMatch(BlockNum[,] board)
+    {
+        int height = board.GetLength(0);
+        int width = board.GetLength(1);
+
+        for (int y = 0; y < height; y++)
+        {
+            int x = 0;
+            while (x < width)
+            {
+                BlockNum val = board[y, x];
+                if (!IsMatchable(val)) { x++; continue; }
+
+                int len = 1;
+                while (x + len < width && board[y, x + len] == val) len++;
+
+                if (len >= 3) return true;
+
+                x += len;
+            }
+        }
+
+
+        for (int x = 0; x < width; x++)
+        {
+            int y = 0;
+            while (y < height)
+            {
+                BlockNum val = board[y, x];
+                if (!IsMatchable(val)) { y++; continue; }
+
+                int len = 1;
+                while (y + len < height && board[y + len, x] == val) len++;
+
+                if (len >= 3) return true;
+
+                y += len;
+            }
+        }
+
+        return false;
     }
 
     private struct SpawnRequest

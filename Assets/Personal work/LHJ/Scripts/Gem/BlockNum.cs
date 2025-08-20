@@ -26,6 +26,8 @@ namespace LHJ
         Egg,
         GiftBox,
         Syrup,
-        Box
+        Box,
+
+        None
     }
 }
