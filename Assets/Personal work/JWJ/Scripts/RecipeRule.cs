@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public static class RecipeRuleService
+public static class RecipeRule
 {
     public static List<RecipeSO> BuildOrder(CustomerSO customer, StageSO stage)
     {

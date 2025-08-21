@@ -29,17 +29,21 @@ public class CustomerFlowController : MonoBehaviour
         }
         _customerOrder.OnCustomerSuccess += OnCustomerSuccess;
         _customerOrder.OnCustomerFail += OnCustomerFail;
+        _customerOrder.OnSpecialCustomerSuccess += OnSpecialCustomerSuccess;
+        _customerOrder.OnSpecialCustomerFail += OnSpecialCustomerFail;
 
-        spawnButton.onClick.AddListener(SpawnRandomCustomer); //테스트용 버튼
+        spawnButton.onClick.AddListener(StartCustomerCycle); //테스트용 버튼
     }
 
     private void OnDestroy()
     {
         _customerOrder.OnCustomerSuccess -= OnCustomerSuccess;
         _customerOrder.OnCustomerFail -= OnCustomerFail;
+        _customerOrder.OnSpecialCustomerSuccess -= OnSpecialCustomerSuccess;
+        _customerOrder.OnSpecialCustomerFail -= OnSpecialCustomerFail;
     }
 
-    public void SpawnRandomCustomer()
+    public void StartCustomerCycle()
     {
         _successCount = 0;
         _failureCount = 0;
@@ -82,7 +86,6 @@ public class CustomerFlowController : MonoBehaviour
             _customerPool.RemoveAt(rand);
         }
 
-
         //손님 리스트 로그
         //CustomerSO[] arr = _customerQueue.ToArray();
         //
@@ -97,7 +100,6 @@ public class CustomerFlowController : MonoBehaviour
         //
         //Debug.Log(log);
     }
-
 
     private void SpawnNextCustomer()
     {
@@ -124,7 +126,22 @@ public class CustomerFlowController : MonoBehaviour
         CheckStageEnd();
     }
 
+    private void OnSpecialCustomerSuccess(CustomerSO customer, float averagePercent)
+    {
+        _successCount++;
+        //스페셜 손님 보상로직 
+        Debug.Log($"스페셜 손님 클리어. 평균 인내심: {averagePercent}. 보상 제공 짠");
+        CheckStageEnd();
+    }
+
     private void OnCustomerFail()
+    {
+        _failureCount++;
+        Debug.Log($"손님 실패. 실패 카운트 : {_failureCount}");
+        CheckStageEnd();
+    }
+
+    private void OnSpecialCustomerFail(CustomerSO customer)
     {
         _failureCount++;
         Debug.Log($"손님 실패. 실패 카운트 : {_failureCount}");
@@ -136,11 +153,13 @@ public class CustomerFlowController : MonoBehaviour
         int cleared = _successCount;
         int left = _customerQueue.Count;
 
-        //Debug.Log($"남은 손님 수 : {left}, 클리어 손님 수 : {cleared}, 실패손님 수 : {_failureCount}, 클리어 조건 : {_curStage.StageClearCustomerCount}");
+        
         if (left + cleared < _curStage.StageClearCustomerCount)
         {
             Debug.Log("스테이지 실패");
             //스테이지 실패 로직 여기에
+
+            Debug.Log($"남은 손님 수 : {left}, 클리어 손님 수 : {cleared}, 실패손님 수 : {_failureCount}, 클리어 조건 : {_curStage.StageClearCustomerCount}");
             return;
         }
         else if (left > 0)
@@ -151,6 +170,7 @@ public class CustomerFlowController : MonoBehaviour
         {
             Debug.Log("스테이지 클리어");
             //스테이지 클리어 로직 여기에 
+            Debug.Log($"남은 손님 수 : {left}, 클리어 손님 수 : {cleared}, 실패손님 수 : {_failureCount}, 클리어 조건 : {_curStage.StageClearCustomerCount}");
 
             //Debug.Log($"남은 손님 수 : {left}");
         }
@@ -163,4 +183,5 @@ public class CustomerFlowController : MonoBehaviour
         yield return new WaitForSeconds(_nextCustomerSpawnDelayTime);
         SpawnNextCustomer();
     }
+
 }

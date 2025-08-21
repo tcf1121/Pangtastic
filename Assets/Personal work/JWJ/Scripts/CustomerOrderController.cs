@@ -14,8 +14,11 @@ public class CustomerOrderController : MonoBehaviour
     private int _specialFail;
     private int _specialNeed;
     private int _specialTotal;
+    private float _specialPatientSum;
 
     public event Action<float> OnCustomerSuccess;
+    public event Action<CustomerSO ,float> OnSpecialCustomerSuccess;
+    public event Action<CustomerSO> OnSpecialCustomerFail; //혹시라도 스페셜손님 실패 이벤트 추가될까봐 넣음 OnCustomerFail로 바꿔도 작동함
     public event Action OnCustomerFail;
 
     private void Awake()
@@ -40,7 +43,7 @@ public class CustomerOrderController : MonoBehaviour
         _curCustomer = customer;
         _curStage = stage;
 
-        _orderRecipes = RecipeRuleService.BuildOrder(customer, stage); //주문가능 메뉴 리스트 만들기
+        _orderRecipes = RecipeRule.BuildOrder(customer, stage); //주문가능 메뉴 리스트 만들기
 
         //Debug.Log($"주문하는 손님 이름[타입]: {_curCustomer}[{_curCustomer.Type}]");
 
@@ -61,6 +64,7 @@ public class CustomerOrderController : MonoBehaviour
 
         if (_curCustomer.Type == CustomerType.Special)
         {
+            _specialPatientSum = 0;
             _specialSuccess = 0;
             _specialFail = 0;
             _specialTotal = _orderRecipes.Count;
@@ -91,17 +95,17 @@ public class CustomerOrderController : MonoBehaviour
         {
             _specialSuccess++;
             //Debug.Log($"스페셜 주문 성공 수 : {_specialSuccess}");
-            
-            //스페셜 손님 대사 조건 퍼센트 계산 여기서
-            
+
+            _specialPatientSum += remainPercent; //스페셜 손님 총 인내심 퍼센트 합
 
             int done = _specialSuccess + _specialFail; //여태 주문 받은 횟수. 다음 주문 인덱스
 
             if (_specialSuccess >= _specialNeed) //스페셜 손님 성공조건 충족시 즉시 성공
             {
-                //스페셜 손님 보상로직 여기에
-                Debug.Log("스페셜 손님 클리어. 보상 제공");
-                OnCustomerSuccess?.Invoke(remainPercent);
+                float averagePercent = _specialPatientSum / done; //평균 인내심
+
+                OnSpecialCustomerSuccess?.Invoke(_curCustomer, averagePercent);
+                //OnCustomerSuccess?.Invoke(remainPercent);
                 return;
             }
             StartSpecialOrder(done);
@@ -125,7 +129,7 @@ public class CustomerOrderController : MonoBehaviour
 
             if (_specialSuccess + remaining < _specialNeed) //성공 불가능하면 바로 실패처리
             {
-                OnCustomerFail?.Invoke();
+                OnSpecialCustomerFail?.Invoke(_curCustomer); //스페셜 손님 실패 이벤트
                 Debug.Log("스페셜 성공 불가능. 즉시 실패");
                 return;
             }
@@ -137,15 +141,17 @@ public class CustomerOrderController : MonoBehaviour
         }
     }
 
-    private void EndSpecialCustomer() //성공 여부 판정에 따라 삭제될 수 있음
+    private void EndSpecialCustomer() //호출될일 없을것같긴한데 혹시몰라서 넣음
     {
+        Debug.Log("이 로그가 뜨면 확인 해야함");
         if (_specialSuccess >= _specialNeed)
         {
-            OnCustomerSuccess?.Invoke(0);
+            float averagePercent = _specialPatientSum / (_specialFail + _specialSuccess);
+            OnSpecialCustomerSuccess?.Invoke(_curCustomer, averagePercent);
         }
         else
         {
-            OnCustomerFail?.Invoke();
+            OnSpecialCustomerFail?.Invoke(_curCustomer);
         }
     }
 }
