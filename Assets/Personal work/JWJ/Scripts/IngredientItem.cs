@@ -18,7 +18,7 @@ public class IngredientItem : MonoBehaviour
     public void SetAmount(int have, int need)
     {
         amountText.text = $"x {(need - have).ToString()}";
-        Debug.Log($"총: {need}, 현재: {have}");
+        //Debug.Log($"총: {need}, 현재: {have}");
 
         if (need - have <= 0 )
         {
@@ -28,7 +28,7 @@ public class IngredientItem : MonoBehaviour
 
     private void IngredientComplete()
     {
-        Debug.Log("재료 완료");
+        //Debug.Log("재료 완료");
         amountText.text = "CLEAR";
     }
 

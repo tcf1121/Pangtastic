@@ -360,7 +360,7 @@ MonoBehaviour:
     m_PressedTrigger: Pressed
     m_SelectedTrigger: Selected
     m_DisabledTrigger: Disabled
-  m_Interactable: 1
+  m_Interactable: 0
   m_TargetGraphic: {fileID: 0}
   m_FillRect: {fileID: 3169648823047011567}
   m_HandleRect: {fileID: 0}
@@ -423,6 +423,7 @@ MonoBehaviour:
       m_Calls: []
   orderItemPrefab: {fileID: 8661964887432397752, guid: b27b753028188a744ac8a5f075225c85, type: 3}
   orderItemParent: {fileID: 4724253568757648794}
+  patienceSlider: {fileID: 4537126015387644510}
 --- !u!1 &5857430461439429432
 GameObject:
   m_ObjectHideFlags: 0
@@ -623,6 +624,7 @@ MonoBehaviour:
   _stageSetting: {fileID: 4569874686876955917}
   _customerOrder: {fileID: 4955664520878629964}
   spawnButton: {fileID: 0}
+  _nextCustomerSpawnDelayTime: 1.5
   customerImage: {fileID: 5063961550721510887}
 --- !u!1 &8204916640889912093
 GameObject:

@@ -30,7 +30,10 @@ public class CustomerOrder : MonoBehaviour
     private CustomerSO _curCustomer;
     private float _maxPatience;
     private float _curPatience;
-    private Coroutine patienceCo;
+
+    private bool _isPatienceRunning = false;
+    private bool _hasOrderEnded = false;
+    private float _elapsed = 0f;
 
     //주문 성공,실패 이벤트
     public event Action<float> OnOrderSucceeded;
@@ -135,13 +138,13 @@ public class CustomerOrder : MonoBehaviour
 
             _orderItems[i].UpdateRow(ingredient, colIng[ingredient], need); // 해당 재료 행 UI 업데이트
 
-            Debug.Log($"{CurRecipes[i].Name} 재료 {ingredient.Name} {colIng[ingredient].ToString()} / {need.ToString()}");
+            //Debug.Log($"{CurRecipes[i].Name} 재료 {ingredient.Name} {colIng[ingredient].ToString()} / {need.ToString()}");
             // 진행 상황
 
             if (IsRecipeComplete(i)) // 해당 레시피가 완성되었는지 검사
             {
                 isRecipeCompleted[i] = true; // 완료 플래그 설정
-                Debug.Log("[완료] 레시피 클리어: " + CurRecipes[i].Name); // 완료 로그
+                //Debug.Log("[완료] 레시피 클리어: " + CurRecipes[i].Name); // 완료 로그
 
                 _orderItems[i].RecipeComplete(true);
 
@@ -149,20 +152,7 @@ public class CustomerOrder : MonoBehaviour
                 {
                     StopPatience();
 
-                    if (_curPatience > 50f)
-                    {
-                        Debug.Log($"주문 성공 인내심: {_curPatience}");
-                    }
-                    else if (_curPatience > 0f)
-                    {
-                        Debug.Log($"주문 성공 인내심: {_curPatience}");
-                    }
-                    else
-                    {
-                        Debug.Log($"0%에 성공하는게 가능한가? 성공 퍼센트: {_curPatience}");
-                    }
-
-                    OnOrderSucceeded(_curPatience);
+                    OnOrderSucceeded?.Invoke(_curPatience);
 
                     Debug.Log("모든 주문 완료!");
 
@@ -201,42 +191,59 @@ public class CustomerOrder : MonoBehaviour
         _maxPatience = _curCustomer.BASE_PATIENCE;
         _curPatience = _maxPatience;
 
+        //슬라이더 세팅
         patienceSlider.minValue = 0f;
-        patienceSlider.maxValue = _curPatience;
+        patienceSlider.maxValue = _maxPatience;
+        patienceSlider.value = _curPatience;
 
-        //StopPatience();
-        patienceCo = StartCoroutine(PatienceRoutine());
+        _elapsed = 0;
+        _hasOrderEnded = false;
+        _isPatienceRunning = true;
+    }
+
+    private void Update()
+    {
+        PatienceGaugeDown();
+    }
+
+    private void PatienceGaugeDown()
+    {
+        if (_isPatienceRunning == false) // 인내심 감소 비활성화면
+        {
+            return;
+        }
+
+        if (_hasOrderEnded) // 성공/실패로 이미 종료되었으면
+        {
+            return;
+        }
+
+        float total = _curCustomer.TimeToReachZero; // 0까지 가는 총 시간초
+
+        _elapsed = _elapsed + Time.deltaTime; // 경과 시간 누적
+
+        float progress = _elapsed / total; // 전체 대비 진행 비율
+
+        if (progress > 1) //혹시몰라서 안전장치
+        {
+            progress = 1;
+        }
+
+        _curPatience = _maxPatience * (1 - progress); 
+        patienceSlider.value = _curPatience;
+
+        if (progress >= 1) // 인내심이 0에 도달하면
+        {
+            _isPatienceRunning = false; // 감소 정지
+            _hasOrderEnded = true;
+            Debug.Log("시간초과. 주문 실패");
+            OnOrderFailed?.Invoke();
+        }
     }
 
     private void StopPatience()
     {
-        StopCoroutine(patienceCo);
-        patienceCo = null;
-    }
-
-    private IEnumerator PatienceRoutine()
-    {
-        float decreasingSpeed = _curCustomer.DropPerSecond;
-
-        while (true)
-        {
-            yield return new WaitForSeconds(1);
-            _curPatience = _curPatience - decreasingSpeed;
-
-            patienceSlider.value = _curPatience;
-
-            //퍼센트별 색상변경로직 여기에 넣으면 됨
-
-            if(_curPatience <= 0)
-            {
-                StopPatience();
-                Debug.Log("시간초과. 주문 실패");
-
-                OnOrderFailed();
-
-                break;
-            }
-        }
+        _isPatienceRunning = false;
     }
 
     private bool IsAllComplete() // 모든 레시피가 완료되었는지 검사하는 함수

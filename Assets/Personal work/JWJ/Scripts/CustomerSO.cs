@@ -15,28 +15,28 @@ public class CustomerSO : ScriptableObject
     [Header("id")]
     public int ID;
 
-    [Header("ÀÌ¸§")]
+    [Header("ì´ë¦„")]
     public string Name;
 
-    [Header("¼Õ´Ô Å¸ÀÔ")]
+    [Header("ì†ë‹˜ íƒ€ì…")]
     public CustomerType Type;
 
-    [Header("¼Õ´Ô ÀÌ¹ÌÁö")]
+    [Header("ì†ë‹˜ ì´ë¯¸ì§€")]
     public Sprite CustomerPic;
 
-    [Header("ÀÎ³»½É")]
+    [Header("ì¸ë‚´ì‹¬")]
     public int BASE_PATIENCE = 100;
 
-    [Header("ÀÎ³»½É °¨¼Ò¼Óµµ")]
-    public float DropPerSecond;
+    [Header("ì¸ë‚´ì‹¬ 0ì— ë„ë‹¬í•˜ëŠ” ì‹œê°„")]
+    public float TimeToReachZero;
 
-    [Header("ÁÁ¾ÆÇÏ´Â ·¹½ÃÇÇ")]
+    [Header("ì¢‹ì•„í•˜ëŠ” ë ˆì‹œí”¼")]
     public RecipeSO[] FavoriteRecipes;
 
-    [Header("µîÀå ´ë»ç")]
+    [Header("ë“±ì¥ ëŒ€ì‚¬")]
     public string FirstDialogue;
 
-    [Header("ÀÎ³»½É¿¡ µû¸¥ ´ë»ç")]
+    [Header("ì¸ë‚´ì‹¬ì— ë”°ë¥¸ ëŒ€ì‚¬")]
     public string HighDialogue;
     public string MidDialogue;
     public string LeftDialogue;
