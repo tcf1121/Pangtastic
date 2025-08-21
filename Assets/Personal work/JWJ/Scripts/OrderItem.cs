@@ -39,8 +39,8 @@ public class OrderItem : MonoBehaviour
         }
     }
 
-    public void RecipeComplete(bool on)
+    public void RecipeComplete(bool active)
     {
-        clearImage.SetActive(true);
+        clearImage.SetActive(active);
     }
 }

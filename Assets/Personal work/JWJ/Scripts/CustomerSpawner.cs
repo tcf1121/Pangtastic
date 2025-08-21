@@ -8,7 +8,7 @@ public class CustomerSpawner : MonoBehaviour
     [SerializeField] private StageSetting _stageSetting; // 스테이지 세팅 스크립트
     [SerializeField] private CustomerOrder _customerOrder; // 주문 처리 스크립트
     [SerializeField] private Button spawnButton; //테스트용 버튼
-    [SerializeField] private float _nextCustomerSpawnDelayTime;
+    [SerializeField] private float _nextCustomerSpawnDelayTime; //다음손님 등장까지 지연시간
 
     private List<int> _recipeList = new List<int>();
 
@@ -40,7 +40,7 @@ public class CustomerSpawner : MonoBehaviour
     {
         _customerOrder.CurRecipes.Clear(); // 기존 주문 비우기
 
-        _curCustomer = PickCustomerByWeight(_stageSetting.CurStage);
+        //_curCustomer = PickCustomerByWeight(_stageSetting.CurStage);
 
         Debug.Log($"{_curCustomer.Name} 등장"); // 손님 이름 로그 출력
         customerImage.sprite = _curCustomer.CustomerPic; //손님 사진 설정
@@ -49,91 +49,6 @@ public class CustomerSpawner : MonoBehaviour
         OrderMenu(_curCustomer); //주문
     }
 
-    private CustomerSO PickCustomerByWeight(StageSO stage) //가중치에 따른 랜덤타입 손님 뽑기
-    {
-        CustomerSO randomCustomer;
-
-        _normalCus.Clear();
-        _uniqueCus.Clear();
-        _specialCus.Clear();
-
-        var cusList = stage.CustomerList; //현재 스테이지 손님 리스트
-
-        for (int i = 0; i < cusList.Length; i++)
-        {
-            if (cusList[i] == null) 
-            { 
-                continue; 
-            }
-
-            if (cusList[i].Type == CustomerType.Normal) //손님 타입이 노멀이면
-            {
-                _normalCus.Add(cusList[i]);
-            }
-
-            else if (cusList[i].Type == CustomerType.Unique) //손님 타입이 유니크면
-            {
-                _uniqueCus.Add(cusList[i]);
-            }
-
-            else if (cusList[i].Type == CustomerType.Special) //손님 타입이 스페셜이면
-            {
-                _specialCus.Add(cusList[i]);
-            }
-        }
-
-        //Debug.Log($"노멀타입 수 : {_normalCus.Count}, 유니크타입 수 : {_uniqueCus.Count}, 스페타입 수 : {_specialCus.Count}");
-
-        int weightNormal = stage.WeightNormal;
-        int weightUnique = stage.WeightUnique;
-        int weightSpecial = stage.WeightSpecial;
-
-        //특정 타입의 손님이 없을경우 가중치는 0으로 바꿔줌
-        if (_normalCus.Count == 0)
-        { 
-            weightNormal = 0; 
-        }
-        if (_uniqueCus.Count == 0) 
-        { 
-            weightUnique = 0; 
-        }
-        if (_specialCus.Count == 0) 
-        { 
-            weightSpecial = 0; 
-        }
-
-        //Debug.Log($"[가중치] 노멀: {weightNormal}, 유니크:{weightUnique}, 스페셜: {weightSpecial}");
-
-        int totalNumber = weightNormal + weightUnique + weightSpecial;
-
-        int randomNum = Random.Range(0, totalNumber);
-        //Debug.Log($"랜덤숫자 : {randomNum}");
-        {
-            if(randomNum < weightNormal)
-            {
-                int rand = Random.Range(0, _normalCus.Count);
-                randomCustomer = _normalCus[rand];
-                //Debug.Log($"노멀 뽑음 : {randomCustomer.Name}");
-                return randomCustomer;
-            }
-
-            else if (randomNum < weightNormal + weightUnique)
-            {
-                int rand = Random.Range(0, _uniqueCus.Count);
-                randomCustomer = _uniqueCus[rand];
-                //Debug.Log($"유니크 뽑음 : {randomCustomer.Name}");
-                return randomCustomer;
-            }
-
-            else
-            {
-                int rand = Random.Range(0, _specialCus.Count);
-                randomCustomer = _specialCus[rand];
-                //Debug.Log($"스페셜 뽑음 : {randomCustomer.Name}");
-                return randomCustomer;
-            }
-        }
-    }
 
     private void OrderMenu(CustomerSO customer)
     {
@@ -166,10 +81,10 @@ public class CustomerSpawner : MonoBehaviour
         _successCount = _successCount + 1;
         Debug.Log($"{persent.ToString()}%  성공 횟수: {_successCount}");
 
-        if(_curCustomer.HasReward)
-        {
-            Debug.Log("보상 제공");
-        }
+        //if(_curCustomer.HasReward)
+        //{
+        //    Debug.Log("보상 제공");
+        //}
 
         StageEndCheck();
     }

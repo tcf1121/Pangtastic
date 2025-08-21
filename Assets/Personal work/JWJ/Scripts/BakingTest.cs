@@ -14,10 +14,11 @@ public class BakingTest : MonoBehaviour
     [SerializeField] private Button lemon;
 
     [SerializeField] private CustomerOrder order;
+    [SerializeField] private OrderStateController orderNew;
 
     private IngredientSO ingredient;
 
-    [Header("∞¢ πˆ∆∞ø° ø¨∞·µ… ¿Á∑· SO")]
+    [Header("Í∞Å Î≤ÑÌäºÏóê Ïó∞Í≤∞Îê† Ïû¨Î£å SO")]
     [SerializeField] private IngredientSO strawberrySO;
     [SerializeField] private IngredientSO kiwiSO;
     [SerializeField] private IngredientSO blueberrySO;
@@ -40,36 +41,44 @@ public class BakingTest : MonoBehaviour
 
     private void AddStrawberry()
     {
-        order.AddIngredient(strawberrySO);
+        //order.AddIngredient(strawberrySO);
+        orderNew.AddIngredient(strawberrySO);
     }
 
     private void AddKiwi()
     {
-        order.AddIngredient(kiwiSO);
+        //order.AddIngredient(kiwiSO);
+        orderNew.AddIngredient(kiwiSO);
     }
 
     private void AddBlueberry()
     {
-        order.AddIngredient(blueberrySO);
+        //order.AddIngredient(blueberrySO);
+   
+        orderNew.AddIngredient(blueberrySO);
     }
 
     private void AddCoffeeBean()
     {
-        order.AddIngredient(coffeeBeanSO);
+        //order.AddIngredient(coffeeBeanSO);
+        orderNew.AddIngredient(coffeeBeanSO);
     }
 
     private void AddMilk()
     {
-        order.AddIngredient(milkSO);
+        //order.AddIngredient(milkSO);
+        orderNew.AddIngredient(milkSO);
     }
 
     private void AddGrape()
     {
-        order.AddIngredient(grapeSO);
+        //order.AddIngredient(grapeSO);
+        orderNew.AddIngredient(grapeSO);
     }
 
     private void AddLemon()
     {
-        order.AddIngredient(lemonSO);
+        //order.AddIngredient(lemonSO);
+        orderNew.AddIngredient(lemonSO);
     }
 }

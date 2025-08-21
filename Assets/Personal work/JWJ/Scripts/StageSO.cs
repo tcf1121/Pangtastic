@@ -12,7 +12,7 @@ public class StageSO : ScriptableObject
     public int StageClearCustomerCount;
 
     [Header("최소 주문 수")]
-    [Range(2, 4)] public int MinOrderNum;
+    [Range(2, 4)] public int MinOrderCount;
 
     [Header("등장 손님 목록")]
     public CustomerSO[] CustomerList;
@@ -20,19 +20,13 @@ public class StageSO : ScriptableObject
     [Header("스테이지 등장 레시피 목록")]
     public RecipeSO[] StageRecipes;
 
-    [Header("재료 추가 개수")]
+    [Header("재료 배수")]
     public IngredientAdjustment[] IngredientAdjustments;
-
-    [Header("손님 타입별 가중치")]
-
-    [Range(0, 100)] public int WeightNormal = 80;
-    [Range(0, 100)] public int WeightUnique = 18;
-    [Range(0, 100)] public int WeightSpecial = 2;
 
     [System.Serializable]
     public struct IngredientAdjustment
     {
         public IngredientSO Ingredient;
-        public int ExtraAmount;
+        public float MuliflyBy;
     }
 }

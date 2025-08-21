@@ -21,9 +21,6 @@ public class CustomerSO : ScriptableObject
     [Header("손님 타입")]
     public CustomerType Type;
 
-    [Header("보상 여부")]
-    public bool HasReward;
-
     [Header("손님 이미지")]
     public Sprite CustomerPic;
 

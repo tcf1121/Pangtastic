@@ -32,7 +32,7 @@ public class StageSetting : MonoBehaviour
         {
             if (_finalRecipe.ContainsKey(_adj.Ingredient))
             {
-                _finalRecipe[_adj.Ingredient] += _adj.ExtraAmount;
+                //_finalRecipe[_adj.Ingredient] += _adj.ExtraAmount;//새로운 스크립트에 더하기에서 곱하기로 바꿔서 주석처리. 더이상 안씀
             }
         } 
     }
