@@ -54,7 +54,7 @@ public class MatchChecker : MonoBehaviour
         bool[,] visitedH = new bool[_height, _width];
         bool[,] visitedV = new bool[_height, _width];
 
-        // 1. 가로 매치
+        // 가로 매치
         for (int y = 0; y < _height; y++)
         {
             int x = 0;
@@ -90,7 +90,7 @@ public class MatchChecker : MonoBehaviour
             }
         }
 
-        // 2. 세로 매치
+        // 세로 매치
         for (int x = 0; x < _width; x++)
         {
             int y = 0;
@@ -208,6 +208,25 @@ public class MatchChecker : MonoBehaviour
                 _blockObjects[p.y, p.x] = null;
             }
             _boardData[p.y, p.x] = (GemType)(-1);
+
+            // 데미지 
+            Vector2Int[] dirs = { Vector2Int.up, Vector2Int.down, Vector2Int.left, Vector2Int.right };
+            foreach (var dir in dirs)
+            {
+                Vector2Int neighbor = p + dir;
+                if (neighbor.x < 0 || neighbor.x >= _width || neighbor.y < 0 || neighbor.y >= _height)
+                    continue;
+
+                GameObject obj = _blockObjects[neighbor.y, neighbor.x];
+                if (obj != null)
+                {
+                    Obstacle obs = obj.GetComponent<Obstacle>();
+                    if (obs != null && obs.IsSplash())
+                    {
+                        obs.Damage(1);
+                    }
+                }
+            }
         }
 
         // 특수블럭 생성
