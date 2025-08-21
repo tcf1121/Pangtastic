@@ -19,8 +19,8 @@ public class AudioController : MonoBehaviour
     [SerializeField] private List<AudioClipGroup> _sfxClips = new List<AudioClipGroup>();
     
     // AudioSource 컴포넌트들
-    private AudioSource _bgmAudioSource;
-    private AudioSource _sfxAudioSource;
+    [HideInInspector] public AudioSource BgmAudioSource;
+    [HideInInspector] public AudioSource SfxAudioSource;
     
     protected void Awake()
     {
@@ -33,13 +33,13 @@ public class AudioController : MonoBehaviour
         DontDestroyOnLoad(gameObject);
         
         // AudioSource 컴포넌트 생성
-        _bgmAudioSource = gameObject.AddComponent<AudioSource>();
-        _bgmAudioSource.loop = true;
-        _bgmAudioSource.playOnAwake = false;
+        BgmAudioSource = gameObject.AddComponent<AudioSource>();
+        BgmAudioSource.loop = true;
+        BgmAudioSource.playOnAwake = false;
         
-        _sfxAudioSource = gameObject.AddComponent<AudioSource>();
-        _sfxAudioSource.loop = false;
-        _sfxAudioSource.playOnAwake = false;
+        SfxAudioSource = gameObject.AddComponent<AudioSource>();
+        SfxAudioSource.loop = false;
+        SfxAudioSource.playOnAwake = false;
     }
 
 
@@ -53,10 +53,10 @@ public class AudioController : MonoBehaviour
         if (clipIndex >= 0 && clipIndex < _bgmClips.Count)
         {
             var clip = _bgmClips[clipIndex].audioClip;
-            if (clip != null && _bgmAudioSource != null)
+            if (clip != null && BgmAudioSource != null)
             {
-                _bgmAudioSource.clip = clip;
-                _bgmAudioSource.Play();
+                BgmAudioSource.clip = clip;
+                BgmAudioSource.Play();
             }
         }
     }
@@ -70,9 +70,9 @@ public class AudioController : MonoBehaviour
         if (clipIndex >= 0 && clipIndex < _sfxClips.Count)
         {
             var clip = _sfxClips[clipIndex].audioClip;
-            if (clip != null && _sfxAudioSource != null)
+            if (clip != null && SfxAudioSource != null)
             {
-                _sfxAudioSource.PlayOneShot(clip);
+                SfxAudioSource.PlayOneShot(clip);
             }
         }
     }
@@ -82,9 +82,9 @@ public class AudioController : MonoBehaviour
     /// </summary>
     public void StopBGM()
     {
-        if (_bgmAudioSource != null)
+        if (BgmAudioSource != null)
         {
-            _bgmAudioSource.Stop();
+            BgmAudioSource.Stop();
         }
     }
     
@@ -93,9 +93,9 @@ public class AudioController : MonoBehaviour
     /// </summary>
     public void StopSFX()
     {
-        if (_sfxAudioSource != null && _sfxAudioSource.isPlaying)
+        if (SfxAudioSource != null && SfxAudioSource.isPlaying)
         {
-            _sfxAudioSource.Stop();
+            SfxAudioSource.Stop();
         }
     }
 
@@ -106,10 +106,10 @@ public class AudioController : MonoBehaviour
     public void PlayBGMByName(string clipName)
     {
         var clipGroup = _bgmClips.Find(g => g.name == clipName);
-        if (clipGroup != null && clipGroup.audioClip != null && _bgmAudioSource != null)
+        if (clipGroup != null && clipGroup.audioClip != null && BgmAudioSource != null)
         {
-            _bgmAudioSource.clip = clipGroup.audioClip;
-            _bgmAudioSource.Play();
+            BgmAudioSource.clip = clipGroup.audioClip;
+            BgmAudioSource.Play();
         }
         else
         {
@@ -124,9 +124,9 @@ public class AudioController : MonoBehaviour
     public void PlaySFXByName(string clipName)
     {
         var clipGroup = _sfxClips.Find(g => g.name == clipName);
-        if (clipGroup != null && clipGroup.audioClip != null && _sfxAudioSource != null)
+        if (clipGroup != null && clipGroup.audioClip != null && SfxAudioSource != null)
         {
-            _sfxAudioSource.PlayOneShot(clipGroup.audioClip);
+            SfxAudioSource.PlayOneShot(clipGroup.audioClip);
         }
         else
         {
