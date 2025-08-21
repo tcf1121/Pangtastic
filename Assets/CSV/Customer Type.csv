@@ -1,0 +1,21 @@
+﻿손님 유형 ID,인내심 감소 수치,첫 등장 대사 ID,인내심 100%~51% 대사 ID,인내심 50%~1% 대사 ID,인내심 0% 대사 ID,특수 블록 랜덤 제공 개수,손님 유형
+int,float,string,string,string,string,int,string
+customer_type_id,patience_reduction,appeared_dialog_id,patience_100_51_dialog_id,patience_50_1_dialog_id,patience_0_dialog_id,special_random_count,customer_type
+1101,60,,,,,null,일반
+1102,50,,,,,null,유니크
+1103,30,,,,,2,특별
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,"대사 ID는 스트링 테이블에 연관, 예시: 손님 유형 301이라는 손님이 인내심 50%~1%일때의 대사일 때, 301_patience_50_1_dialog_01",,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,"스테이지 등장하는 레시피, 손님 선호 레시피랑 겹쳐야",,,,
