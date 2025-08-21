@@ -8,7 +8,6 @@ namespace KDJ.States
         public void OnEnter(BoardManager boardManager)
         {
             Debug.Log("블록 생성 상태");
-            // boardManager.Spawner.SpawnBlockData();
             boardManager.Spawner.SpawnBlock();
             boardManager.ChangeState(new FallingState());
         }
@@ -18,21 +17,16 @@ namespace KDJ.States
             // 로직 변경. 낙하 후 생성이 아닌 미리 생성 시켜놓고 함께 자연스럽게 낙하하도록
         }
 
-        public void OnExit(BoardManager boardManager) 
+        public void OnExit(BoardManager boardManager)
         {
             Debug.Log("블록 생성 상태 종료");
         }
 
         private IEnumerator SpawningCoroutine(BoardManager boardManager)
         {
-            yield return new WaitForSeconds(0.25f);
             boardManager.Spawner.SpawnBlock();
-
-            if (boardManager.Spawner.BlankBlockCount == 0)
-            {
-                boardManager.Spawner.StopCoroutine();
-                boardManager.ChangeState(new FallingState());
-            }
+            boardManager.ChangeState(new FallingState());
+            yield return new WaitForSeconds(0.25f);
         }
     }
 }

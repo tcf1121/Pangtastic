@@ -3,6 +3,13 @@ using UnityEngine;
 
 namespace KDJ
 {
+    [System.Serializable]
+    public class Block
+    {
+        public int BlockType { get; set; }
+        public GameObject BlockInstance { get; set; }
+    }
+
     public class BlockSpawner : MonoBehaviour
     {
         [SerializeField] private GameObject _block1;
@@ -12,19 +19,17 @@ namespace KDJ
         [SerializeField] private GameObject _block5;
         [SerializeField] private BlockPlate _blockPlate;
 
-        private GameObject[,] _blockArray;
-        private int[,] _blockDataArray;
+        private Block[,] _blockArray;
 
         public int BlankBlockCount = 0;
-
+        #region 초기화
         /// <summary>
         /// 블럭 배열 초기화
         /// </summary>
         public void InitBlockArray()
         {
             // 블럭 배열은 높이를 2배로 설정
-            _blockDataArray = new int[_blockPlate.BlockPlateHeight * 2, _blockPlate.BlockPlateWidth];
-            _blockArray = new GameObject[_blockPlate.BlockPlateHeight * 2, _blockPlate.BlockPlateWidth];
+            _blockArray = new Block[_blockPlate.BlockPlateHeight * 2, _blockPlate.BlockPlateWidth];
 
             for (int x = 0; x < _blockPlate.BlockPlateWidth; x++)
             {
@@ -32,14 +37,14 @@ namespace KDJ
                 {
                     if (_blockPlate.BlockPlateArray[y, x])
                     {
-                        _blockDataArray[y, x] = Random.Range(1, 6);
+                        _blockArray[y, x] = new Block { BlockType = Random.Range(1, 6) };
                     }
                     else
                     {
-                        _blockDataArray[y, x] = 0; // 빈 블록
+                        _blockArray[y, x] = new Block { BlockType = 0 }; // 빈 블록
                     }
 
-                    _blockArray[y, x] = null;
+                    _blockArray[y, x].BlockInstance = null;
                 }
             }
         }
@@ -55,105 +60,57 @@ namespace KDJ
                 {
                     if (_blockPlate.BlockPlateWidth % 2 == 0)
                     {
-                        if (_blockDataArray[y, x] != 0)
+                        if (_blockArray[y, x].BlockType != 0)
                         {
                             Vector3 position = new Vector3(x - _blockPlate.BlockPlateWidth / 2 + 0.5f, y - _blockPlate.BlockPlateHeight / 2 + 0.5f, 0);
-                            GameObject blockPrefab = GetBlockTile(_blockDataArray[y, x]);
-                            _blockArray[y, x] = Instantiate(blockPrefab, position, Quaternion.identity);
+                            GameObject blockPrefab = GetBlockTile(_blockArray[y, x].BlockType);
+                            _blockArray[y, x].BlockInstance = Instantiate(blockPrefab, position, Quaternion.identity);
                         }
                         else
                         {
-                            _blockArray[y, x] = null;
+                            _blockArray[y, x].BlockInstance = null;
                         }
                     }
                     else
                     {
-                        if (_blockDataArray[y, x] != 0)
+                        if (_blockArray[y, x].BlockType != 0)
                         {
                             Vector3 position = new Vector3(x - _blockPlate.BlockPlateWidth / 2, y - _blockPlate.BlockPlateHeight / 2, 0);
-                            GameObject blockPrefab = GetBlockTile(_blockDataArray[y, x]);
-                            _blockArray[y, x] = Instantiate(blockPrefab, position, Quaternion.identity);
+                            GameObject blockPrefab = GetBlockTile(_blockArray[y, x].BlockType);
+                            _blockArray[y, x].BlockInstance = Instantiate(blockPrefab, position, Quaternion.identity);
                         }
                         else
                         {
-                            _blockArray[y, x] = null;
+                            _blockArray[y, x].BlockInstance = null;
                         }
                     }
                 }
             }
         }
+        #endregion
 
+        #region 블럭 관리
         /// <summary>
-        /// 블럭 데이터 배열 정렬
+        /// 블럭 배열 정렬
         /// </summary>
-        public void SortBlockDataArray()
+        public void SortBlockArray()
         {
-            Debug.Log("블럭 데이터 배열 정렬");
+            Debug.Log("블럭 배열 정렬");
             for (int x = 0; x < _blockPlate.BlockPlateWidth; x++)
             {
-                for (int y = 0; y < _blockArray.GetLength(0); y++)
+                for (int y = 0; y < _blockArray.GetLength(0) - 1; y++)
                 {
-                    if (_blockDataArray[y, x] == 0 && _blockPlate.IsBlockTile(x, y))
+                    if (_blockArray[y, x] == null)
                     {
-                        for (int k = y + 1; k < _blockPlate.BlockPlateHeight; k++)
+                        if (_blockArray[y + 1, x] != null)
                         {
-                            if (_blockDataArray[k, x] != 0)
-                            {
-                                _blockDataArray[y, x] = _blockDataArray[k, x];
-                                _blockDataArray[k, x] = 0;
-                                break;
-                            }
-                        }
-                    }
-                    else if (_blockDataArray[y, x] != 0 && !_blockPlate.IsBlockTile(x, y))
-                    {
-                        // 블록판 밖에 블록이 생성된 경우 아래로 내림
-                        for (int k = y; _blockArray.GetLength(0) > k && k >= _blockPlate.BlockPlateHeight; k++)
-                        {
-                            if (_blockArray[k, x] != null && _blockArray[k - 1, x] == null)
-                            {
-                                Debug.Log("블럭판 밖에서 블럭 이동 ");
-                                _blockArray[k - 1, x] = _blockArray[k, x];
-                                _blockArray[k, x] = null;
-                                break;
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-        public void SortViewBlockArray()
-        {
-            Debug.Log("뷰 블럭 배열 정렬");
-            for (int x = 0; x < _blockPlate.BlockPlateWidth; x++)
-            {
-                for (int y = 0; y < _blockArray.GetLength(0); y++)
-                {
-                    if (_blockArray[y, x] == null && _blockPlate.IsBlockTile(x, y))
-                    {
-                        for (int k = y + 1; k < _blockArray.GetLength(0); k++)
-                        {
-                            if (_blockArray[k, x] != null)
-                            {
-                                _blockArray[y, x] = _blockArray[k, x];
-                                _blockArray[k, x] = null;
-                                break;
-                            }
-                        }
-                    }
-                    else if (_blockArray[y, x] != null && !_blockPlate.IsBlockTile(x, y))
-                    {
-                        // 블록판 밖에 블록이 생성된 경우 아래로 내림
-                        for (int k = y; _blockArray.GetLength(0) > k && k >= _blockPlate.BlockPlateHeight; k++)
-                        {
-                            if (_blockArray[k, x] != null && _blockArray[k - 1, x] == null)
-                            {
-                                Debug.Log("블럭판 밖에서 블럭 이동 ");
-                                _blockArray[k - 1, x] = _blockArray[k, x];
-                                _blockArray[k, x] = null;
-                                break;
-                            }
+                            _blockArray[y, x] = _blockArray[y + 1, x];
+                            _blockArray[y + 1, x] = null;
+                            _blockArray[y, x].BlockInstance.transform.position = new Vector3(
+                                _blockArray[y, x].BlockInstance.transform.position.x,
+                                _blockArray[y, x].BlockInstance.transform.position.y - 1,
+                                0
+                                );
                         }
                     }
                 }
@@ -172,7 +129,7 @@ namespace KDJ
 
                 for (int y = 0; y < _blockPlate.BlockPlateHeight; y++)
                 {
-                    if (_blockDataArray[y, x] == 0 && _blockPlate.BlockPlateArray[y, x] && _blockArray[y, x] == null)
+                    if (_blockPlate.BlockPlateArray[y, x] && _blockArray[y, x] == null)
                     {
                         Vector3 position;
                         Vector3 spawnPosition;
@@ -191,11 +148,15 @@ namespace KDJ
                             spawnPosition = new Vector3(position.x, position.y + _blockPlate.BlockPlateHeight - y + spawnCount, 0);
                         }
                         // 생성 후 배열 위에 배치
-                        int spawnIndex = _blockPlate.BlockPlateHeight - y + spawnCount;
+                        int spawnIndex = _blockPlate.BlockPlateHeight + spawnCount;
+                        if (_blockArray[spawnIndex, x] == null)
+                        {
+                            _blockArray[spawnIndex, x] = new Block();
+                        }
                         Debug.Log(spawnIndex);
-                        _blockDataArray[spawnIndex, x] = Random.Range(1, 6);
-                        GameObject gemPrefab = GetBlockTile(_blockDataArray[spawnIndex, x]);
-                        _blockArray[spawnIndex, x] = Instantiate(gemPrefab, spawnPosition, Quaternion.identity);
+                        _blockArray[spawnIndex, x].BlockType = Random.Range(1, 6);
+                        GameObject gemPrefab = GetBlockTile(_blockArray[spawnIndex, x].BlockType);
+                        _blockArray[spawnIndex, x].BlockInstance = Instantiate(gemPrefab, spawnPosition, Quaternion.identity);
 
                         // 생성했다면 spawnCount 증가
                         spawnCount++;
@@ -205,59 +166,26 @@ namespace KDJ
         }
 
         /// <summary>
-        /// 블럭 배열의 빈 공간에 데이터 생성
+        /// 블럭 체크. 시각적 오브젝트가 파괴된 경우에도 해당 칸을 빈칸으로 설정
         /// </summary>
-        public void SpawnBlockData()
+        public void CheckBlockArray()
         {
+            Debug.Log("블럭 배열 상태 확인 시작");
             for (int x = 0; x < _blockPlate.BlockPlateWidth; x++)
             {
                 for (int y = 0; y < _blockPlate.BlockPlateHeight; y++)
                 {
-                    if (_blockDataArray[y, x] == 0 && _blockPlate.BlockPlateArray[y, x])
+                    if (_blockArray[y, x] == null || _blockArray[y, x].BlockInstance == null)
                     {
-                        _blockDataArray[y, x] = Random.Range(1, 6);
-                    }
-                }
-            }
-        }
-
-        /// <summary>
-        /// 블럭 리프레쉬, 블럭 파괴 후 다시 생성함
-        /// </summary>
-        public void RefreshBlock()
-        {
-            Debug.Log("블럭 리프레쉬");
-            for (int x = 0; x < _blockPlate.BlockPlateWidth; x++)
-            {
-                for (int y = 0; y < _blockPlate.BlockPlateHeight; y++)
-                {
-                    // 데이터에는 빈 블록인데 뷰에는 블록이 있는 경우
-                    if (_blockDataArray[y, x] == 0 && _blockArray[y, x] != null)
-                    {
-                        Destroy(_blockArray[y, x]);
+                        if (_blockArray[y, x].BlockInstance != null) Destroy(_blockArray[y, x].BlockInstance);
                         _blockArray[y, x] = null;
                     }
-                    // 데이터에는 블록이 있는데 뷰에는 블록이 없는 경우
-                    else if (_blockPlate.BlockPlateArray[y, x] && _blockDataArray[y, x] != 0)
-                    {
-                        if (_blockArray[y, x] != null) Destroy(_blockArray[y, x]);
-
-                        Vector3 position;
-                        if (_blockPlate.BlockPlateWidth % 2 == 0)
-                        {
-                            position = new Vector3(x - _blockPlate.BlockPlateWidth / 2 + 0.5f, y - _blockPlate.BlockPlateHeight / 2 + 0.5f, 0);
-                        }
-                        else
-                        {
-                            position = new Vector3(x - _blockPlate.BlockPlateWidth / 2, y - _blockPlate.BlockPlateHeight / 2, 0);
-                        }
-                        GameObject gemPrefab = GetBlockTile(_blockDataArray[y, x]);
-                        _blockArray[y, x] = Instantiate(gemPrefab, position, Quaternion.identity);
-                    }
                 }
             }
         }
+        #endregion
 
+        #region 테스트 코드
         /// <summary>
         /// 테스트 코드. 하단 블럭을 ㅗ자 형태로 파괴
         /// </summary>
@@ -265,37 +193,35 @@ namespace KDJ
         public bool TestDeleteBlock()
         {
             bool deleted = false;
-            if (_blockDataArray[0, 1] != 0)
+            if (_blockArray[0, 1] != null && _blockArray[0, 1].BlockInstance != null)
             {
-                _blockDataArray[0, 1] = 0;
-                Destroy(_blockArray[0, 1]);
+                Destroy(_blockArray[0, 1].BlockInstance);
                 _blockArray[0, 1] = null;
                 deleted = true;
             }
-            if (_blockDataArray[0, 2] != 0)
+            if (_blockArray[0, 2] != null && _blockArray[0, 2].BlockInstance != null)
             {
-                _blockDataArray[0, 2] = 0;
-                Destroy(_blockArray[0, 2]);
+                Destroy(_blockArray[0, 2].BlockInstance);
                 _blockArray[0, 2] = null;
                 deleted = true;
             }
-            if (_blockDataArray[0, 3] != 0)
+            if (_blockArray[0, 3] != null && _blockArray[0, 3].BlockInstance != null)
             {
-                _blockDataArray[0, 3] = 0;
-                Destroy(_blockArray[0, 3]);
+                Destroy(_blockArray[0, 3].BlockInstance);
                 _blockArray[0, 3] = null;
                 deleted = true;
             }
-            if (_blockDataArray[1, 2] != 0)
+            if (_blockArray[1, 2] != null && _blockArray[1, 2].BlockInstance != null)
             {
-                _blockDataArray[1, 2] = 0;
-                Destroy(_blockArray[1, 2]);
+                Destroy(_blockArray[1, 2].BlockInstance);
                 _blockArray[1, 2] = null;
                 deleted = true;
             }
             return deleted;
         }
+        #endregion
 
+        #region 블럭 데이터 관리
         /// <summary>
         /// 입력받은 블럭 번호에 해당하는 블럭 프리팹을 반환
         /// </summary>
@@ -326,7 +252,7 @@ namespace KDJ
             {
                 for (int y = 0; y < _blockPlate.BlockPlateHeight; y++)
                 {
-                    if (_blockPlate.BlockPlateArray[y, x] && _blockDataArray[y, x] == 0)
+                    if (_blockPlate.BlockPlateArray[y, x] && _blockArray[y, x] == null)
                     {
                         BlankBlockCount++;
                     }
@@ -357,35 +283,6 @@ namespace KDJ
             }
             return count;
         }
-
-        /// <summary>
-        /// 블럭 이동을 위한 코루틴. 이후 DOTween으로 교체될수도 있음
-        /// </summary>
-        /// <param name="block"></param>
-        /// <param name="targetPosition"></param>
-        /// <param name="duration"></param>
-        /// <returns></returns>
-        public IEnumerator MoveBlockCoroutine(GameObject block, Vector3 targetPosition, float duration)
-        {
-            Vector3 startPosition = block.transform.position;
-            float elapsedTime = 0f;
-
-            while (elapsedTime < duration)
-            {
-                block.transform.position = Vector3.Lerp(startPosition, targetPosition, elapsedTime / duration);
-                elapsedTime += Time.deltaTime;
-                yield return null;
-            }
-
-            block.transform.position = targetPosition;
-            // 블럭 이동이 완료되면 빈 블럭 카운트 감소
-
-            BlankBlockCount--;
-        }
-
-        public void StopCoroutine()
-        {
-            StopAllCoroutines();
-        }
+        #endregion
     }
 }

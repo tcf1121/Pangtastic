@@ -16,6 +16,14 @@ namespace KDJ.States
                 // 테스트 코드. 하단에서 블럭을 ㅗ자 형태로 파괴
                 boardManager.Spawner.TestDeleteBlock();
                 boardManager.ChangeState(new MatchingState());
+                return;
+            }
+
+            boardManager.Spawner.CheckBlockArray();
+
+            if (boardManager.Spawner.HasEmptyBlocks())
+            {
+                boardManager.ChangeState(new SpawningState());
             }
         }
 

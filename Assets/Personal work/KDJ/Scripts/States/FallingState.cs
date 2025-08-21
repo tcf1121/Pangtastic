@@ -5,17 +5,25 @@ namespace KDJ.States
 {
     public class FallingState : IGameState
     {
+        private Coroutine _fallingCoroutine;
         public void OnEnter(BoardManager boardManager)
         {
             Debug.Log("블록 낙하 상태");
-            boardManager.Spawner.StartCoroutine(FallingCoroutine(boardManager));
-            // boardManager.Spawner.SortBlockDataArray();
-            // boardManager.Spawner.SortViewBlockArray();
-            // boardManager.Spawner.RefreshBlock();
-            // boardManager.ChangeState(new ReadyState());
         }
 
-        public void OnUpdate(BoardManager boardManager) { }
+        public void OnUpdate(BoardManager boardManager)
+        {
+            if (!boardManager.Spawner.HasEmptyBlocks())
+            {
+                boardManager.ChangeState(new ReadyState());
+                return;
+            }
+
+            if (_fallingCoroutine == null)
+            {
+                _fallingCoroutine = boardManager.Spawner.StartCoroutine(FallingCoroutine(boardManager));
+            }
+        }
 
         public void OnExit(BoardManager boardManager) 
         {
@@ -24,11 +32,9 @@ namespace KDJ.States
 
         private IEnumerator FallingCoroutine(BoardManager boardManager)
         {
-            yield return new WaitForSeconds(0.5f);
-            boardManager.Spawner.SortBlockDataArray();
-            boardManager.Spawner.SortViewBlockArray();
-            boardManager.Spawner.RefreshBlock();
-            boardManager.ChangeState(new ReadyState());
+            yield return new WaitForSeconds(0.1f);
+            boardManager.Spawner.SortBlockArray();
+            _fallingCoroutine = null;
         }
     }
 }

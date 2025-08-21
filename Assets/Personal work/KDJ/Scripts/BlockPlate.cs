@@ -74,9 +74,9 @@ namespace KDJ
                     {
                         { true, true, true, true, true, true, true },
                         { true, true, true, true, true, true, true },
-                        { true, true, true, false, true, true, true },
-                        { true, true, false, false, false, true, true },
-                        { true, true, true, false, true, true, true },
+                        { true, true, true, true, true, true, true },
+                        { true, true, true, true, true, true, true },
+                        { true, true, true, true, true, true, true },
                         { true, true, true, true, true, true, true },
                         { true, true, true, true, true, true, true }
                     };
@@ -84,6 +84,21 @@ namespace KDJ
                 case 3:
                     BlockPlateArray = new bool[,]
                     {
+                        { true, true, true, true, true, true, true, true },
+                        { true, true, true, true, true, true, true, true },
+                        { true, true, true, true, true, true, true, true },
+                        { true, true, true, true, true, true, true, true },
+                        { true, true, true, true, true, true, true, true },
+                        { true, true, true, true, true, true, true, true },
+                        { true, true, true, true, true, true, true, true },
+                        { true, true, true, true, true, true, true, true }
+                    };
+                    break;
+                case 4:
+                    BlockPlateArray = new bool[,]
+                    {
+                        { true, true, true, true, true, true, true, true },
+                        { true, true, true, true, true, true, true, true },
                         { true, true, true, true, true, true, true, true },
                         { true, true, true, true, true, true, true, true },
                         { true, true, true, true, true, true, true, true },
