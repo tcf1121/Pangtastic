@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 namespace SCR
@@ -36,7 +37,7 @@ namespace SCR
         public Dictionary<Vector3Int, GemType> CellType = new();
         public Dictionary<Vector3Int, GemType> CellNonCollider = new();
         public Dictionary<Vector3Int, BoardCell> CellContent = new();
-        public GemType[,] BlockTypesBoard;
+
 
         private Grid _grid;
 
@@ -54,7 +55,8 @@ namespace SCR
                 instance = GameObject.Find("Grid").GetComponent<Board>();
                 instance.GetReference();
             }
-            instance.CellContent.Add(pos, new BoardCell());
+            if (!instance.CellContent.ContainsKey(pos))
+                instance.CellContent.Add(pos, new BoardCell());
         }
 
         // 스포너 추가
@@ -71,7 +73,13 @@ namespace SCR
         // 블록 추가
         public static void AddObstacle(Vector3Int pos, Obstacle obstacle)
         {
+            if (instance == null)
+            {
+                instance = GameObject.Find("Grid").GetComponent<Board>();
+                instance.GetReference();
+            }
             AddGem(pos, obstacle.GetBlockType());
+            if (!instance.CellContent.ContainsKey(pos)) AddCell(pos);
             instance.CellContent[pos].Obstacle = obstacle;
         }
 
@@ -152,6 +160,16 @@ namespace SCR
             instance.CellType.Remove(pos);
 
             instance.CellType.Add(moveToPos, value);
+        }
+
+        public void SortCell()
+        {
+            var keyDescendingResult = instance.CellType.OrderBy(x => x.Key);
+            foreach (KeyValuePair<Vector3Int, GemType> Cell in keyDescendingResult)
+            {
+                Debug.Log(Cell.Value);
+            }
+
         }
 
 
