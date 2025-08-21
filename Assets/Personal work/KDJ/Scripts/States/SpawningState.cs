@@ -8,8 +8,8 @@ namespace KDJ.States
         public void OnEnter(BoardManager boardManager)
         {
             Debug.Log("블록 생성 상태");
-            boardManager.Spawner.SpawnBlock();
-            boardManager.ChangeState(new FallingState());
+            //boardManager.Spawner.SpawnBlock();
+            boardManager.ChangeState(new RefillState());
         }
 
         public void OnUpdate(BoardManager boardManager)
@@ -20,13 +20,6 @@ namespace KDJ.States
         public void OnExit(BoardManager boardManager)
         {
             Debug.Log("블록 생성 상태 종료");
-        }
-
-        private IEnumerator SpawningCoroutine(BoardManager boardManager)
-        {
-            boardManager.Spawner.SpawnBlock();
-            boardManager.ChangeState(new FallingState());
-            yield return new WaitForSeconds(0.25f);
         }
     }
 }
