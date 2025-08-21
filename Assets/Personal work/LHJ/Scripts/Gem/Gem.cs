@@ -9,9 +9,9 @@ namespace LHJ
         private Vector2Int _cellPos;
         private TestMatchMap _map;
 
-        public BlockNum BlockType { get; private set; }
+        public SCR.GemType BlockType { get; private set; }
 
-        public void Init(TestMatchMap map, Vector2Int pos, BlockNum type)
+        public void Init(TestMatchMap map, Vector2Int pos, SCR.GemType type)
         {
             _map = map;
             _cellPos = pos;
