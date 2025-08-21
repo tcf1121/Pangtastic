@@ -9,14 +9,14 @@ public class TestMatchMap : MonoBehaviour
     [SerializeField] private List<GameObject> _blockPrefabs;
 
     [SerializeField]
-    private BlockNum[,] _mapArray = new BlockNum[,]
+    private SCR.GemType[,] _mapArray = new SCR.GemType[,]
     {
-        { BlockNum.Carrot, BlockNum.Lemon, BlockNum.Lemon, BlockNum.Grape, BlockNum.Grape, BlockNum.Lemon },
-        { BlockNum.Carrot, BlockNum.Lemon, BlockNum.Lemon, BlockNum.Grape, BlockNum.Lemon, BlockNum.Grape },
-        { BlockNum.Grape, BlockNum.Grape, BlockNum.Carrot, BlockNum.Lemon, BlockNum.Grape, BlockNum.Grape },
-        { BlockNum.Carrot, BlockNum.Lemon, BlockNum.Lemon, BlockNum.Carrot, BlockNum.Lemon, BlockNum.Lemon },
-        { BlockNum.Carrot, BlockNum.Grape, BlockNum.Lemon, BlockNum.Lemon, BlockNum.Carrot, BlockNum.Carrot },
-        { BlockNum.Grape, BlockNum.Grape, BlockNum.Carrot, BlockNum.Grape, BlockNum.Grape, BlockNum.Carrot },
+        { SCR.GemType.Carrot, SCR.GemType.Lemon, SCR.GemType.Lemon, SCR.GemType.Grape, SCR.GemType.Grape, SCR.GemType.Lemon },
+        { SCR.GemType.Carrot, SCR.GemType.Lemon, SCR.GemType.Lemon, SCR.GemType.Grape, SCR.GemType.Lemon, SCR.GemType.Grape },
+        { SCR.GemType.Grape,  SCR.GemType.Grape, SCR.GemType.Carrot, SCR.GemType.Lemon, SCR.GemType.Grape, SCR.GemType.Grape },
+        { SCR.GemType.Carrot, SCR.GemType.Lemon, SCR.GemType.Lemon, SCR.GemType.Carrot, SCR.GemType.Lemon, SCR.GemType.Lemon },
+        { SCR.GemType.Carrot, SCR.GemType.Grape, SCR.GemType.Lemon, SCR.GemType.Lemon, SCR.GemType.Carrot, SCR.GemType.Carrot },
+        { SCR.GemType.Grape,  SCR.GemType.Grape, SCR.GemType.Carrot, SCR.GemType.Grape, SCR.GemType.Grape, SCR.GemType.Carrot },
     };
 
     [SerializeField] private MatchChecker _matchChecker;
@@ -36,7 +36,6 @@ public class TestMatchMap : MonoBehaviour
         _blockObjects = new GameObject[_height, _width];
 
         SpawnMap();
-        //_matchChecker.SetBoard(_mapArray, _blockObjects);
     }
 
     private void Update()
@@ -50,19 +49,15 @@ public class TestMatchMap : MonoBehaviour
 
             _dragStartPos = WorldToGrid(worldPos);
         }
-
         else if (Input.GetMouseButtonUp(0) && _dragStartPos.HasValue)
         {
             Vector2 delta = (Vector2)Input.mousePosition - _dragStartScreenPos;
 
             if (delta.magnitude >= _dragThreshold)
             {
-                Vector2Int dir;
-
-                if (Mathf.Abs(delta.x) > Mathf.Abs(delta.y))
-                    dir = delta.x > 0 ? Vector2Int.right : Vector2Int.left;
-                else
-                    dir = delta.y > 0 ? Vector2Int.up : Vector2Int.down;
+                Vector2Int dir = (Mathf.Abs(delta.x) > Mathf.Abs(delta.y))
+                    ? (delta.x > 0 ? Vector2Int.right : Vector2Int.left)
+                    : (delta.y > 0 ? Vector2Int.up : Vector2Int.down);
 
                 Vector2Int from = _dragStartPos.Value;
                 Vector2Int to = from + dir;
@@ -74,13 +69,14 @@ public class TestMatchMap : MonoBehaviour
 
                     if (fromGem != null && toGem != null)
                     {
-                        BlockNum[,] tempMap = (BlockNum[,])_mapArray.Clone();
-                        (tempMap[from.y, from.x], tempMap[to.y, to.x]) = (tempMap[to.y, to.x], tempMap[from.y, from.x]);
+                        SCR.GemType[,] tempMap = (SCR.GemType[,])_mapArray.Clone();
+                        (tempMap[from.y, from.x], tempMap[to.y, to.x]) =
+                            (tempMap[to.y, to.x], tempMap[from.y, from.x]);
 
                         if (_matchChecker.HasAnyMatch(tempMap))
                         {
                             SwapBlocks(fromGem, toGem);
-                            _matchChecker.SetBoard(_mapArray, _blockObjects);
+                            _matchChecker.SetBoard(_mapArray, _blockObjects, to);
                         }
                         else
                         {
@@ -92,18 +88,6 @@ public class TestMatchMap : MonoBehaviour
 
             _dragStartPos = null;
         }
-        //if (Input.GetKeyDown(KeyCode.Space))
-        //{
-        //    if (_matchChecker != null)
-        //    {
-        //        Debug.Log("스페이스바 입력됨 → 매치 검사 시작");
-        //        _matchChecker.SetBoard(_mapArray, _blockObjects);
-        //    }
-        //    else
-        //    {
-        //        Debug.LogWarning("MatchChecker가 연결되지 않았습니다!");
-        //    }
-        //}
     }
 
     private void SpawnMap()
@@ -112,7 +96,7 @@ public class TestMatchMap : MonoBehaviour
         {
             for (int x = 0; x < _width; x++)
             {
-                BlockNum blockType = _mapArray[y, x];
+                SCR.GemType blockType = _mapArray[y, x];
                 int id = (int)blockType;
 
                 Vector3 pos = new Vector3(
@@ -141,7 +125,9 @@ public class TestMatchMap : MonoBehaviour
         Vector2Int posA = a.GetPosition();
         Vector2Int posB = b.GetPosition();
 
-        (_mapArray[posA.y, posA.x], _mapArray[posB.y, posB.x]) = (_mapArray[posB.y, posB.x], _mapArray[posA.y, posA.x]);
+        (_mapArray[posA.y, posA.x], _mapArray[posB.y, posB.x]) =
+            (_mapArray[posB.y, posB.x], _mapArray[posA.y, posA.x]);
+
         GameObject objA = _blockObjects[posA.y, posA.x];
         GameObject objB = _blockObjects[posB.y, posB.x];
         (_blockObjects[posA.y, posA.x], _blockObjects[posB.y, posB.x]) = (objB, objA);
@@ -153,12 +139,14 @@ public class TestMatchMap : MonoBehaviour
         a.SetPosition(posB);
         b.SetPosition(posA);
     }
+
     private Vector2Int WorldToGrid(Vector3 worldPos)
     {
         int x = Mathf.FloorToInt(worldPos.x + _width / 2);
         int y = Mathf.FloorToInt(worldPos.y + _height / 2);
         return new Vector2Int(x, y);
     }
+
     private bool IsInsideGrid(Vector2Int pos)
     {
         return pos.x >= 0 && pos.x < _width && pos.y >= 0 && pos.y < _height;
