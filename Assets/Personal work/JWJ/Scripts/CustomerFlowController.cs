@@ -78,13 +78,38 @@ public class CustomerFlowController : MonoBehaviour
             _customerQueue.Enqueue(firstCustomer); // 큐에 처음으로 넣어서 첫손님으로 지정
             _customerPool.Remove(firstCustomer); // 풀에서 제거
         }
+        else
+        {
+            Debug.LogWarning("normal 손님이 없습니다.");
+        }
 
-        while (_customerPool.Count > 0) //풀이 0이될때까지 랜덤으로 뽑아서 큐에 넣고 리스트에서는 삭제
+        List<CustomerSO> lastCustomerList = new List<CustomerSO>(); //스페셜 뺀 손님 담을 리스트
+
+        foreach (CustomerSO customer in _customerPool)
+        {
+            if (customer.Type != CustomerType.Special) // 스페셜이 아니면 리스트에 추가
+            {
+                lastCustomerList.Add(customer);
+            }
+        }
+
+        CustomerSO lastCustomer = null; //마지막 손님
+
+        if (lastCustomerList.Count > 0)
+        {
+            int rand = Random.Range(0, lastCustomerList.Count);
+            lastCustomer = lastCustomerList[rand];
+            _customerPool.Remove(lastCustomer); //원래 손님목록 리스트에서 삭제
+        }
+
+        while (_customerPool.Count > 0)
         {
             int rand = Random.Range(0, _customerPool.Count);
             _customerQueue.Enqueue(_customerPool[rand]);
             _customerPool.RemoveAt(rand);
         }
+
+        _customerQueue.Enqueue(lastCustomer);
 
         //손님 리스트 로그
         //CustomerSO[] arr = _customerQueue.ToArray();
