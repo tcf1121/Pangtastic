@@ -33,7 +33,7 @@ public class SettingToggleButton : MonoBehaviour
         ApplySetting();
 
     }
-
+    
     private void ApplySetting()
     {
         if (isOn)
