@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq.Expressions;
 using UnityEditor.U2D.Aseprite;
 using UnityEngine;
@@ -7,19 +8,14 @@ namespace SCR
 {
     public abstract class Obstacle : MonoBehaviour
     {
-        [Serializable]
-        public class LockStateData
-        {
-            public Sprite Sprite;
-        }
+        public GemType _blockType;
+        public GameObject CatGameObject;
 
-        public LockStateData[] LockStates;
-
-        protected SpriteRenderer spriteRenderer;
 
         protected Vector3Int _cellPos;
+        protected List<Vector3Int> _fourCellPos;
 
-        protected GemType _blockType;
+
         protected int _currentHP;
         protected int _score;
         protected bool _canMove;
@@ -31,8 +27,6 @@ namespace SCR
 
         public virtual void Init(Vector3Int cell)
         {
-            spriteRenderer = GetComponent<SpriteRenderer>();
-            spriteRenderer.sprite = LockStates[0].Sprite;
             _cellPos = cell;
 
             transform.position = new Vector3(cell.x + 0.5f, cell.y + 0.5f, 0);
@@ -40,9 +34,14 @@ namespace SCR
             Board.AddObstacle(cell, this);
         }
 
-        public virtual GemType GetBlockType()
+        public GemType GetBlockType()
         {
             return _blockType;
+        }
+
+        public bool GetCollider()
+        {
+            return _onCollider;
         }
 
         public virtual void Clear()
@@ -54,6 +53,11 @@ namespace SCR
             Destroy(gameObject);
         }
 
+        public bool IsFourPos(Vector3Int pos)
+        {
+            if (pos == _cellPos) return true;
+            else return false;
+        }
 
         // 매치 시 주변에 있을 때 파괴되는건지 확인
         public bool IsSplash()
@@ -73,11 +77,6 @@ namespace SCR
 
             _currentHP = newState;
 
-            if (_currentHP < LockStates.Length)
-            {
-                spriteRenderer.sprite = LockStates[_currentHP].Sprite;
-                return false;
-            }
 
             _isDone = true;
             return true;

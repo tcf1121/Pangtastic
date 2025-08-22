@@ -18,12 +18,12 @@ public class TestMatchMap : MonoBehaviour
     [SerializeField]
     private SCR.GemType[,] _mapArray = new SCR.GemType[,]
     {
-        { SCR.GemType.Carrot, SCR.GemType.Lemon, SCR.GemType.Lemon, SCR.GemType.Grape, SCR.GemType.Grape, SCR.GemType.Lemon },
-        { SCR.GemType.Carrot, SCR.GemType.Lemon, SCR.GemType.Lemon, SCR.GemType.Grape, SCR.GemType.Lemon, SCR.GemType.Grape },
-        { SCR.GemType.Grape,  SCR.GemType.Grape, SCR.GemType.Carrot, SCR.GemType.Lemon, SCR.GemType.Grape, SCR.GemType.Grape },
-        { SCR.GemType.Carrot, SCR.GemType.Lemon, SCR.GemType.Lemon, SCR.GemType.Box,   SCR.GemType.Lemon, SCR.GemType.Lemon },
-        { SCR.GemType.Carrot, SCR.GemType.Grape, SCR.GemType.Lemon, SCR.GemType.Lemon, SCR.GemType.Carrot, SCR.GemType.Carrot },
-        { SCR.GemType.Grape,  SCR.GemType.Grape, SCR.GemType.Carrot, SCR.GemType.Grape, SCR.GemType.Grape, SCR.GemType.Carrot },
+        { SCR.GemType.Lavender, SCR.GemType.Chocolate, SCR.GemType.Chocolate, SCR.GemType.Blueberry, SCR.GemType.Blueberry, SCR.GemType.Chocolate },
+        { SCR.GemType.Lavender, SCR.GemType.Chocolate, SCR.GemType.Chocolate, SCR.GemType.Blueberry, SCR.GemType.Chocolate, SCR.GemType.Blueberry },
+        { SCR.GemType.Blueberry,  SCR.GemType.Blueberry, SCR.GemType.Lavender, SCR.GemType.Chocolate, SCR.GemType.Blueberry, SCR.GemType.Blueberry },
+        { SCR.GemType.Lavender, SCR.GemType.Chocolate, SCR.GemType.Chocolate, SCR.GemType.Cloche,   SCR.GemType.Chocolate, SCR.GemType.Chocolate },
+        { SCR.GemType.Lavender, SCR.GemType.Blueberry, SCR.GemType.Chocolate, SCR.GemType.Chocolate, SCR.GemType.Lavender, SCR.GemType.Lavender },
+        { SCR.GemType.Blueberry,  SCR.GemType.Blueberry, SCR.GemType.Lavender, SCR.GemType.Blueberry, SCR.GemType.Blueberry, SCR.GemType.Lavender },
     };
 
     [SerializeField] private MatchChecker _matchChecker;

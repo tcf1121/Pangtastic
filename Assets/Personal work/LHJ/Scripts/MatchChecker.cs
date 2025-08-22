@@ -76,9 +76,9 @@ public class MatchChecker : MonoBehaviour
                     Vector2Int spawnCell = ChooseSpawnCell(group, pivot);
 
                     if (len == 4)
-                        allCandidates.Add(new MatchCandidate { Cells = group, Type = GemType.Knife_h, SpawnCell = spawnCell, Priority = MatchType.Knife });
+                        allCandidates.Add(new MatchCandidate { Cells = group, Type = GemType.RollingPin_h, SpawnCell = spawnCell, Priority = MatchType.Knife });
                     else if (len >= 5)
-                        allCandidates.Add(new MatchCandidate { Cells = group, Type = GemType.Honeycomb, SpawnCell = spawnCell, Priority = MatchType.Honeycomb });
+                        allCandidates.Add(new MatchCandidate { Cells = group, Type = GemType.Popcorn, SpawnCell = spawnCell, Priority = MatchType.Honeycomb });
 
                     if (len == 3)
                         allCandidates.Add(new MatchCandidate { Cells = group, Type = val, SpawnCell = spawnCell, Priority = MatchType.Normal });
@@ -112,9 +112,9 @@ public class MatchChecker : MonoBehaviour
                     Vector2Int spawnCell = ChooseSpawnCell(group, pivot);
 
                     if (len == 4)
-                        allCandidates.Add(new MatchCandidate { Cells = group, Type = GemType.Knife_v, SpawnCell = spawnCell, Priority = MatchType.Knife });
+                        allCandidates.Add(new MatchCandidate { Cells = group, Type = GemType.RollingPin_v, SpawnCell = spawnCell, Priority = MatchType.Knife });
                     else if (len >= 5)
-                        allCandidates.Add(new MatchCandidate { Cells = group, Type = GemType.Honeycomb, SpawnCell = spawnCell, Priority = MatchType.Honeycomb });
+                        allCandidates.Add(new MatchCandidate { Cells = group, Type = GemType.Popcorn, SpawnCell = spawnCell, Priority = MatchType.Honeycomb });
 
                     if (len == 3)
                         allCandidates.Add(new MatchCandidate { Cells = group, Type = val, SpawnCell = spawnCell, Priority = MatchType.Normal });
@@ -158,7 +158,7 @@ public class MatchChecker : MonoBehaviour
                 {
                     List<Vector2Int> group = new() { new Vector2Int(x, y) };
                     Vector2Int spawnCell = ChooseSpawnCell(group, new Vector2Int(x, y));
-                    allCandidates.Add(new MatchCandidate { Cells = group, Type = GemType.FruitBasket, SpawnCell = spawnCell, Priority = MatchType.FruitBasket });
+                    allCandidates.Add(new MatchCandidate { Cells = group, Type = GemType.DonutBox, SpawnCell = spawnCell, Priority = MatchType.FruitBasket });
                 }
             }
         }
@@ -244,8 +244,8 @@ public class MatchChecker : MonoBehaviour
 
     private bool IsMatchable(SCR.GemType block)
     {
-        return block == GemType.Carrot || block == GemType.Lemon || block == GemType.Grape ||
-               block == GemType.Strawberry || block == GemType.Apple || block == GemType.Cabbage;
+        return block == GemType.Lavender || block == GemType.Chocolate || block == GemType.Blueberry ||
+               block == GemType.Cheese || block == GemType.Strawberry || block == GemType.Sugar;
     }
 
     private Vector2Int ChooseSpawnCell(List<Vector2Int> groupCells, Vector2Int defaultPivot)

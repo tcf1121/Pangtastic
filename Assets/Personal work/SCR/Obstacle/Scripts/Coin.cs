@@ -6,7 +6,6 @@ namespace SCR
     {
         public override void Init(Vector3Int cell)
         {
-            base.Init(cell);
             _currentHP = 1;
             _score = 0;
             _canMove = true;
@@ -14,6 +13,7 @@ namespace SCR
             _isSpawn = true;
             _isSplashDamage = true;
             _blockType = GemType.Coin;
+            base.Init(cell);
         }
     }
 }

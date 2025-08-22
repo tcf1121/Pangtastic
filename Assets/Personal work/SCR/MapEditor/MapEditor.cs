@@ -11,13 +11,14 @@ namespace SCR
 {
     public class MapEditor : MonoBehaviour
     {
+        private BoardCell[] sortedItemsArray;
         [SerializeField] private InputField inputField;
 
         public GemType[,] dataToSave = new GemType[,]
     {
-        { GemType.Apple, GemType.Box, GemType.Cabbage },
-        { GemType.Apple, GemType.Apple, GemType.Apple },
-        { GemType.Apple, GemType.Apple, GemType.Apple }
+        { GemType.Strawberry, GemType.Cloche, GemType.Sugar },
+        { GemType.Strawberry, GemType.Strawberry, GemType.Strawberry },
+        { GemType.Strawberry, GemType.Strawberry, GemType.Strawberry }
     };
         string path = "Personal work/SCR/StageInfo.csv";
 
@@ -49,6 +50,28 @@ namespace SCR
                 }
                 return map;
             }
+        }
+
+        private void SortAndCreateArray()
+        {
+            // 1. 딕셔너리의 모든 키-값 쌍을 가져옵니다.
+            // 이 시점에도 순서는 보장되지 않습니다.
+            var unsortedPairs = Board.GetDictionary();
+
+            // 2. LINQ의 OrderBy를 사용하여 Vector3Int 키를 기준으로 정렬합니다.
+            // 사전식 순서: X -> Y -> Z 순으로 비교합니다.
+            // 그리고 .Select()를 사용하여 각 키-값 쌍에서 '값(Item)'만 추출합니다.
+            var sortedItemsList = unsortedPairs
+                .OrderBy(pair => pair.Key.x) // 1차: X 값으로 정렬
+                .ThenBy(pair => pair.Key.y) // 2차: X 값이 같으면 Y 값으로 정렬
+                .ThenBy(pair => pair.Key.z) // 3차: Y 값까지 같으면 Z 값으로 정렬
+                .Select(pair => pair.Value) // 정렬된 순서대로 'Item' 객체만 선택
+                .ToList(); // 결과를 List<Item>으로 변환
+
+            // 3. 리스트를 배열로 변환
+            sortedItemsArray = sortedItemsList.ToArray();
+
+            Debug.Log("딕셔너리를 정렬하여 배열로 생성 완료!");
         }
 
 
