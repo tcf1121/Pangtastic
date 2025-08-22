@@ -29,7 +29,6 @@ public class OrderItem : MonoBehaviour
             _rows[kv.Key] = row;
         }
     }
-
     public void UpdateRow(IngredientSO ing, int have, int need)
     {
         IngredientItem row;

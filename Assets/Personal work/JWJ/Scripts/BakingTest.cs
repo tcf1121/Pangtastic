@@ -13,7 +13,6 @@ public class BakingTest : MonoBehaviour
     [SerializeField] private Button grape;
     [SerializeField] private Button lemon;
 
-    [SerializeField] private CustomerOrder order;
     [SerializeField] private OrderStateController orderNew;
 
     private IngredientSO ingredient;
@@ -37,6 +36,11 @@ public class BakingTest : MonoBehaviour
         milk.onClick.AddListener(AddMilk);
         grape.onClick.AddListener(AddGrape);
         lemon.onClick.AddListener(AddLemon);
+
+        if(orderNew == null)
+        {
+            orderNew = FindObjectOfType<OrderStateController>();
+        }
     }
 
     private void AddStrawberry()
