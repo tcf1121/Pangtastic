@@ -6,23 +6,26 @@ using UnityEngine.UI;
 
 public class OrderUIPresenter : MonoBehaviour
 {
+    [Header("스크립트")]
     [SerializeField] private OrderStateController _orderState; // 주문 상태 컨트롤러
     [SerializeField] private CustomerOrderController _customerOrder;
 
-    [SerializeField] private GameObject orderItemPrefab;       // 주문 아이템 프리팹
-    [SerializeField] private Transform orderItemParent;        // UI 부모 
-
+    [Header("대사창")]
     [SerializeField] private GameObject _chatBox;
     [SerializeField] private TMP_Text _leftDialogue;
     [SerializeField] private float _dialogueDuration;
 
+    [Header("이모지")]
     [SerializeField] private GameObject _emojiBox;
     [SerializeField] private Image _emojiImage;
     [SerializeField] private Sprite _emojiHigh;
     [SerializeField] private Sprite _emojiMid;
     [SerializeField] private Sprite _emojiLow;
 
-    private List<OrderItem> _orderItems = new List<OrderItem>();
+    [Header("레시피 아이템 리스트")]
+    [SerializeField] private List<OrderItem> _recipeSlotList = new List<OrderItem>(); 
+
+    private List<OrderItem> _activeRecipeSlots = new List<OrderItem>();
 
     private Coroutine emojiCo;
     private Coroutine pairCo;
@@ -59,45 +62,46 @@ public class OrderUIPresenter : MonoBehaviour
         _customerOrder.OnSpecialCustomerSuccess -= OnSpecialOrderCompleted;
         _customerOrder.OnSpecialCustomerFail -= OnSpecialCustomerFail;
 
-        StopAllCoroutines(); //이거 필요함?
+        StopRunningCoroutines();
     }
 
     // 주문이 새로 시작될 때 UI 생성
     private void BuildOrderUI(List<Dictionary<IngredientSO, int>> requiredList, List<RecipeSO> recipes)
     {
-        ClearOrderUI();
+        ResetAllOrderSlots();
+        _activeRecipeSlots.Clear();
 
-        for (int i = 0; i < recipes.Count; i++)
+        for (int i = 0; i < recipes.Count; i++) // 레시피 수만큼 반복
         {
-            GameObject obj = Instantiate(orderItemPrefab, orderItemParent);
-            OrderItem orderItem = obj.GetComponent<OrderItem>();
+            //Debug.Log($"슬롯{i}개");
+            OrderItem slot = _recipeSlotList[i]; // i번째
 
-            // 메뉴 이미지 세팅
-            orderItem.SetMenu(recipes[i].FoodPic);
+            slot.gameObject.SetActive(true); // 슬롯 활성화
+            slot.SetMenu(recipes[i].FoodPic); // 메뉴 이미지 세팅
+            slot.BuildRows(requiredList[i]); //행 생성 
+            slot.RecipeComplete(false); // 클리어 표시 리셋
 
-            // 요구 재료 행들 생성
-            orderItem.BuildRows(requiredList[i]);
-
-            _orderItems.Add(orderItem);
+            _activeRecipeSlots.Add(slot); // 활성 목록에 추가
         }
     }
 
-    private void OnIngredientProgress(int recipeIndex, IngredientSO ing, int have, int need)
+    private void OnIngredientProgress(int recipeIndex, IngredientSO ing, int have, int need) // 진행도 업데이트
     {
-        if (recipeIndex >= 0 && recipeIndex < _orderItems.Count)
+        if (recipeIndex >= 0 && recipeIndex < _activeRecipeSlots.Count) //방어코드
         {
-            _orderItems[recipeIndex].UpdateRow(ing, have, need);
-        }
-    }
-    private void OnRecipeCompleted(int recipeIndex) 
-    {
-        if (recipeIndex >= 0 && recipeIndex < _orderItems.Count)
-        {
-            _orderItems[recipeIndex].RecipeComplete(true);
+            _activeRecipeSlots[recipeIndex].UpdateRow(ing, have, need);
         }
     }
 
-    private void OnOrderCompleted(CustomerSO curCustomer, float percent)
+    private void OnRecipeCompleted(int recipeIndex) //레시피 성공
+    {
+        if (recipeIndex >= 0 && recipeIndex < _activeRecipeSlots.Count)
+        {
+            _activeRecipeSlots[recipeIndex].RecipeComplete(true); //클리어 표시
+        }
+    }
+
+    private void OnOrderCompleted(CustomerSO curCustomer, float percent) //주문 성공
     {
         if (curCustomer.Type == CustomerType.Special) //스페셜 손님이면 중간주문은 이모지만
         {
@@ -114,7 +118,7 @@ public class OrderUIPresenter : MonoBehaviour
         StartEmojiAndDialogue(averagePercent, curCustomer);
     }
 
-    private void OnOrderTimeout(CustomerSO curCustomer)
+    private void OnOrderTimeout(CustomerSO curCustomer) //주문 실패
     {
         if (curCustomer.Type == CustomerType.Special)
         {
@@ -131,7 +135,7 @@ public class OrderUIPresenter : MonoBehaviour
         StartEmojiAndDialogue(0f, curCustomer);
     }
 
-    private void StartEmojiOnly(float percent)
+    private void StartEmojiOnly(float percent) //이모지 코루틴 시작
     {
         if (emojiCo != null) // 혹시 코루틴 도는동안 다음 재료가 들어올 수도 있으니 코루틴 중복 호출 방지
         {
@@ -141,14 +145,14 @@ public class OrderUIPresenter : MonoBehaviour
         emojiCo = StartCoroutine(EmojiRoutine(percent));
     }
 
-    private void StartEmojiAndDialogue(float percent, CustomerSO curCustomer)
+    private void StartEmojiAndDialogue(float percent, CustomerSO curCustomer) //이모지 대사 코루틴 시작
     {
         StopRunningCoroutines(); //돌고있는 코루틴있으면 정리
         pairCo = StartCoroutine(PairRoutine(curCustomer, percent));
     }
 
 
-    private void StopRunningCoroutines()
+    private void StopRunningCoroutines() //코루틴 정지
     {
         if (emojiCo != null)
         {
@@ -162,7 +166,7 @@ public class OrderUIPresenter : MonoBehaviour
         }
     }
 
-    private IEnumerator PairRoutine(CustomerSO curCustomer, float percent)
+    private IEnumerator PairRoutine(CustomerSO curCustomer, float percent) //이모지 + 대사 코루틴
     {
         if (percent <= 0f)
         {
@@ -187,7 +191,7 @@ public class OrderUIPresenter : MonoBehaviour
         _chatBox.gameObject.SetActive(false);
     }
 
-    private IEnumerator EmojiRoutine(float percent)
+    private IEnumerator EmojiRoutine(float percent) //이모지 코루틴
     {
         _emojiImage.sprite = GetEmojiSprite(percent);
         _emojiBox.gameObject.SetActive(true);
@@ -197,7 +201,7 @@ public class OrderUIPresenter : MonoBehaviour
     }
 
 
-    private Sprite GetEmojiSprite(float percent)
+    private Sprite GetEmojiSprite(float percent) //필요한 이모지 이미지 넣기
     {
         if (percent <= 0f)
         {
@@ -213,12 +217,14 @@ public class OrderUIPresenter : MonoBehaviour
         }
     }
 
-    private void ClearOrderUI() //ui프리팹 파괴. 자식부터 지움
+    private void ResetAllOrderSlots() // 슬롯 초기화
     {
-        for (int i = orderItemParent.childCount - 1; i >= 0; i--)
+        for (int i = 0; i < _recipeSlotList.Count; i++)
         {
-            Destroy(orderItemParent.GetChild(i).gameObject);
+            OrderItem slot = _recipeSlotList[i];
+            slot.ResetUI();
+
+            slot.gameObject.SetActive(false);
         }
-        _orderItems.Clear();
     }
 }
