@@ -196,14 +196,14 @@ namespace KDJ
                             }
                         }
                     }
-                    else if (x > 0 && BlockArray[y, x - 1] == null && BlockArray[y + 1, x].GemType != GemType.Box)
-                    {
-                        BlockArray[y, x - 1] = BlockArray[y + 1, x];
-                        BlockArray[y + 1, x] = null;
-                        BlockArray[y, x - 1].BlockInstance.transform.position = new Vector3(
-                            BlockArray[y, x - 1].BlockInstance.transform.position.x - 1,
-                            BlockArray[y, x - 1].BlockInstance.transform.position.y - 1, 0);
-                    }
+                    // else if (x > 0 && BlockArray[y, x - 1] == null && BlockArray[y + 1, x].GemType != GemType.Box)
+                    // {
+                    //     BlockArray[y, x - 1] = BlockArray[y + 1, x];
+                    //     BlockArray[y + 1, x] = null;
+                    //     BlockArray[y, x - 1].BlockInstance.transform.position = new Vector3(
+                    //         BlockArray[y, x - 1].BlockInstance.transform.position.x - 1,
+                    //         BlockArray[y, x - 1].BlockInstance.transform.position.y - 1, 0);
+                    // }
 
 
                 }
