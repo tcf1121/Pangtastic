@@ -7,25 +7,26 @@ namespace SCR
 {
     public enum GemType
     {
-        Carrot,
-        Lemon,
-        Grape,
+        Lavender,
+        Chocolate,
+        Blueberry,
+        Cheese,
         Strawberry,
-        Apple,
-        Cabbage,
-        Coffee,
-        Knife_v,
-        Knife_h,
+        Sugar,
+        RollingPin_v,
+        RollingPin_h,
         Milk,
-        Honeycomb,
-        FruitBasket,
-        Box,
+        Popcorn,
+        DonutBox,
+        Cloche,
         Syrup,
         Coin,
         GiftBox,
         Egg,
         CatStatues,
-        Dirt
+        Ice,
+        Dough,
+        Empty
     }
 
     [DefaultExecutionOrder(-9999)]
@@ -37,7 +38,7 @@ namespace SCR
         public Dictionary<Vector3Int, GemType> CellType = new();
         public Dictionary<Vector3Int, GemType> CellNonCollider = new();
         public Dictionary<Vector3Int, BoardCell> CellContent = new();
-
+        [SerializeField] private PrefabList prefabList;
 
         private Grid _grid;
 
@@ -70,7 +71,7 @@ namespace SCR
             instance.SpawnPoint.Add(pos);
         }
 
-        // 블록 추가
+        // 장애 블록 추가
         public static void AddObstacle(Vector3Int pos, Obstacle obstacle)
         {
             if (instance == null)
@@ -78,23 +79,36 @@ namespace SCR
                 instance = GameObject.Find("Grid").GetComponent<Board>();
                 instance.GetReference();
             }
-            AddGem(pos, obstacle.GetBlockType());
             if (!instance.CellContent.ContainsKey(pos)) AddCell(pos);
-            instance.CellContent[pos].Obstacle = obstacle;
+            instance.CellContent[pos].SetObstacle(pos, obstacle);
         }
 
-        // 블록 추가
-        public static void AddGem(Vector3Int pos, GemType gemType)
+        public static void SetCatStatues(Vector3Int pos)
+        {
+            Vector3Int fourpos;
+            Obstacle obstacle = instance.CellContent[pos].GetCatStatues().GetComponent<Obstacle>();
+            fourpos = new Vector3Int(pos.x + 1, pos.y);
+            if (!instance.CellContent.ContainsKey(fourpos)) AddCell(fourpos);
+            instance.CellContent[fourpos].SetObstacle(fourpos, obstacle, true);
+            fourpos = new Vector3Int(pos.x + 1, pos.y + 1);
+            if (!instance.CellContent.ContainsKey(fourpos)) AddCell(fourpos);
+            instance.CellContent[fourpos].SetObstacle(fourpos, obstacle, true);
+            fourpos = new Vector3Int(pos.x, pos.y + 1);
+            if (!instance.CellContent.ContainsKey(fourpos)) AddCell(fourpos);
+            instance.CellContent[fourpos].SetObstacle(fourpos, obstacle, true);
+        }
+
+
+        // 도넛 추가
+        public static void AddDonut(Vector3Int pos, Donut donut)
         {
             if (instance == null)
             {
                 instance = GameObject.Find("Grid").GetComponent<Board>();
                 instance.GetReference();
             }
-            if (gemType == GemType.Dirt || gemType == GemType.Syrup)
-                instance.CellNonCollider.Add(pos, gemType);
-            else
-                instance.CellType.Add(pos, gemType);
+            if (!instance.CellContent.ContainsKey(pos)) AddCell(pos);
+            instance.CellContent[pos].SetDonut(pos, donut);
         }
 
         // 블록 삭제
@@ -109,19 +123,19 @@ namespace SCR
             instance.CellContent[pos].RemoveCell();
         }
 
+        // 블록 삭제
+        public static GameObject GetPrefab(GemType gemType)
+        {
+            return instance.prefabList.GemPrefab[(int)gemType];
+        }
+
         // 움직일 수 있는 블럭인지 확인
         public static bool IsCanMove(Vector3Int pos)
         {
             if (!instance.CellType.ContainsKey(pos))
                 return false;
 
-            if (instance.CellType[pos] == GemType.Syrup ||
-                instance.CellType[pos] == GemType.CatStatues ||
-                instance.CellType[pos] == GemType.Dirt
-                /*|| instance.CellContent[pos]가 아이스 상태일때*/ )
-                return false;
-
-            else return true;
+            return instance.CellContent[pos].CanMove();
         }
         // 현재 공간이 비어있는지 확인 후
         public static void IsEmpty(Vector3Int pos)
@@ -162,14 +176,9 @@ namespace SCR
             instance.CellType.Add(moveToPos, value);
         }
 
-        public void SortCell()
+        public static Dictionary<Vector3Int, BoardCell> GetDictionary()
         {
-            var keyDescendingResult = instance.CellType.OrderBy(x => x.Key);
-            foreach (KeyValuePair<Vector3Int, GemType> Cell in keyDescendingResult)
-            {
-                Debug.Log(Cell.Value);
-            }
-
+            return instance.CellContent;
         }
 
 

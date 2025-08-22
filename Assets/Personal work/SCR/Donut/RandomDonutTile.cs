@@ -1,14 +1,14 @@
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Tilemaps;
 
 namespace SCR
 {
-    [CreateAssetMenu(fileName = "ObstacleTile", menuName = "Match/Tile/Obstacle Tile")]
-    public class ObstacleTile : TileBase
+    [CreateAssetMenu(fileName = "RandomDonutTile", menuName = "Match/Tile/Random Donut Tile")]
+    public class RandomDonutTile : TileBase
     {
         public Sprite PreviewEditorSprite;
         public Color PreviewEditorColor;
-        public Obstacle ObstaclePrefab;
 
         public override void GetTileData(Vector3Int position, ITilemap tilemap, ref TileData tileData)
         {
@@ -24,9 +24,7 @@ namespace SCR
 #endif
 
 
-            ObstaclePrefab.Init(position);
-
-
+            Board.AddDonut(position, null);
 
             return true;
         }

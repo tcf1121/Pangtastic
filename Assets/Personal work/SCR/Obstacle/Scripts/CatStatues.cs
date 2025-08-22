@@ -6,11 +6,11 @@ namespace SCR
     public class CatStatues : Obstacle
     {
 
-        [SerializeField] private List<Vector3Int> _fourCellPos = new();
+
 
         public override void Init(Vector3Int cell)
         {
-            base.Init(cell);
+
             _fourCellPos.Add(new Vector3Int(cell.x + 1, cell.y));
             _fourCellPos.Add(new Vector3Int(cell.x + 1, cell.y + 1));
             _fourCellPos.Add(new Vector3Int(cell.x, cell.y + 1));
@@ -22,9 +22,10 @@ namespace SCR
             _isSplashDamage = true;
             transform.position = new Vector3(cell.x + 1, cell.y + 1, 0);
             _blockType = GemType.CatStatues;
-            Board.AddObstacle(_fourCellPos[0], this);
-            Board.AddObstacle(_fourCellPos[1], this);
-            Board.AddObstacle(_fourCellPos[2], this);
+            _fourCellPos = new();
+
+            base.Init(cell);
+            Board.SetCatStatues(cell);
         }
     }
 }

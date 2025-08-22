@@ -6,13 +6,13 @@ namespace SCR
     {
         public override void Init(Vector3Int cell)
         {
-            base.Init(cell);
             _currentHP = 2;
             _score = 10;
             _canMove = true;
             _onCollider = true;
             _isSpawn = false;
             _blockType = GemType.Egg;
+            base.Init(cell);
         }
 
         public override void Clear()

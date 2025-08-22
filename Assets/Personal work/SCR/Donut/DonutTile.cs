@@ -3,12 +3,12 @@ using UnityEngine.Tilemaps;
 
 namespace SCR
 {
-    [CreateAssetMenu(fileName = "ObstacleTile", menuName = "Match/Tile/Obstacle Tile")]
-    public class ObstacleTile : TileBase
+    [CreateAssetMenu(fileName = "DonutTile", menuName = "Match/Tile/Donut Tile")]
+    public class DonutTile : TileBase
     {
         public Sprite PreviewEditorSprite;
         public Color PreviewEditorColor;
-        public Obstacle ObstaclePrefab;
+        public Donut DonutPrefab;
 
         public override void GetTileData(Vector3Int position, ITilemap tilemap, ref TileData tileData)
         {
@@ -24,9 +24,7 @@ namespace SCR
 #endif
 
 
-            ObstaclePrefab.Init(position);
-
-
+            Board.AddDonut(position, DonutPrefab);
 
             return true;
         }
