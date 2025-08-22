@@ -8,6 +8,8 @@ public class OrderStateController : MonoBehaviour
     public event Action<List<Dictionary<IngredientSO, int>>, List<RecipeSO>> OnOrderStarted; //주문 시작 시 요구목록/레시피 전달
     public event Action<int, IngredientSO, int, int> OnIngredientProgress; //레시피 인덱스, 재료, 현재수, 필요수
     public event Action<int> OnRecipeCompleted;
+
+    //노멀, 유니크 손님 성공/실패 이벤트
     public event Action<CustomerSO, float> OnOrderCompleted;
     public event Action<CustomerSO> OnOrderTimeout; //레시피 인덱스 //유지
 
@@ -39,7 +41,7 @@ public class OrderStateController : MonoBehaviour
 
         foreach (RecipeSO recipe in _curRecipes) //레시피들을 순회
         {
-            var required = RecipeRuleService.ApplyMultipliers(recipe, _curStage); //스테이지 보정 적용된 최종값
+            var required = RecipeRule.ApplyMultipliers(recipe, _curStage); //스테이지 보정 적용된 최종값
             var reqCopy = new Dictionary<IngredientSO, int>(); //내부 보관용 복사 딕셔너리 생성
 
             foreach (var kv in required) //요구 목록을 순회
@@ -118,7 +120,7 @@ public class OrderStateController : MonoBehaviour
 
                     float remainPercent = (_curPatience / _maxPatience) * 100; //성공한 인내심
 
-                    OnOrderCompleted?.Invoke(_curCustomer ,remainPercent); //주문 완료 알림(남은 인내심 포함). 보상로직으로 연동해야함
+                    OnOrderCompleted?.Invoke(_curCustomer ,remainPercent);
                 }
             }
             break; //재료 반영 끝
