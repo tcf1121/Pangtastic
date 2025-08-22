@@ -143,7 +143,7 @@ public class CustomerOrderController : MonoBehaviour
 
     private void EndSpecialCustomer() //호출될일 없을것같긴한데 혹시몰라서 넣음
     {
-        Debug.Log("이 로그가 뜨면 확인 해야함");
+        Debug.Log("이 로그가 뜨면 왜 떴는지 확인 해야함");
         if (_specialSuccess >= _specialNeed)
         {
             float averagePercent = _specialPatientSum / (_specialFail + _specialSuccess);
