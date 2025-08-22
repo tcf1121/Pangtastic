@@ -140,15 +140,15 @@ namespace KDJ
             {
                 for (int y = 0; y < BlockPlate.BlockPlateHeight; y++)
                 {
-                    if (BlockArray[y, x] != null && BlockArray[y, x].GemType == GemType.Box) continue; // 6번 블럭은 건너뜀
+                    if (BlockArray[y, x] != null && BlockArray[y, x].GemType == GemType.Cloche) continue; // 6번 블럭은 건너뜀
 
                     if (BlockArray[y, x] == null && BlockPlate.BlockPlateArray[y, x])
                     {
                         if (BlockArray[y + 1, x] != null)
                         {
-                            if (BlockArray[y + 1, x].GemType == GemType.Box)
+                            if (BlockArray[y + 1, x].GemType == GemType.Cloche)
                             {
-                                if (BlockPlate.BlockPlateArray[y + 1, x - 1] && BlockArray[y + 1, x - 1] != null && BlockArray[y + 1, x - 1].GemType != GemType.Box)
+                                if (BlockPlate.BlockPlateArray[y + 1, x - 1] && BlockArray[y + 1, x - 1] != null && BlockArray[y + 1, x - 1].GemType != GemType.Cloche)
                                 {
                                     // 오른쪽 위에 블럭이 있는 경우
                                     BlockArray[y, x] = BlockArray[y + 1, x - 1];
@@ -157,7 +157,7 @@ namespace KDJ
                                         BlockArray[y, x].BlockInstance.transform.position.x + 1,
                                         BlockArray[y, x].BlockInstance.transform.position.y - 1, 0);
                                 }
-                                else if (BlockPlate.BlockPlateArray[y + 1, x + 1] && BlockArray[y + 1, x + 1] != null && BlockArray[y + 1, x + 1].GemType != GemType.Box)
+                                else if (BlockPlate.BlockPlateArray[y + 1, x + 1] && BlockArray[y + 1, x + 1] != null && BlockArray[y + 1, x + 1].GemType != GemType.Cloche)
                                 {
                                     // 오른쪽 위에 없고 왼쪽 위에 있는 경우
                                     BlockArray[y, x] = BlockArray[y + 1, x + 1];

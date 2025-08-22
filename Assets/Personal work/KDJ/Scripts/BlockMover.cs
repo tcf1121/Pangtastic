@@ -45,7 +45,7 @@ public class BlockMover : MonoBehaviour
         Vector2Int endGrid = WorldToGrid(EndPos);
         EndBlockPos = endGrid; // 끝 위치 저장
 
-        if (boardManager.Spawner.BlockArray[startGrid.y, startGrid.x].GemType == GemType.Box || boardManager.Spawner.BlockArray[endGrid.y, endGrid.x].GemType == GemType.Box) return;
+        if (boardManager.Spawner.BlockArray[startGrid.y, startGrid.x].GemType == GemType.Cloche || boardManager.Spawner.BlockArray[endGrid.y, endGrid.x].GemType == GemType.Cloche) return;
 
         // 이후 대각으로 가는 경우에 대한 예외처리 추가 필요
         Block tempBlock = boardManager.Spawner.BlockArray[endGrid.y, endGrid.x];
@@ -64,7 +64,7 @@ public class BlockMover : MonoBehaviour
     {
         // 블록을 원래 위치로 되돌리는 로직
         // 블럭들의 시작 위치와 끝 위치를 저장해뒀기에 그걸 사용
-        if (boardManager.Spawner.BlockArray[StartBlockPos.y, StartBlockPos.x].GemType == GemType.Box || boardManager.Spawner.BlockArray[EndBlockPos.y, EndBlockPos.x].GemType == GemType.Box) return;
+        if (boardManager.Spawner.BlockArray[StartBlockPos.y, StartBlockPos.x].GemType == GemType.Cloche || boardManager.Spawner.BlockArray[EndBlockPos.y, EndBlockPos.x].GemType == GemType.Cloche) return;
 
         if (boardManager.Spawner.BlockPlate.BlockPlateHeight < StartPos.y || boardManager.Spawner.BlockPlate.BlockPlateWidth < StartPos.x || boardManager.Spawner.BlockPlate.BlockPlateHeight < EndPos.y || boardManager.Spawner.BlockPlate.BlockPlateWidth < EndPos.x)
         {
