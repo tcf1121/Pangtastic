@@ -27,6 +27,8 @@ namespace KDJ.States
         public void OnExit(BoardManager boardManager)
         {
             Debug.Log("블럭 매칭 상태 종료");
+            boardManager.BlockMover.StartPos = Vector2.zero; // 초기 시작 위치 설정
+            boardManager.BlockMover.EndPos = Vector2.zero; // 초기 종료 위치 설정
         }
 
         private IEnumerator MatchingCoroutine(BoardManager boardManager)

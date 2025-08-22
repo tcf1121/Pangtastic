@@ -28,13 +28,9 @@ public class BoardMatchChecker : MonoBehaviour
 
             for (int x = 0; x < boardManager.Spawner.BlockPlate.BlockPlateWidth; x++)
             {
-                Debug.Log($"x축 매치 체크 인덱스: {x}");
-
                 if (boardManager.Spawner.BlockArray[y, x] != null)
                 {
                     curGemType = boardManager.Spawner.BlockArray[y, x].GemType;
-
-                    Debug.Log($"x축 현재 GemType: {curGemType}, 이전 GemType: {prevGemType}");
 
                     if (curGemType == prevGemType)
                     {
@@ -70,13 +66,10 @@ public class BoardMatchChecker : MonoBehaviour
 
             for (int y = 0; y < boardManager.Spawner.BlockPlate.BlockPlateHeight; y++)
             {
-                Debug.Log($"y축 매치 체크 인덱스: {y}");
 
                 if (boardManager.Spawner.BlockArray[y, x] != null)
                 {
                     curGemType = boardManager.Spawner.BlockArray[y, x].GemType;
-
-                    Debug.Log($"y축 현재 GemType: {curGemType}, 이전 GemType: {prevGemType}");
 
                     if (curGemType == prevGemType)
                     {
@@ -123,13 +116,10 @@ public class BoardMatchChecker : MonoBehaviour
 
             for (int x = 0; x < boardManager.Spawner.BlockPlate.BlockPlateWidth; x++)
             {
-                Debug.Log($"x축 매치 체크 인덱스: {x}");
 
                 if (boardManager.Spawner.BlockArray[y, x] != null)
                 {
                     curGemType = boardManager.Spawner.BlockArray[y, x].GemType;
-
-                    Debug.Log($"x축 현재 GemType: {curGemType}, 이전 GemType: {prevGemType}");
 
                     if (curGemType == prevGemType)
                     {
@@ -164,13 +154,9 @@ public class BoardMatchChecker : MonoBehaviour
 
             for (int y = 0; y < boardManager.Spawner.BlockPlate.BlockPlateHeight; y++)
             {
-                Debug.Log($"y축 매치 체크 인덱스: {y}");
-
                 if (boardManager.Spawner.BlockArray[y, x] != null)
                 {
                     curGemType = boardManager.Spawner.BlockArray[y, x].GemType;
-
-                    Debug.Log($"y축 현재 GemType: {curGemType}, 이전 GemType: {prevGemType}");
 
                     if (curGemType == prevGemType)
                     {

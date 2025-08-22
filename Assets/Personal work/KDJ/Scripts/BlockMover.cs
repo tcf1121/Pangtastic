@@ -2,6 +2,7 @@ using KDJ;
 using SCR;
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class BlockMover : MonoBehaviour
@@ -26,6 +27,12 @@ public class BlockMover : MonoBehaviour
 
         StartPos += new Vector2(boardManager.Spawner.BlockPlate.BlockPlateWidth / 2, boardManager.Spawner.BlockPlate.BlockPlateHeight / 2);
         EndPos += new Vector2(boardManager.Spawner.BlockPlate.BlockPlateWidth / 2, boardManager.Spawner.BlockPlate.BlockPlateHeight / 2);
+
+        if (boardManager.Spawner.BlockPlate.BlockPlateHeight < StartPos.y || boardManager.Spawner.BlockPlate.BlockPlateWidth < StartPos.x || boardManager.Spawner.BlockPlate.BlockPlateHeight < EndPos.y || boardManager.Spawner.BlockPlate.BlockPlateWidth < EndPos.x)
+        {
+            Debug.Log("블록이 보드 영역을 벗어났습니다.");
+            return;
+        }
 
         // StartPos와 EndPos를 이용하여 블록을 이동하는 로직 구현
         Vector2Int startGrid = WorldToGrid(StartPos);
@@ -58,6 +65,12 @@ public class BlockMover : MonoBehaviour
         // 블록을 원래 위치로 되돌리는 로직
         // 블럭들의 시작 위치와 끝 위치를 저장해뒀기에 그걸 사용
         if (boardManager.Spawner.BlockArray[StartBlockPos.y, StartBlockPos.x].GemType == GemType.Box || boardManager.Spawner.BlockArray[EndBlockPos.y, EndBlockPos.x].GemType == GemType.Box) return;
+
+        if (boardManager.Spawner.BlockPlate.BlockPlateHeight < StartPos.y || boardManager.Spawner.BlockPlate.BlockPlateWidth < StartPos.x || boardManager.Spawner.BlockPlate.BlockPlateHeight < EndPos.y || boardManager.Spawner.BlockPlate.BlockPlateWidth < EndPos.x)
+        {
+            Debug.Log("블록이 보드 영역을 벗어났습니다.");
+            return;
+        }
 
         Block tempBlock = boardManager.Spawner.BlockArray[EndBlockPos.y, EndBlockPos.x];
         boardManager.Spawner.BlockArray[EndBlockPos.y, EndBlockPos.x] = boardManager.Spawner.BlockArray[StartBlockPos.y, StartBlockPos.x];
