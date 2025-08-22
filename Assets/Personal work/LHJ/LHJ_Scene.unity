@@ -270,6 +270,7 @@ GameObject:
   - component: {fileID: 1111763846}
   - component: {fileID: 1111763845}
   - component: {fileID: 1111763844}
+  - component: {fileID: 1111763847}
   m_Layer: 0
   m_Name: Grid
   m_TagString: Untagged
@@ -289,11 +290,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 032111165790b054197de3437cdac533, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _blockPrefabs:
-  - {fileID: 357163143499718715, guid: 2e25cb92767521749bb30bf05c915ccd, type: 3}
-  - {fileID: 9006276583788223286, guid: 5873a7c44d23ce14da39fa54426c9310, type: 3}
-  - {fileID: 734591683590678352, guid: 2ee94707ab3e0804dad74768c009adfe, type: 3}
-  - {fileID: 4107551491749965541, guid: c830bd59c47de5d45b568a9d37e0f79c, type: 3}
+  _prefabPairs:
+  - Type: 0
+    Prefab: {fileID: 357163143499718715, guid: 2e25cb92767521749bb30bf05c915ccd, type: 3}
+  - Type: 1
+    Prefab: {fileID: 9006276583788223286, guid: 5873a7c44d23ce14da39fa54426c9310, type: 3}
+  - Type: 2
+    Prefab: {fileID: 734591683590678352, guid: 2ee94707ab3e0804dad74768c009adfe, type: 3}
+  - Type: 12
+    Prefab: {fileID: 4107551491749965541, guid: c830bd59c47de5d45b568a9d37e0f79c, type: 3}
   _matchChecker: {fileID: 911964333}
   _dragThreshold: 30
 --- !u!156049354 &1111763845
@@ -324,6 +329,19 @@ Transform:
   - {fileID: 1256946231}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1111763847
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1111763843}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f5b57417d84cbf648be5a13019b73383, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  SpawnPoint: []
 --- !u!1 &1256946230
 GameObject:
   m_ObjectHideFlags: 0

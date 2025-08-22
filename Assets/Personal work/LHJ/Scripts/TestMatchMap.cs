@@ -4,9 +4,16 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Tilemaps;
 
+[System.Serializable]
+public class GemPrefabPair
+{
+    public SCR.GemType Type;
+    public GameObject Prefab;
+}
+
 public class TestMatchMap : MonoBehaviour
 {
-    [SerializeField] private List<GameObject> _blockPrefabs;
+    [SerializeField] private List<GemPrefabPair> _prefabPairs;
 
     [SerializeField]
     private SCR.GemType[,] _mapArray = new SCR.GemType[,]
@@ -14,7 +21,7 @@ public class TestMatchMap : MonoBehaviour
         { SCR.GemType.Carrot, SCR.GemType.Lemon, SCR.GemType.Lemon, SCR.GemType.Grape, SCR.GemType.Grape, SCR.GemType.Lemon },
         { SCR.GemType.Carrot, SCR.GemType.Lemon, SCR.GemType.Lemon, SCR.GemType.Grape, SCR.GemType.Lemon, SCR.GemType.Grape },
         { SCR.GemType.Grape,  SCR.GemType.Grape, SCR.GemType.Carrot, SCR.GemType.Lemon, SCR.GemType.Grape, SCR.GemType.Grape },
-        { SCR.GemType.Carrot, SCR.GemType.Lemon, SCR.GemType.Lemon, SCR.GemType.Carrot, SCR.GemType.Lemon, SCR.GemType.Lemon },
+        { SCR.GemType.Carrot, SCR.GemType.Lemon, SCR.GemType.Lemon, SCR.GemType.Box,   SCR.GemType.Lemon, SCR.GemType.Lemon },
         { SCR.GemType.Carrot, SCR.GemType.Grape, SCR.GemType.Lemon, SCR.GemType.Lemon, SCR.GemType.Carrot, SCR.GemType.Carrot },
         { SCR.GemType.Grape,  SCR.GemType.Grape, SCR.GemType.Carrot, SCR.GemType.Grape, SCR.GemType.Grape, SCR.GemType.Carrot },
     };
@@ -29,11 +36,27 @@ public class TestMatchMap : MonoBehaviour
     private int _width;
     private int _height;
 
+    // 내부 매핑 딕셔너리
+    private Dictionary<SCR.GemType, GameObject> _prefabMap;
+
     private void Start()
     {
         _width = _mapArray.GetLength(1);
         _height = _mapArray.GetLength(0);
         _blockObjects = new GameObject[_height, _width];
+
+        // 딕셔너리 구성
+        _prefabMap = new Dictionary<SCR.GemType, GameObject>();
+        for (int i = 0; i < _prefabPairs.Count; i++)
+        {
+            SCR.GemType key = _prefabPairs[i].Type;
+            GameObject val = _prefabPairs[i].Prefab;
+
+            if (val != null && !_prefabMap.ContainsKey(key))
+            {
+                _prefabMap.Add(key, val);
+            }
+        }
 
         SpawnMap();
     }
@@ -55,9 +78,11 @@ public class TestMatchMap : MonoBehaviour
 
             if (delta.magnitude >= _dragThreshold)
             {
-                Vector2Int dir = (Mathf.Abs(delta.x) > Mathf.Abs(delta.y))
-                    ? (delta.x > 0 ? Vector2Int.right : Vector2Int.left)
-                    : (delta.y > 0 ? Vector2Int.up : Vector2Int.down);
+                Vector2Int dir;
+                if (Mathf.Abs(delta.x) > Mathf.Abs(delta.y))
+                    dir = delta.x > 0 ? Vector2Int.right : Vector2Int.left;
+                else
+                    dir = delta.y > 0 ? Vector2Int.up : Vector2Int.down;
 
                 Vector2Int from = _dragStartPos.Value;
                 Vector2Int to = from + dir;
@@ -70,8 +95,9 @@ public class TestMatchMap : MonoBehaviour
                     if (fromGem != null && toGem != null)
                     {
                         SCR.GemType[,] tempMap = (SCR.GemType[,])_mapArray.Clone();
-                        (tempMap[from.y, from.x], tempMap[to.y, to.x]) =
-                            (tempMap[to.y, to.x], tempMap[from.y, from.x]);
+                        SCR.GemType temp = tempMap[from.y, from.x];
+                        tempMap[from.y, from.x] = tempMap[to.y, to.x];
+                        tempMap[to.y, to.x] = temp;
 
                         if (_matchChecker.HasAnyMatch(tempMap))
                         {
@@ -97,18 +123,25 @@ public class TestMatchMap : MonoBehaviour
             for (int x = 0; x < _width; x++)
             {
                 SCR.GemType blockType = _mapArray[y, x];
-                int id = (int)blockType;
 
                 Vector3 pos = new Vector3(
-                    x - _width / 2 + 0.5f,
-                    y - _height / 2 + 0.5f,
-                    0
+                    x - _width / 2f + 0.5f,
+                    y - _height / 2f + 0.5f,
+                    0f
                 );
 
-                if (id < _blockPrefabs.Count && _blockPrefabs[id] != null)
+                GameObject prefab;
+                if (_prefabMap.TryGetValue(blockType, out prefab) && prefab != null)
                 {
-                    GameObject obj = Instantiate(_blockPrefabs[id], pos, Quaternion.identity, transform);
+                    GameObject obj = Instantiate(prefab, pos, Quaternion.identity, transform);
                     _blockObjects[y, x] = obj;
+
+                    var obstacle = obj.GetComponent<SCR.Obstacle>();
+                    if (obstacle != null)
+                    {
+                        Vector3Int cell = new Vector3Int(x - _width / 2, y - _height / 2, 0);
+                        obstacle.Init(cell);
+                    }
 
                     Gem gem = obj.GetComponent<Gem>();
                     if (gem != null)
@@ -125,12 +158,14 @@ public class TestMatchMap : MonoBehaviour
         Vector2Int posA = a.GetPosition();
         Vector2Int posB = b.GetPosition();
 
-        (_mapArray[posA.y, posA.x], _mapArray[posB.y, posB.x]) =
-            (_mapArray[posB.y, posB.x], _mapArray[posA.y, posA.x]);
+        SCR.GemType tmp = _mapArray[posA.y, posA.x];
+        _mapArray[posA.y, posA.x] = _mapArray[posB.y, posB.x];
+        _mapArray[posB.y, posB.x] = tmp;
 
         GameObject objA = _blockObjects[posA.y, posA.x];
         GameObject objB = _blockObjects[posB.y, posB.x];
-        (_blockObjects[posA.y, posA.x], _blockObjects[posB.y, posB.x]) = (objB, objA);
+        _blockObjects[posA.y, posA.x] = objB;
+        _blockObjects[posB.y, posB.x] = objA;
 
         Vector3 tempPos = objA.transform.position;
         objA.transform.position = objB.transform.position;
@@ -142,8 +177,8 @@ public class TestMatchMap : MonoBehaviour
 
     private Vector2Int WorldToGrid(Vector3 worldPos)
     {
-        int x = Mathf.FloorToInt(worldPos.x + _width / 2);
-        int y = Mathf.FloorToInt(worldPos.y + _height / 2);
+        int x = Mathf.FloorToInt(worldPos.x + _width / 2f);
+        int y = Mathf.FloorToInt(worldPos.y + _height / 2f);
         return new Vector2Int(x, y);
     }
 
