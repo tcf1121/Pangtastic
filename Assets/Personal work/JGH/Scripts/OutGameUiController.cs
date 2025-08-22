@@ -18,8 +18,9 @@ public class OutGameUiController : MonoBehaviour
         // 배경음, 효과음 설정에 따라 초기 볼륨 조정 :: E
         
         // 배경음 정지
-        AudioController.Instance.StopBGM();
+        // AudioController.Instance.StopBGM();
         
+        AudioController.Instance.PlayBGMByName("OutGameMusic");
         
         // 게임 클리어 후 계속하기 누르면 로비 화면으로 넘어오고 게임 시작 화면 활성화 :: S
         if (InGameUiController.needStartSetting)
@@ -37,9 +38,16 @@ public class OutGameUiController : MonoBehaviour
         // 게임 클리어 후 계속하기 누르면 로비 화면으로 넘어오고 게임 시작 화면 활성화 :: E
     }
 
-    public void ChangeInGameScene()
+    public void ChangeInGameScene(int num)
     {
-        SceneManager.LoadScene("JGH_InGameUI");
+        if (HeartSystem.Instance.TryUseHearts(num))
+        {
+            SceneManager.LoadScene("JGH_InGameUI");
+        }
+        else
+        {
+            // TODO: 하트 부족 시 UI 띄우기
+        }
     }
 
     public void SfxPlayStartButton()
