@@ -38,6 +38,12 @@ public class CoinSystem : MonoBehaviour
         // UI 갱신
         UpdateCoinUI();
     }
+    
+    public void SetCoinText(TMP_Text text)
+    {
+        _coinText = text;
+        UpdateCoinUI(); // 바로 최신 값 반영
+    }
 
     /// <summary>
     /// 코인 추가
@@ -48,7 +54,7 @@ public class CoinSystem : MonoBehaviour
         CoinSave();                  // JSON 저장
         UpdateCoinUI();          // UI 갱신
     }
-
+    
     /// <summary>
     /// 코인 사용 (부족하면 false 반환)
     /// </summary>

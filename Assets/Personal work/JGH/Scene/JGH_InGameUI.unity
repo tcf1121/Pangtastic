@@ -2305,6 +2305,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 89bf8d80f14cf4ce0b12c42eab840457, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  continueSpawnArea: {fileID: 0}
+  exitSpawnArea: {fileID: 0}
 --- !u!4 &1299568043
 Transform:
   m_ObjectHideFlags: 0
@@ -3502,6 +3504,10 @@ PrefabInstance:
       value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 605968008202654785, guid: c9ff86330aa144f8ab0d4630c142770e, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Mode
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 605968008202654785, guid: c9ff86330aa144f8ab0d4630c142770e, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[1].m_Mode
       value: 1
       objectReference: {fileID: 0}
@@ -3532,6 +3538,10 @@ PrefabInstance:
     - target: {fileID: 605968008202654785, guid: c9ff86330aa144f8ab0d4630c142770e, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[1].m_TargetAssemblyTypeName
       value: InGameUiController, Assembly-CSharp
+      objectReference: {fileID: 0}
+    - target: {fileID: 605968008202654785, guid: c9ff86330aa144f8ab0d4630c142770e, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Arguments.m_IntArgument
+      value: 10
       objectReference: {fileID: 0}
     - target: {fileID: 605968008202654785, guid: c9ff86330aa144f8ab0d4630c142770e, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[1].m_Arguments.m_ObjectArgumentAssemblyTypeName
@@ -3903,7 +3913,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6863328145330335358, guid: c9ff86330aa144f8ab0d4630c142770e, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Mode
-      value: 1
+      value: 3
       objectReference: {fileID: 0}
     - target: {fileID: 6863328145330335358, guid: c9ff86330aa144f8ab0d4630c142770e, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[1].m_Mode
@@ -3968,6 +3978,10 @@ PrefabInstance:
     - target: {fileID: 6863328145330335358, guid: c9ff86330aa144f8ab0d4630c142770e, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[3].m_TargetAssemblyTypeName
       value: UnityEngine.GameObject, UnityEngine
+      objectReference: {fileID: 0}
+    - target: {fileID: 6863328145330335358, guid: c9ff86330aa144f8ab0d4630c142770e, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Arguments.m_IntArgument
+      value: 10
       objectReference: {fileID: 0}
     - target: {fileID: 6863328145330335358, guid: c9ff86330aa144f8ab0d4630c142770e, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Arguments.m_BoolArgument
@@ -5576,7 +5590,7 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 1299568042}
         m_TargetAssemblyTypeName: InGameUiController, Assembly-CSharp
-        m_MethodName: ChangeOutGameScene
+        m_MethodName: ChangeQuitGameScene
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}

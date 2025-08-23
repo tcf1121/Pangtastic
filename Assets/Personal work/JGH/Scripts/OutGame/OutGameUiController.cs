@@ -50,4 +50,6 @@ public class OutGameUiController : MonoBehaviour
             // TODO: 하트 부족 시 UI 띄우기
         }
     }
+    
+   
 }
