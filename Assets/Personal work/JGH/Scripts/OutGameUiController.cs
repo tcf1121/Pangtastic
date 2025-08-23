@@ -40,6 +40,7 @@ public class OutGameUiController : MonoBehaviour
 
     public void ChangeInGameScene(int num)
     {
+        AudioController.Instance.PlaySFXByName("GameInSfx");
         if (HeartSystem.Instance.TryUseHearts(num))
         {
             SceneManager.LoadScene("JGH_InGameUI");
@@ -48,10 +49,5 @@ public class OutGameUiController : MonoBehaviour
         {
             // TODO: 하트 부족 시 UI 띄우기
         }
-    }
-
-    public void SfxPlayStartButton()
-    {
-        AudioController.Instance.PlaySFXByName("GameInSfx");
     }
 }
