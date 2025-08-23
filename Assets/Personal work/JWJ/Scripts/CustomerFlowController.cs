@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -109,7 +110,10 @@ public class CustomerFlowController : MonoBehaviour
             _customerPool.RemoveAt(rand);
         }
 
-        _customerQueue.Enqueue(lastCustomer);
+        if (lastCustomer != null)
+        {
+            _customerQueue.Enqueue(lastCustomer);
+        }
 
         //손님 리스트 로그
         //CustomerSO[] arr = _customerQueue.ToArray();
@@ -183,7 +187,6 @@ public class CustomerFlowController : MonoBehaviour
         {
             Debug.Log("스테이지 실패");
             //스테이지 실패 로직 여기에
-
             Debug.Log($"남은 손님 수 : {left}, 클리어 손님 수 : {cleared}, 실패손님 수 : {_failureCount}, 클리어 조건 : {_curStage.StageClearCustomerCount}");
             return;
         }
