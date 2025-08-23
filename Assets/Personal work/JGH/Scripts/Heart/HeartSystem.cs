@@ -45,6 +45,7 @@ public class HeartSystem : MonoBehaviour
         StopAllCoroutines();
         
         HeartLoadData();
+        HeartSaveData();
 
         UpdateHeartUI();
         

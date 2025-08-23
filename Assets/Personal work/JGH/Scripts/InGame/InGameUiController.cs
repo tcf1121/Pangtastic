@@ -7,27 +7,26 @@ public class InGameUiController : MonoBehaviour
     
     private void Start()
     {
-        AudioController.Instance.PlayBGMByName("InGameMusic");
+        AudioSystem.Instance.PlayBGMByName("InGameMusic");
     }
 
     public void ChangeOutGameScene()
     {
         SceneManager.LoadScene("JGH_OutGameUI");
+        AudioSystem.Instance.PlaySFXByName("GameToHomeSfx");
+        CoinRewardEffectSystem.Instance.CoinPlayEffect(10);
     }
     
     public void ChangeContinueOutGameScene()
     {
         needStartSetting = true;
         SceneManager.LoadScene("JGH_OutGameUI");
+        AudioSystem.Instance.PlaySFXByName("GameToHomeSfx");
+        CoinRewardEffectSystem.Instance.CoinPlayEffect(10);
     }
 
     public void SfxGameExit()
     {
-        AudioController.Instance.PlaySFXByName("GameExitSfx");
-    }
-    
-    public void SfxGameToHome()
-    {
-        AudioController.Instance.PlaySFXByName("GameToHomeSfx");
+        AudioSystem.Instance.PlaySFXByName("GameExitSfx");
     }
 }

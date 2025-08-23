@@ -1,7 +1,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 
-public class SettingToggleButton : MonoBehaviour
+public class SettingToggleSystem : MonoBehaviour
 {
     [SerializeField] private Image targetImage;
     [SerializeField] private Sprite onSprite;
@@ -42,12 +42,12 @@ public class SettingToggleButton : MonoBehaviour
 
             if (gameObject.name == "BackgroundMusicOnOff")
             {
-                AudioController.Instance.BgmAudioSource.volume = 1f;
+                AudioSystem.Instance.BgmAudioSource.volume = 1f;
             }
             
             if (gameObject.name == "SfxMusicOnOff")
             {
-                AudioController.Instance.SfxAudioSource.volume = 1f;
+                AudioSystem.Instance.SfxAudioSource.volume = 1f;
             }
         }
         else
@@ -56,12 +56,12 @@ public class SettingToggleButton : MonoBehaviour
 
             if (gameObject.name == "BackgroundMusicOnOff")
             {
-                AudioController.Instance.BgmAudioSource.volume = 0f;
+                AudioSystem.Instance.BgmAudioSource.volume = 0f;
             }
             
             if (gameObject.name == "SfxMusicOnOff")
             {
-                AudioController.Instance.SfxAudioSource.volume = 0f;
+                AudioSystem.Instance.SfxAudioSource.volume = 0f;
             }
         }
     }
