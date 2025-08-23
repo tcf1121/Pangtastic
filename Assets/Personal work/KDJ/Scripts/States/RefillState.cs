@@ -10,6 +10,7 @@ namespace KDJ.States
         public void OnEnter(BoardManager boardManager)
         {
             Debug.Log("블록 재충전 상태");
+            boardManager.Spawner.CheckBlockInArray();
             boardManager.Spawner.CheckBlockArray();
         }
 

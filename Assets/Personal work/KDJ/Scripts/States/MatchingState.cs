@@ -1,3 +1,4 @@
+using LHJ;
 using System.Collections;
 using Unity.VisualScripting;
 using UnityEngine;
@@ -33,11 +34,23 @@ namespace KDJ.States
 
         private IEnumerator MatchingCoroutine(BoardManager boardManager)
         {
+            SpecialBlock startSpecialBlock = null;
+            SpecialBlock endSpecialBlock = null;
             Debug.Log("블럭 매칭 시작");
             yield return new WaitForSeconds(0.5f);
+            bool StartBlockIsSpecialBlock = boardManager.Spawner.BlockArray[(int)boardManager.BlockMover.StartPos.y, (int)boardManager.BlockMover.StartPos.x].BlockInstance.TryGetComponent<SpecialBlock>(out startSpecialBlock);
+            bool EndBlockIsSpecialBlock = boardManager.Spawner.BlockArray[(int)boardManager.BlockMover.EndPos.y, (int)boardManager.BlockMover.EndPos.x].BlockInstance.TryGetComponent<SpecialBlock>(out endSpecialBlock);
+            if (StartBlockIsSpecialBlock || EndBlockIsSpecialBlock)
+            {
+                startSpecialBlock?.Activate(boardManager);
+                endSpecialBlock?.Activate(boardManager);
+                boardManager.ChangeState(new RefillState());
+                yield break;
+            }
+
             if (boardManager.BlockMover.StartPos != Vector2.zero)
             {
-                boardManager.MatchChecker.BlockMatchCheck(boardManager.BlockMover.StartBlockPos, boardManager); 
+                boardManager.MatchChecker.BlockMatchCheck(boardManager.BlockMover.StartBlockPos, boardManager);
                 boardManager.MatchChecker.BlockMatchCheck(boardManager.BlockMover.EndBlockPos, boardManager);
 
                 if (boardManager.Spawner.HasEmptyBlockObjects())

@@ -49,8 +49,10 @@ namespace KDJ.States
                     Vector3 mousePosition = Input.mousePosition;
                     mousePosition.z = -Camera.main.transform.position.z;
                     boardManager.BlockMover.EndPos = Camera.main.ScreenToWorldPoint(mousePosition);
-                    boardManager.BlockMover.MoveBlock(boardManager);
-                    boardManager.ChangeState(new MatchingState());
+                    if (boardManager.BlockMover.MoveBlock(boardManager))
+                    {
+                        boardManager.ChangeState(new MatchingState());
+                    }
                 }
                 else
                 {
