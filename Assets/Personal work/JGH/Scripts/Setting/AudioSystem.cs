@@ -8,9 +8,9 @@ public class AudioClipGroup
     public AudioClip audioClip;
 }
 
-public class AudioController : MonoBehaviour
+public class AudioSystem : MonoBehaviour
 {
-    public static AudioController Instance { get; private set; }
+    public static AudioSystem Instance { get; private set; }
     
     [Header("BGM 클립들")]
     [SerializeField] private List<AudioClipGroup> _bgmClips = new List<AudioClipGroup>();
