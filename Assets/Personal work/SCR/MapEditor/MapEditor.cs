@@ -14,58 +14,17 @@ namespace SCR
         private BoardCell[] sortedItemsArray;
         [SerializeField] private InputField inputField;
         private Dictionary<Vector3Int, GemType> _mapInfo = new();
+        private List<Vector3Int> _spawnPoint = new();
 
         string path = "Personal work/SCR/StageInfo.csv";
-
-        [SerializeField]
-        public class Stage
-        {
-            public int Num;
-            public Dictionary<Vector3Int, GemType> MapDic;
-
-            public void SetStage(string num, string map)
-            {
-                Num = int.Parse(num);
-                GetMap(map);
-
-            }
-
-            private void GetMap(string value)
-            {
-                MapDic = new();
-                string[] gem = value.Split('|');
-                for (int i = 0; i < gem.Length - 1; i++)
-                {
-                    string cellInfo = gem[i];
-                    string[] info = cellInfo.Split(':');
-                    MapDic.Add(GetVec3Int(info[0], info[1], info[2]), (GemType)Enum.Parse(typeof(GemType), info[3]));
-                }
-            }
-
-            private Vector3Int GetVec3Int(string stringX, string stringY, string stringZ)
-            {
-                int x, y, z;
-                bool xSuccess = int.TryParse(stringX.Trim(), out x);
-                bool ySuccess = int.TryParse(stringY.Trim(), out y);
-                bool zSuccess = int.TryParse(stringZ.Trim(), out z);
-
-                if (xSuccess && ySuccess && zSuccess)
-                {
-                    return new Vector3Int(x, y, z);
-                }
-                else
-                {
-                    Debug.LogError($"일부 값이 정수 형식이 아닙니다.");
-                    return Vector3Int.zero;
-                }
-            }
-        }
 
 
         public void SaveMapInfo()
         {
             _mapInfo.Clear();
             _mapInfo = Board.GetPuzzleInfo();
+            _spawnPoint.Clear();
+            _spawnPoint = Board.GetSpawnPoint();
             int num = int.Parse(inputField.text);
             string directoryPath = Path.GetDirectoryName(Application.dataPath + "/" + path);
             if (!Directory.Exists(directoryPath))
@@ -107,6 +66,17 @@ namespace SCR
                     csvBuilder.Append(data.Value);
                     csvBuilder.Append("|");
                 }
+                csvBuilder.Append(",");
+                foreach (var data in _spawnPoint)
+                {
+                    csvBuilder.Append(data.x);
+                    csvBuilder.Append(":");
+                    csvBuilder.Append(data.y);
+                    csvBuilder.Append(":");
+                    csvBuilder.Append(data.z);
+                    csvBuilder.Append("|");
+                }
+
                 // 4. 특정 인덱스의 줄을 새 데이터로 덮어쓰기
                 lines[num] = csvBuilder.ToString();
                 // 5. 수정된 모든 줄을 다시 파일에 저장 (기존 파일 내용 덮어씀)
@@ -133,9 +103,9 @@ namespace SCR
                 var splitData = File.ReadLines(Application.dataPath + "/" + path).Skip(num).Take(1).FirstOrDefault();
                 string[] values = splitData.ToString().Split(',');
 
-                Stage loadstage = new();
-                loadstage.SetStage(values[0], values[1]);
-                Board.SetPuzzleInfo(loadstage.MapDic);
+                GetPuzzle(values[1]);
+                GetSpawnPoint(values[2]);
+                Board.SetPuzzleInfo(_mapInfo, _spawnPoint);
             }
             catch (Exception e)
             {
@@ -143,7 +113,47 @@ namespace SCR
             }
         }
 
+        private void GetPuzzle(string value)
+        {
+            _mapInfo.Clear();
+            string[] gem = value.Split('|');
+            for (int i = 0; i < gem.Length - 1; i++)
+            {
+                string cellInfo = gem[i];
+                string[] info = cellInfo.Split(':');
+                _mapInfo.Add(GetVec3Int(info[0], info[1], info[2]), (GemType)Enum.Parse(typeof(GemType), info[3]));
+            }
+        }
 
+        private void GetSpawnPoint(string value)
+        {
+            _spawnPoint.Clear();
+            string[] gem = value.Split('|');
+            for (int i = 0; i < gem.Length - 1; i++)
+            {
+                string cellInfo = gem[i];
+                string[] info = cellInfo.Split(':');
+                _spawnPoint.Add(GetVec3Int(info[0], info[1], info[2]));
+            }
+        }
+
+        private Vector3Int GetVec3Int(string stringX, string stringY, string stringZ)
+        {
+            int x, y, z;
+            bool xSuccess = int.TryParse(stringX.Trim(), out x);
+            bool ySuccess = int.TryParse(stringY.Trim(), out y);
+            bool zSuccess = int.TryParse(stringZ.Trim(), out z);
+
+            if (xSuccess && ySuccess && zSuccess)
+            {
+                return new Vector3Int(x, y, z);
+            }
+            else
+            {
+                Debug.LogError($"일부 값이 정수 형식이 아닙니다.");
+                return Vector3Int.zero;
+            }
+        }
     }
 }
 
