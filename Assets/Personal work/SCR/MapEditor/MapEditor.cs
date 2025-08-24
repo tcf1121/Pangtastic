@@ -13,70 +13,59 @@ namespace SCR
     {
         private BoardCell[] sortedItemsArray;
         [SerializeField] private InputField inputField;
+        private Dictionary<Vector3Int, GemType> _mapInfo = new();
 
-        public GemType[,] dataToSave = new GemType[,]
-    {
-        { GemType.Strawberry, GemType.Cloche, GemType.Sugar },
-        { GemType.Strawberry, GemType.Strawberry, GemType.Strawberry },
-        { GemType.Strawberry, GemType.Strawberry, GemType.Strawberry }
-    };
         string path = "Personal work/SCR/StageInfo.csv";
 
         [SerializeField]
         public class Stage
         {
             public int Num;
-            public int Size;
-            public GemType[,] MapArray;
+            public Dictionary<Vector3Int, GemType> MapDic;
 
-            public void SetStage(string num, string size, string map)
+            public void SetStage(string num, string map)
             {
                 Num = int.Parse(num);
-                Size = int.Parse(size);
-                MapArray = GetMap(Size, map);
+                GetMap(map);
+
             }
 
-            private GemType[,] GetMap(int size, string value)
+            private void GetMap(string value)
             {
-                GemType[,] map = new GemType[size, size];
+                MapDic = new();
                 string[] gem = value.Split('|');
-                int i = 0;
-                for (int x = 0; x < size; x++)
+                for (int i = 0; i < gem.Length - 1; i++)
                 {
-                    for (int y = 0; y < size; y++)
-                    {
-                        map[y, x] = (GemType)Enum.Parse(typeof(GemType), gem[i++]);
-                    }
+                    string cellInfo = gem[i];
+                    string[] info = cellInfo.Split(':');
+                    MapDic.Add(GetVec3Int(info[0], info[1], info[2]), (GemType)Enum.Parse(typeof(GemType), info[3]));
                 }
-                return map;
             }
-        }
 
-        private void SortAndCreateArray()
-        {
-            // 1. 딕셔너리의 모든 키-값 쌍을 가져옵니다.
-            // 이 시점에도 순서는 보장되지 않습니다.
-            var unsortedPairs = Board.GetDictionary();
+            private Vector3Int GetVec3Int(string stringX, string stringY, string stringZ)
+            {
+                int x, y, z;
+                bool xSuccess = int.TryParse(stringX.Trim(), out x);
+                bool ySuccess = int.TryParse(stringY.Trim(), out y);
+                bool zSuccess = int.TryParse(stringZ.Trim(), out z);
 
-            // 2. LINQ의 OrderBy를 사용하여 Vector3Int 키를 기준으로 정렬합니다.
-            // 사전식 순서: X -> Y -> Z 순으로 비교합니다.
-            // 그리고 .Select()를 사용하여 각 키-값 쌍에서 '값(Item)'만 추출합니다.
-            var sortedItemsList = unsortedPairs
-                .OrderBy(pair => pair.Key.x) // 1차: X 값으로 정렬
-                .ThenBy(pair => pair.Key.y) // 2차: X 값이 같으면 Y 값으로 정렬
-                .ThenBy(pair => pair.Key.z) // 3차: Y 값까지 같으면 Z 값으로 정렬
-                .Select(pair => pair.Value) // 정렬된 순서대로 'Item' 객체만 선택
-                .ToList(); // 결과를 List<Item>으로 변환
-
-            // 3. 리스트를 배열로 변환
-            sortedItemsArray = sortedItemsList.ToArray();
-
-            Debug.Log("딕셔너리를 정렬하여 배열로 생성 완료!");
+                if (xSuccess && ySuccess && zSuccess)
+                {
+                    return new Vector3Int(x, y, z);
+                }
+                else
+                {
+                    Debug.LogError($"일부 값이 정수 형식이 아닙니다.");
+                    return Vector3Int.zero;
+                }
+            }
         }
 
 
         public void SaveMapInfo()
         {
+            _mapInfo.Clear();
+            _mapInfo = Board.GetPuzzleInfo();
             int num = int.Parse(inputField.text);
             string directoryPath = Path.GetDirectoryName(Application.dataPath + "/" + path);
             if (!Directory.Exists(directoryPath))
@@ -97,12 +86,9 @@ namespace SCR
                     Debug.LogError("0보다 큰 값을 입력하시오.");
                     return;
                 }
-                if (num > lines.Count)
+                while (lines.Count <= num)
                 {
-                    for (int i = lines.Count; i < num; i++)
-                    {
-                        lines.Add(" ");
-                    }
+                    lines.Add(""); // 빈 줄 추가
                 }
 
                 StringBuilder csvBuilder = new StringBuilder();
@@ -110,26 +96,19 @@ namespace SCR
                 // 배열의 각 행을 순회
                 csvBuilder.Append(num);
                 csvBuilder.Append(",");
-                csvBuilder.Append(dataToSave.GetLength(0));
-                csvBuilder.Append(",");
-                for (int i = 0; i < dataToSave.GetLength(0); i++)
+                foreach (var data in _mapInfo)
                 {
-
-                    // 각 행의 열을 순회하며 쉼표로 구분하여 추가
-                    for (int j = 0; j < dataToSave.GetLength(1); j++)
-                    {
-                        csvBuilder.Append(dataToSave[i, j]);
-                        if (j < dataToSave.GetLength(1) - 1)
-                        {
-                            csvBuilder.Append("|");
-                        }
-                    }
+                    csvBuilder.Append(data.Key.x);
+                    csvBuilder.Append(":");
+                    csvBuilder.Append(data.Key.y);
+                    csvBuilder.Append(":");
+                    csvBuilder.Append(data.Key.z);
+                    csvBuilder.Append(":");
+                    csvBuilder.Append(data.Value);
                     csvBuilder.Append("|");
                 }
-
                 // 4. 특정 인덱스의 줄을 새 데이터로 덮어쓰기
                 lines[num] = csvBuilder.ToString();
-
                 // 5. 수정된 모든 줄을 다시 파일에 저장 (기존 파일 내용 덮어씀)
                 File.WriteAllLines(Application.dataPath + "/" + path, lines.ToArray(), Encoding.UTF8);
 
@@ -153,13 +132,10 @@ namespace SCR
             {
                 var splitData = File.ReadLines(Application.dataPath + "/" + path).Skip(num).Take(1).FirstOrDefault();
                 string[] values = splitData.ToString().Split(',');
-                Debug.Log(splitData);
 
                 Stage loadstage = new();
-                loadstage.SetStage(values[0], values[1], values[2]);
-                Debug.Log(loadstage.Num);
-                Debug.Log(loadstage.Size);
-                Debug.Log(loadstage.MapArray[0, 0]);
+                loadstage.SetStage(values[0], values[1]);
+                Board.SetPuzzleInfo(loadstage.MapDic);
             }
             catch (Exception e)
             {
@@ -170,3 +146,4 @@ namespace SCR
 
     }
 }
+

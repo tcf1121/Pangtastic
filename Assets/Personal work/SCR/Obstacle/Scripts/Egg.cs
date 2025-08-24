@@ -11,7 +11,7 @@ namespace SCR
             _canMove = true;
             _onCollider = true;
             _isSpawn = false;
-            _blockType = GemType.Egg;
+            ObstaclType = GemType.Egg;
             base.Init(cell);
         }
 
