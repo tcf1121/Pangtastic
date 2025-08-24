@@ -6,6 +6,15 @@ using UnityEngine.SceneManagement;
 
 public class HeartSystem : MonoBehaviour
 {
+    [Serializable]
+    public class HeartData
+    {
+        public int currentHearts;
+        public string lastSaveTime;
+        public int remainingSeconds; 
+    }
+    
+    private string SavePath => System.IO.Path.Combine(Application.persistentDataPath, "HeartData.json"); 
     
     public static HeartSystem Instance { get; private set; }
     
@@ -36,6 +45,7 @@ public class HeartSystem : MonoBehaviour
         StopAllCoroutines();
         
         HeartLoadData();
+        HeartSaveData();
 
         UpdateHeartUI();
         
@@ -49,30 +59,67 @@ public class HeartSystem : MonoBehaviour
     // TODO: 파이어 베이스로 변경 필요
     private void HeartLoadData()
     {
-        _currentHearts = PlayerPrefs.GetInt("CurrentHearts", 0);
-
-        string lastTimeStr = PlayerPrefs.GetString("LastSaveTime", "");
-        if (!string.IsNullOrEmpty(lastTimeStr))
+        if (System.IO.File.Exists(SavePath))
         {
-            DateTime lastTime = DateTime.Parse(lastTimeStr);
-            TimeSpan diff = DateTime.Now - lastTime;
+            string json = System.IO.File.ReadAllText(SavePath);
+            HeartData data = JsonUtility.FromJson<HeartData>(json);
 
-            int recoveredHearts = (int)(diff.TotalSeconds / _startSeconds);
-            _currentHearts = Mathf.Min(_currentHearts + recoveredHearts, _maxHearts);
+            _currentHearts = data.currentHearts;
 
-            int leftoverSeconds = (int)(diff.TotalSeconds % _startSeconds);
+            if (!string.IsNullOrEmpty(data.lastSaveTime))
+            {
+                DateTime lastTime = DateTime.Parse(data.lastSaveTime);
+                TimeSpan diff = DateTime.Now - lastTime;
 
-            if (_currentHearts < _maxHearts)
-                _remainingSeconds = _startSeconds - leftoverSeconds;
+                // 지난 시간만큼 하트 충전
+                int recoveredHearts = (int)(diff.TotalSeconds / _startSeconds);
+                _currentHearts = Mathf.Min(_currentHearts + recoveredHearts, _maxHearts);
+
+                if (_currentHearts < _maxHearts)
+                {
+                    // 남은 시간 계산 (기존 저장된 남은 시간에서 경과 시간 빼기)
+                    _remainingSeconds = data.remainingSeconds - (int)diff.TotalSeconds;
+
+                    if (_remainingSeconds <= 0)
+                    {
+                        // 부족하면 추가로 하트 충전
+                        int extraHearts = Mathf.Abs(_remainingSeconds) / _startSeconds + 1;
+                        _currentHearts = Mathf.Min(_currentHearts + extraHearts, _maxHearts);
+
+                        // 남은 시간 재설정
+                        if (_currentHearts < _maxHearts)
+                            _remainingSeconds = _startSeconds - (Mathf.Abs(_remainingSeconds) % _startSeconds);
+                        else
+                            _remainingSeconds = 0;
+                    }
+                }
+                else
+                {
+                    _remainingSeconds = 0;
+                }
+            }
             else
-                _remainingSeconds = 0;
+            {
+                _remainingSeconds = _startSeconds;
+            }
+
+            Debug.Log("JSON 불러오기 완료");
         }
         else
         {
+            _currentHearts = _maxHearts;
             _remainingSeconds = _startSeconds;
+            Debug.Log("JSON 파일 없음, 기본값으로 시작");
         }
     }
-    
+
+
+
+    /// <summary>
+    /// 하트를 사용하여 스테이지를 시작합니다.
+    /// </summary>
+    /// <param name="requiredHearts"></param>
+    /// <returns></returns>
     public bool TryUseHearts(int requiredHearts)
     {
         if (_currentHearts >= requiredHearts)
@@ -90,12 +137,42 @@ public class HeartSystem : MonoBehaviour
         }
     }
     
+    /// <summary>
+    /// 하트를 회복(채우기)합니다.
+    /// 최대치 제한 없음
+    /// </summary>
+    /// <param name="amount">회복할 하트 개수</param>
+    public void AddHearts(int amount)
+    {
+        if (amount <= 0)
+        {
+            Debug.LogWarning("회복할 하트 개수가 0 이하입니다.");
+            return;
+        }
+
+        int beforeHearts = _currentHearts;
+        _currentHearts += amount; // 제한 없이 누적
+
+        UpdateHeartUI();
+        HeartSaveData();
+
+        Debug.Log($"하트 {amount}개 회복! ({beforeHearts} → {_currentHearts})");
+    }
+    
+    /// <summary>
+    /// 하트 UI를 업데이트합니다.
+    /// </summary>
     private void UpdateHeartUI()
     {
         if (_textHeart != null)
             _textHeart.text = $"{_currentHearts}/{_maxHearts}";
     }
 
+    /// <summary>
+    /// 하트 타이머
+    /// 시간이 다 되면 하트를 충전합니다.
+    /// </summary>
+    /// <returns></returns>
     private IEnumerator TimerCoroutine()
     {
         while (true) // 무한 루프 → 내부에서 조건으로 제어
@@ -137,7 +214,12 @@ public class HeartSystem : MonoBehaviour
             }
         }
     }
+    
 
+    /// <summary>
+    /// 타이머 UI를 업데이트합니다.
+    /// 하트가 가득찬경우 FULL로 표시합니다.
+    /// </summary>
     private void UpdateTimerUI()
     {
         if (_timerText == null) return;
@@ -153,11 +235,18 @@ public class HeartSystem : MonoBehaviour
         _timerText.text = string.Format("{0:D2}:{1:D2}", minutes, seconds);
     }
     
+    /// <summary>
+    /// 애플리케이션이 종료될 때 하트 데이터를 저장합니다.
+    /// </summary>
     private void OnApplicationQuit()
     {
         HeartSaveData(); // 정상 종료 시 저장
     }
 
+    /// <summary>
+    /// 애플리케이션이 백그라운드로 갔을 때 하트 데이터를 저장합니다.
+    /// </summary>
+    /// <param name="pause"></param>
     private void OnApplicationPause(bool pause)
     {
         if (pause)
@@ -169,18 +258,30 @@ public class HeartSystem : MonoBehaviour
     // TODO: 파이어 베이스로 변경 필요
     private void HeartSaveData()
     {
-        PlayerPrefs.SetInt("CurrentHearts", _currentHearts);
-        PlayerPrefs.SetString("LastSaveTime", DateTime.Now.ToString());
-        PlayerPrefs.Save();
+        HeartData data = new HeartData
+        {
+            currentHearts = _currentHearts,
+            lastSaveTime = (_currentHearts < _maxHearts) ? DateTime.Now.ToString() : "",
+            remainingSeconds = (_currentHearts < _maxHearts) ? _remainingSeconds : 0
+        };
 
-        Debug.Log("PlayerPrefs 저장 완료");
+        string json = JsonUtility.ToJson(data, true);
+        System.IO.File.WriteAllText(SavePath, json);
+
+        Debug.Log("JSON 저장 완료: " + SavePath);
     }
     
+    /// <summary>
+    /// 씬이 로드될 때마다 UI를 다시 찾아 연결합니다.
+    /// </summary>
     private void OnEnable()
     {
         SceneManager.sceneLoaded += OnSceneLoaded;
     }
 
+    /// <summary>
+    /// 씬이 비활성화될 때 이벤트 구독을 해제합니다.
+    /// </summary>
     private void OnDisable()
     {
         SceneManager.sceneLoaded -= OnSceneLoaded;
