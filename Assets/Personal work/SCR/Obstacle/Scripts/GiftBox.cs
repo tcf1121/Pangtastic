@@ -12,7 +12,7 @@ namespace SCR
             _onCollider = true;
             _isSpawn = true;
             _isSplashDamage = true;
-            _blockType = GemType.GiftBox;
+            ObstaclType = GemType.GiftBox;
             base.Init(cell);
         }
 

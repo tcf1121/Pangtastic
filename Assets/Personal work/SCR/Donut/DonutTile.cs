@@ -8,7 +8,7 @@ namespace SCR
     {
         public Sprite PreviewEditorSprite;
         public Color PreviewEditorColor;
-        public Donut DonutPrefab;
+        public GemType Donut;
 
         public override void GetTileData(Vector3Int position, ITilemap tilemap, ref TileData tileData)
         {
@@ -24,7 +24,7 @@ namespace SCR
 #endif
 
 
-            Board.AddDonut(position, DonutPrefab);
+            Board.AddObject(position, Donut);
 
             return true;
         }

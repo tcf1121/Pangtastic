@@ -24,7 +24,7 @@ namespace SCR
 #endif
 
 
-            Board.AddDonut(position, null);
+            Board.AddObject(position, GemType.Random);
 
             return true;
         }

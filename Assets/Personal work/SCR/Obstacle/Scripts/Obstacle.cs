@@ -8,13 +8,9 @@ namespace SCR
 {
     public abstract class Obstacle : MonoBehaviour
     {
-        public GemType _blockType;
-        public GameObject CatGameObject;
-
-
+        public GemType ObstaclType;
         protected Vector3Int _cellPos;
         protected List<Vector3Int> _fourCellPos;
-
 
         protected int _currentHP;
         protected int _score;
@@ -28,15 +24,12 @@ namespace SCR
         public virtual void Init(Vector3Int cell)
         {
             _cellPos = cell;
-
-            transform.position = new Vector3(cell.x + 0.5f, cell.y + 0.5f, 0);
             //보드의 cell 위치에 장애 블록 추가
-            Board.AddObstacle(cell, this);
         }
 
         public GemType GetBlockType()
         {
-            return _blockType;
+            return ObstaclType;
         }
 
         public bool GetCollider()
