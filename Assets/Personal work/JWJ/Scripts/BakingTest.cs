@@ -12,6 +12,8 @@ public class BakingTest : MonoBehaviour
     [SerializeField] private Button milk;
     [SerializeField] private Button grape;
     [SerializeField] private Button lemon;
+    [SerializeField] private Button carrot;
+    [SerializeField] private Button apple;
 
     [SerializeField] private OrderStateController orderNew;
 
@@ -25,6 +27,8 @@ public class BakingTest : MonoBehaviour
     [SerializeField] private IngredientSO milkSO;
     [SerializeField] private IngredientSO grapeSO;
     [SerializeField] private IngredientSO lemonSO;
+    [SerializeField] private IngredientSO carrotSO;
+    [SerializeField] private IngredientSO appleSO;
 
 
     private void Awake()
@@ -36,6 +40,8 @@ public class BakingTest : MonoBehaviour
         milk.onClick.AddListener(AddMilk);
         grape.onClick.AddListener(AddGrape);
         lemon.onClick.AddListener(AddLemon);
+        apple.onClick.AddListener(AddApple);
+        carrot.onClick.AddListener(AddCarrot);
 
         if(orderNew == null)
         {
@@ -84,5 +90,15 @@ public class BakingTest : MonoBehaviour
     {
         //order.AddIngredient(lemonSO);
         orderNew.AddIngredient(lemonSO);
+    }
+
+    private void AddCarrot()
+    {
+        orderNew.AddIngredient(carrotSO);
+    }
+
+    private void AddApple()
+    {
+        orderNew.AddIngredient(appleSO);
     }
 }
