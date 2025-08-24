@@ -1,7 +1,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 
-public class CoinBuy : MonoBehaviour
+public class CurrencyCoinBuy : MonoBehaviour
 {
     [SerializeField] private Button _button;
     [SerializeField] private int _spendAmount;
@@ -11,10 +11,10 @@ public class CoinBuy : MonoBehaviour
         if (_button == null) _button = GetComponent<Button>();
         
         // CoinManager 자동 검색
-        var CoinSystem = FindObjectOfType<CoinSystem>();
-        if (CoinSystem != null)
+        var RewardSystem = FindObjectOfType<CurrencySystem>();
+        if (RewardSystem != null)
         {
-            _button.onClick.AddListener(() => CoinSystem.Instance.SpendCoin(_spendAmount));
+            _button.onClick.AddListener(() => CurrencySystem.Instance.SpendCoin(_spendAmount));
         }
     }
 }

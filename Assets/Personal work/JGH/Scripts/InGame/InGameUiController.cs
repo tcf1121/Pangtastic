@@ -13,9 +13,10 @@ public class InGameUiController : MonoBehaviour
     
     public void ChangeOutGameScene(int addCoin)
     {
-        CoinRewardEffectSystem.Instance.pendingSpawnType = CoinRewardEffectSystem.SpawnType.Exit;
+        CurrencySystem.Instance.pendingSpawnType = CurrencySystem.SpawnType.Exit;
         
-        CoinSystem.Instance.AddCoin(addCoin);
+        CurrencySystem.Instance.AddCoin(addCoin);
+        CurrencySystem.Instance.AddStar(addCoin);
         
         SceneManager.LoadScene("JGH_OutGameUI");
         
@@ -24,11 +25,12 @@ public class InGameUiController : MonoBehaviour
     
     public void ChangeContinueOutGameScene(int addCoin)
     {
-        CoinRewardEffectSystem.Instance.pendingSpawnType = CoinRewardEffectSystem.SpawnType.Continue;
+        CurrencySystem.Instance.pendingSpawnType = CurrencySystem.SpawnType.Continue;
         
         needStartSetting = true;
         
-        CoinSystem.Instance.AddCoin(addCoin);
+        CurrencySystem.Instance.AddCoin(addCoin);
+        CurrencySystem.Instance.AddStar(addCoin);
 
         SceneManager.LoadScene("JGH_OutGameUI");
         
