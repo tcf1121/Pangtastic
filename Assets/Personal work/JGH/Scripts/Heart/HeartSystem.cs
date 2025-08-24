@@ -224,7 +224,7 @@ public class HeartSystem : MonoBehaviour
     {
         if (_timerText == null) return;
 
-        if (_currentHearts == _maxHearts)
+        if (_currentHearts >= _maxHearts)
         {
             _timerText.text = "FULL";
             return;
