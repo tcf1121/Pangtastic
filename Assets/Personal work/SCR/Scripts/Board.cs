@@ -37,7 +37,8 @@ namespace SCR
     public class Board : MonoBehaviour
     {
         private static Board instance;
-        public Tilemap myTilemap;
+        public Tilemap BlankTilemap;
+        [SerializeField] TileBase blankTile;
         [SerializeField] private int loadCell = 0;
         private int _cellCount;
         public List<Vector3Int> SpawnPoint = new();
@@ -76,12 +77,21 @@ namespace SCR
             return instance.CellGemType;
         }
 
-        public static void SetPuzzleInfo(Dictionary<Vector3Int, GemType> PuzzleInfo)
+        public static List<Vector3Int> GetSpawnPoint()
+        {
+            return instance.SpawnPoint;
+        }
+
+        public static void SetPuzzleInfo(Dictionary<Vector3Int, GemType> PuzzleInfo, List<Vector3Int> SpawnPoint)
         {
             foreach (var data in PuzzleInfo)
             {
                 AddCell(data.Key);
                 AddObject(data.Key, data.Value);
+            }
+            foreach (var data in SpawnPoint)
+            {
+                AddSpawner(data);
             }
         }
 
@@ -89,10 +99,10 @@ namespace SCR
         {
             int count = 0;
             // 타일맵의 유효한 셀 영역을 순회
-            BoundsInt bounds = myTilemap.cellBounds;
+            BoundsInt bounds = BlankTilemap.cellBounds;
             foreach (var pos in bounds.allPositionsWithin)
             {
-                if (myTilemap.HasTile(pos))
+                if (BlankTilemap.HasTile(pos))
                 {
                     count++;
                 }
@@ -110,6 +120,7 @@ namespace SCR
                 instance = GameObject.Find("Grid").GetComponent<Board>();
                 instance.GetReference();
             }
+            instance.BlankTilemap.SetTile(pos, instance.blankTile);
             instance.CellList.Add(pos);
         }
 
