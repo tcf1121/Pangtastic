@@ -26,23 +26,17 @@ namespace KDJ.States
                 return;
             }
 
-            // 입력 대기. 플레이어의 입력이 있어야 MatchingState로 전환
-            if (Input.GetKeyDown(KeyCode.Space))
-            {
-                // 테스트 코드. 하단에서 블럭을 ㅗ자 형태로 파괴
-                boardManager.Spawner.TestDeleteBlock();
-                boardManager.ChangeState(new MatchingState());
-                return;
-            }
-
             if (Input.GetMouseButtonDown(0))
             {
+                Debug.Log("마우스 클릭 감지");
                 Vector3 mousePosition = Input.mousePosition;
                 mousePosition.z = -Camera.main.transform.position.z;
                 boardManager.BlockMover.StartPos = Camera.main.ScreenToWorldPoint(mousePosition);
+                TestBlockInfo(boardManager);
             }
             if (Input.GetMouseButtonUp(0))
             {
+                boardManager.ResetUI();
                 if (boardManager.BlockMover.StartPos != Vector2.zero)
                 {
                     // 마우스 버튼을 떼면 EndPos를 설정하고 블록 이동 시작
@@ -66,6 +60,32 @@ namespace KDJ.States
         public void OnExit(BoardManager boardManager)
         {
             Debug.Log("입력 준비 상태 종료");
+        }
+
+        private void TestBlockInfo(BoardManager boardManager)
+        {
+            Vector3 mousePosition = Input.mousePosition;
+            mousePosition.z = -Camera.main.transform.position.z;
+            Vector2 targetPos = Camera.main.ScreenToWorldPoint(mousePosition);
+            targetPos += new Vector2(boardManager.Spawner.BlockPlate.BlockPlateWidth / 2, boardManager.Spawner.BlockPlate.BlockPlateHeight / 2);
+
+            if (targetPos.x < 0 || targetPos.y < 0)
+            {
+                return;
+            }
+
+            Vector2Int gridPos = boardManager.BlockMover.WorldToGrid(targetPos);
+
+            if (gridPos.x >= boardManager.Spawner.BlockPlate.BlockPlateWidth || gridPos.y >= boardManager.Spawner.BlockPlate.BlockPlateHeight)
+            {
+                return;
+            }
+
+            Block block = boardManager.Spawner.BlockArray[gridPos.y, gridPos.x];
+            if (block != null)
+            {
+                boardManager.UpdateUI(block);
+            }
         }
     }
 }
