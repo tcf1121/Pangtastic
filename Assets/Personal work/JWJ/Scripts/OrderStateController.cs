@@ -63,7 +63,7 @@ public class OrderStateController : MonoBehaviour
             {
                 continue;
             }
-                
+
             bool collected = recipe.CollectIngredient(ingredient, out int have, out int need); //재료 수집 시도
 
             if (collected) // 재료가 반영되면

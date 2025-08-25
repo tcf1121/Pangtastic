@@ -106,6 +106,7 @@ namespace SCR
                 GetPuzzle(values[1]);
                 GetSpawnPoint(values[2]);
                 Board.SetPuzzleInfo(_mapInfo, _spawnPoint);
+
             }
             catch (Exception e)
             {

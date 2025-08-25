@@ -223,7 +223,7 @@ public class MatchChecker : MonoBehaviour
                     Obstacle obs = obj.GetComponent<Obstacle>();
                     if (obs != null && obs.IsSplash())
                     {
-                        obs.Damage(1);
+                        obs.Damage();
                     }
                 }
             }
