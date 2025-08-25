@@ -1,6 +1,7 @@
 using SCR;
 using System.Collections;
 using System.Collections.Generic;
+using System.Net.Sockets;
 using Unity.Collections;
 using Unity.VisualScripting;
 using UnityEngine;
@@ -97,6 +98,7 @@ namespace KDJ
                         if (x + 1 < boardManager.Spawner.BlockPlate.BlockPlateWidth && y + 1 < boardManager.Spawner.BlockPlate.BlockPlateHeight)
                         {
                             if (boardManager.Spawner.BlockPlate.BlockPlateArray[y + 1, x] && boardManager.Spawner.BlockPlate.BlockPlateArray[y, x + 1]
+                            && boardManager.Spawner.BlockArray[y + 1, x] != null && boardManager.Spawner.BlockArray[y, x + 1] != null
                             && boardManager.Spawner.BlockArray[y, x].BlockType == boardManager.Spawner.BlockArray[y + 1, x].BlockType
                             && boardManager.Spawner.BlockArray[y, x].BlockType == boardManager.Spawner.BlockArray[y, x + 1].BlockType)
                             {
@@ -120,6 +122,7 @@ namespace KDJ
         /// <param name="boardManager"></param>
         public void AllMatchBlockDestroy(BoardManager boardManager)
         {
+            int score = 0;
             // 블럭 매치 체크 로직
             // x축부터 쭉 체크하고 y축도 체크
             for (int y = 0; y < boardManager.Spawner.BlockPlate.BlockPlateHeight; y++)
@@ -145,6 +148,10 @@ namespace KDJ
                             count = 1;
                             matchStartIndex = x;
                         }
+                        else if (curGemType != prevGemType && count >= 3)
+                        {
+                            break; // 매치가 끊기고 이전에 3개 이상 매치된 경우 루프 종료
+                        }
                     }
                     prevGemType = curGemType;
                 }
@@ -160,8 +167,20 @@ namespace KDJ
                             Debug.Log($"매치된 블록 GemType: {boardManager.Spawner.BlockArray[y, i].GemType}");
                             Destroy(boardManager.Spawner.BlockArray[y, i].BlockInstance);
                             boardManager.Spawner.BlockArray[y, i].BlockInstance = null;
+                            score += 10;
                         }
                     }
+
+                    boardManager.MatchCombo.UpCombo();
+                    if (boardManager.MatchCombo.CurCombo > 1)
+                    {
+                        boardManager.UpdateUI((int)(score * (0.5f * boardManager.MatchCombo.CurCombo)));
+                    }
+                    else
+                    {
+                        boardManager.UpdateUI(score);
+                    }
+                    score = 0;
                 }
             }
 
@@ -188,6 +207,10 @@ namespace KDJ
                             count = 1;
                             matchStartIndex = y;
                         }
+                        else if (curGemType != prevGemType && count >= 3)
+                        {
+                            break; // 매치가 끊기고 이전에 3개 이상 매치된 경우 루프 종료
+                        }
                     }
                     prevGemType = curGemType;
                 }
@@ -205,9 +228,21 @@ namespace KDJ
                                 Debug.Log($"매치된 블록 GemType: {boardManager.Spawner.BlockArray[i, x].GemType}");
                                 Destroy(boardManager.Spawner.BlockArray[i, x].BlockInstance);
                                 boardManager.Spawner.BlockArray[i, x].BlockInstance = null;
+                                score += 10;
                             }
                         }
                     }
+
+                    boardManager.MatchCombo.UpCombo();
+                    if (boardManager.MatchCombo.CurCombo > 1)
+                    {
+                        boardManager.UpdateUI((int)(score * (0.5f * boardManager.MatchCombo.CurCombo)));
+                    }
+                    else
+                    {
+                        boardManager.UpdateUI(score);
+                    }
+                    score = 0;
                 }
             }
 
@@ -221,6 +256,7 @@ namespace KDJ
                         if (x + 1 < boardManager.Spawner.BlockPlate.BlockPlateWidth && y + 1 < boardManager.Spawner.BlockPlate.BlockPlateHeight)
                         {
                             if (boardManager.Spawner.BlockPlate.BlockPlateArray[y + 1, x] && boardManager.Spawner.BlockPlate.BlockPlateArray[y, x + 1]
+                            && boardManager.Spawner.BlockArray[y + 1, x] != null && boardManager.Spawner.BlockArray[y, x + 1] != null
                             && boardManager.Spawner.BlockArray[y, x].BlockType == boardManager.Spawner.BlockArray[y + 1, x].BlockType
                             && boardManager.Spawner.BlockArray[y, x].BlockType == boardManager.Spawner.BlockArray[y, x + 1].BlockType)
                             {
@@ -230,6 +266,8 @@ namespace KDJ
                     }
                 }
             }
+
+            boardManager.UpdateUI(score);
         }
 
         /// <summary>
@@ -243,6 +281,14 @@ namespace KDJ
             int xBlockBreakCount = XAxisMatchCheck(blockGrid.x, blockGrid.y, boardManager);
             int yBlockBreakCount = YAxisMatchCheck(blockGrid.x, blockGrid.y, boardManager);
             bool isCubeMatched = CubeMatchCheck(blockGrid.x, blockGrid.y, boardManager);
+            if (xBlockBreakCount == 4)
+            {
+                boardManager.Spawner.SpawnBlock(blockGrid.x, blockGrid.y, 7);
+            }
+            else if (yBlockBreakCount == 4)
+            {
+                boardManager.Spawner.SpawnBlock(blockGrid.x, blockGrid.y, 6);
+            }
         }
 
         public int XAxisMatchCheck(int x, int y, BoardManager boardManager)
@@ -250,6 +296,7 @@ namespace KDJ
             // x축 매치 체크 로직
             //Debug.Log($"X축 매치 체크. 시작 좌표: x={x}, y={y}");
 
+            int score = 0;
             int count = 1;
             int matchStartIndex = 0;
             GemType curGemType = (GemType)(-1);
@@ -276,6 +323,10 @@ namespace KDJ
                         count = 1;
                         matchStartIndex = curIndex;
                     }
+                    else if (curGemType != prevGemType && count >= 3)
+                    {
+                        break; // 매치가 끊기고 이전에 3개 이상 매치된 경우 루프 종료
+                    }
                 }
                 prevGemType = curGemType;
             }
@@ -293,7 +344,18 @@ namespace KDJ
                         Debug.Log($"매치된 블록 GemType: {boardManager.Spawner.BlockArray[y, i].GemType}");
                         Destroy(boardManager.Spawner.BlockArray[y, i].BlockInstance);
                         boardManager.Spawner.BlockArray[y, i].BlockInstance = null;
+                        score += 10;
                     }
+                }
+
+                boardManager.MatchCombo.UpCombo();
+                if (boardManager.MatchCombo.CurCombo > 1)
+                {
+                    boardManager.UpdateUI((int)(score * (0.5f * boardManager.MatchCombo.CurCombo)));
+                }
+                else
+                {
+                    boardManager.UpdateUI(score);
                 }
             }
 
@@ -304,6 +366,7 @@ namespace KDJ
         {
             // y축 매치 체크 로직
             //Debug.Log($"Y축 매치 체크. 시작 좌표: x={x}, y={y}");
+            int score = 0;
             int count = 1;
             int matchStartIndex = 0;
             GemType curGemType = (GemType)(-1);
@@ -351,7 +414,18 @@ namespace KDJ
                         Debug.Log($"매치된 블록 GemType: {boardManager.Spawner.BlockArray[i, x].GemType}");
                         Destroy(boardManager.Spawner.BlockArray[i, x].BlockInstance);
                         boardManager.Spawner.BlockArray[i, x].BlockInstance = null;
+                        score += 10;
                     }
+                }
+
+                boardManager.MatchCombo.UpCombo();
+                if (boardManager.MatchCombo.CurCombo > 1)
+                {
+                    boardManager.UpdateUI((int)(score * (0.5f * boardManager.MatchCombo.CurCombo)));
+                }
+                else
+                {
+                    boardManager.UpdateUI(score);
                 }
             }
 
@@ -401,8 +475,9 @@ namespace KDJ
         /// <param name="x"></param>
         /// <param name="y"></param>
         /// <param name="startArray">1 = 좌측 하단, 2 = 우측 하단, 3 = 좌측 상단, 4 = 우측 상단</param>
-        private void CubeCheck(BoardManager boardManager, int x, int y, int startArray = 1)
+        private bool CubeCheck(BoardManager boardManager, int x, int y, int startArray = 1)
         {
+            int score = 0;
             int matchCount = 0;
             int offsetX = 0;
             int offsetY = 0;
@@ -427,7 +502,7 @@ namespace KDJ
                     break;
                 default:
                     Debug.LogError("CubeCheck의 startArray 파라미터는 1~4 사이의 값이어야 합니다.");
-                    return;
+                    return false;
             }
 
             // 매치 체크
@@ -435,14 +510,14 @@ namespace KDJ
             {
                 if (i < 0 || i >= boardManager.Spawner.BlockPlate.BlockPlateHeight)
                 {
-                    return;
+                    return false;
                 }
 
                 for (int j = offsetX; j < offsetX + 2; j++)
                 {
                     if (j < 0 || j >= boardManager.Spawner.BlockPlate.BlockPlateWidth)
                     {
-                        return;
+                        return false;
                     }
 
                     if (boardManager.Spawner.BlockPlate.BlockPlateArray[i, j] && boardManager.Spawner.BlockPlate.BlockPlateArray[y, x] && boardManager.Spawner.BlockArray[i, j] != null
@@ -466,11 +541,24 @@ namespace KDJ
                             {
                                 Destroy(boardManager.Spawner.BlockArray[i, j].BlockInstance);
                                 boardManager.Spawner.BlockArray[i, j].BlockInstance = null;
+                                score += 10;
                             }
                         }
                     }
                 }
+
+                boardManager.MatchCombo.UpCombo();
+                if (boardManager.MatchCombo.CurCombo > 1)
+                {
+                    boardManager.UpdateUI((int)(score * (0.5f * boardManager.MatchCombo.CurCombo)));
+                }
+                else
+                {
+                    boardManager.UpdateUI(score);
+                }
             }
+
+            return true;
         }
 
         /// <summary>
