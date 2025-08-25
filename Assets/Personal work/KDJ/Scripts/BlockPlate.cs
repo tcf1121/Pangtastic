@@ -89,9 +89,9 @@ namespace KDJ
                         { true, true, true, true, true, true, true, true },
                         { true, true, true, true, true, true, true, true },
                         { true, true, true, true, true, true, true, true },
-                        { true, true, true, true, true, true, true, true },
-                        { true, true, true, true, true, true, true, true },
-                        { true, true, true, true, true, true, true, true }
+                        { false, false, true, true, true, true, false, false },
+                        { false, false, true, true, true, true, false, false },
+                        { false, false, true, true, true, true, false, false }
                     };
                     break;
                 case 4:

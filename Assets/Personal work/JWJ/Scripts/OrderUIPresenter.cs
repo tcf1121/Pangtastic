@@ -9,10 +9,11 @@ public class OrderUIPresenter : MonoBehaviour
     [Header("스크립트")]
     [SerializeField] private OrderStateController _orderState; // 주문 상태 컨트롤러
     [SerializeField] private CustomerOrderController _customerOrder;
+    [SerializeField] private CustomerFlowController _customerFlow;
 
     [Header("대사창")]
     [SerializeField] private GameObject _chatBox;
-    [SerializeField] private TMP_Text _leftDialogue;
+    [SerializeField] private TMP_Text _dialogue;
     [SerializeField] private float _dialogueDuration;
 
     [Header("이모지")]
@@ -29,6 +30,7 @@ public class OrderUIPresenter : MonoBehaviour
 
     private Coroutine emojiCo;
     private Coroutine pairCo;
+    private Coroutine firstDialogueCo;
 
     private void Awake()
     {
@@ -42,6 +44,11 @@ public class OrderUIPresenter : MonoBehaviour
             _customerOrder = FindObjectOfType<CustomerOrderController>();
         }
 
+        if (_customerFlow == null)
+        {
+            _customerFlow = FindObjectOfType<CustomerFlowController>();
+        }
+
         // 이벤트 구독
         _orderState.OnOrderStarted += BuildOrderUI;
         _orderState.OnIngredientProgress += OnIngredientProgress;
@@ -49,7 +56,8 @@ public class OrderUIPresenter : MonoBehaviour
         _orderState.OnOrderCompleted += OnOrderCompleted;
         _orderState.OnOrderTimeout += OnOrderTimeout;
         _customerOrder.OnSpecialCustomerSuccess += OnSpecialOrderCompleted;
-        _customerOrder.OnSpecialCustomerFail += OnSpecialCustomerFail;
+        //_customerOrder.OnSpecialCustomerFail += OnSpecialCustomerFail;
+        _customerFlow.OnCustomerSpawn += OnCustomerSpawn;
     }
 
     private void OnDestroy()
@@ -60,28 +68,34 @@ public class OrderUIPresenter : MonoBehaviour
         _orderState.OnOrderCompleted -= OnOrderCompleted;
         _orderState.OnOrderTimeout -= OnOrderTimeout;
         _customerOrder.OnSpecialCustomerSuccess -= OnSpecialOrderCompleted;
-        _customerOrder.OnSpecialCustomerFail -= OnSpecialCustomerFail;
+        //_customerOrder.OnSpecialCustomerFail -= OnSpecialCustomerFail;
+        _customerFlow.OnCustomerSpawn -= OnCustomerSpawn;
 
         StopRunningCoroutines();
     }
 
+    private void OnCustomerSpawn(CustomerSO customer)
+    {
+        StopRunningCoroutines();
+        firstDialogueCo = StartCoroutine(FirstDialogueRoutine(customer));
+    }
+
     // 주문이 새로 시작될 때 UI 생성
-    private void BuildOrderUI(List<Dictionary<IngredientSO, int>> requiredList, List<RecipeSO> recipes)
+    private void BuildOrderUI(List<OrderRecipe> orderRecipes, List<RecipeSO> recipes)
     {
         ResetAllOrderSlots();
         _activeRecipeSlots.Clear();
 
-        for (int i = 0; i < recipes.Count; i++) // 레시피 수만큼 반복
+        for (int i = 0; i < recipes.Count; i++)
         {
-            //Debug.Log($"슬롯{i}개");
-            OrderItem slot = _recipeSlotList[i]; // i번째
+            OrderItem slot = _recipeSlotList[i]; //주문 들어온 레시피 수만큼
+            slot.gameObject.SetActive(true); //켜줌
+            slot.SetMenu(recipes[i].FoodPic);
 
-            slot.gameObject.SetActive(true); // 슬롯 활성화
-            slot.SetMenu(recipes[i].FoodPic); // 메뉴 이미지 세팅
-            slot.BuildRows(requiredList[i]); //행 생성 
-            slot.RecipeComplete(false); // 클리어 표시 리셋
+            slot.BuildRows(orderRecipes[i]);
+            slot.RecipeComplete(false);
 
-            _activeRecipeSlots.Add(slot); // 활성 목록에 추가
+            _activeRecipeSlots.Add(slot);
         }
     }
 
@@ -120,28 +134,17 @@ public class OrderUIPresenter : MonoBehaviour
 
     private void OnOrderTimeout(CustomerSO curCustomer) //주문 실패
     {
-        if (curCustomer.Type == CustomerType.Special)
-        {
-            StartEmojiOnly(0f);
-        }
-        else 
-        {
-            StartEmojiAndDialogue(0f, curCustomer);
-        }
-    }
-
-    private void OnSpecialCustomerFail(CustomerSO curCustomer) // 스페셜 최종 실패
-    {
         StartEmojiAndDialogue(0f, curCustomer);
     }
 
+    //private void OnSpecialCustomerFail(CustomerSO curCustomer) // 스페셜 최종 실패
+    //{
+    //    StartEmojiAndDialogue(0f, curCustomer);
+    //}
+
     private void StartEmojiOnly(float percent) //이모지 코루틴 시작
     {
-        if (emojiCo != null) // 혹시 코루틴 도는동안 다음 재료가 들어올 수도 있으니 코루틴 중복 호출 방지
-        {
-            StopCoroutine(emojiCo);
-            emojiCo = null;
-        }
+        StopRunningCoroutines();// 혹시 코루틴 도는동안 다음 재료가 들어올 수도 있으니 코루틴 중복 호출 방지
         emojiCo = StartCoroutine(EmojiRoutine(percent));
     }
 
@@ -151,34 +154,35 @@ public class OrderUIPresenter : MonoBehaviour
         pairCo = StartCoroutine(PairRoutine(curCustomer, percent));
     }
 
-
-    private void StopRunningCoroutines() //코루틴 정지
+    private IEnumerator FirstDialogueRoutine(CustomerSO customer)
     {
-        if (emojiCo != null)
-        {
-            StopCoroutine(emojiCo);
-            emojiCo = null;
-        }
-        if (pairCo != null)
-        {
-            StopCoroutine(pairCo);
-            pairCo = null;
-        }
+        _dialogue.text = customer.FirstDialogue; 
+        _chatBox.SetActive(true);
+        yield return new WaitForSeconds(_dialogueDuration);
+        _chatBox.SetActive(false);
+    }
+    private IEnumerator EmojiRoutine(float percent) //이모지 코루틴
+    {
+        _emojiImage.sprite = GetEmojiSprite(percent);
+        _emojiBox.gameObject.SetActive(true);
+
+        yield return new WaitForSeconds(_dialogueDuration);
+        _emojiBox.gameObject.SetActive(false);
     }
 
     private IEnumerator PairRoutine(CustomerSO curCustomer, float percent) //이모지 + 대사 코루틴
     {
         if (percent <= 0f)
         {
-            _leftDialogue.text = curCustomer.LeftDialogue;
+            _dialogue.text = curCustomer.LeftDialogue;
         }
         else if (percent <= 50f)
         {
-            _leftDialogue.text = curCustomer.MidDialogue;
+            _dialogue.text = curCustomer.MidDialogue;
         }
         else
         {
-            _leftDialogue.text = curCustomer.HighDialogue;
+            _dialogue.text = curCustomer.HighDialogue;
         }
 
         _emojiImage.sprite = GetEmojiSprite(percent);
@@ -190,16 +194,6 @@ public class OrderUIPresenter : MonoBehaviour
         _emojiBox.gameObject.SetActive(false);
         _chatBox.gameObject.SetActive(false);
     }
-
-    private IEnumerator EmojiRoutine(float percent) //이모지 코루틴
-    {
-        _emojiImage.sprite = GetEmojiSprite(percent);
-        _emojiBox.gameObject.SetActive(true);
-
-        yield return new WaitForSeconds(_dialogueDuration);
-        _emojiBox.gameObject.SetActive(false);
-    }
-
 
     private Sprite GetEmojiSprite(float percent) //필요한 이모지 이미지 넣기
     {
@@ -225,6 +219,24 @@ public class OrderUIPresenter : MonoBehaviour
             slot.ResetUI();
 
             slot.gameObject.SetActive(false);
+        }
+    }
+    private void StopRunningCoroutines() //코루틴 정지
+    {
+        if (emojiCo != null)
+        {
+            StopCoroutine(emojiCo);
+            emojiCo = null;
+        }
+        if (pairCo != null)
+        {
+            StopCoroutine(pairCo);
+            pairCo = null;
+        }
+        if (firstDialogueCo != null)
+        {
+            StopCoroutine(firstDialogueCo);
+            firstDialogueCo = null;
         }
     }
 }

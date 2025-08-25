@@ -15,8 +15,8 @@ public class StageSetting : MonoBehaviour
     public void SetStage(StageSO stage) //스테이지 세팅 변경
     {
         CurStage = stage;
-        TotalCustomerCount = CurStage.CustomerList.Length;
-        StageClearCustomerCount = CurStage.StageClearCustomerCount;
+       //TotalCustomerCount = CurStage.CustomerList.Length;
+       //StageClearCustomerCount = CurStage.StageClearCustomerCount;
     }
 
     public void InitStageRecipe() //레시피에 스테이지 재료 증감치 적용
