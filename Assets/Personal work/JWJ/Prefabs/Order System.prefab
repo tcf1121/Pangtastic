@@ -380,8 +380,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _orderState: {fileID: 1893106766576959858}
   _customerOrder: {fileID: 3711836772533679277}
+  _customerFlow: {fileID: 0}
   _chatBox: {fileID: 8010624320298729307}
-  _leftDialogue: {fileID: 1827789687244446383}
+  _dialogue: {fileID: 1827789687244446383}
   _dialogueDuration: 1
   _emojiBox: {fileID: 6802223121224489231}
   _emojiImage: {fileID: 8026592808597006540}
@@ -2678,10 +2679,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 16c6d9a294b439644bd96591bdf29b78, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _curStage: {fileID: 11400000, guid: 13b0837ac34a80c42901d6ab81d6d8a4, type: 2}
   _customerOrder: {fileID: 3711836772533679277}
-  customerImage: {fileID: 7036645305961795974}
-  _nextCustomerSpawnDelayTime: 1.5
+  _customerImage: {fileID: 7036645305961795974}
   spawnButton: {fileID: 0}
 --- !u!1 &3070267357217155084
 GameObject:
