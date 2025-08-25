@@ -1,13 +1,16 @@
+using TMPro;
 using UnityEngine;
 
 namespace KDJ
 {
     public class BoardManager : MonoBehaviour
     {
+        [SerializeField] private TMP_Text _blockInfo;
         public IGameState CurrentState { get; private set; }
         public BlockSpawner Spawner { get; private set; }
         public BoardMatchChecker MatchChecker { get; private set; }
         public BlockMover BlockMover { get; private set; }
+        
 
         private void Awake()
         {
@@ -38,5 +41,17 @@ namespace KDJ
             CurrentState = newState;
             CurrentState.OnEnter(this);
         }
+
+        #region 테스트 코드
+        public void UpdateUI(Block block)
+        {
+            _blockInfo.text = $"Block Type: {block.BlockType}\nGem Type: {block.GemType}";
+        }
+
+        public void ResetUI()
+        {
+            _blockInfo.text = string.Empty;
+        }
+        #endregion
     }
 }
