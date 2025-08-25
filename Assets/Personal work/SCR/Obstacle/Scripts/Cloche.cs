@@ -12,13 +12,14 @@ namespace SCR
             _onCollider = true;
             _isSpawn = false;
             _isSplashDamage = true;
-            _blockType = GemType.Cloche;
+            ObstaclType = GemType.Cloche;
             base.Init(cell);
         }
 
         public override void Clear()
         {
             base.Clear();
+            Board.AddObject(_cellPos, GemType.Random);
             //젤리 생성
         }
 

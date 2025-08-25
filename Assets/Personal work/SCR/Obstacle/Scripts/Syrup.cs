@@ -13,7 +13,7 @@ namespace SCR
             _onCollider = false;
             _isSpawn = false;
             _isSplashDamage = false;
-            _blockType = GemType.Syrup;
+            ObstaclType = GemType.Syrup;
         }
 
         public override void Clear()

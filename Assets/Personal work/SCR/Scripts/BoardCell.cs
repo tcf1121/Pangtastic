@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace SCR
 {
-    public class BoardCell : MonoBehaviour
+    public class BoardCell
     {
         private Vector3Int _pos;
         private Donut _donut;
@@ -15,67 +15,73 @@ namespace SCR
         // 시럽, 반죽 뭉치만 확인
         private Obstacle _cellObstacle;
 
-        public void SetDonut(Vector3Int pos, Donut donut)
+        public BoardCell(Vector3Int pos, GemType gem)
         {
-            _pos = pos;
-            if (donut == null)
-            {
-                _donut = new();
-                _donut.RandomDonut();
-            }
-            else _donut = donut;
-            var newDonut = Instantiate(Board.GetPrefab(_donut.DonutType));
-            newDonut.transform.position = _pos;
+            SetCellPos(pos);
+            SetObject(gem);
         }
 
-        public void SetObstacle(Vector3Int pos, Obstacle obstacle, bool isFour = false)
+        private void SetCellPos(Vector3Int pos)
         {
             _pos = pos;
-            if (obstacle.GetCollider())
+        }
+
+        public void SetObject(GemType gem)
+        {
+            if (gem < GemType.RollingPin_v) SetDonut(gem);
+            else if (gem < GemType.Dough) { }
+            else if (gem < GemType.Empty) SetObstacle(gem);
+            if (gem == GemType.Random) SetDonut(gem);
+        }
+
+        public void SetDonut(Donut donut)
+        {
+            _donut = donut;
+        }
+
+        private void SetDonut(GemType donut)
+        {
+            if (donut == GemType.Random)
             {
-                if (obstacle.GetBlockType() == GemType.Ice)
-                {
-                    _donutObstacle = obstacle;
-                    SetDonut(pos, null);
-                }
-                else _obstacle = obstacle;
+                donut = (GemType)Random.Range(0, 6);
+            }
+            _donut = Board.GetDonut(_pos, donut);
+        }
+
+        public void SetObstacle(Obstacle obstacle)
+        {
+            _obstacle = obstacle;
+        }
+
+        private void SetObstacle(GemType obstacle)
+        {
+            if (obstacle < GemType.Ice)
+            {
+                _cellObstacle = Board.GetObstacle(_pos, obstacle);
+                _cellObstacle.Init(_pos);
+                SetDonut(GemType.Random);
+            }
+            else if (obstacle < GemType.Coin)
+            {
+                if (obstacle == GemType.Ice) SetDonut(GemType.Random);
+                _donutObstacle = Board.GetObstacle(_pos, obstacle);
+                _donutObstacle.Init(_pos);
             }
             else
             {
-                _cellObstacle = obstacle;
-                SetDonut(pos, null);
-            }
-            if (isFour) return;
-            InstantiateObstacle();
-        }
-
-        public GameObject GetCatStatues()
-        {
-            return _obstacle.CatGameObject;
-        }
-
-        private void InstantiateObstacle()
-        {
-
-            if (_obstacle != null)
-            {
-                if (_obstacle.GetBlockType() == GemType.CatStatues)
+                if (obstacle == GemType.CatStatues_s)
                 {
-                    if (!_obstacle.IsFourPos(_pos)) return;
+                    return;
                 }
-                _obstacle.CatGameObject = Instantiate(Board.GetPrefab(_obstacle.GetBlockType()));
-                _obstacle.CatGameObject.transform.position = _pos;
+                _obstacle = Board.GetObstacle(_pos, obstacle);
+                _obstacle.Init(_pos);
             }
-            if (_donutObstacle != null)
-            {
-                var newDonut = Instantiate(Board.GetPrefab(_donutObstacle.GetBlockType()));
-                newDonut.transform.position = _pos;
-            }
-            if (_cellObstacle != null)
-            {
-                var newDonut = Instantiate(Board.GetPrefab(_cellObstacle.GetBlockType()));
-                newDonut.transform.position = _pos;
-            }
+        }
+
+        public bool IsEmpty()
+        {
+            if (_obstacle == null && _donut == null && _donutObstacle == null) return true;
+            else return false;
         }
 
         public void RemoveCell()
@@ -86,34 +92,58 @@ namespace SCR
 
         public GemType getCellType()
         {
-            if (_obstacle != null)
-            {
-                return _obstacle.GetBlockType();
-            }
-            else if (_donutObstacle != null)
+            if (_donutObstacle != null)
             {
                 if (_donutObstacle.GetBlockType() == GemType.Cloche)
-                    return _obstacle.GetBlockType();
+                    return GemType.Empty;
                 else return _donut.DonutType;
             }
-            else return _donut.DonutType;
+            if (_donut != null) return _donut.DonutType;
+            else return GemType.Empty;
         }
 
         public bool CanMove()
         {
+            if (_donutObstacle != null)
+                return false;
+            if (_obstacle != null && (_obstacle.GetBlockType() == GemType.CatStatues ||
+                    _obstacle.GetBlockType() == GemType.CatStatues_s))
+                return false;
+            return true;
+        }
+
+        public void MoveObject(BoardCell moveCell)
+        {
+            if (_donut != null)
+            {
+                moveCell.SetDonut(_donut);
+                _donut = null;
+            }
+            if (_obstacle != null && _obstacle.ObstaclType < GemType.CatStatues)
+            {
+                moveCell.SetObstacle(_obstacle);
+                _obstacle = null;
+            }
+        }
+
+        public Donut GetDonut()
+        {
+            if (_donut != null)
+            {
+                return _donut;
+            }
+            return null;
+        }
+
+        public Obstacle GetObstacle()
+        {
             if (_obstacle != null)
             {
-                if (_obstacle.GetBlockType() == GemType.Cloche ||
-                    _obstacle.GetBlockType() == GemType.Ice ||
-                    _obstacle.GetBlockType() == GemType.CatStatues)
-                {
-
-                    return false;
-                }
-                else return true;
+                return _obstacle;
             }
-            else return true;
+            return null;
         }
+
 
         // 주변 피해로 데미지를 입었을 때
         public void SplashDamage()
@@ -124,7 +154,7 @@ namespace SCR
             }
             if (_donutObstacle != null)
             {
-                _obstacle.Damage(1);
+                _donutObstacle.Damage(1);
             }
         }
 
@@ -137,7 +167,7 @@ namespace SCR
             }
             if (_donutObstacle != null)
             {
-                _obstacle.Damage(1);
+                _donutObstacle.Damage(1);
             }
             if (_donut != null)
             {
@@ -147,6 +177,7 @@ namespace SCR
             {
                 _cellObstacle.Damage(1);
             }
+
         }
     }
 }
