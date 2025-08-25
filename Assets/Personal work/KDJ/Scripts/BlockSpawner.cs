@@ -186,9 +186,33 @@ namespace KDJ
                                     BlockArray[y, x].BlockInstance.transform.position.y - 1, 0);
                             }
                         }
+                        if (y < BlockPlate.BlockPlateHeight - 1 && !BlockPlate.BlockPlateArray[y + 1, x])
+                        {
+                            bool allAboveBlockEmpty = true;
+
+                            for (int i = y + 1; i < BlockPlate.BlockPlateHeight; i++)
+                            {
+                                if (BlockPlate.BlockPlateArray[i, x])
+                                {
+                                    allAboveBlockEmpty = false;
+                                }
+                            }
+
+                            if (allAboveBlockEmpty)
+                            {
+                                // 내 위의 블록이 전부 빈칸인 경우
+                                BlockArray[y, x] = BlockArray[BlockArray.GetLength(0) - 1, x];
+                                BlockArray[BlockArray.GetLength(0) - 1, x] = null;
+                                BlockArray[y, x].BlockInstance.transform.position = new Vector3(
+                                    BlockArray[y, x].BlockInstance.transform.position.x,
+                                    BlockArray[y, x].BlockInstance.transform.position.y - (BlockPlate.BlockPlateHeight - y), 0);
+                            }
+                        }
                     }
                     else if (!BlockPlate.BlockPlateArray[y, x])
                     {
+                        if (y - 1 < 0 || !BlockPlate.BlockPlateArray[y - 1, x]) continue;
+
                         if (BlockArray[y + 1, x] != null)
                         {
                             if (BlockArray[y - 1, x] == null)

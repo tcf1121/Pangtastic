@@ -2,6 +2,7 @@ using SCR;
 using System.Collections;
 using System.Collections.Generic;
 using Unity.Collections;
+using Unity.VisualScripting;
 using UnityEngine;
 
 namespace KDJ
@@ -29,7 +30,7 @@ namespace KDJ
 
                 for (int x = 0; x < boardManager.Spawner.BlockPlate.BlockPlateWidth; x++)
                 {
-                    if (boardManager.Spawner.BlockArray[y, x] != null)
+                    if (boardManager.Spawner.BlockPlate.BlockPlateArray[y, x] && boardManager.Spawner.BlockArray[y, x] != null)
                     {
                         curGemType = boardManager.Spawner.BlockArray[y, x].GemType;
 
@@ -48,11 +49,6 @@ namespace KDJ
 
                 if (count >= 3)
                 {
-                    // for (int i = matchStartIndex; i < matchStartIndex + count; i++)
-                    // {
-                    //     Destroy(boardManager.Spawner.BlockArray[y, i].BlockInstance);
-                    //     boardManager.Spawner.BlockArray[y, i].BlockInstance = null;
-                    // }
                     isMatched = true;
                 }
             }
@@ -68,7 +64,7 @@ namespace KDJ
                 for (int y = 0; y < boardManager.Spawner.BlockPlate.BlockPlateHeight; y++)
                 {
 
-                    if (boardManager.Spawner.BlockArray[y, x] != null)
+                    if (boardManager.Spawner.BlockPlate.BlockPlateArray[y, x] && boardManager.Spawner.BlockArray[y, x] != null)
                     {
                         curGemType = boardManager.Spawner.BlockArray[y, x].GemType;
 
@@ -87,11 +83,6 @@ namespace KDJ
 
                 if (count >= 3)
                 {
-                    // for (int i = matchStartIndex; i < matchStartIndex + count; i++)
-                    // {
-                    //     Destroy(boardManager.Spawner.BlockArray[i, x].BlockInstance);
-                    //     boardManager.Spawner.BlockArray[i, x].BlockInstance = null;
-                    // }
                     isMatched = true;
                 }
             }
@@ -101,11 +92,12 @@ namespace KDJ
             {
                 for (int x = 0; x < boardManager.Spawner.BlockPlate.BlockPlateWidth; x++)
                 {
-                    if (boardManager.Spawner.BlockArray[y, x] != null)
+                    if (boardManager.Spawner.BlockPlate.BlockPlateArray[y, x] && boardManager.Spawner.BlockArray[y, x] != null)
                     {
                         if (x + 1 < boardManager.Spawner.BlockPlate.BlockPlateWidth && y + 1 < boardManager.Spawner.BlockPlate.BlockPlateHeight)
                         {
-                            if (boardManager.Spawner.BlockArray[y, x].BlockType == boardManager.Spawner.BlockArray[y + 1, x].BlockType
+                            if (boardManager.Spawner.BlockPlate.BlockPlateArray[y + 1, x] && boardManager.Spawner.BlockPlate.BlockPlateArray[y, x + 1]
+                            && boardManager.Spawner.BlockArray[y, x].BlockType == boardManager.Spawner.BlockArray[y + 1, x].BlockType
                             && boardManager.Spawner.BlockArray[y, x].BlockType == boardManager.Spawner.BlockArray[y, x + 1].BlockType)
                             {
                                 if (IsCubeMatched(boardManager, x, y))
@@ -140,7 +132,7 @@ namespace KDJ
                 for (int x = 0; x < boardManager.Spawner.BlockPlate.BlockPlateWidth; x++)
                 {
 
-                    if (boardManager.Spawner.BlockArray[y, x] != null)
+                    if (boardManager.Spawner.BlockPlate.BlockPlateArray[y, x] && boardManager.Spawner.BlockArray[y, x] != null)
                     {
                         curGemType = boardManager.Spawner.BlockArray[y, x].GemType;
 
@@ -161,10 +153,14 @@ namespace KDJ
                 {
                     for (int i = matchStartIndex; i < matchStartIndex + count; i++)
                     {
-                        Debug.Log($"매칭 된 블럭 수: {count}");
-                        Debug.Log($"X축 매치된 블록 파괴 위치: x={i}, y={y}");
-                        Destroy(boardManager.Spawner.BlockArray[y, i].BlockInstance);
-                        boardManager.Spawner.BlockArray[y, i].BlockInstance = null;
+                        if (boardManager.Spawner.BlockPlate.BlockPlateArray[y, i] && boardManager.Spawner.BlockArray[y, i].BlockInstance != null)
+                        {
+                            Debug.Log($"매칭 된 블럭 수: {count}");
+                            Debug.Log($"X축 매치된 블록 파괴 위치: x={i}, y={y}");
+                            Debug.Log($"매치된 블록 GemType: {boardManager.Spawner.BlockArray[y, i].GemType}");
+                            Destroy(boardManager.Spawner.BlockArray[y, i].BlockInstance);
+                            boardManager.Spawner.BlockArray[y, i].BlockInstance = null;
+                        }
                     }
                 }
             }
@@ -179,7 +175,7 @@ namespace KDJ
 
                 for (int y = 0; y < boardManager.Spawner.BlockPlate.BlockPlateHeight; y++)
                 {
-                    if (boardManager.Spawner.BlockArray[y, x] != null)
+                    if (boardManager.Spawner.BlockPlate.BlockPlateArray[y, x] && boardManager.Spawner.BlockArray[y, x] != null)
                     {
                         curGemType = boardManager.Spawner.BlockArray[y, x].GemType;
 
@@ -200,12 +196,16 @@ namespace KDJ
                 {
                     for (int i = matchStartIndex; i < matchStartIndex + count; i++)
                     {
-                        if (boardManager.Spawner.BlockArray[i, x] != null)
+                        if (boardManager.Spawner.BlockPlate.BlockPlateArray[i, x] && boardManager.Spawner.BlockArray[i, x] != null)
                         {
-                            Debug.Log($"매칭 된 블럭 수: {count}");
-                            Debug.Log($"Y축 매치된 블록 파괴 위치: x={x}, y={i}");
-                            Destroy(boardManager.Spawner.BlockArray[i, x].BlockInstance);
-                            boardManager.Spawner.BlockArray[i, x].BlockInstance = null;
+                            if (boardManager.Spawner.BlockArray[i, x].BlockInstance != null)
+                            {
+                                Debug.Log($"매칭 된 블럭 수: {count}");
+                                Debug.Log($"Y축 매치된 블록 파괴 위치: x={x}, y={i}");
+                                Debug.Log($"매치된 블록 GemType: {boardManager.Spawner.BlockArray[i, x].GemType}");
+                                Destroy(boardManager.Spawner.BlockArray[i, x].BlockInstance);
+                                boardManager.Spawner.BlockArray[i, x].BlockInstance = null;
+                            }
                         }
                     }
                 }
@@ -220,7 +220,8 @@ namespace KDJ
                     {
                         if (x + 1 < boardManager.Spawner.BlockPlate.BlockPlateWidth && y + 1 < boardManager.Spawner.BlockPlate.BlockPlateHeight)
                         {
-                            if (boardManager.Spawner.BlockArray[y, x].BlockType == boardManager.Spawner.BlockArray[y + 1, x].BlockType
+                            if (boardManager.Spawner.BlockPlate.BlockPlateArray[y + 1, x] && boardManager.Spawner.BlockPlate.BlockPlateArray[y, x + 1]
+                            && boardManager.Spawner.BlockArray[y, x].BlockType == boardManager.Spawner.BlockArray[y + 1, x].BlockType
                             && boardManager.Spawner.BlockArray[y, x].BlockType == boardManager.Spawner.BlockArray[y, x + 1].BlockType)
                             {
                                 CubeCheck(boardManager, x, y, 1);
@@ -260,7 +261,7 @@ namespace KDJ
 
                 //Debug.Log($"x축 매치 체크 인덱스: {curIndex}");
 
-                if (boardManager.Spawner.BlockArray.GetLength(1) > curIndex && curIndex >= 0 && boardManager.Spawner.BlockArray[y, curIndex] != null)
+                if (boardManager.Spawner.BlockPlate.BlockPlateArray[y, x] && boardManager.Spawner.BlockArray.GetLength(1) > curIndex && curIndex >= 0 && boardManager.Spawner.BlockArray[y, curIndex] != null)
                 {
                     curGemType = boardManager.Spawner.BlockArray[y, curIndex].GemType;
 
@@ -285,10 +286,14 @@ namespace KDJ
             {
                 for (int i = matchStartIndex; i < matchStartIndex + count; i++)
                 {
-                    Debug.Log($"매칭 된 블럭 수: {count}");
-                    Debug.Log($"X축 매치된 블록 파괴 위치: x={i}, y={y}");
-                    Destroy(boardManager.Spawner.BlockArray[y, i].BlockInstance);
-                    boardManager.Spawner.BlockArray[y, i].BlockInstance = null;
+                    if (boardManager.Spawner.BlockPlate.BlockPlateArray[y, i] && boardManager.Spawner.BlockArray[y, i].BlockInstance != null)
+                    {
+                        Debug.Log($"매칭 된 블럭 수: {count}");
+                        Debug.Log($"X축 매치된 블록 파괴 위치: x={i}, y={y}");
+                        Debug.Log($"매치된 블록 GemType: {boardManager.Spawner.BlockArray[y, i].GemType}");
+                        Destroy(boardManager.Spawner.BlockArray[y, i].BlockInstance);
+                        boardManager.Spawner.BlockArray[y, i].BlockInstance = null;
+                    }
                 }
             }
 
@@ -310,7 +315,7 @@ namespace KDJ
 
                 //Debug.Log($"y축 매치 체크 인덱스: {curIndex}");
 
-                if (boardManager.Spawner.BlockPlate.BlockPlateHeight > curIndex && curIndex >= 0 && boardManager.Spawner.BlockArray[curIndex, x] != null)
+                if (boardManager.Spawner.BlockPlate.BlockPlateArray[y, x] && boardManager.Spawner.BlockPlate.BlockPlateHeight > curIndex && curIndex >= 0 && boardManager.Spawner.BlockArray[curIndex, x] != null)
                 {
                     curGemType = boardManager.Spawner.BlockArray[curIndex, x].GemType;
 
@@ -339,10 +344,14 @@ namespace KDJ
             {
                 for (int i = matchStartIndex; i < matchStartIndex + count; i++)
                 {
-                    Debug.Log($"매칭 된 블럭 수: {count}");
-                    Debug.Log($"Y축 매치된 블록 파괴 위치: x={x}, y={i}");
-                    Destroy(boardManager.Spawner.BlockArray[i, x].BlockInstance);
-                    boardManager.Spawner.BlockArray[i, x].BlockInstance = null;
+                    if (boardManager.Spawner.BlockPlate.BlockPlateArray[i, x] && boardManager.Spawner.BlockArray[i, x].BlockInstance != null)
+                    {
+                        Debug.Log($"매칭 된 블럭 수: {count}");
+                        Debug.Log($"Y축 매치된 블록 파괴 위치: x={x}, y={i}");
+                        Debug.Log($"매치된 블록 GemType: {boardManager.Spawner.BlockArray[i, x].GemType}");
+                        Destroy(boardManager.Spawner.BlockArray[i, x].BlockInstance);
+                        boardManager.Spawner.BlockArray[i, x].BlockInstance = null;
+                    }
                 }
             }
 
@@ -436,8 +445,8 @@ namespace KDJ
                         return;
                     }
 
-                    if (boardManager.Spawner.BlockArray[i, j] != null && boardManager.Spawner.BlockArray[y, x] != null &&
-                        boardManager.Spawner.BlockArray[i, j].BlockType == boardManager.Spawner.BlockArray[y, x].BlockType)
+                    if (boardManager.Spawner.BlockPlate.BlockPlateArray[i, j] && boardManager.Spawner.BlockPlate.BlockPlateArray[y, x] && boardManager.Spawner.BlockArray[i, j] != null
+                    && boardManager.Spawner.BlockArray[y, x] != null && boardManager.Spawner.BlockArray[i, j].BlockType == boardManager.Spawner.BlockArray[y, x].BlockType)
                     {
                         matchCount++;
                     }
@@ -453,8 +462,11 @@ namespace KDJ
                     {
                         if (boardManager.Spawner.BlockArray[i, j] != null)
                         {
-                            Destroy(boardManager.Spawner.BlockArray[i, j].BlockInstance);
-                            boardManager.Spawner.BlockArray[i, j].BlockInstance = null;
+                            if (boardManager.Spawner.BlockArray[i, j].BlockInstance != null)
+                            {
+                                Destroy(boardManager.Spawner.BlockArray[i, j].BlockInstance);
+                                boardManager.Spawner.BlockArray[i, j].BlockInstance = null;
+                            }
                         }
                     }
                 }
@@ -487,8 +499,8 @@ namespace KDJ
                         return isMatched;
                     }
 
-                    if (boardManager.Spawner.BlockArray[i, j] != null && boardManager.Spawner.BlockArray[y, x] != null &&
-                        boardManager.Spawner.BlockArray[i, j].BlockType == boardManager.Spawner.BlockArray[y, x].BlockType)
+                    if (boardManager.Spawner.BlockPlate.BlockPlateArray[i, j] && boardManager.Spawner.BlockPlate.BlockPlateArray[y, x] && boardManager.Spawner.BlockArray[i, j] != null
+                    && boardManager.Spawner.BlockArray[y, x] != null && boardManager.Spawner.BlockArray[i, j].BlockType == boardManager.Spawner.BlockArray[y, x].BlockType)
                     {
                         matchCount++;
                     }

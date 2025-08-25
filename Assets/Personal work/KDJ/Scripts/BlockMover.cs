@@ -39,7 +39,7 @@ namespace KDJ
             // StartPos와 EndPos를 이용하여 블록을 이동하는 로직 구현
             Vector2Int startGrid = WorldToGrid(StartPos);
 
-            if (startGrid.x >= boardManager.Spawner.BlockPlate.BlockPlateWidth || startGrid.y >= boardManager.Spawner.BlockPlate.BlockPlateHeight)
+            if (startGrid.x >= boardManager.Spawner.BlockPlate.BlockPlateWidth || startGrid.y >= boardManager.Spawner.BlockPlate.BlockPlateHeight || !boardManager.Spawner.BlockPlate.BlockPlateArray[startGrid.y, startGrid.x])
             {
                 Debug.Log("시작 위치가 보드 영역을 벗어났습니다.");
                 return false;
@@ -75,7 +75,8 @@ namespace KDJ
             EndPos = new Vector2(swapPos.x, swapPos.y); // EndPos도 갱신
 
             // 스왑할 위치가 보드를 벗어나면 이동안함
-            if (swapPos.x < 0 || swapPos.y < 0 || swapPos.x >= boardManager.Spawner.BlockPlate.BlockPlateWidth || swapPos.y >= boardManager.Spawner.BlockPlate.BlockPlateHeight)
+            if (swapPos.x < 0 || swapPos.y < 0 || swapPos.x >= boardManager.Spawner.BlockPlate.BlockPlateWidth || swapPos.y >= boardManager.Spawner.BlockPlate.BlockPlateHeight
+            || !boardManager.Spawner.BlockPlate.BlockPlateArray[swapPos.y, swapPos.x])
             {
                 Debug.Log("스왑 위치가 보드 영역을 벗어났습니다.");
                 return false;
