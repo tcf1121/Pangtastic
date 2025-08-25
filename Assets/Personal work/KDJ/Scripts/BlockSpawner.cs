@@ -9,6 +9,7 @@ namespace KDJ
     public class Block
     {
         public int BlockType { get; set; }
+        public int Score { get; private set; } = 10;
         public GameObject BlockInstance { get; set; } = null;
         public GemType GemType { get; set; }
     }
@@ -186,9 +187,33 @@ namespace KDJ
                                     BlockArray[y, x].BlockInstance.transform.position.y - 1, 0);
                             }
                         }
+                        if (y < BlockPlate.BlockPlateHeight - 1 && !BlockPlate.BlockPlateArray[y + 1, x])
+                        {
+                            bool allAboveBlockEmpty = true;
+
+                            for (int i = y + 1; i < BlockPlate.BlockPlateHeight; i++)
+                            {
+                                if (BlockPlate.BlockPlateArray[i, x])
+                                {
+                                    allAboveBlockEmpty = false;
+                                }
+                            }
+
+                            if (allAboveBlockEmpty)
+                            {
+                                // 내 위의 블록이 전부 빈칸인 경우
+                                BlockArray[y, x] = BlockArray[BlockArray.GetLength(0) - 1, x];
+                                BlockArray[BlockArray.GetLength(0) - 1, x] = null;
+                                BlockArray[y, x].BlockInstance.transform.position = new Vector3(
+                                    BlockArray[y, x].BlockInstance.transform.position.x,
+                                    BlockArray[y, x].BlockInstance.transform.position.y - (BlockPlate.BlockPlateHeight - y), 0);
+                            }
+                        }
                     }
                     else if (!BlockPlate.BlockPlateArray[y, x])
                     {
+                        if (y - 1 < 0 || !BlockPlate.BlockPlateArray[y - 1, x]) continue;
+
                         if (BlockArray[y + 1, x] != null)
                         {
                             if (BlockArray[y - 1, x] == null)
@@ -277,8 +302,9 @@ namespace KDJ
         /// <summary>
         /// 블럭 체크. 시각적 오브젝트가 파괴된 경우에도 해당 칸을 빈칸으로 설정
         /// </summary>
-        public void CheckBlockArray()
+        public void CheckBlockArray(BoardManager boardManager)
         {
+            int score = 0;
             for (int x = 0; x < BlockPlate.BlockPlateWidth; x++)
             {
                 for (int y = 0; y < BlockPlate.BlockPlateHeight; y++)
@@ -316,6 +342,28 @@ namespace KDJ
                         }
                     }
                 }
+            }
+        }
+
+        /// <summary>
+        /// 지정 위치에 입력받은 블록을 생성
+        /// </summary>
+        /// <param name="x"></param>
+        /// <param name="y"></param>
+        // 추후에 3번째 매개변수 Gemtype을 받도록 변경해야합니다.
+        public void SpawnBlock(int x, int y, int blockNum)
+        {
+            GameObject blockPrefab = GetBlockTile(blockNum);
+            if (blockPrefab != null)
+            {
+                GameObject blockInstance = Instantiate(blockPrefab);
+
+                if (BlockPlate.BlockPlateWidth % 2 == 0)
+                    blockInstance.transform.position = new Vector3(x - BlockPlate.BlockPlateWidth / 2 + 0.5f, y - BlockPlate.BlockPlateHeight / 2 + 0.5f, 0);
+                else
+                    blockInstance.transform.position = new Vector3(x - BlockPlate.BlockPlateWidth / 2, y - BlockPlate.BlockPlateHeight / 2, 0);
+
+                BlockArray[y, x] = new Block { BlockInstance = blockInstance, BlockType = blockNum };
             }
         }
         #endregion

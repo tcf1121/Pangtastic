@@ -38,14 +38,19 @@ namespace KDJ.States
             SpecialBlock endSpecialBlock = null;
             Debug.Log("블럭 매칭 시작");
             yield return new WaitForSeconds(0.5f);
-            bool StartBlockIsSpecialBlock = boardManager.Spawner.BlockArray[(int)boardManager.BlockMover.StartPos.y, (int)boardManager.BlockMover.StartPos.x].BlockInstance.TryGetComponent<SpecialBlock>(out startSpecialBlock);
-            bool EndBlockIsSpecialBlock = boardManager.Spawner.BlockArray[(int)boardManager.BlockMover.EndPos.y, (int)boardManager.BlockMover.EndPos.x].BlockInstance.TryGetComponent<SpecialBlock>(out endSpecialBlock);
-            if (StartBlockIsSpecialBlock || EndBlockIsSpecialBlock)
+
+            if (boardManager.Spawner.BlockPlate.BlockPlateArray[(int)boardManager.BlockMover.StartPos.y, (int)boardManager.BlockMover.StartPos.x] &&
+                boardManager.Spawner.BlockPlate.BlockPlateArray[(int)boardManager.BlockMover.EndPos.y, (int)boardManager.BlockMover.EndPos.x])
             {
-                startSpecialBlock?.Activate(boardManager);
-                endSpecialBlock?.Activate(boardManager);
-                boardManager.ChangeState(new RefillState());
-                yield break;
+                bool StartBlockIsSpecialBlock = boardManager.Spawner.BlockArray[(int)boardManager.BlockMover.StartPos.y, (int)boardManager.BlockMover.StartPos.x].BlockInstance.TryGetComponent<SpecialBlock>(out startSpecialBlock);
+                bool EndBlockIsSpecialBlock = boardManager.Spawner.BlockArray[(int)boardManager.BlockMover.EndPos.y, (int)boardManager.BlockMover.EndPos.x].BlockInstance.TryGetComponent<SpecialBlock>(out endSpecialBlock);
+                if (StartBlockIsSpecialBlock || EndBlockIsSpecialBlock)
+                {
+                    startSpecialBlock?.Activate(boardManager);
+                    endSpecialBlock?.Activate(boardManager);
+                    boardManager.ChangeState(new RefillState());
+                    yield break;
+                }
             }
 
             if (boardManager.BlockMover.StartPos != Vector2.zero)
