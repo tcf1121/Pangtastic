@@ -9,6 +9,7 @@ namespace KDJ
     public class Block
     {
         public int BlockType { get; set; }
+        public int Score { get; private set; } = 10;
         public GameObject BlockInstance { get; set; } = null;
         public GemType GemType { get; set; }
     }
@@ -42,9 +43,9 @@ namespace KDJ
             // 추가 생성될 블럭을 담아놓을 큐를 생성. 배열은 미리 블럭을 꺼내 로드할 행 하나만 추가
             BlockArray = new Block[BlockPlate.BlockPlateHeight + 1, BlockPlate.BlockPlateWidth];
             _blockWaitingQueue = new Queue<Block>[BlockPlate.BlockPlateWidth];
-            _bakingTest = FindObjectOfType<OrderStateController>();
-            _test = FindObjectOfType<CustomerFlowController>();
-            _test.StartCustomerCycle();
+            // _bakingTest = FindObjectOfType<OrderStateController>();
+            // _test = FindObjectOfType<CustomerFlowController>();
+            // _test.Spawn();
 
             for (int x = 0; x < BlockPlate.BlockPlateWidth; x++)
             {
@@ -65,10 +66,10 @@ namespace KDJ
             }
 
             // 테스트 코드
-            BlockArray[3, 2].BlockType = 6;
-            BlockArray[3, 2].GemType = (GemType)6;
-            BlockArray[3, 3].BlockType = 7;
-            BlockArray[3, 3].GemType = (GemType)7;
+            //BlockArray[3, 2].BlockType = 6;
+            //BlockArray[3, 2].GemType = (GemType)6;
+            //BlockArray[3, 3].BlockType = 7;
+            //BlockArray[3, 3].GemType = (GemType)7;
             //BlockArray[3, 4].BlockType = 12;
             //BlockArray[3, 4].GemType = GemType.Box;
             //BlockArray[3, 5].BlockType = 12;
@@ -186,9 +187,33 @@ namespace KDJ
                                     BlockArray[y, x].BlockInstance.transform.position.y - 1, 0);
                             }
                         }
+                        if (y < BlockPlate.BlockPlateHeight - 1 && !BlockPlate.BlockPlateArray[y + 1, x])
+                        {
+                            bool allAboveBlockEmpty = true;
+
+                            for (int i = y + 1; i < BlockPlate.BlockPlateHeight; i++)
+                            {
+                                if (BlockPlate.BlockPlateArray[i, x])
+                                {
+                                    allAboveBlockEmpty = false;
+                                }
+                            }
+
+                            if (allAboveBlockEmpty)
+                            {
+                                // 내 위의 블록이 전부 빈칸인 경우
+                                BlockArray[y, x] = BlockArray[BlockArray.GetLength(0) - 1, x];
+                                BlockArray[BlockArray.GetLength(0) - 1, x] = null;
+                                BlockArray[y, x].BlockInstance.transform.position = new Vector3(
+                                    BlockArray[y, x].BlockInstance.transform.position.x,
+                                    BlockArray[y, x].BlockInstance.transform.position.y - (BlockPlate.BlockPlateHeight - y), 0);
+                            }
+                        }
                     }
                     else if (!BlockPlate.BlockPlateArray[y, x])
                     {
+                        if (y - 1 < 0 || !BlockPlate.BlockPlateArray[y - 1, x]) continue;
+
                         if (BlockArray[y + 1, x] != null)
                         {
                             if (BlockArray[y - 1, x] == null)
@@ -262,27 +287,24 @@ namespace KDJ
         public void CheckBlockInArray()
         {
             int count = 0;
-            Debug.Log("블럭 배열 상태 확인 시작");
             for (int x = 0; x < BlockPlate.BlockPlateWidth; x++)
             {
                 for (int y = 0; y < BlockPlate.BlockPlateHeight; y++)
                 {
                     if (BlockArray[y, x] != null)
                     {
-                        Debug.Log($"블럭 위치: ({x}, {y}) - 타입: {BlockArray[y, x].BlockType}");
                         count++;
                     }
                 }
             }
-            Debug.Log($"총 블럭 수: {count}");
         }
 
         /// <summary>
         /// 블럭 체크. 시각적 오브젝트가 파괴된 경우에도 해당 칸을 빈칸으로 설정
         /// </summary>
-        public void CheckBlockArray()
+        public void CheckBlockArray(BoardManager boardManager)
         {
-            Debug.Log("블럭 배열 상태 확인 시작");
+            int score = 0;
             for (int x = 0; x < BlockPlate.BlockPlateWidth; x++)
             {
                 for (int y = 0; y < BlockPlate.BlockPlateHeight; y++)
@@ -294,32 +316,54 @@ namespace KDJ
                             // if (BlockArray[y, x].BlockInstance != null) Destroy(BlockArray[y, x].BlockInstance);
 
                             // 이 부분에 파괴된 블럭의 데이터를 내보낼 로직 추가하면 됨
-                            switch (BlockArray[y, x].BlockType)
-                            {
-                                case 1:
-                                    _bakingTest?.AddIngredient(_carrot);
-                                    break;
-                                case 2:
-                                    _bakingTest?.AddIngredient(_lemon);
-                                    break;
-                                case 3:
-                                    _bakingTest?.AddIngredient(_grape);
-                                    break;
-                                case 4:
-                                    _bakingTest?.AddIngredient(_strawberry);
-                                    break;
-                                case 5:
-                                    _bakingTest?.AddIngredient(_apple);
-                                    break;
-                                default:
-                                    break;
-
-                            }
+                            //switch (BlockArray[y, x].BlockType)
+                            //{
+                            //    case 1:
+                            //        _bakingTest?.AddIngredient(_carrot);
+                            //        break;
+                            //    case 2:
+                            //        _bakingTest?.AddIngredient(_lemon);
+                            //        break;
+                            //    case 3:
+                            //        _bakingTest?.AddIngredient(_grape);
+                            //        break;
+                            //    case 4:
+                            //        _bakingTest?.AddIngredient(_strawberry);
+                            //        break;
+                            //    case 5:
+                            //        _bakingTest?.AddIngredient(_apple);
+                            //        break;
+                            //    default:
+                            //        break;
+                            //
+                            //}
 
                             BlockArray[y, x] = null;
                         }
                     }
                 }
+            }
+        }
+
+        /// <summary>
+        /// 지정 위치에 입력받은 블록을 생성
+        /// </summary>
+        /// <param name="x"></param>
+        /// <param name="y"></param>
+        // 추후에 3번째 매개변수 Gemtype을 받도록 변경해야합니다.
+        public void SpawnBlock(int x, int y, int blockNum)
+        {
+            GameObject blockPrefab = GetBlockTile(blockNum);
+            if (blockPrefab != null)
+            {
+                GameObject blockInstance = Instantiate(blockPrefab);
+
+                if (BlockPlate.BlockPlateWidth % 2 == 0)
+                    blockInstance.transform.position = new Vector3(x - BlockPlate.BlockPlateWidth / 2 + 0.5f, y - BlockPlate.BlockPlateHeight / 2 + 0.5f, 0);
+                else
+                    blockInstance.transform.position = new Vector3(x - BlockPlate.BlockPlateWidth / 2, y - BlockPlate.BlockPlateHeight / 2, 0);
+
+                BlockArray[y, x] = new Block { BlockInstance = blockInstance, BlockType = blockNum };
             }
         }
         #endregion

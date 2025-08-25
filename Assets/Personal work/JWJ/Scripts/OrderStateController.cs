@@ -5,23 +5,19 @@ using UnityEngine.UI;
 
 public class OrderStateController : MonoBehaviour
 {
-    public event Action<List<Dictionary<IngredientSO, int>>, List<RecipeSO>> OnOrderStarted; //주문 시작 시 요구목록/레시피 전달
+    public event Action<List<OrderRecipe>, List<RecipeSO>> OnOrderStarted; //주문 시작 시 요구목록/레시피 전달
     public event Action<int, IngredientSO, int, int> OnIngredientProgress; //레시피 인덱스, 재료, 현재수, 필요수
     public event Action<int> OnRecipeCompleted;
 
     //노멀, 유니크 손님 성공/실패 이벤트
     public event Action<CustomerSO, float> OnOrderCompleted;
-    public event Action<CustomerSO> OnOrderTimeout; //레시피 인덱스 //유지
+    public event Action<CustomerSO> OnOrderTimeout; //레시피 인덱스
 
     [SerializeField] private Slider patienceSlider;
 
-    private List<RecipeSO> _curRecipes = new List<RecipeSO>(); //이번 주문의 레시피 목록
-    private StageSO _curStage;
     private CustomerSO _curCustomer;
 
-    private List<Dictionary<IngredientSO, int>> _requiredPerRecipe = new List<Dictionary<IngredientSO, int>>(); //레시피별 요구 재료
-    private List<Dictionary<IngredientSO, int>> _collectedPerRecipe = new List<Dictionary<IngredientSO, int>>(); //레시피별 수집 재료
-    private List<bool> _isRecipeCompleted = new List<bool>(); //레시피별 완료 여부
+    private List<OrderRecipe> _orderRecipes = new List<OrderRecipe>();
 
     private float _maxPatience; //인내심 최대값
     private float _curPatience; //현재 인내심
@@ -31,126 +27,75 @@ public class OrderStateController : MonoBehaviour
 
     public void StartOrder(List<RecipeSO> recipes, StageSO stage, CustomerSO customer)
     {
-        _curRecipes = recipes; //현재 레시피 목록 저장
-        _curStage = stage; //현재 스테이지 저장
-        _curCustomer = customer; //현재 손님 저장
+        _curCustomer = customer;
 
-        _requiredPerRecipe.Clear(); //이전 요구 목록 초기화
-        _collectedPerRecipe.Clear(); //이전 수집 목록 초기화
-        _isRecipeCompleted.Clear(); //이전 완료 목록 초기화
+        _orderRecipes.Clear();
 
-        foreach (RecipeSO recipe in _curRecipes) //레시피들을 순회
+        for (int i = 0; i < recipes.Count; i++) // 주문 레시피 순회
         {
-            var required = RecipeRule.ApplyMultipliers(recipe, _curStage); //스테이지 보정 적용된 최종값
-            var reqCopy = new Dictionary<IngredientSO, int>(); //내부 보관용 복사 딕셔너리 생성
-
-            foreach (var kv in required) //요구 목록을 순회
-            {
-                reqCopy[kv.Key] = kv.Value; //키/값 복사
-            }
-            _requiredPerRecipe.Add(reqCopy); //요구 목록 리스트에 추가
-
-            var colInit = new Dictionary<IngredientSO, int>(); //수집 초기값 딕셔너리
-            foreach (var kv in reqCopy) //요구 재료 키 기반으로
-            {
-                colInit[kv.Key] = 0; //초기 수집량 0으로 설정
-            }
-            _collectedPerRecipe.Add(colInit); //수집 목록 리스트에 추가
-
-            _isRecipeCompleted.Add(false); //해당 레시피 완료 플래그 false로 초기화
+            OrderRecipe orderRecipe = new OrderRecipe(recipes[i], stage); //레시피별로 필요재료, 배수 적용
+            _orderRecipes.Add(orderRecipe);
         }
 
-        OnOrderStarted?.Invoke(_requiredPerRecipe, _curRecipes); //UI로 정보 전달
+        OnOrderStarted?.Invoke(_orderRecipes, recipes); //UI로 정보 전달
 
         StartPatience(); //인내심 감소 시작
     }
 
     public void AddIngredient(IngredientSO ingredient) //블록 터지면 호출되는 함수
     {
-        if (_requiredPerRecipe == null || _requiredPerRecipe.Count == 0) //주문 들어오기 전 재료 안받음
+        if (_orderRecipes.Count == 0)
         {
             Debug.Log("주문 없음");
             return;
         }
-
         if (_hasEnded)
         {
-            Debug.Log("아직 재료를 수집할 수 없습니다");
+            Debug.Log("스테이지 종료됨 재료수집 불가능");
             return;
         }
 
-        for (int i = 0; i < _requiredPerRecipe.Count; i++) //각 레시피를 순회
+        for (int i = 0; i < _orderRecipes.Count; i++) //레시피 순회
         {
-            if (_isRecipeCompleted[i]) //이미 완료된 레시피면
+            OrderRecipe recipe = _orderRecipes[i];
+
+            if (recipe.IsCompleted) //이미 완료된 레시피면 건너뜀
             {
-                continue; //다음 레시피 검사
+                continue;
             }
 
-            var reqIng = _requiredPerRecipe[i]; //필요 재료 딕셔너리
-            var colIng = _collectedPerRecipe[i]; //수집 재료 딕셔너리
+            bool collected = recipe.CollectIngredient(ingredient, out int have, out int need); //재료 수집 시도
 
-            if (!reqIng.ContainsKey(ingredient)) //이 레시피에 해당 제료가 필요 없으면
+            if (collected) // 재료가 반영되면
             {
-                continue; //다음 레시피 검사
-            }
+                OnIngredientProgress?.Invoke(i, ingredient, have, need); // UI 갱신 이벤트
 
-            int need = reqIng[ingredient]; //필요 수량
-            int cur = colIng.ContainsKey(ingredient) ? colIng[ingredient] : 0; //현재 수집 수량
-
-            if (cur >= need) //이 재료가 더이상 필요 없을경우
-            {
-                continue; //다음 레시피 검사
-            }
-
-            colIng[ingredient] = cur + 1; //수집 개수 1 증가
-
-            OnIngredientProgress?.Invoke(i, ingredient, colIng[ingredient], need); //UI에게 정보 전달
-
-            if (IsRecipeComplete(i)) //이 레시피가 완료됐다면
-            {
-                _isRecipeCompleted[i] = true;
-
-                OnRecipeCompleted?.Invoke(i);
-
-                if (IsAllComplete()) //모든 주문이 완료되었다면
+                if (recipe.IsCompleted) // 이 레시피가 완료됐다면
                 {
-                    _hasEnded = true; //다음 손님 주문 들어오기전까진 재료수집 막음
-
-                    StopPatience(); //인내심 정지
-
-                    float remainPercent = (_curPatience / _maxPatience) * 100; //성공한 인내심
-
-                    OnOrderCompleted?.Invoke(_curCustomer, remainPercent);
+                    OnRecipeCompleted?.Invoke(i); // 레시피 완료 이벤트
                 }
+
+                if (IsAllComplete()) //주문 전체 완료되면
+                {
+                    _hasEnded = true; //재료수집 막음
+                    StopPatience();
+
+                    float remainPercent = (_curPatience / _maxPatience) * 100f;
+                    OnOrderCompleted?.Invoke(_curCustomer, remainPercent); //주문 완료 이벤트 (남은 인내심 포함)
+                }
+                break; //재료 반영되면 반복문 종료
             }
-            break; //재료 반영 끝
         }
     }
 
 
-    private bool IsRecipeComplete(int index) //레시피 완료 검사
+    private bool IsAllComplete()
     {
-        var req = _requiredPerRecipe[index]; //요구량
-        var col = _collectedPerRecipe[index]; //수집량
-
-        foreach (var kv in req) //요구 항목 순회
+        foreach (var recipe in _orderRecipes) //주문 레시피 목록 순회
         {
-            int have = col[kv.Key]; //수집된 수량 조회
-            if (have < kv.Value) //필요치 미달이면
+            if (!recipe.IsCompleted) //완료 안된 레시피가 있으면
             {
-                return false; //미완료
-            }
-        }
-        return true; //완료
-    }
-
-    private bool IsAllComplete() //전체 완료 검사
-    {
-        foreach (bool done in _isRecipeCompleted) //완료 레시피 순회
-        {
-            if (!done) //하나라도 미완료면
-            {
-                return false;
+                return false; //false 반환
             }
         }
         return true;

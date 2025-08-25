@@ -1,24 +1,21 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 public class CustomerFlowController : MonoBehaviour
 {
-    [SerializeField] private StageSO _curStage; // 현재 스테이지 SO
-    [SerializeField] private CustomerOrderController _customerOrder; // 주문 오케스트레이터
-    [SerializeField] private Image customerImage; // 손님 이미지
-    [SerializeField] private float _nextCustomerSpawnDelayTime = 1.5f; // 손님 딜레이
+    [SerializeField] private CustomerOrderController _customerOrder;
+    [SerializeField] private Image _customerImage; // 손님 이미지
 
-    private List<CustomerSO> _customerPool = new List<CustomerSO>();
-    List<CustomerSO> _normals = new List<CustomerSO>(); //노멀 손님 담기용
-
-    private Queue<CustomerSO> _customerQueue = new Queue<CustomerSO>(); // 이번 스테이지 손님 순서 큐
     private CustomerSO _curCustomer;
 
-    private int _successCount;
-    private int _failureCount;
+    public event Action<CustomerSO> OnCustomerSpawn;
+    public event Action OnStageCleared;
+    public event Action OnStageFailed;
 
     [SerializeField] private Button spawnButton; //테스트용 버튼
 
@@ -31,9 +28,10 @@ public class CustomerFlowController : MonoBehaviour
         _customerOrder.OnCustomerSuccess += OnCustomerSuccess;
         _customerOrder.OnCustomerFail += OnCustomerFail;
         _customerOrder.OnSpecialCustomerSuccess += OnSpecialCustomerSuccess;
-        _customerOrder.OnSpecialCustomerFail += OnSpecialCustomerFail;
+        //_customerOrder.OnSpecialCustomerFail += OnSpecialCustomerFail;
+        _customerOrder.OnSpecialCustomerRewardGiven += OnSpecialCustomerRewardGiven;
 
-        spawnButton.onClick.AddListener(StartCustomerCycle); //테스트용 버튼
+        spawnButton.onClick.AddListener(SpawnCustomer); //테스트용 버튼
     }
 
     private void OnDestroy()
@@ -41,175 +39,73 @@ public class CustomerFlowController : MonoBehaviour
         _customerOrder.OnCustomerSuccess -= OnCustomerSuccess;
         _customerOrder.OnCustomerFail -= OnCustomerFail;
         _customerOrder.OnSpecialCustomerSuccess -= OnSpecialCustomerSuccess;
-        _customerOrder.OnSpecialCustomerFail -= OnSpecialCustomerFail;
+        //_customerOrder.OnSpecialCustomerFail -= OnSpecialCustomerFail;
+        _customerOrder.OnSpecialCustomerRewardGiven -= OnSpecialCustomerRewardGiven;
     }
 
-    public void StartCustomerCycle()
+    public void SpawnCustomer()
     {
-        _successCount = 0;
-        _failureCount = 0;
+        StageSO curStage = StageManager.Instance.CurrentStage;
+        _curCustomer = curStage.Customer;
 
-        BuildCustomerQueue();
-        SpawnNextCustomer();
-    }
+        _customerImage.sprite = _curCustomer.CustomerPic;
 
-    private void BuildCustomerQueue()
-    {
-        _customerQueue.Clear();
-        _normals.Clear();
+        OnCustomerSpawn?.Invoke(_curCustomer);
 
-        _customerPool = new List<CustomerSO>(_curStage.CustomerList); //스테이지 손님 목록을 리스트에 담음
-        //Debug.Log($"총 손님 수 : {_customerPool.Count}");
+        _customerOrder.StartCustomerOrder(_curCustomer, curStage); //손님 주문
 
-        foreach (CustomerSO customer in _customerPool) //스테이지 손님 리스트 순회
-        {
-            if (customer.Type == CustomerType.Normal) //손님 타입이 노멀이면 리스트에 넣음
-            {
-                _normals.Add(customer);
-            }
-        }
-        //Debug.Log($"노멀 타입 수 : {_normals.Count}");
-
-        if (_normals.Count > 0) //노멀 타입이 리스트에 있을경우 
-        {
-            int randIndex = Random.Range(0, _normals.Count);
-            CustomerSO firstCustomer = _normals[randIndex];
-            //Debug.Log($"첫 손님 : {firstCustomer}");
-
-            _customerQueue.Enqueue(firstCustomer); // 큐에 처음으로 넣어서 첫손님으로 지정
-            _customerPool.Remove(firstCustomer); // 풀에서 제거
-        }
-        else
-        {
-            Debug.LogWarning("normal 손님이 없습니다.");
-        }
-
-        List<CustomerSO> lastCustomerList = new List<CustomerSO>(); //스페셜 뺀 손님 담을 리스트
-
-        foreach (CustomerSO customer in _customerPool)
-        {
-            if (customer.Type != CustomerType.Special) // 스페셜이 아니면 리스트에 추가
-            {
-                lastCustomerList.Add(customer);
-            }
-        }
-
-        CustomerSO lastCustomer = null; //마지막 손님
-
-        if (lastCustomerList.Count > 0)
-        {
-            int rand = Random.Range(0, lastCustomerList.Count);
-            lastCustomer = lastCustomerList[rand];
-            _customerPool.Remove(lastCustomer); //원래 손님목록 리스트에서 삭제
-        }
-
-        while (_customerPool.Count > 0)
-        {
-            int rand = Random.Range(0, _customerPool.Count);
-            _customerQueue.Enqueue(_customerPool[rand]);
-            _customerPool.RemoveAt(rand);
-        }
-
-        if (lastCustomer != null)
-        {
-            _customerQueue.Enqueue(lastCustomer);
-        }
-
-        //손님 리스트 로그
-        //CustomerSO[] arr = _customerQueue.ToArray();
-        //
-        //string log = "손님 순서: ";
-        //
-        //for (int i = 0; i < arr.Length; i++)
-        //{
-        //    log += arr[i].Name;
-        //    if (i < arr.Length - 1)
-        //        log += ", ";
-        //}
-        //
-        //Debug.Log(log);
-    }
-
-    private void SpawnNextCustomer()
-    {
-        //Debug.Log("손님 호출");
-        if (_customerQueue.Count <= 0) //모든 손님을 처리했으면
-        {
-            CheckStageEnd();
-            return;
-        }
-
-        _curCustomer = _customerQueue.Dequeue(); //큐에서 손님 하나 뺌
-
-        //Debug.Log($"현재 손님 : {_curCustomer}");
-        customerImage.sprite = _curCustomer.CustomerPic;
-
-        _customerOrder.StartCustomerOrder(_curCustomer, _curStage); //손님 주문
+        Debug.Log($"현재 스테이지 {curStage.StageID}");
     }
 
     private void OnCustomerSuccess(float percentage)
     {
-        _successCount++;
-        Debug.Log($"손님 성공 남은 인내심 {percentage}%. 성공 카운트 : {_successCount}");
+        StageClear(percentage);
+    }
 
-        CheckStageEnd();
+    private void OnSpecialCustomerRewardGiven(float percentage)
+    {
+        Debug.Log($"성공 인내심 {percentage}%. 보상제공");
+        //특수블록 확률은 깃[손님 유형] 참고
     }
 
     private void OnSpecialCustomerSuccess(CustomerSO customer, float averagePercent)
     {
-        _successCount++;
-        //스페셜 손님 보상로직 
-        Debug.Log($"스페셜 손님 클리어. 평균 인내심: {averagePercent}. 보상 제공 짠");
-        CheckStageEnd();
+        StageClear(averagePercent);
     }
 
     private void OnCustomerFail()
     {
-        _failureCount++;
-        Debug.Log($"손님 실패. 실패 카운트 : {_failureCount}");
-        CheckStageEnd();
+        StageFail();
     }
 
-    private void OnSpecialCustomerFail(CustomerSO customer)
+    //private void OnSpecialCustomerFail(CustomerSO customer)
+    //{
+    //    StageFail();
+    //}
+
+    private void StageClear(float percentage)
     {
-        _failureCount++;
-        Debug.Log($"손님 실패. 실패 카운트 : {_failureCount}");
-        CheckStageEnd();
-    }
+        Debug.Log($"스테이지 클리어. 보상 기준 인내심{percentage}");
 
-    private void CheckStageEnd() //스테이지 끝났는지 확인
+        StageManager.Instance.AdvanceStage();
+
+        OnStageCleared?.Invoke();
+        //특수블록 보상 도넛상자 제외
+
+        StartCoroutine(TmpChangeSceneRoutine()); //임시 씬 넘기기 코루틴
+    }
+    
+    private void StageFail()
     {
-        int cleared = _successCount;
-        int left = _customerQueue.Count;
+        Debug.Log("스테이지 실패");
+        OnStageFailed?.Invoke();
 
-        
-        if (left + cleared < _curStage.StageClearCustomerCount)
-        {
-            Debug.Log("스테이지 실패");
-            //스테이지 실패 로직 여기에
-            Debug.Log($"남은 손님 수 : {left}, 클리어 손님 수 : {cleared}, 실패손님 수 : {_failureCount}, 클리어 조건 : {_curStage.StageClearCustomerCount}");
-            return;
-        }
-        else if (left > 0)
-        {
-            StartCoroutine(NextCustomerRoutine());
-        }
-        else
-        {
-            Debug.Log("스테이지 클리어");
-            //스테이지 클리어 로직 여기에 
-            Debug.Log($"남은 손님 수 : {left}, 클리어 손님 수 : {cleared}, 실패손님 수 : {_failureCount}, 클리어 조건 : {_curStage.StageClearCustomerCount}");
-
-            //Debug.Log($"남은 손님 수 : {left}");
-        }
-
-        
+        StartCoroutine(TmpChangeSceneRoutine()); //임시 씬 넘기기 코루틴
     }
 
-    private IEnumerator NextCustomerRoutine()
+    private IEnumerator TmpChangeSceneRoutine() //임시 씬 넘기기 코루틴
     {
-        yield return new WaitForSeconds(_nextCustomerSpawnDelayTime);
-        SpawnNextCustomer();
+        yield return new WaitForSeconds(3);
+        SceneManager.LoadScene("StageSelectScene");
     }
-
 }

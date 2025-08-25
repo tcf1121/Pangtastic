@@ -8,14 +8,11 @@ public class StageSO : ScriptableObject
     [Header("스테이지 ID")]
     public int StageID;
 
-    [Header("스테이지 클리어 손님 수")]
-    public int StageClearCustomerCount;
+    [Header("주문 수")]
+    [Min(1)] public int OrderCount;
 
-    [Header("최소 주문 수")]
-    [Range(2, 4)] public int MinOrderCount;
-
-    [Header("등장 손님 목록")]
-    public CustomerSO[] CustomerList;
+    [Header("등장 손님")]
+    public CustomerSO Customer;
 
     [Header("스테이지 등장 레시피 목록")]
     public RecipeSO[] StageRecipes;
