@@ -6,7 +6,7 @@ using UnityEngine;
 
 namespace LHJ
 {
-    public class Popcorn : SpecialBlock
+    public class DonutBox : SpecialBlock
     {
         [SerializeField] private bool _destroySpecial;
 
@@ -19,29 +19,21 @@ namespace LHJ
             int width = plate.BlockPlateWidth;
             int height = plate.BlockPlateHeight;
 
-            Vector2Int myPos = new Vector2Int(
-                Mathf.RoundToInt(transform.position.x + width / 2f - 0.5f),
-                Mathf.RoundToInt(transform.position.y + height / 2f - 0.5f)
-            );
-
-            Vector2Int endPos = board.BlockMover.EndBlockPos;
-            Vector2Int startPos = board.BlockMover.StartBlockPos;
-
-            Vector2Int targetPos = (myPos == startPos) ? endPos : startPos;
-            var targetBlock = spawner.BlockArray[targetPos.y, targetPos.x];
-            if (targetBlock == null) return;
-
-            var targetType = targetBlock.GemType;
-
-            for (int y = 0; y < height; y++)
+            Vector2Int center = board.BlockMover.StartBlockPos;
+            if (spawner.BlockArray[center.y, center.x].BlockInstance != this.gameObject)
             {
-                for (int x = 0; x < width; x++)
+                center = board.BlockMover.EndBlockPos;
+            }
+
+            for (int y = center.y - 2; y <= center.y + 2; y++)
+            {
+                for (int x = center.x - 2; x <= center.x + 2; x++)
                 {
+                    if (y < 0 || y >= height || x < 0 || x >= width)
+                        continue;
+
                     var blk = spawner.BlockArray[y, x];
                     if (blk == null || blk.BlockInstance == null) continue;
-
-                    if (blk.GemType != targetType && blk.BlockInstance != this.gameObject)
-                        continue;
 
                     if (_destroySpecial)
                     {
@@ -49,6 +41,7 @@ namespace LHJ
                         if (special != null && blk.BlockInstance != this.gameObject)
                             continue;
                     }
+
                     Object.Destroy(blk.BlockInstance);
                     spawner.BlockArray[y, x].BlockInstance = null;
                 }
