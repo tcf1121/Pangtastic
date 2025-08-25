@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using UnityEditor.SceneManagement;
 using UnityEditor.U2D.Aseprite;
 using UnityEngine;
 using UnityEngine.Tilemaps;
@@ -43,11 +44,18 @@ namespace SCR
         private int _cellCount;
         public List<Vector3Int> SpawnPoint = new();
         public List<Vector3Int> CellList = new();
+        private List<Vector3Int> _emptyPositions = new List<Vector3Int>();
         private List<Vector3Int> _matchedPositions = new List<Vector3Int>();
-        private List<Vector3Int> splashDamageTargets = new List<Vector3Int>();
+        private List<Vector3Int> _splashDamageTargets = new List<Vector3Int>();
         public Dictionary<Vector3Int, GemType> CellGemType = new();
         public Dictionary<Vector3Int, BoardCell> CellContent = new();
         [SerializeField] private PrefabList prefabList;
+
+        private Vector3Int _clickPos;
+        private Vector3Int _dragDir;
+
+        private Coroutine allCheckCor;
+        private Coroutine allEmptyCor;
 
         private Grid _grid;
 
@@ -60,18 +68,34 @@ namespace SCR
 
         public void Update()
         {
-            // if (instance._cellCount == instance.loadCell)
+            if (instance == null)
+            {
+                instance = GameObject.Find("Grid").GetComponent<Board>();
+                instance.GetReference();
+            }
             //     AllCheck();
+
+
             if (Input.GetKeyDown(KeyCode.Q))
             {
                 SortCells();
             }
-            // if (Input.GetKeyDown(KeyCode.Space))
-            // {
-            //     AllCheck();
-            // }
+
         }
 
+        public static void SetClickPos(Vector3Int pos)
+        {
+            instance._clickPos = pos;
+        }
+
+        public static void SetDragDir(Vector3Int Dir)
+        {
+            instance._dragDir = Dir;
+            if (instance._clickPos != null && instance._dragDir != Vector3Int.zero)
+            {
+                instance.StartCoroutine(SwapCor(instance._clickPos, instance._clickPos + instance._dragDir));
+            }
+        }
         public static Dictionary<Vector3Int, GemType> GetPuzzleInfo()
         {
             return instance.CellGemType;
@@ -84,14 +108,41 @@ namespace SCR
 
         public static void SetPuzzleInfo(Dictionary<Vector3Int, GemType> PuzzleInfo, List<Vector3Int> SpawnPoint)
         {
-            foreach (var data in PuzzleInfo)
+            do
             {
-                AddCell(data.Key);
-                AddObject(data.Key, data.Value);
-            }
+                instance.CellList.Clear();
+                instance.CellGemType.Clear();
+                instance.CellContent.Clear();
+                foreach (var data in PuzzleInfo)
+                {
+                    AddCell(data.Key);
+                    AddObject(data.Key, data.Value);
+                }
+
+            } while (instance.IsStartMatch());
+
+            instance.InitObject();
+
             foreach (var data in SpawnPoint)
             {
                 AddSpawner(data);
+            }
+        }
+
+        private bool IsStartMatch()
+        {
+            foreach (Vector3Int pos in CellList)
+                CheckMatch(pos);
+            _matchedPositions = _matchedPositions.Distinct().ToList();
+            if (_matchedPositions.Count > 0)
+            {
+                _matchedPositions.Clear();
+                return true;
+            }
+            else
+            {
+                _matchedPositions.Clear();
+                return false;
             }
         }
 
@@ -154,6 +205,12 @@ namespace SCR
 
         }
 
+        public void InitObject()
+        {
+            foreach (var data in CellContent)
+                data.Value.Init();
+        }
+
 
         // 도넛 생성
         public static Donut GetDonut(Vector3Int pos, GemType donut)
@@ -182,10 +239,10 @@ namespace SCR
             instance.CellContent[pos].RemoveCell();
         }
 
-        // 블록 삭제
+        // 
         public static GameObject GetPrefab(GemType gemType)
         {
-            return instance.prefabList.GemPrefab[(int)gemType];
+            return instance.prefabList.GemDatas[(int)gemType].GemPrefab;
         }
 
         // 움직일 수 있는 블럭인지 확인
@@ -196,51 +253,34 @@ namespace SCR
 
             return instance.CellContent[pos].CanMove();
         }
-        // 움직이는 오브젝트일때 밑에가 비어있는지 확인 후 비어있으면 내려가기
-        public static void IsEmpty(Vector3Int pos)
-        {
-            Vector3Int movePos;
-            // 비어있으면
-            if (!instance.CellContent.ContainsKey(pos) &&
-                instance.CellContent[pos].IsEmpty())
-            {
-                // 아래 부터 확인
-                if (IsCanMove(movePos = new Vector3Int(pos.x, pos.y - 1)))
-                {
-                    MoveDown(movePos, pos);
-                }
-                // 아니면 왼쪽 대각선 위
-                else if (IsCanMove(movePos = new Vector3Int(pos.x - 1, pos.y - 1)))
-                {
-                    MoveDown(movePos, pos);
-                }
-                // 아니면 오른쪽 대각선 위
-                else if (IsCanMove(movePos = new Vector3Int(pos.x + 1, pos.y - 1)))
-                {
-                    MoveDown(movePos, pos);
-                }
-                // 아무것도 찾지 못했으면 아무것도 하지 않는다.
-                else
-                {
-                    return;
-                }
-            }
-        }
 
-        // 비어있으면 위에서 가져옴
-        public static void MoveDown(Vector3Int pos, Vector3Int moveToPos)
-        {
-            instance.CellContent[pos].MoveObject(instance.CellContent[moveToPos]);
-        }
 
         // 두 컨텐츠의 위치를 바꿈
-        public static void Change(Vector3Int pos, Vector3Int moveToPos)
+        public static IEnumerator SwapCor(Vector3Int pos, Vector3Int moveToPos, bool back = false)
         {
+            if (!instance.CellContent[moveToPos].CanMove() || instance.CellContent[moveToPos].IsEmpty()) yield break;
             Donut changeDonut = instance.CellContent[moveToPos].GetDonut();
             Obstacle changeObstacle = instance.CellContent[moveToPos].GetObstacle();
             instance.CellContent[pos].MoveObject(instance.CellContent[moveToPos]);
             instance.CellContent[pos].SetDonut(changeDonut);
             instance.CellContent[pos].SetObstacle(changeObstacle);
+            instance.StartCoroutine(instance.CellContent[pos].SetPos(0.2f));
+            instance.StartCoroutine(instance.CellContent[moveToPos].SetPos(0.2f));
+            yield return new WaitForSeconds(0.2f);
+            if (!back)
+                instance.CheckSwap(pos, moveToPos);
+            if (instance.allCheckCor == null)
+                instance.allCheckCor = instance.StartCoroutine(instance.AllCheck());
+
+        }
+
+        public static IEnumerator DownCor(Vector3Int pos, Vector3Int moveToPos)
+        {
+            instance.CellContent[pos].MoveObject(instance.CellContent[moveToPos]);
+            instance.CellContent[pos].SetDonut(null);
+            instance.CellContent[pos].SetObstacle(null);
+            instance.StartCoroutine(instance.CellContent[moveToPos].SetPos(0.1f));
+            yield return new WaitForSeconds(0.2f);
         }
 
         public static Dictionary<Vector3Int, BoardCell> GetDictionary()
@@ -253,10 +293,133 @@ namespace SCR
             CellList = CellList.OrderBy(pos => pos.y).ThenBy(pos => pos.x).ToList();
         }
 
-        private void AllCheck()
+        private void CheckSwap(Vector3Int firstPos, Vector3Int secondPos)
         {
-            foreach (Vector3Int pos in CellList)
-                CheckMatch(pos);
+            _matchedPositions.Clear();
+            _splashDamageTargets.Clear();
+            CheckMatch(firstPos);
+            CheckMatch(secondPos);
+            _matchedPositions = _matchedPositions.Distinct().ToList();
+            _splashDamageTargets = _splashDamageTargets
+                    .Distinct().Except(_matchedPositions.Distinct()).ToList();
+            if (_matchedPositions.Count > 0)
+            {
+                DamageCheck();
+            }
+            else
+            {
+                StartCoroutine(SwapCor(firstPos, secondPos, true));
+            }
+        }
+
+        private IEnumerator AllCheckEmpty()
+        {
+            while (true)
+            {
+                foreach (Vector3Int pos in CellList)
+                    if (instance.CellContent.ContainsKey(pos))
+                        if (instance.CellContent[pos].IsEmpty())
+                        {
+                            _emptyPositions.Add(pos);
+                        }
+                if (_emptyPositions.Count == 0)
+                {
+                    allEmptyCor = null;
+                    if (allCheckCor == null) allCheckCor = StartCoroutine(AllCheck());
+                    yield break;
+                }
+                else if (_emptyPositions.Count > 0) yield return StartCoroutine(FullEmpty());
+
+            }
+
+        }
+
+        private IEnumerator FullEmpty()
+        {
+            foreach (Vector3Int pos in _emptyPositions)
+            {
+                IsEmpty(pos);
+                yield return new WaitForFixedUpdate();
+            }
+            _emptyPositions.Clear();
+        }
+
+        public void IsEmpty(Vector3Int pos)
+        {
+            Vector3Int upPos = pos + Vector3Int.up;
+            if (instance.SpawnPoint.Contains(upPos))
+            {
+                AddObject(pos, GemType.Random);
+                return;
+            }
+            if (instance.CellContent.ContainsKey(upPos))
+            {
+
+                if (instance.CellContent[upPos].CanMove())
+                    if (!instance.CellContent[upPos].IsEmpty())
+                    {
+                        StartCoroutine(DownCor(upPos, pos));
+                        return;
+                    }
+                    else
+                    {
+                        return;
+                    }
+            }
+            upPos = pos + Vector3Int.left;
+            if (instance.CellContent.ContainsKey(upPos))
+            {
+                if (instance.CellContent[upPos].CanMove())
+                    if (!instance.CellContent[upPos].IsEmpty())
+                    {
+                        StartCoroutine(DownCor(upPos, pos));
+                        return;
+                    }
+                    else
+                    {
+                        return;
+                    }
+            }
+            upPos = pos + Vector3Int.right + Vector3Int.right;
+            if (instance.CellContent.ContainsKey(upPos))
+            {
+                if (instance.CellContent[upPos].CanMove())
+                    if (!instance.CellContent[upPos].IsEmpty())
+                    {
+                        StartCoroutine(DownCor(upPos, pos));
+                        return;
+                    }
+                    else
+                    {
+                        return;
+                    }
+            }
+        }
+
+        private IEnumerator AllCheck()
+        {
+            while (true)
+            {
+                foreach (Vector3Int pos in CellList)
+                    CheckMatch(pos);
+                if (_matchedPositions.Count == 0)
+                {
+                    allCheckCor = null;
+                    yield break;
+                }
+                else if (_matchedPositions.Count > 0)
+                {
+                    _matchedPositions = _matchedPositions.Distinct().ToList();
+                    if (_splashDamageTargets.Count > 0)
+                        _splashDamageTargets = _splashDamageTargets
+                                .Distinct().Except(_matchedPositions.Distinct()).ToList();
+                    DamageCheck();
+                }
+                yield return new WaitForSeconds(0.2f);
+                if (instance.allEmptyCor == null)
+                    instance.allEmptyCor = instance.StartCoroutine(instance.AllCheckEmpty());
+            }
+
         }
 
         private void CheckMatch(Vector3Int pos)
@@ -281,37 +444,83 @@ namespace SCR
             if (_matchedPositions.Count > 0)
             {
                 // 중복 제거
-                List<Vector3Int> distinctMatches = _matchedPositions.Distinct().ToList();
+                _matchedPositions = _matchedPositions.Distinct().ToList();
 
-                // 모든 매치 블록에 Damage 호출
-                foreach (var matchedPos in distinctMatches)
-                {
-                    if (instance.CellContent.ContainsKey(matchedPos))
-                    {
-                        instance.CellContent[matchedPos].Damage();
-                    }
-                }
-
-                foreach (var matchedPos in distinctMatches)
+                foreach (var matchedPos in _matchedPositions)
                 {
                     AddSplashTargets(matchedPos);
                 }
 
-                // 4. 스플래시 데미지 대상 리스트에서 매치 블록과 중복을 제거
-                List<Vector3Int> uniqueSplashTargets = splashDamageTargets
-                    .Distinct().ToList();
-
-                // 5. 스플래시 데미지 대상에 SplashDamage() 함수를 호출
-                foreach (var splashPos in uniqueSplashTargets)
-                {
-                    if (instance.CellContent.ContainsKey(splashPos))
-                    {
-                        instance.CellContent[splashPos].SplashDamage();
-                    }
-                }
-
-                _matchedPositions.Clear(); // 다음 매치 확인을 위해 리스트 초기화
+                // 스플래시 데미지 대상 리스트에서 매치 블록과 중복을 제거
+                if (_splashDamageTargets.Count > 0)
+                    _splashDamageTargets = _splashDamageTargets
+                        .Distinct().Except(_matchedPositions.Distinct()).ToList();
             }
+        }
+
+
+
+        private void DamageCheck()
+        {
+            int addEmpty = _matchedPositions.Count + _splashDamageTargets.Count;
+            foreach (var matchedPos in _matchedPositions)
+            {
+                if (instance.CellContent.ContainsKey(matchedPos))
+                {
+                    if (instance.CellContent[matchedPos].GetCatStatuse() == GemType.CatStatues_s)
+                    {
+                        if (!_matchedPositions.Contains(CatStatuesPos(matchedPos)))
+                            instance.CellContent[CatStatuesPos(matchedPos)].Damage();
+                    }
+                    else instance.CellContent[matchedPos].Damage();
+                }
+            }
+            foreach (var splashPos in _splashDamageTargets)
+            {
+                if (instance.CellContent.ContainsKey(splashPos))
+                {
+                    if (instance.CellContent[splashPos].GetCatStatuse() == GemType.CatStatues_s)
+                    {
+                        if (!_splashDamageTargets.Contains(CatStatuesPos(splashPos)))
+                            instance.CellContent[CatStatuesPos(splashPos)].SplashDamage();
+                    }
+                    else instance.CellContent[splashPos].SplashDamage();
+                }
+            }
+
+            _matchedPositions.Clear(); // 다음 매치 확인을 위해 리스트 초기화
+            _splashDamageTargets.Clear(); // 다음 매치 확인을 위해 리스트 초기화
+        }
+
+        private Vector3Int CatStatuesPos(Vector3Int cat_sPos)
+        {
+            Vector3Int pos;
+            pos = cat_sPos + Vector3Int.down;
+            if (instance.CellContent.ContainsKey(pos))
+            {
+                if (instance.CellContent[pos].GetCatStatuse() == GemType.CatStatues)
+                {
+                    return pos;
+                }
+            }
+            pos = cat_sPos + Vector3Int.left;
+            if (instance.CellContent.ContainsKey(pos))
+            {
+                Debug.Log(instance.CellContent[pos].getCellType());
+                if (instance.CellContent[pos].GetCatStatuse() == GemType.CatStatues)
+                {
+                    return pos;
+                }
+            }
+            pos = pos + Vector3Int.down;
+            if (instance.CellContent.ContainsKey(pos))
+            {
+                if (instance.CellContent[pos].GetCatStatuse() == GemType.CatStatues)
+                {
+                    return pos;
+                }
+            }
+            return Vector3Int.zero;
         }
 
         private int CheckDirection(Vector3Int startPos, Vector3Int direction)
@@ -356,7 +565,7 @@ namespace SCR
                 Vector3Int targetPos = centerPos + direction;
                 if (instance.CellContent.ContainsKey(targetPos))
                 {
-                    splashDamageTargets.Add(targetPos);
+                    _splashDamageTargets.Add(targetPos);
                 }
             }
         }

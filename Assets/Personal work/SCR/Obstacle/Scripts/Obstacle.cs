@@ -40,8 +40,8 @@ namespace SCR
         public virtual void Clear()
         {
             //해당 오브젝트 삭제
-            int x = (int)(transform.position.x - 0.5f);
-            int y = (int)(transform.position.y - 0.5f);
+            int x = (int)transform.position.x;
+            int y = (int)transform.position.y;
             Board.RemoveGem(new Vector3Int(x, y, 0));
             Destroy(gameObject);
         }
@@ -58,9 +58,10 @@ namespace SCR
             return _isSplashDamage;
         }
 
-        public void Damage(int amount)
+        public void Damage()
         {
-            if (ChangeState(_currentHP + amount)) Clear();
+            _currentHP--;
+            if (_currentHP == 0) Clear();
         }
 
         protected bool ChangeState(int newState)

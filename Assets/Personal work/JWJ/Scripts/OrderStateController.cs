@@ -120,7 +120,7 @@ public class OrderStateController : MonoBehaviour
 
                     float remainPercent = (_curPatience / _maxPatience) * 100; //성공한 인내심
 
-                    OnOrderCompleted?.Invoke(_curCustomer ,remainPercent);
+                    OnOrderCompleted?.Invoke(_curCustomer, remainPercent);
                 }
             }
             break; //재료 반영 끝
@@ -153,7 +153,7 @@ public class OrderStateController : MonoBehaviour
                 return false;
             }
         }
-        return true; 
+        return true;
     }
 
     private void StartPatience() //인내심 시작

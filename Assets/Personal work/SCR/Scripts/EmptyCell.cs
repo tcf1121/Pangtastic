@@ -11,6 +11,7 @@ namespace SCR
         public override void GetTileData(Vector3Int position, ITilemap tilemap, ref TileData tileData)
         {
             tileData.sprite = PreviewEditorSprite;
+            tileData.colliderType = Tile.ColliderType.Sprite;
         }
 
         public override bool StartUp(Vector3Int position, ITilemap tilemap, GameObject go)

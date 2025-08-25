@@ -23,6 +23,12 @@ namespace SCR
 
 
             Board.AddObject(position, Obstacle);
+            if (Obstacle == GemType.CatStatues)
+            {
+                Board.AddObject(new Vector3Int(position.x + 1, position.y), GemType.CatStatues_s);
+                Board.AddObject(new Vector3Int(position.x + 1, position.y + 1), GemType.CatStatues_s);
+                Board.AddObject(new Vector3Int(position.x, position.y + 1), GemType.CatStatues_s);
+            }
 
 
 
