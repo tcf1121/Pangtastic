@@ -81,22 +81,21 @@ public class OrderUIPresenter : MonoBehaviour
     }
 
     // 주문이 새로 시작될 때 UI 생성
-    private void BuildOrderUI(List<Dictionary<IngredientSO, int>> requiredList, List<RecipeSO> recipes)
+    private void BuildOrderUI(List<OrderRecipe> orderRecipes, List<RecipeSO> recipes)
     {
         ResetAllOrderSlots();
         _activeRecipeSlots.Clear();
 
-        for (int i = 0; i < recipes.Count; i++) // 레시피 수만큼 반복
+        for (int i = 0; i < recipes.Count; i++)
         {
-            //Debug.Log($"슬롯{i}개");
-            OrderItem slot = _recipeSlotList[i]; // i번째
+            OrderItem slot = _recipeSlotList[i]; //주문 들어온 레시피 수만큼
+            slot.gameObject.SetActive(true); //켜줌
+            slot.SetMenu(recipes[i].FoodPic);
 
-            slot.gameObject.SetActive(true); // 슬롯 활성화
-            slot.SetMenu(recipes[i].FoodPic); // 메뉴 이미지 세팅
-            slot.BuildRows(requiredList[i]); //행 생성 
-            slot.RecipeComplete(false); // 클리어 표시 리셋
+            slot.BuildRows(orderRecipes[i]);
+            slot.RecipeComplete(false);
 
-            _activeRecipeSlots.Add(slot); // 활성 목록에 추가
+            _activeRecipeSlots.Add(slot);
         }
     }
 

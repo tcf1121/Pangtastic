@@ -49,7 +49,6 @@ public static class RecipeRule
                 copy.RemoveAt(rand);
             }
         }
-        //랜덤처리 해줘야함
         else if (customer.Type == CustomerType.Special) // 스페셜
         {
             List<RecipeSO> orderOptions = new List<RecipeSO>(); //선호 메뉴 리스트 생성
