@@ -6,7 +6,8 @@ namespace KDJ.States
     public class RefillState : IGameState
     {
         private Coroutine _fallingCoroutine;
-        private int _fallingCount = 0;
+        private Coroutine _changeStateCoroutine;
+
         public void OnEnter(BoardManager boardManager)
         {
             Debug.Log("블록 재충전 상태");
@@ -16,27 +17,30 @@ namespace KDJ.States
 
         public void OnUpdate(BoardManager boardManager)
         {
-            if (_fallingCount >= 10)
+            if (boardManager.Spawner.HasEmptyBlocks())
             {
-                boardManager.ChangeState(new MatchingState());
-                return;
+                if (_fallingCoroutine == null)
+                {
+                    _fallingCoroutine = boardManager.Spawner.StartCoroutine(FallingCoroutine(boardManager));
+                }
             }
-
-            if (!boardManager.Spawner.HasEmptyBlocks())
+            else
             {
-                boardManager.ChangeState(new ReadyState());
-                return;
-            }
-
-            if (_fallingCoroutine == null)
-            {
-                _fallingCoroutine = boardManager.Spawner.StartCoroutine(FallingCoroutine(boardManager));
+                if (_changeStateCoroutine == null)
+                {
+                    _changeStateCoroutine = boardManager.Spawner.StartCoroutine(ChangeStateDelay(boardManager));
+                }
             }
         }
 
         public void OnExit(BoardManager boardManager)
         {
             Debug.Log("블록 재충전 상태 종료");
+            if (_fallingCoroutine != null)
+            {
+                boardManager.Spawner.StopCoroutine(_fallingCoroutine);
+                _fallingCoroutine = null;
+            }
             boardManager.Spawner.DestroyBlockData.Clear(); // 파괴된 블럭 데이터 초기화
             boardManager.BlockMover.StartPos = Vector2.zero; // 초기 시작 위치 설정
             boardManager.BlockMover.EndPos = Vector2.zero; // 초기 종료 위치 설정
@@ -44,10 +48,16 @@ namespace KDJ.States
 
         private IEnumerator FallingCoroutine(BoardManager boardManager)
         {
-            yield return new WaitForSeconds(0.075f);
+            yield return new WaitForSeconds(0.05f);
             boardManager.Spawner.SortBlockArray();
-            _fallingCount++;
             _fallingCoroutine = null;
+        }
+
+        private IEnumerator ChangeStateDelay(BoardManager boardManager)
+        {
+            yield return new WaitForSeconds(0.2f);
+            boardManager.ChangeState(new ReadyState());
+            _changeStateCoroutine = null;
         }
     }
 }

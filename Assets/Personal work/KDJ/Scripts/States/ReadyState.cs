@@ -1,9 +1,12 @@
+using System.Collections;
 using UnityEngine;
 
 namespace KDJ.States
 {
     public class ReadyState : IGameState
     {
+        private Coroutine _matchDelayCoroutine;
+
         public void OnEnter(BoardManager boardManager)
         {
             Debug.Log("입력 준비 상태");
@@ -13,7 +16,10 @@ namespace KDJ.States
             // 매칭되는 블럭이 있을 경우 매칭 상태로 전환
             if (boardManager.MatchChecker.AllBlockMatchCheck(boardManager))
             {
-                boardManager.ChangeState(new MatchingState());
+                if (_matchDelayCoroutine == null)
+                {
+                    _matchDelayCoroutine = boardManager.StartCoroutine(MatchDelayCoroutine(boardManager));
+                }
             }
         }
 
@@ -34,6 +40,7 @@ namespace KDJ.States
                 boardManager.BlockMover.StartPos = Camera.main.ScreenToWorldPoint(mousePosition);
                 TestBlockInfo(boardManager);
             }
+
             if (Input.GetMouseButtonUp(0))
             {
                 boardManager.ResetUI();
@@ -53,7 +60,6 @@ namespace KDJ.States
                     boardManager.BlockMover.StartPos = Vector2.zero;
                     boardManager.BlockMover.EndPos = Vector2.zero;
                 }
-
             }
         }
 
@@ -86,6 +92,13 @@ namespace KDJ.States
             {
                 boardManager.UpdateUI(block);
             }
+        }
+
+        private IEnumerator MatchDelayCoroutine(BoardManager boardManager)
+        {
+            yield return new WaitForSeconds(0.1f);
+            boardManager.ChangeState(new MatchingState());
+            _matchDelayCoroutine = null;
         }
     }
 }
