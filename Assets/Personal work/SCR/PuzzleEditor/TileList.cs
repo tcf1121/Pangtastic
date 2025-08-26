@@ -20,7 +20,7 @@ namespace SCR
 
         public TileBase Spawner()
         {
-            return tiles[tiles.Count - 2].Tile;
+            return tiles[tiles.Count - 4].Tile;
         }
 
         public TileBase Cell()
@@ -30,7 +30,7 @@ namespace SCR
 
         public TileBase CatStatues()
         {
-            return tiles[tiles.Count - 4].Tile;
+            return tiles[tiles.Count - 5].Tile;
         }
 
 

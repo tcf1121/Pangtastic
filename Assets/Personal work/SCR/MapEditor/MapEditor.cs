@@ -49,7 +49,7 @@ namespace SCR
                     Debug.LogError("0보다 큰 값을 입력하시오.");
                     return;
                 }
-                while (lines.Count <= num)
+                while (lines.Count <= num + 2)
                 {
                     lines.Add(""); // 빈 줄 추가
                 }

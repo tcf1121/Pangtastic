@@ -88,7 +88,6 @@ namespace SCR
                 mousePos.z = -_cameraZ;
                 Vector3 mouseWorldPos = Camera.main.ScreenToWorldPoint(mousePos);
                 _clickPos = _mainTilemap.WorldToCell(mouseWorldPos);
-                Debug.Log(instance._selectTile);
                 DrawTileMap(_clickPos, tileList.tiles[instance._selectTile].Tile);
             }
 
@@ -112,6 +111,7 @@ namespace SCR
 
         public static Dictionary<Vector3Int, GemType> GetPuzzleInfo()
         {
+            instance.SortCells();
             return instance.CellGemType;
         }
 
@@ -140,16 +140,19 @@ namespace SCR
             if (tile == instance.tileList.Cell())
             {
                 instance.BlankTilemap.SetTile(pos, tile);
+                AddCell(pos);
             }
             else if (tile == instance.tileList.Spawner())
             {
                 instance.SpawnerTilemap.SetTile(pos, tile);
+                AddSpawner(pos);
             }
-            else if (tile == null)
+            else if (tile == instance.tileList.Eraser())
             {
                 instance.BlankTilemap.SetTile(pos, null);
                 instance.SpawnerTilemap.SetTile(pos, null);
                 instance.GemTilemap.SetTile(pos, null);
+                DeleteObject(pos);
             }
             else if (tile == instance.tileList.CatStatues())
             {
@@ -157,11 +160,25 @@ namespace SCR
                 instance.GemTilemap.SetTile(pos + Vector3Int.up, null);
                 instance.GemTilemap.SetTile(pos + Vector3Int.right, null);
                 instance.GemTilemap.SetTile(pos + Vector3Int.up + Vector3Int.right, null);
+                DrawObject(pos, GemType.CatStatues);
             }
             else
             {
                 instance.GemTilemap.SetTile(pos, tile);
+                DrawObject(pos, (GemType)instance._selectTile);
             }
+        }
+
+        public static void DeleteObject(Vector3Int pos)
+        {
+            if (instance == null)
+            {
+                instance = GameObject.Find("Grid").GetComponent<PuzzelEditBoard>();
+                instance.GetReference();
+            }
+            if (instance.CellGemType.ContainsKey(pos)) instance.CellGemType.Remove(pos);
+            if (instance.CellList.Contains(pos)) instance.CellList.Remove(pos);
+            if (instance.SpawnPoint.Contains(pos)) instance.SpawnPoint.Remove(pos);
         }
 
 
@@ -174,6 +191,7 @@ namespace SCR
             }
             if (!instance.CellGemType.ContainsKey(pos))
             {
+                Debug.Log("오브젝트 추가");
                 instance.CellGemType.Add(pos, gem);
             }
             else
@@ -188,8 +206,9 @@ namespace SCR
                 instance = GameObject.Find("Grid").GetComponent<PuzzelEditBoard>();
                 instance.GetReference();
             }
+            Debug.Log("빈칸 추가");
+            if (!instance.CellList.Contains(pos)) instance.CellList.Add(pos);
 
-            instance.CellList.Add(pos);
         }
 
         // 스포너 추가
@@ -200,12 +219,15 @@ namespace SCR
                 instance = GameObject.Find("Grid").GetComponent<PuzzelEditBoard>();
                 instance.GetReference();
             }
-            instance.SpawnPoint.Add(pos);
+            Debug.Log("스포너 추가");
+            if (!instance.SpawnPoint.Contains(pos)) instance.SpawnPoint.Add(pos);
+
         }
 
         public void SortCells()
         {
             CellList = CellList.OrderBy(pos => pos.y).ThenBy(pos => pos.x).ToList();
+            CellList.Reverse();
         }
 
         private void GetReference()
