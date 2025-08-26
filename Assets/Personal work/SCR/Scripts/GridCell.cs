@@ -3,14 +3,12 @@ using UnityEngine.Tilemaps;
 
 namespace SCR
 {
-    [CreateAssetMenu(fileName = "EmptyCell", menuName = "Match/Tile/EmptyCell")]
-    public class EmptyCell : TileBase
+    [CreateAssetMenu(fileName = "GridCell", menuName = "Match/Tile/GridCell")]
+    public class GridCell : TileBase
     {
-        public Sprite PreviewEditorSprite;
 
         public override void GetTileData(Vector3Int position, ITilemap tilemap, ref TileData tileData)
         {
-            tileData.sprite = PreviewEditorSprite;
             tileData.colliderType = Tile.ColliderType.Grid;
         }
 
@@ -22,7 +20,6 @@ namespace SCR
 #endif
 
 
-            PuzzelEditBoard.AddCell(position);
 
             return base.StartUp(position, tilemap, go);
         }

@@ -161,6 +161,21 @@ namespace SCR
             return count;
         }
 
+        public static void DrawObject(Vector3Int pos, GemType gem)
+        {
+            if (instance == null)
+            {
+                instance = GameObject.Find("Grid").GetComponent<Board>();
+                instance.GetReference();
+            }
+            if (!instance.CellGemType.ContainsKey(pos))
+            {
+                instance.CellGemType.Add(pos, gem);
+            }
+            else
+                instance.CellGemType[pos] = gem;
+        }
+
 
 
         // 빈칸 추가

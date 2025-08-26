@@ -11,7 +11,7 @@ namespace SCR
 
         public override void GetTileData(Vector3Int position, ITilemap tilemap, ref TileData tileData)
         {
-            tileData.sprite = !Application.isPlaying ? PreviewEditorSprite : null;
+            tileData.sprite = PreviewEditorSprite;
         }
 
         public override bool StartUp(Vector3Int position, ITilemap tilemap, GameObject go)
@@ -22,12 +22,12 @@ namespace SCR
 #endif
 
 
-            Board.AddObject(position, Obstacle);
+            PuzzelEditBoard.DrawObject(position, Obstacle);
             if (Obstacle == GemType.CatStatues)
             {
-                Board.AddObject(new Vector3Int(position.x + 1, position.y), GemType.CatStatues_s);
-                Board.AddObject(new Vector3Int(position.x + 1, position.y + 1), GemType.CatStatues_s);
-                Board.AddObject(new Vector3Int(position.x, position.y + 1), GemType.CatStatues_s);
+                PuzzelEditBoard.DrawObject(new Vector3Int(position.x + 1, position.y), GemType.CatStatues_s);
+                PuzzelEditBoard.DrawObject(new Vector3Int(position.x + 1, position.y + 1), GemType.CatStatues_s);
+                PuzzelEditBoard.DrawObject(new Vector3Int(position.x, position.y + 1), GemType.CatStatues_s);
             }
 
 

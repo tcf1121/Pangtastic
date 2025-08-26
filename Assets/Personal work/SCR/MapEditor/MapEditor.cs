@@ -11,20 +11,24 @@ namespace SCR
 {
     public class MapEditor : MonoBehaviour
     {
+        [SerializeField] GameObject canvas;
         private BoardCell[] sortedItemsArray;
         [SerializeField] private InputField inputField;
         private Dictionary<Vector3Int, GemType> _mapInfo = new();
         private List<Vector3Int> _spawnPoint = new();
 
         string path = "Personal work/SCR/StageInfo.csv";
-
+        void Awake()
+        {
+            if (!canvas.activeSelf) canvas.SetActive(true);
+        }
 
         public void SaveMapInfo()
         {
             _mapInfo.Clear();
-            _mapInfo = Board.GetPuzzleInfo();
+            _mapInfo = PuzzelEditBoard.GetPuzzleInfo();
             _spawnPoint.Clear();
-            _spawnPoint = Board.GetSpawnPoint();
+            _spawnPoint = PuzzelEditBoard.GetSpawnPoint();
             int num = int.Parse(inputField.text);
             string directoryPath = Path.GetDirectoryName(Application.dataPath + "/" + path);
             if (!Directory.Exists(directoryPath))

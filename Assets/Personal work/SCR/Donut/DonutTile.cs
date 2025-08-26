@@ -12,8 +12,8 @@ namespace SCR
 
         public override void GetTileData(Vector3Int position, ITilemap tilemap, ref TileData tileData)
         {
-            tileData.sprite = !Application.isPlaying ? PreviewEditorSprite : null;
-            tileData.color = !Application.isPlaying ? PreviewEditorColor : Color.white;
+            tileData.sprite = PreviewEditorSprite;
+            tileData.color = PreviewEditorColor;
         }
 
         public override bool StartUp(Vector3Int position, ITilemap tilemap, GameObject go)
@@ -24,7 +24,7 @@ namespace SCR
 #endif
 
 
-            Board.AddObject(position, Donut);
+            PuzzelEditBoard.DrawObject(position, Donut);
 
             return true;
         }
