@@ -413,6 +413,22 @@ namespace KDJ
                         Debug.Log($"매치된 블록 GemType: {boardManager.Spawner.BlockArray[y, i].GemType}");
                         Destroy(boardManager.Spawner.BlockArray[y, i].BlockInstance);
                         boardManager.Spawner.BlockArray[y, i].BlockInstance = null;
+                        if (y + 1 < boardManager.Spawner.BlockPlate.BlockPlateHeight && boardManager.Spawner.BlockArray[y + 1, i] is Cloche)
+                        {
+                            (boardManager.Spawner.BlockArray[y + 1, i] as Cloche).TakeDamage(boardManager);
+                        }
+                        if (y - 1 >= 0 && boardManager.Spawner.BlockArray[y - 1, i] is Cloche)
+                        {
+                            (boardManager.Spawner.BlockArray[y - 1, i] as Cloche).TakeDamage(boardManager);
+                        }
+                        if (i + 1 < boardManager.Spawner.BlockPlate.BlockPlateWidth && boardManager.Spawner.BlockArray[y, i + 1] is Cloche)
+                        {
+                            (boardManager.Spawner.BlockArray[y, i + 1] as Cloche).TakeDamage(boardManager);
+                        }
+                        if (i - 1 >= 0 && boardManager.Spawner.BlockArray[y, i - 1] is Cloche)
+                        {
+                            (boardManager.Spawner.BlockArray[y, i - 1] as Cloche).TakeDamage(boardManager);
+                        }
                         score += 10;
                         isMatched = true;
                     }
@@ -481,13 +497,29 @@ namespace KDJ
             {
                 for (int i = matchStartIndex; i < matchStartIndex + count; i++)
                 {
-                    if (boardManager.Spawner.BlockPlate.BlockPlateArray[i, x] && boardManager.Spawner.BlockArray[y, i] != null && boardManager.Spawner.BlockArray[y, i].BlockInstance != null)
+                    if (boardManager.Spawner.BlockPlate.BlockPlateArray[i, x] && boardManager.Spawner.BlockArray[i, x] != null && boardManager.Spawner.BlockArray[y, i].BlockInstance != null)
                     {
                         Debug.Log($"매칭 된 블럭 수: {count}");
                         Debug.Log($"Y축 매치된 블록 파괴 위치: x={x}, y={i}");
                         Debug.Log($"매치된 블록 GemType: {boardManager.Spawner.BlockArray[i, x].GemType}");
                         Destroy(boardManager.Spawner.BlockArray[i, x].BlockInstance);
                         boardManager.Spawner.BlockArray[i, x].BlockInstance = null;
+                        if (i + 1 < boardManager.Spawner.BlockPlate.BlockPlateHeight && boardManager.Spawner.BlockArray[i + 1, x] is Cloche)
+                        {
+                            (boardManager.Spawner.BlockArray[i + 1, x] as Cloche).TakeDamage(boardManager);
+                        }
+                        if (i - 1 >= 0 && boardManager.Spawner.BlockArray[i - 1, x] is Cloche)
+                        {
+                            (boardManager.Spawner.BlockArray[i - 1, x] as Cloche).TakeDamage(boardManager);
+                        }
+                        if (x + 1 < boardManager.Spawner.BlockPlate.BlockPlateWidth && boardManager.Spawner.BlockArray[i, x + 1] is Cloche)
+                        {
+                            (boardManager.Spawner.BlockArray[i, x + 1] as Cloche).TakeDamage(boardManager);
+                        }
+                        if (x - 1 >= 0 && boardManager.Spawner.BlockArray[i, x - 1] is Cloche)
+                        {
+                            (boardManager.Spawner.BlockArray[i, x - 1] as Cloche).TakeDamage(boardManager);
+                        }
                         score += 10;
                         isMatched = true;
                     }
@@ -628,6 +660,22 @@ namespace KDJ
                             {
                                 Destroy(boardManager.Spawner.BlockArray[i, j].BlockInstance);
                                 boardManager.Spawner.BlockArray[i, j].BlockInstance = null;
+                                if (i + 1 < boardManager.Spawner.BlockPlate.BlockPlateHeight && boardManager.Spawner.BlockArray[i + 1, j] is Cloche)
+                                {
+                                    (boardManager.Spawner.BlockArray[i + 1, j] as Cloche).TakeDamage(boardManager);
+                                }
+                                if (i - 1 >= 0 && boardManager.Spawner.BlockArray[i - 1, j] is Cloche)
+                                {
+                                    (boardManager.Spawner.BlockArray[i - 1, j] as Cloche).TakeDamage(boardManager);
+                                }
+                                if (j + 1 < boardManager.Spawner.BlockPlate.BlockPlateWidth && boardManager.Spawner.BlockArray[i, j + 1] is Cloche)
+                                {
+                                    (boardManager.Spawner.BlockArray[i, j + 1] as Cloche).TakeDamage(boardManager);
+                                }
+                                if (j - 1 >= 0 && boardManager.Spawner.BlockArray[i, j - 1] is Cloche)
+                                {
+                                    (boardManager.Spawner.BlockArray[i, j - 1] as Cloche).TakeDamage(boardManager);
+                                }
                                 score += 10;
                                 isMatched = true;
                             }
