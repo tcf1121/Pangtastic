@@ -66,8 +66,8 @@ namespace KDJ
             }
 
             // 테스트 코드
-            //BlockArray[3, 2].BlockType = 6;
-            //BlockArray[3, 2].GemType = (GemType)6;
+            BlockArray[3, 2].BlockType = 6;
+            BlockArray[3, 2].GemType = (GemType)6;
             //BlockArray[3, 3].BlockType = 7;
             //BlockArray[3, 3].GemType = (GemType)7;
             //BlockArray[3, 4].BlockType = 12;
