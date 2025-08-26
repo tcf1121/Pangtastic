@@ -13,6 +13,11 @@ namespace LHJ
         public override void Activate(BoardManager board)
         {
             if (board == null || board.Spawner == null) return;
+            if (SpecialBlockCombo.Instance != null &&
+                SpecialBlockCombo.Instance.TryResolveFromActivate(board, this.gameObject))
+            {
+                return;
+            }
 
             var spawner = board.Spawner;
             var plate = spawner.BlockPlate;
@@ -28,11 +33,11 @@ namespace LHJ
                 var blk = spawner.BlockArray[y, myX];
                 if (blk == null || blk.BlockInstance == null) continue;
 
-                if (!_destroySpecial)
+                var special = blk.BlockInstance.GetComponent<SpecialBlock>();
+                if (special != null && blk.BlockInstance != this.gameObject)
                 {
-                    var special = blk.BlockInstance.GetComponent<SpecialBlock>();
-                    if (special != null && blk.BlockInstance != this.gameObject)
-                        continue;
+                    if (!_destroySpecial) continue;
+                    special.Activate(board);
                 }
 
                 Object.Destroy(blk.BlockInstance);

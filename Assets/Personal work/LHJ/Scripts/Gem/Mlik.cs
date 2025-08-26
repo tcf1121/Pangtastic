@@ -35,6 +35,11 @@ namespace LHJ
         public override void Activate(BoardManager board)
         {
             if (board == null || board.Spawner == null) return;
+            if (SpecialBlockCombo.Instance != null &&
+                SpecialBlockCombo.Instance.TryResolveFromActivate(board, this.gameObject))
+            {
+                return;
+            }
 
             var spawner = board.Spawner;
             var plate = spawner.BlockPlate;
