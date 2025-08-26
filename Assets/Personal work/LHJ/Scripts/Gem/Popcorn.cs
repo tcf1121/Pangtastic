@@ -13,11 +13,17 @@ namespace LHJ
         public override void Activate(BoardManager board)
         {
             if (board == null || board.Spawner == null) return;
+            if (SpecialBlockCombo.Instance != null &&
+                SpecialBlockCombo.Instance.TryResolveFromActivate(board, this.gameObject))
+            {
+                return;
+            }
 
             var spawner = board.Spawner;
             var plate = spawner.BlockPlate;
             int width = plate.BlockPlateWidth;
             int height = plate.BlockPlateHeight;
+            int destroyedCount = 0;
 
             Vector2Int myPos = new Vector2Int(
                 Mathf.RoundToInt(transform.position.x + width / 2f - 0.5f),
@@ -51,7 +57,13 @@ namespace LHJ
                     }
                     Object.Destroy(blk.BlockInstance);
                     spawner.BlockArray[y, x].BlockInstance = null;
+                    destroyedCount++;
                 }
+            }
+            if (destroyedCount > 0)
+            {
+                int score = destroyedCount * 10;
+                board.UpdateUI(score);
             }
         }
     }
