@@ -51,7 +51,7 @@ namespace KDJ
             {
                 for (int y = 0; y < BlockArray.GetLength(0); y++)
                 {
-                    int num = Random.Range(1, 6);
+                    int num = Random.Range(1, 7);
 
                     if (y < BlockPlate.BlockPlateHeight)
                     {
@@ -66,8 +66,8 @@ namespace KDJ
             }
 
             // 테스트 코드
-            BlockArray[3, 2].BlockType = 6;
-            BlockArray[3, 2].GemType = (GemType)6;
+            BlockArray[3, 2].BlockType = 10;
+            BlockArray[3, 2].GemType = (GemType)9;
             //BlockArray[3, 3].BlockType = 7;
             //BlockArray[3, 3].GemType = (GemType)7;
             //BlockArray[3, 4].BlockType = 12;
@@ -92,7 +92,7 @@ namespace KDJ
                         {
                             if (BlockPlate.BlockPlateArray[y, x] && BlockArray[y, x].BlockType != 0)
                             {
-                                Vector3 position = new Vector3(x - BlockPlate.BlockPlateWidth / 2 + 0.5f, y - BlockPlate.BlockPlateHeight / 2 + 0.5f, 0);
+                                Vector3 position = new Vector3(x - BlockPlate.BlockPlateWidth / 2, y - BlockPlate.BlockPlateHeight / 2, 0);
                                 GameObject blockPrefab = GetBlockTile(BlockArray[y, x].BlockType);
                                 BlockArray[y, x].BlockInstance = Instantiate(blockPrefab, position, Quaternion.identity);
                             }
@@ -101,7 +101,7 @@ namespace KDJ
                         {
                             if (BlockArray[y, x].BlockType != 0)
                             {
-                                Vector3 position = new Vector3(x - BlockPlate.BlockPlateWidth / 2 + 0.5f, y - BlockPlate.BlockPlateHeight / 2 + 0.5f, 0);
+                                Vector3 position = new Vector3(x - BlockPlate.BlockPlateWidth / 2, y - BlockPlate.BlockPlateHeight / 2, 0);
                                 GameObject blockPrefab = GetBlockTile(BlockArray[y, x].BlockType);
                                 BlockArray[y, x].BlockInstance = Instantiate(blockPrefab, position, Quaternion.identity);
                             }
@@ -240,7 +240,7 @@ namespace KDJ
 
                 if (_blockWaitingQueue[x].Count == 0)
                 {
-                    int num = Random.Range(1, 6);
+                    int num = Random.Range(1, 7);
                     _blockWaitingQueue[x].Enqueue(new Block { BlockType = num, GemType = (GemType)num - 1 });
                 }
 
@@ -251,7 +251,7 @@ namespace KDJ
 
                     if (BlockPlate.BlockPlateWidth % 2 == 0)
                     {
-                        position = new Vector3(x - BlockPlate.BlockPlateWidth / 2 + 0.5f, BlockPlate.BlockPlateHeight - BlockPlate.BlockPlateHeight / 2 + 0.5f, 0);
+                        position = new Vector3(x - BlockPlate.BlockPlateWidth / 2, BlockPlate.BlockPlateHeight - BlockPlate.BlockPlateHeight / 2, 0);
                     }
                     else
                     {
@@ -277,7 +277,7 @@ namespace KDJ
                     if (BlockPlate.BlockPlateArray[y, x] && BlockArray[y, x] == null)
                     {
                         // 빈칸이 있는 경우 해당 열 큐에 블럭을 생성해서 추가
-                        int num = Random.Range(1, 6);
+                        int num = Random.Range(1, 7);
                         _blockWaitingQueue[x].Enqueue(new Block { BlockType = num, GemType = (GemType)num - 1 });
                     }
                 }
@@ -359,13 +359,25 @@ namespace KDJ
                 GameObject blockInstance = Instantiate(blockPrefab);
 
                 if (BlockPlate.BlockPlateWidth % 2 == 0)
-                    blockInstance.transform.position = new Vector3(x - BlockPlate.BlockPlateWidth / 2 + 0.5f, y - BlockPlate.BlockPlateHeight / 2 + 0.5f, 0);
+                    blockInstance.transform.position = new Vector3(x - BlockPlate.BlockPlateWidth / 2, y - BlockPlate.BlockPlateHeight / 2, 0);
                 else
                     blockInstance.transform.position = new Vector3(x - BlockPlate.BlockPlateWidth / 2, y - BlockPlate.BlockPlateHeight / 2, 0);
 
                 BlockArray[y, x] = new Block { BlockInstance = blockInstance, BlockType = blockNum, GemType = (GemType)blockNum - 1 };
             }
         }
+
+        /// <summary>
+        /// 지정 위치에 랜덤 일반 블록을 생성
+        /// </summary>
+        /// <param name="x"></param>
+        /// <param name="y"></param>
+        public void SpawnRandomBlock(int x, int y)
+        {
+            int randomBlockType = Random.Range(1, 7); // 1부터 6까지의 랜덤 블럭 타입
+            SpawnBlock(x, y, randomBlockType);
+        }
+
         #endregion
 
         #region 테스트 코드
@@ -419,11 +431,12 @@ namespace KDJ
                 case 3: return _blockPrefabs[2];
                 case 4: return _blockPrefabs[3];
                 case 5: return _blockPrefabs[4];
-                case 7: return _blockPrefabs[5];
-                case 8: return _blockPrefabs[6];
-                case 10: return _blockPrefabs[7];
-                case 11: return _blockPrefabs[8];
-                //case 12: return _blockPrefabs[5];
+                case 6: return _blockPrefabs[5];
+                case 7: return _blockPrefabs[6];
+                case 8: return _blockPrefabs[7];
+                case 9: return _blockPrefabs[8];
+                case 10: return _blockPrefabs[9];
+                case 11: return _blockPrefabs[10];
                 default: return null;
             }
         }
@@ -461,7 +474,7 @@ namespace KDJ
             {
                 for (int y = 0; y < BlockPlate.BlockPlateHeight; y++)
                 {
-                    if (BlockPlate.BlockPlateArray[y, x] && BlockArray[y, x].BlockInstance == null)
+                    if (BlockPlate.BlockPlateArray[y, x] && (BlockArray[y, x] == null || BlockArray[y, x].BlockInstance == null))
                     {
                         BlankBlockCount++;
                     }

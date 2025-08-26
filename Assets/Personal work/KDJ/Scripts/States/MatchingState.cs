@@ -46,20 +46,19 @@ namespace KDJ.States
                 EPos.x < 0 || EPos.y < 0 || EPos.x >= boardManager.Spawner.BlockPlate.BlockPlateWidth || EPos.y >= boardManager.Spawner.BlockPlate.BlockPlateHeight)
             {
                 Debug.Log("StartPos 또는 EndPos가 보드 영역을 벗어났습니다.");
+                boardManager.ChangeState(new ReadyState());
                 yield break;
             }
 
             if (boardManager.Spawner.BlockPlate.BlockPlateArray[(int)SPos.y, (int)SPos.x] &&
                 boardManager.Spawner.BlockPlate.BlockPlateArray[(int)EPos.y, (int)EPos.x])
             {
-                bool StartBlockIsSpecialBlock = boardManager.Spawner.BlockArray[(int)SPos.y, (int)SPos.x].BlockInstance.TryGetComponent<SpecialBlock>(out startSpecialBlock);
-                bool EndBlockIsSpecialBlock = boardManager.Spawner.BlockArray[(int)EPos.y, (int)EPos.x].BlockInstance.TryGetComponent<SpecialBlock>(out endSpecialBlock);
-                if (StartBlockIsSpecialBlock || EndBlockIsSpecialBlock)
+                startSpecialBlock = boardManager.Spawner.BlockArray[(int)SPos.y, (int)SPos.x].BlockInstance.GetComponent<SpecialBlock>();
+                endSpecialBlock = boardManager.Spawner.BlockArray[(int)EPos.y, (int)EPos.x].BlockInstance.GetComponent<SpecialBlock>();
+                if (startSpecialBlock != null || endSpecialBlock != null)
                 {
                     startSpecialBlock?.Activate(boardManager);
                     endSpecialBlock?.Activate(boardManager);
-                    boardManager.ChangeState(new RefillState());
-                    yield break;
                 }
             }
 

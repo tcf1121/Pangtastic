@@ -6,6 +6,7 @@ namespace KDJ.States
     public class RefillState : IGameState
     {
         private Coroutine _fallingCoroutine;
+        private Coroutine _changeStateCoroutine;
 
         public void OnEnter(BoardManager boardManager)
         {
@@ -25,8 +26,10 @@ namespace KDJ.States
             }
             else
             {
-                // Board is full, transition to check for matches.
-                boardManager.ChangeState(new ReadyState());
+                if (_changeStateCoroutine == null)
+                {
+                    _changeStateCoroutine = boardManager.Spawner.StartCoroutine(ChangeStateDelay(boardManager));
+                }
             }
         }
 
@@ -45,10 +48,16 @@ namespace KDJ.States
 
         private IEnumerator FallingCoroutine(BoardManager boardManager)
         {
-            yield return new WaitForSeconds(0.033f);
+            yield return new WaitForSeconds(0.05f);
             boardManager.Spawner.SortBlockArray();
-            yield return new WaitForSeconds(0.033f);
             _fallingCoroutine = null;
+        }
+
+        private IEnumerator ChangeStateDelay(BoardManager boardManager)
+        {
+            yield return new WaitForSeconds(0.2f);
+            boardManager.ChangeState(new ReadyState());
+            _changeStateCoroutine = null;
         }
     }
 }

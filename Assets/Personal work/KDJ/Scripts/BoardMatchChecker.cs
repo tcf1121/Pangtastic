@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Net.Sockets;
 using Unity.Collections;
+using Unity.Mathematics;
 using Unity.VisualScripting;
 using UnityEditor.Experimental.GraphView;
 using UnityEngine;
@@ -16,6 +17,7 @@ namespace KDJ
         /// </summary>
         /// <param name="boardManager"></param>
         /// <returns>매칭되는 블럭이 있는지 여부 반환</returns>
+        #region 배열 체크
         public bool AllBlockMatchCheck(BoardManager boardManager)
         {
             // 블럭 매치 체크 로직
@@ -134,6 +136,7 @@ namespace KDJ
                     {
                         int xMatchCount = XAxisMatchCheck(x, y, boardManager);
                         int yMatchCount = YAxisMatchCheck(x, y, boardManager);
+                        bool isCubeMatched = CubeCheck(boardManager, x, y, 1);
 
                         if (xMatchCount == 5 || yMatchCount == 5)
                         {
@@ -142,6 +145,10 @@ namespace KDJ
                         else if (5 > xMatchCount && xMatchCount >= 3 && 5 > yMatchCount && yMatchCount >= 3)
                         {
                             boardManager.Spawner.SpawnBlock(x, y, 11);
+                        }
+                        else if (isCubeMatched)
+                        {
+                            boardManager.Spawner.SpawnBlock(x, y, 9);
                         }
                         else if (xMatchCount == 4)
                         {
@@ -155,7 +162,7 @@ namespace KDJ
                 }
             }
 
-            /*
+            /* 안쓰는 코드
             // 블럭 매치 체크 로직
             // x축부터 쭉 체크하고 y축도 체크
             for (int y = 0; y < boardManager.Spawner.BlockPlate.BlockPlateHeight; y++)
@@ -291,29 +298,33 @@ namespace KDJ
             */
 
             // 큐브 체크
-            for (int y = 0; y < boardManager.Spawner.BlockPlate.BlockPlateHeight; y++)
-            {
-                for (int x = 0; x < boardManager.Spawner.BlockPlate.BlockPlateWidth; x++)
-                {
-                    if (boardManager.Spawner.BlockArray[y, x] != null)
-                    {
-                        if (x + 1 < boardManager.Spawner.BlockPlate.BlockPlateWidth && y + 1 < boardManager.Spawner.BlockPlate.BlockPlateHeight)
-                        {
-                            if (boardManager.Spawner.BlockPlate.BlockPlateArray[y + 1, x] && boardManager.Spawner.BlockPlate.BlockPlateArray[y, x + 1]
-                            && boardManager.Spawner.BlockArray[y + 1, x] != null && boardManager.Spawner.BlockArray[y, x + 1] != null
-                            && boardManager.Spawner.BlockArray[y, x].BlockType == boardManager.Spawner.BlockArray[y + 1, x].BlockType
-                            && boardManager.Spawner.BlockArray[y, x].BlockType == boardManager.Spawner.BlockArray[y, x + 1].BlockType)
-                            {
-                                CubeCheck(boardManager, x, y, 1);
-                            }
-                        }
-                    }
-                }
-            }
+            // for (int y = 0; y < boardManager.Spawner.BlockPlate.BlockPlateHeight; y++)
+            // {
+            //     for (int x = 0; x < boardManager.Spawner.BlockPlate.BlockPlateWidth; x++)
+            //     {
+            //         if (boardManager.Spawner.BlockArray[y, x] != null)
+            //         {
+            //             if (x + 1 < boardManager.Spawner.BlockPlate.BlockPlateWidth && y + 1 < boardManager.Spawner.BlockPlate.BlockPlateHeight)
+            //             {
+            //                 if (boardManager.Spawner.BlockPlate.BlockPlateArray[y + 1, x] && boardManager.Spawner.BlockPlate.BlockPlateArray[y, x + 1]
+            //                 && boardManager.Spawner.BlockArray[y + 1, x] != null && boardManager.Spawner.BlockArray[y, x + 1] != null
+            //                 && boardManager.Spawner.BlockArray[y, x].BlockType == boardManager.Spawner.BlockArray[y + 1, x].BlockType
+            //                 && boardManager.Spawner.BlockArray[y, x].BlockType == boardManager.Spawner.BlockArray[y, x + 1].BlockType)
+            //                 {
+            //                     CubeCheck(boardManager, x, y, 1);
+            //                 }
+            //             }
+            //         }
+            //     }
+            // }
 
-            boardManager.UpdateUI(score);
+            // boardManager.UpdateUI(score);
         }
 
+        #endregion
+
+
+        #region 블럭 매치 체크
         /// <summary>
         /// 블럭 매치 체크 로직. x,y,큐브 형태의 매치를 전부 체크함
         /// </summary>
@@ -325,6 +336,7 @@ namespace KDJ
             int xBlockBreakCount = XAxisMatchCheck(blockGrid.x, blockGrid.y, boardManager);
             int yBlockBreakCount = YAxisMatchCheck(blockGrid.x, blockGrid.y, boardManager);
             bool isCubeMatched = CubeMatchCheck(blockGrid.x, blockGrid.y, boardManager);
+            Debug.Log("큐브 매치 결과: " + isCubeMatched);
             if (xBlockBreakCount == 5 || yBlockBreakCount == 5)
             {
                 boardManager.Spawner.SpawnBlock(blockGrid.x, blockGrid.y, 10);
@@ -332,6 +344,10 @@ namespace KDJ
             else if (5 > xBlockBreakCount && xBlockBreakCount >= 3 && 5 > yBlockBreakCount && yBlockBreakCount >= 3)
             {
                 boardManager.Spawner.SpawnBlock(blockGrid.x, blockGrid.y, 11);
+            }
+            else if (isCubeMatched)
+            {
+                boardManager.Spawner.SpawnBlock(blockGrid.x, blockGrid.y, 9);
             }
             else if (xBlockBreakCount == 4)
             {
@@ -390,7 +406,7 @@ namespace KDJ
             {
                 for (int i = matchStartIndex; i < matchStartIndex + count; i++)
                 {
-                    if (boardManager.Spawner.BlockPlate.BlockPlateArray[y, i] && boardManager.Spawner.BlockArray[y, i].BlockInstance != null)
+                    if (boardManager.Spawner.BlockPlate.BlockPlateArray[y, i] && boardManager.Spawner.BlockArray[y, i] != null && boardManager.Spawner.BlockArray[y, i].BlockInstance != null)
                     {
                         Debug.Log($"매칭 된 블럭 수: {count}");
                         Debug.Log($"X축 매치된 블록 파괴 위치: x={i}, y={y}");
@@ -465,7 +481,7 @@ namespace KDJ
             {
                 for (int i = matchStartIndex; i < matchStartIndex + count; i++)
                 {
-                    if (boardManager.Spawner.BlockPlate.BlockPlateArray[i, x] && boardManager.Spawner.BlockArray[i, x].BlockInstance != null)
+                    if (boardManager.Spawner.BlockPlate.BlockPlateArray[i, x] && boardManager.Spawner.BlockArray[y, i] != null && boardManager.Spawner.BlockArray[y, i].BlockInstance != null)
                     {
                         Debug.Log($"매칭 된 블럭 수: {count}");
                         Debug.Log($"Y축 매치된 블록 파괴 위치: x={x}, y={i}");
@@ -505,26 +521,34 @@ namespace KDJ
             if (moveDirection.x == 1)
             {
                 // 우측 이동시 체크 로직
-                CubeCheck(boardManager, x, y, 1);
-                CubeCheck(boardManager, x, y, 3);
+                if (CubeCheck(boardManager, x, y, 1) || CubeCheck(boardManager, x, y, 3))
+                {
+                    isMatched = true;
+                }
             }
             else if (moveDirection.x == -1)
             {
                 // 좌측 이동시 체크 로직
-                CubeCheck(boardManager, x, y, 2);
-                CubeCheck(boardManager, x, y, 4);
+                if (CubeCheck(boardManager, x, y, 2) || CubeCheck(boardManager, x, y, 4))
+                {
+                    isMatched = true;
+                }
             }
             else if (moveDirection.y == 1)
             {
                 // 상단 이동시 체크 로직
-                CubeCheck(boardManager, x, y, 1);
-                CubeCheck(boardManager, x, y, 2);
+                if (CubeCheck(boardManager, x, y, 1) || CubeCheck(boardManager, x, y, 2))
+                {
+                    isMatched = true;
+                }
             }
             else if (moveDirection.y == -1)
             {
                 // 하단 이동시 체크 로직
-                CubeCheck(boardManager, x, y, 3);
-                CubeCheck(boardManager, x, y, 4);
+                if (CubeCheck(boardManager, x, y, 3) || CubeCheck(boardManager, x, y, 4))
+                {
+                    isMatched = true;
+                }
             }
 
             return isMatched;
@@ -625,9 +649,11 @@ namespace KDJ
                 }
             }
 
-            return true;
+            return isMatched;
         }
+        #endregion
 
+        #region 유틸 함수
         /// <summary>
         /// 배열에 매칭가능한 2x2 배열이 있는지 체크
         /// </summary>
@@ -669,5 +695,6 @@ namespace KDJ
 
             return isMatched;
         }
+        #endregion
     }
 }
