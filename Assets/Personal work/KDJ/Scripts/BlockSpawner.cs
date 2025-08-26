@@ -66,8 +66,8 @@ namespace KDJ
             }
 
             // 테스트 코드
-            BlockArray[3, 2].BlockType = 10;
-            BlockArray[3, 2].GemType = (GemType)9;
+            //BlockArray[3, 2].BlockType = 10;
+            //BlockArray[3, 2].GemType = (GemType)9;
             //BlockArray[3, 3].BlockType = 7;
             //BlockArray[3, 3].GemType = (GemType)7;
             //BlockArray[3, 4].BlockType = 12;
@@ -92,7 +92,7 @@ namespace KDJ
                         {
                             if (BlockPlate.BlockPlateArray[y, x] && BlockArray[y, x].BlockType != 0)
                             {
-                                Vector3 position = new Vector3(x - BlockPlate.BlockPlateWidth / 2, y - BlockPlate.BlockPlateHeight / 2, 0);
+                                Vector3 position = new Vector3(x - BlockPlate.BlockPlateWidth / 2 + 0.5f, y - BlockPlate.BlockPlateHeight / 2 + 0.5f, 0);
                                 GameObject blockPrefab = GetBlockTile(BlockArray[y, x].BlockType);
                                 BlockArray[y, x].BlockInstance = Instantiate(blockPrefab, position, Quaternion.identity);
                             }
@@ -101,7 +101,7 @@ namespace KDJ
                         {
                             if (BlockArray[y, x].BlockType != 0)
                             {
-                                Vector3 position = new Vector3(x - BlockPlate.BlockPlateWidth / 2, y - BlockPlate.BlockPlateHeight / 2, 0);
+                                Vector3 position = new Vector3(x - BlockPlate.BlockPlateWidth / 2 + 0.5f, y - BlockPlate.BlockPlateHeight / 2 + 0.5f, 0);
                                 GameObject blockPrefab = GetBlockTile(BlockArray[y, x].BlockType);
                                 BlockArray[y, x].BlockInstance = Instantiate(blockPrefab, position, Quaternion.identity);
                             }
@@ -251,7 +251,7 @@ namespace KDJ
 
                     if (BlockPlate.BlockPlateWidth % 2 == 0)
                     {
-                        position = new Vector3(x - BlockPlate.BlockPlateWidth / 2, BlockPlate.BlockPlateHeight - BlockPlate.BlockPlateHeight / 2, 0);
+                        position = new Vector3(x - BlockPlate.BlockPlateWidth / 2 + 0.5f, BlockPlate.BlockPlateHeight - BlockPlate.BlockPlateHeight / 2 + 0.5f, 0);
                     }
                     else
                     {
@@ -359,7 +359,7 @@ namespace KDJ
                 GameObject blockInstance = Instantiate(blockPrefab);
 
                 if (BlockPlate.BlockPlateWidth % 2 == 0)
-                    blockInstance.transform.position = new Vector3(x - BlockPlate.BlockPlateWidth / 2, y - BlockPlate.BlockPlateHeight / 2, 0);
+                    blockInstance.transform.position = new Vector3(x - BlockPlate.BlockPlateWidth / 2 + 0.5f, y - BlockPlate.BlockPlateHeight / 2 + 0.5f, 0);
                 else
                     blockInstance.transform.position = new Vector3(x - BlockPlate.BlockPlateWidth / 2, y - BlockPlate.BlockPlateHeight / 2, 0);
 

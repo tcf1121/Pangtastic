@@ -53,9 +53,9 @@ namespace KDJ.States
             if (boardManager.Spawner.BlockPlate.BlockPlateArray[(int)SPos.y, (int)SPos.x] &&
                 boardManager.Spawner.BlockPlate.BlockPlateArray[(int)EPos.y, (int)EPos.x])
             {
-                startSpecialBlock = boardManager.Spawner.BlockArray[(int)SPos.y, (int)SPos.x].BlockInstance.GetComponent<SpecialBlock>();
-                endSpecialBlock = boardManager.Spawner.BlockArray[(int)EPos.y, (int)EPos.x].BlockInstance.GetComponent<SpecialBlock>();
-                if (startSpecialBlock != null || endSpecialBlock != null)
+                bool isStartSpecialBlock = boardManager.Spawner.BlockArray[(int)SPos.y, (int)SPos.x].BlockInstance.TryGetComponent<SpecialBlock>(out startSpecialBlock);
+                bool isEndSpecialBlock = boardManager.Spawner.BlockArray[(int)EPos.y, (int)EPos.x].BlockInstance.TryGetComponent<SpecialBlock>(out endSpecialBlock);
+                if (isStartSpecialBlock || isEndSpecialBlock)
                 {
                     startSpecialBlock?.Activate(boardManager);
                     endSpecialBlock?.Activate(boardManager);
