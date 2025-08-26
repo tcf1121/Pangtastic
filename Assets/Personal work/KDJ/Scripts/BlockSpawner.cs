@@ -363,7 +363,7 @@ namespace KDJ
                 else
                     blockInstance.transform.position = new Vector3(x - BlockPlate.BlockPlateWidth / 2, y - BlockPlate.BlockPlateHeight / 2, 0);
 
-                BlockArray[y, x] = new Block { BlockInstance = blockInstance, BlockType = blockNum };
+                BlockArray[y, x] = new Block { BlockInstance = blockInstance, BlockType = blockNum, GemType = (GemType)blockNum - 1 };
             }
         }
         #endregion
@@ -419,8 +419,10 @@ namespace KDJ
                 case 3: return _blockPrefabs[2];
                 case 4: return _blockPrefabs[3];
                 case 5: return _blockPrefabs[4];
-                case 6: return _blockPrefabs[5];
-                case 7: return _blockPrefabs[6];
+                case 7: return _blockPrefabs[5];
+                case 8: return _blockPrefabs[6];
+                case 10: return _blockPrefabs[7];
+                case 11: return _blockPrefabs[8];
                 //case 12: return _blockPrefabs[5];
                 default: return null;
             }

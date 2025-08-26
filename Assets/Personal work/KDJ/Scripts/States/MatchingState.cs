@@ -36,14 +36,24 @@ namespace KDJ.States
         {
             SpecialBlock startSpecialBlock = null;
             SpecialBlock endSpecialBlock = null;
+            Vector2 SPos = boardManager.BlockMover.StartPos;
+            Vector2 EPos = boardManager.BlockMover.EndPos;
+
             Debug.Log("블럭 매칭 시작");
             yield return new WaitForSeconds(0.5f);
 
-            if (boardManager.Spawner.BlockPlate.BlockPlateArray[(int)boardManager.BlockMover.StartPos.y, (int)boardManager.BlockMover.StartPos.x] &&
-                boardManager.Spawner.BlockPlate.BlockPlateArray[(int)boardManager.BlockMover.EndPos.y, (int)boardManager.BlockMover.EndPos.x])
+            if (SPos.x < 0 || SPos.y < 0 || SPos.x >= boardManager.Spawner.BlockPlate.BlockPlateWidth || SPos.y >= boardManager.Spawner.BlockPlate.BlockPlateHeight ||
+                EPos.x < 0 || EPos.y < 0 || EPos.x >= boardManager.Spawner.BlockPlate.BlockPlateWidth || EPos.y >= boardManager.Spawner.BlockPlate.BlockPlateHeight)
             {
-                bool StartBlockIsSpecialBlock = boardManager.Spawner.BlockArray[(int)boardManager.BlockMover.StartPos.y, (int)boardManager.BlockMover.StartPos.x].BlockInstance.TryGetComponent<SpecialBlock>(out startSpecialBlock);
-                bool EndBlockIsSpecialBlock = boardManager.Spawner.BlockArray[(int)boardManager.BlockMover.EndPos.y, (int)boardManager.BlockMover.EndPos.x].BlockInstance.TryGetComponent<SpecialBlock>(out endSpecialBlock);
+                Debug.Log("StartPos 또는 EndPos가 보드 영역을 벗어났습니다.");
+                yield break;
+            }
+
+            if (boardManager.Spawner.BlockPlate.BlockPlateArray[(int)SPos.y, (int)SPos.x] &&
+                boardManager.Spawner.BlockPlate.BlockPlateArray[(int)EPos.y, (int)EPos.x])
+            {
+                bool StartBlockIsSpecialBlock = boardManager.Spawner.BlockArray[(int)SPos.y, (int)SPos.x].BlockInstance.TryGetComponent<SpecialBlock>(out startSpecialBlock);
+                bool EndBlockIsSpecialBlock = boardManager.Spawner.BlockArray[(int)EPos.y, (int)EPos.x].BlockInstance.TryGetComponent<SpecialBlock>(out endSpecialBlock);
                 if (StartBlockIsSpecialBlock || EndBlockIsSpecialBlock)
                 {
                     startSpecialBlock?.Activate(boardManager);
@@ -53,7 +63,7 @@ namespace KDJ.States
                 }
             }
 
-            if (boardManager.BlockMover.StartPos != Vector2.zero)
+            if (SPos != Vector2.zero)
             {
                 boardManager.MatchChecker.BlockMatchCheck(boardManager.BlockMover.StartBlockPos, boardManager);
                 boardManager.MatchChecker.BlockMatchCheck(boardManager.BlockMover.EndBlockPos, boardManager);
@@ -70,7 +80,7 @@ namespace KDJ.States
                     boardManager.ChangeState(new ReadyState());
                 }
             }
-            else if (boardManager.BlockMover.StartPos == Vector2.zero)
+            else if (SPos == Vector2.zero)
             {
                 // 모든 매치된 블럭을 파괴
                 boardManager.MatchChecker.AllMatchBlockDestroy(boardManager);

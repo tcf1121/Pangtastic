@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Net.Sockets;
 using Unity.Collections;
 using Unity.VisualScripting;
+using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 
 namespace KDJ
@@ -123,6 +124,38 @@ namespace KDJ
         public void AllMatchBlockDestroy(BoardManager boardManager)
         {
             int score = 0;
+
+            // x,y 통합 체크
+            for (int y = 0; y < boardManager.Spawner.BlockPlate.BlockPlateHeight; y++)
+            {
+                for (int x = 0; x < boardManager.Spawner.BlockPlate.BlockPlateWidth; x++)
+                {
+                    if (boardManager.Spawner.BlockPlate.BlockPlateArray[y, x] && boardManager.Spawner.BlockArray[y, x] != null)
+                    {
+                        int xMatchCount = XAxisMatchCheck(x, y, boardManager);
+                        int yMatchCount = YAxisMatchCheck(x, y, boardManager);
+
+                        if (xMatchCount == 5 || yMatchCount == 5)
+                        {
+                            boardManager.Spawner.SpawnBlock(x, y, 10);
+                        }
+                        else if (5 > xMatchCount && xMatchCount >= 3 && 5 > yMatchCount && yMatchCount >= 3)
+                        {
+                            boardManager.Spawner.SpawnBlock(x, y, 11);
+                        }
+                        else if (xMatchCount == 4)
+                        {
+                            boardManager.Spawner.SpawnBlock(x, y, 7);
+                        }
+                        else if (yMatchCount == 4)
+                        {
+                            boardManager.Spawner.SpawnBlock(x, y, 8);
+                        }
+                    }
+                }
+            }
+
+            /*
             // 블럭 매치 체크 로직
             // x축부터 쭉 체크하고 y축도 체크
             for (int y = 0; y < boardManager.Spawner.BlockPlate.BlockPlateHeight; y++)
@@ -169,6 +202,11 @@ namespace KDJ
                             boardManager.Spawner.BlockArray[y, i].BlockInstance = null;
                             score += 10;
                         }
+                    }
+
+                    if (count == 4)
+                    {
+                        boardManager.Spawner.SpawnBlock(matchStartIndex, y, 7);
                     }
 
                     boardManager.MatchCombo.UpCombo();
@@ -233,6 +271,11 @@ namespace KDJ
                         }
                     }
 
+                    if (count == 4)
+                    {
+                        boardManager.Spawner.SpawnBlock(x, matchStartIndex, 8);
+                    }
+
                     boardManager.MatchCombo.UpCombo();
                     if (boardManager.MatchCombo.CurCombo > 1)
                     {
@@ -245,6 +288,7 @@ namespace KDJ
                     score = 0;
                 }
             }
+            */
 
             // 큐브 체크
             for (int y = 0; y < boardManager.Spawner.BlockPlate.BlockPlateHeight; y++)
@@ -281,13 +325,21 @@ namespace KDJ
             int xBlockBreakCount = XAxisMatchCheck(blockGrid.x, blockGrid.y, boardManager);
             int yBlockBreakCount = YAxisMatchCheck(blockGrid.x, blockGrid.y, boardManager);
             bool isCubeMatched = CubeMatchCheck(blockGrid.x, blockGrid.y, boardManager);
-            if (xBlockBreakCount == 4)
+            if (xBlockBreakCount == 5 || yBlockBreakCount == 5)
+            {
+                boardManager.Spawner.SpawnBlock(blockGrid.x, blockGrid.y, 10);
+            }
+            else if (5 > xBlockBreakCount && xBlockBreakCount >= 3 && 5 > yBlockBreakCount && yBlockBreakCount >= 3)
+            {
+                boardManager.Spawner.SpawnBlock(blockGrid.x, blockGrid.y, 11);
+            }
+            else if (xBlockBreakCount == 4)
             {
                 boardManager.Spawner.SpawnBlock(blockGrid.x, blockGrid.y, 7);
             }
             else if (yBlockBreakCount == 4)
             {
-                boardManager.Spawner.SpawnBlock(blockGrid.x, blockGrid.y, 6);
+                boardManager.Spawner.SpawnBlock(blockGrid.x, blockGrid.y, 8);
             }
         }
 
@@ -299,6 +351,7 @@ namespace KDJ
             int score = 0;
             int count = 1;
             int matchStartIndex = 0;
+            bool isMatched = false;
             GemType curGemType = (GemType)(-1);
             GemType prevGemType = (GemType)(-1);
 
@@ -345,17 +398,21 @@ namespace KDJ
                         Destroy(boardManager.Spawner.BlockArray[y, i].BlockInstance);
                         boardManager.Spawner.BlockArray[y, i].BlockInstance = null;
                         score += 10;
+                        isMatched = true;
                     }
                 }
 
-                boardManager.MatchCombo.UpCombo();
-                if (boardManager.MatchCombo.CurCombo > 1)
+                if (isMatched)
                 {
-                    boardManager.UpdateUI((int)(score * (0.5f * boardManager.MatchCombo.CurCombo)));
-                }
-                else
-                {
-                    boardManager.UpdateUI(score);
+                    boardManager.MatchCombo.UpCombo();
+                    if (boardManager.MatchCombo.CurCombo > 1)
+                    {
+                        boardManager.UpdateUI((int)(score * (0.5f * boardManager.MatchCombo.CurCombo)));
+                    }
+                    else
+                    {
+                        boardManager.UpdateUI(score);
+                    }
                 }
             }
 
@@ -369,6 +426,7 @@ namespace KDJ
             int score = 0;
             int count = 1;
             int matchStartIndex = 0;
+            bool isMatched = false;
             GemType curGemType = (GemType)(-1);
             GemType prevGemType = (GemType)(-1);
 
@@ -415,17 +473,21 @@ namespace KDJ
                         Destroy(boardManager.Spawner.BlockArray[i, x].BlockInstance);
                         boardManager.Spawner.BlockArray[i, x].BlockInstance = null;
                         score += 10;
+                        isMatched = true;
                     }
                 }
 
-                boardManager.MatchCombo.UpCombo();
-                if (boardManager.MatchCombo.CurCombo > 1)
+                if (isMatched)
                 {
-                    boardManager.UpdateUI((int)(score * (0.5f * boardManager.MatchCombo.CurCombo)));
-                }
-                else
-                {
-                    boardManager.UpdateUI(score);
+                    boardManager.MatchCombo.UpCombo();
+                    if (boardManager.MatchCombo.CurCombo > 1)
+                    {
+                        boardManager.UpdateUI((int)(score * (0.5f * boardManager.MatchCombo.CurCombo)));
+                    }
+                    else
+                    {
+                        boardManager.UpdateUI(score);
+                    }
                 }
             }
 
@@ -481,6 +543,7 @@ namespace KDJ
             int matchCount = 0;
             int offsetX = 0;
             int offsetY = 0;
+            bool isMatched = false;
 
             switch (startArray)
             {
@@ -542,19 +605,23 @@ namespace KDJ
                                 Destroy(boardManager.Spawner.BlockArray[i, j].BlockInstance);
                                 boardManager.Spawner.BlockArray[i, j].BlockInstance = null;
                                 score += 10;
+                                isMatched = true;
                             }
                         }
                     }
                 }
 
-                boardManager.MatchCombo.UpCombo();
-                if (boardManager.MatchCombo.CurCombo > 1)
+                if (isMatched)
                 {
-                    boardManager.UpdateUI((int)(score * (0.5f * boardManager.MatchCombo.CurCombo)));
-                }
-                else
-                {
-                    boardManager.UpdateUI(score);
+                    boardManager.MatchCombo.UpCombo();
+                    if (boardManager.MatchCombo.CurCombo > 1)
+                    {
+                        boardManager.UpdateUI((int)(score * (0.5f * boardManager.MatchCombo.CurCombo)));
+                    }
+                    else
+                    {
+                        boardManager.UpdateUI(score);
+                    }
                 }
             }
 
