@@ -18,6 +18,7 @@ namespace LHJ
             var plate = spawner.BlockPlate;
             int width = plate.BlockPlateWidth;
             int height = plate.BlockPlateHeight;
+            int destroyedCount = 0;
 
             int myX = Mathf.RoundToInt(transform.position.x + width / 2f - 0.5f);
             int myY = Mathf.RoundToInt(transform.position.y + height / 2f - 0.5f);
@@ -35,8 +36,13 @@ namespace LHJ
                 }
                 Object.Destroy(blk.BlockInstance);
                 spawner.BlockArray[myY, x].BlockInstance = null;
+                destroyedCount ++;
             }
-            board.ChangeState(new MatchingState());
+            if (destroyedCount > 0)
+            {
+                int score = destroyedCount * 10;
+                board.UpdateUI(score);
+            }
         }
     }
 }

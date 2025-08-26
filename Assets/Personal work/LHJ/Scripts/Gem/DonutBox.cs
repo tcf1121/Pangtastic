@@ -18,6 +18,7 @@ namespace LHJ
             var plate = spawner.BlockPlate;
             int width = plate.BlockPlateWidth;
             int height = plate.BlockPlateHeight;
+            int destroyedCount = 0;
 
             Vector2Int center = board.BlockMover.StartBlockPos;
             if (spawner.BlockArray[center.y, center.x].BlockInstance != this.gameObject)
@@ -44,7 +45,13 @@ namespace LHJ
 
                     Object.Destroy(blk.BlockInstance);
                     spawner.BlockArray[y, x].BlockInstance = null;
+                    destroyedCount++;
                 }
+            }
+            if (destroyedCount > 0)
+            {
+                int score = destroyedCount * 10;
+                board.UpdateUI(score);
             }
         }
     }

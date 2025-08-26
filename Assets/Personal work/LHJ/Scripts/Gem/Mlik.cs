@@ -77,6 +77,7 @@ namespace LHJ
             }
 
             var order = GameObject.FindObjectOfType<OrderStateController>();
+            int destroyedCount = 0;
             int toRemove = Mathf.Min(3, candidates.Count);
             for (int i = 0; i < toRemove; i++)
             {
@@ -91,6 +92,12 @@ namespace LHJ
 
                 Object.Destroy(blk.BlockInstance);
                 spawner.BlockArray[pos.y, pos.x].BlockInstance = null;
+                destroyedCount++;
+            }
+            if (destroyedCount > 0)
+            {
+                int score = destroyedCount * 10;
+                board.UpdateUI(score);
             }
         }
     }
