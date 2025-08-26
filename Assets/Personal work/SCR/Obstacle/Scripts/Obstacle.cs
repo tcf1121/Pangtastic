@@ -61,6 +61,7 @@ namespace SCR
         public void Damage()
         {
             _currentHP--;
+            Debug.Log($"{ObstaclType}:{_currentHP}");
             if (_currentHP == 0) Clear();
         }
 
