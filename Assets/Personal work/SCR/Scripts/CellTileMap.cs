@@ -49,7 +49,11 @@ public class CellTileMap : MonoBehaviour
         Vector3 mouseWorldPosition = Camera.main.ScreenToWorldPoint(touchPos);
 
         Vector3 directionVector = mouseWorldPosition - _clickPos;
-        if (directionVector.magnitude < _dragThreshold) return;
+        if (directionVector.magnitude < _dragThreshold)
+        {
+            Board.SetUseItem(_clickPos);
+            return;
+        }
 
         _dragDir = Vector3Int.zero;
 
@@ -87,7 +91,7 @@ public class CellTileMap : MonoBehaviour
         Vector3 directionVector = mouseWorldPosition - _clickPos;
         if (directionVector.magnitude < _dragThreshold)
         {
-            Board.IsSpeical(_clickPos);
+            Board.SetUseItem(_clickPos);
             return;
         }
 

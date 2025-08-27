@@ -50,11 +50,6 @@ namespace SCR
             if (gem == GemType.Random) SetDonut(gem);
         }
 
-        public GemType FirstGem()
-        {
-            return _firstGemtype;
-        }
-
         public void Init()
         {
             if (_firstGemtype == GemType.CatStatues_s) _catS = true;
