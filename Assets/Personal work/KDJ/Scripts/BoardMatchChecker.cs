@@ -1,4 +1,6 @@
+using LHJ;
 using SCR;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace KDJ
@@ -24,27 +26,35 @@ namespace KDJ
             {
                 for (int x = 0; x < width; x++)
                 {
-                    // 오른쪽 블록과 교환 테스트
-                    if (x + 1 < width)
+                    if (blockArray[y, x].GemType > GemType.Sugar && blockArray[y, x].GemType < GemType.Dough)
                     {
-                        // 가상 교환
-                        var temp = blockArray[y, x];
-                        blockArray[y, x] = blockArray[y, x + 1];
-                        blockArray[y, x + 1] = temp;
-
-                        // 교환된 위치 주변에서 매치가 발생하는지 확인
-                        if (CheckForMatchAt(boardManager, x, y) || CheckForMatchAt(boardManager, x + 1, y))
-                        {
-                            // 중복 저장을 막기 위해 항상 좌표를 정렬하여 키로 사용
-                            string key = $"({x},{y}):({x + 1},{y})";
-                            possibleMoves.Add(key);
-                        }
-
-                        // 교환 원상 복구
-                        temp = blockArray[y, x];
-                        blockArray[y, x] = blockArray[y, x + 1];
-                        blockArray[y, x + 1] = temp;
+                        // 특수 블럭이 있는 경우 매치 가능 횟수에 1회 더함. 해당 좌표를 키로 추가 후 continue
+                        string key = $"({x},{y})";
+                        possibleMoves.Add(key);
+                        continue;
                     }
+
+                    // 오른쪽 블록과 교환 테스트
+                        if (x + 1 < width)
+                        {
+                            // 가상 교환
+                            var temp = blockArray[y, x];
+                            blockArray[y, x] = blockArray[y, x + 1];
+                            blockArray[y, x + 1] = temp;
+
+                            // 교환된 위치 주변에서 매치가 발생하는지 확인
+                            if (CheckForMatchAt(boardManager, x, y) || CheckForMatchAt(boardManager, x + 1, y))
+                            {
+                                // 중복 저장을 막기 위해 항상 좌표를 정렬하여 키로 사용
+                                string key = $"({x},{y}):({x + 1},{y})";
+                                possibleMoves.Add(key);
+                            }
+
+                            // 교환 원상 복구
+                            temp = blockArray[y, x];
+                            blockArray[y, x] = blockArray[y, x + 1];
+                            blockArray[y, x + 1] = temp;
+                        }
 
                     // 아래쪽 블록과 교환 테스트
                     if (y + 1 < height)

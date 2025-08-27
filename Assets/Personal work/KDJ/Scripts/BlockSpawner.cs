@@ -556,7 +556,7 @@ namespace KDJ
 
             while (true)
             {
-                if (BlockPlate.BlockPlateArray[y, x] && BlockArray[y, x].GemType > GemType.Sugar && BlockArray[y, x].GemType < GemType.Dough)
+                if (BlockPlate.BlockPlateArray[y, x] && BlockArray[y, x].GemType > GemType.Sugar)
                 {
                     x = Random.Range(0, BlockPlate.BlockPlateWidth);
                     y = Random.Range(0, BlockPlate.BlockPlateHeight);
@@ -567,9 +567,8 @@ namespace KDJ
                 }
             }
 
-            GameObject blockPrefab = GetBlockTile(blockNum);
-
             Destroy(BlockArray[y, x].BlockInstance);
+            GameObject blockPrefab = GetBlockTile(blockNum);
 
             if (blockPrefab != null)
             {
@@ -598,19 +597,20 @@ namespace KDJ
         public void ShuffleBlockArray()
         {
             // 블록 배열을 섞는 로직 구현
-            // 각 배열 인덱스에 접근하여 기존 데이터를 제거하고 랜덤 일반 블럭을 생성
+            // 각 배열 인덱스에 접근하여 일반 블럭이라면 기존 데이터를 제거하고 랜덤 일반 블럭을 생성
             for (int x = 0; x < BlockPlate.BlockPlateWidth; x++)
             {
                 for (int y = 0; y < BlockPlate.BlockPlateHeight; y++)
                 {
                     if (BlockPlate.BlockPlateArray[y, x])
                     {
-                        if (BlockArray[y, x] != null && BlockArray[y, x].BlockInstance != null)
+                        if (BlockArray[y, x] != null && BlockArray[y, x].BlockInstance != null && BlockArray[y, x].GemType <= GemType.Sugar)
                         {
                             Destroy(BlockArray[y, x].BlockInstance);
+                            BlockArray[y, x] = null;
+                            int randomBlockType = Random.Range(1, 7); // 1부터 6까지의 랜덤 블럭 타입
+                            SpawnBlock(x, y, randomBlockType);
                         }
-                        int randomBlockType = Random.Range(1, 7); // 1부터 6까지의 랜덤 블럭 타입
-                        SpawnBlock(x, y, randomBlockType);
                     }
                 }
             }
