@@ -11,7 +11,7 @@ namespace SCR
         // 기본 블럭
         private Donut _donut;
         // 특수 블럭
-        private SpecialBlock _speacial;
+        private Special _special;
         // 고양 지폐, 선물 상자, 계란, 고양이 동상
         private Obstacle _obstacle;
         // 클로체, 얼음만 확인
@@ -45,9 +45,14 @@ namespace SCR
         public void SetObject(GemType gem)
         {
             if (gem < GemType.Roller_v) SetDonut(gem);
-            else if (gem < GemType.Dough) { }
+            else if (gem < GemType.Dough) SetSpecial(gem);
             else if (gem < GemType.Empty) SetObstacle(gem);
             if (gem == GemType.Random) SetDonut(gem);
+        }
+
+        public GemType FirstGem()
+        {
+            return _firstGemtype;
         }
 
         public void Init()
@@ -98,21 +103,22 @@ namespace SCR
             }
         }
 
-        public void SetSpecial(SpecialBlock special)
+        public void SetSpecial(Special special)
         {
-            _speacial = null;
-            _speacial = special;
+            _special = null;
+            _special = special;
         }
 
         private void SetSpecial(GemType special)
         {
-
+            _special = Board.GetSpecial(_pos, special);
+            _special.Init(_pos);
         }
 
         public bool IsEmpty()
         {
             if (_catS) return false;
-            if (_obstacle == null && _donut == null && _donutObstacle == null) return true;
+            if (_obstacle == null && _donut == null && _donutObstacle == null && _special == null) return true;
             else return false;
         }
 
@@ -170,6 +176,11 @@ namespace SCR
                 moveCell.SetObstacle(_obstacle);
                 _obstacle = null;
             }
+            if (_special != null)
+            {
+                moveCell.SetSpecial(_special);
+                _special = null;
+            }
         }
 
         public IEnumerator SetPos(float duration)
@@ -180,24 +191,29 @@ namespace SCR
             {
                 target = _donut.gameObject.transform;
             }
+            else if (_special != null)
+            {
+                target = _special.gameObject.transform;
+            }
             else if (_obstacle != null && _obstacle.ObstaclType < GemType.CatStatues)
             {
                 target = _obstacle.gameObject.transform;
             }
-            if (target.gameObject != null)
-            {
-                Vector3 startPosition = target.position;
-
-                while (elapsedTime < duration)
+            if (target != null)
+                if (target.gameObject != null)
                 {
+                    Vector3 startPosition = target.position;
+
+                    while (elapsedTime < duration)
+                    {
+                        if (target != null)
+                            target.position = Vector3.Lerp(startPosition, _pos, (elapsedTime / duration));
+                        elapsedTime += Time.deltaTime;
+                        yield return null;
+                    }
                     if (target != null)
-                        target.position = Vector3.Lerp(startPosition, _pos, (elapsedTime / duration));
-                    elapsedTime += Time.deltaTime;
-                    yield return null;
+                        target.position = _pos;
                 }
-                if (target != null)
-                    target.position = _pos;
-            }
         }
 
 
@@ -220,6 +236,14 @@ namespace SCR
             return null;
         }
 
+        public Special GetSpecial()
+        {
+            if (_special != null)
+            {
+                return _special;
+            }
+            return null;
+        }
 
         // 주변 피해로 데미지를 입었을 때
         public void SplashDamage()
@@ -274,12 +298,37 @@ namespace SCR
                     if (_cellObstacle.gameObject == null)
                         _cellObstacle = null;
             }
+            if (_special != null)
+            {
+                _special.Damage();
+                if (_special != null)
+                    if (_special.gameObject == null)
+                        _special = null;
+            }
 
         }
 
         public void DestroyCat()
         {
             if (_catS) _catS = false;
+        }
+
+        public void UseTwoSpecial(Special special = null)
+        {
+            if (special = null)
+            {
+                _special.UsedSpecial();
+                if (_special != null)
+                    if (_special.gameObject == null)
+                        _special = null;
+            }
+            else
+            {
+                _special.Use(special);
+                if (_special != null)
+                    if (_special.gameObject == null)
+                        _special = null;
+            }
         }
     }
 }

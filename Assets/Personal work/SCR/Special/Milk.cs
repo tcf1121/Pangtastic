@@ -7,7 +7,7 @@ namespace SCR
     {
         public override void Use(Special special = null)
         {
-
+            base.Use(special);
         }
     }
 }

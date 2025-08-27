@@ -78,7 +78,7 @@ public class MatchChecker : MonoBehaviour
                     if (len == 4)
                         allCandidates.Add(new MatchCandidate { Cells = group, Type = GemType.Roller_h, SpawnCell = spawnCell, Priority = MatchType.Knife });
                     else if (len >= 5)
-                        allCandidates.Add(new MatchCandidate { Cells = group, Type = GemType.Popcorn, SpawnCell = spawnCell, Priority = MatchType.Honeycomb });
+                        allCandidates.Add(new MatchCandidate { Cells = group, Type = GemType.Oven, SpawnCell = spawnCell, Priority = MatchType.Honeycomb });
 
                     if (len == 3)
                         allCandidates.Add(new MatchCandidate { Cells = group, Type = val, SpawnCell = spawnCell, Priority = MatchType.Normal });
@@ -114,7 +114,7 @@ public class MatchChecker : MonoBehaviour
                     if (len == 4)
                         allCandidates.Add(new MatchCandidate { Cells = group, Type = GemType.Roller_v, SpawnCell = spawnCell, Priority = MatchType.Knife });
                     else if (len >= 5)
-                        allCandidates.Add(new MatchCandidate { Cells = group, Type = GemType.Popcorn, SpawnCell = spawnCell, Priority = MatchType.Honeycomb });
+                        allCandidates.Add(new MatchCandidate { Cells = group, Type = GemType.Oven, SpawnCell = spawnCell, Priority = MatchType.Honeycomb });
 
                     if (len == 3)
                         allCandidates.Add(new MatchCandidate { Cells = group, Type = val, SpawnCell = spawnCell, Priority = MatchType.Normal });
