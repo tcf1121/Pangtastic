@@ -48,8 +48,8 @@ namespace SCR
 
         public void Init()
         {
-            if (_firstGemtype != GemType.CatStatues_s) SetObject(_firstGemtype);
-            else _catS = true;
+            if (_firstGemtype == GemType.CatStatues_s) _catS = true;
+            else SetObject(_firstGemtype);
             _firstGemtype = GemType.Empty;
         }
 
@@ -96,6 +96,7 @@ namespace SCR
 
         public bool IsEmpty()
         {
+            if (_catS) return false;
             if (_obstacle == null && _donut == null && _donutObstacle == null) return true;
             else return false;
         }
@@ -126,14 +127,12 @@ namespace SCR
                 else return _donut.DonutType;
             }
             if (_donut != null) return _donut.DonutType;
-            if (_catS) return GemType.CatStatues_s;
             else return GemType.Empty;
         }
 
         public GemType GetCatStatuse()
         {
             if (_catS) return GemType.CatStatues_s;
-
             if (_obstacle != null &&
             _obstacle.GetBlockType() == GemType.CatStatues)
                 return GemType.CatStatues;
@@ -144,9 +143,9 @@ namespace SCR
         {
             if (_donutObstacle != null)
                 return false;
-            if (_obstacle != null && (_obstacle.GetBlockType() == GemType.CatStatues ||
-                    _obstacle.GetBlockType() == GemType.CatStatues_s))
+            if (_obstacle != null && _obstacle.GetBlockType() == GemType.CatStatues)
                 return false;
+            if (_catS) return false;
             return true;
         }
 
@@ -182,11 +181,13 @@ namespace SCR
 
                 while (elapsedTime < duration)
                 {
-                    target.position = Vector3.Lerp(startPosition, _pos, (elapsedTime / duration));
+                    if (target != null)
+                        target.position = Vector3.Lerp(startPosition, _pos, (elapsedTime / duration));
                     elapsedTime += Time.deltaTime;
                     yield return null;
                 }
-                target.position = _pos;
+                if (target != null)
+                    target.position = _pos;
             }
         }
 
@@ -217,14 +218,19 @@ namespace SCR
             if (_obstacle != null)
             {
                 _obstacle.Damage();
-                if (_obstacle.gameObject == null)
-                    _obstacle = null;
+                if (_obstacle != null)
+                    if (_obstacle.gameObject == null)
+                        _obstacle = null;
             }
             if (_donutObstacle != null)
             {
-                _donutObstacle.Damage();
-                if (_donutObstacle.gameObject == null)
-                    _donutObstacle = null;
+                if (_donutObstacle.GetBlockType() == GemType.Cloche)
+                {
+                    _donutObstacle.Damage();
+                    if (_donutObstacle != null)
+                        if (_donutObstacle.gameObject == null)
+                            _donutObstacle = null;
+                }
             }
         }
 
@@ -234,28 +240,37 @@ namespace SCR
             if (_obstacle != null)
             {
                 _obstacle.Damage();
-                if (_obstacle.gameObject == null)
-                    _obstacle = null;
+                if (_obstacle != null)
+                    if (_obstacle.gameObject == null)
+                        _obstacle = null;
             }
             if (_donutObstacle != null)
             {
                 _donutObstacle.Damage();
-                if (_donutObstacle.gameObject == null)
-                    _donutObstacle = null;
+                if (_donutObstacle != null)
+                    if (_donutObstacle.gameObject == null)
+                        _donutObstacle = null;
             }
             if (_donut != null)
             {
                 _donut.Damage();
-                if (_donut.gameObject == null)
-                    _donut = null;
+                if (_donut != null)
+                    if (_donut.gameObject == null)
+                        _donut = null;
             }
             if (_cellObstacle != null)
             {
                 _cellObstacle.Damage();
-                if (_cellObstacle.gameObject == null)
-                    _cellObstacle = null;
+                if (_cellObstacle != null)
+                    if (_cellObstacle.gameObject == null)
+                        _cellObstacle = null;
             }
 
+        }
+
+        public void DestroyCat()
+        {
+            if (_catS) _catS = false;
         }
     }
 }

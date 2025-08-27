@@ -161,6 +161,21 @@ namespace SCR
             return count;
         }
 
+        public static void DrawObject(Vector3Int pos, GemType gem)
+        {
+            if (instance == null)
+            {
+                instance = GameObject.Find("Grid").GetComponent<Board>();
+                instance.GetReference();
+            }
+            if (!instance.CellGemType.ContainsKey(pos))
+            {
+                instance.CellGemType.Add(pos, gem);
+            }
+            else
+                instance.CellGemType[pos] = gem;
+        }
+
 
 
         // 빈칸 추가
@@ -236,6 +251,13 @@ namespace SCR
                 instance = GameObject.Find("Grid").GetComponent<Board>();
                 instance.GetReference();
             }
+            if (instance.CellContent[pos].GetCatStatuse() == GemType.CatStatues)
+            {
+                instance.CellContent[pos + Vector3Int.up].DestroyCat();
+                instance.CellContent[pos + Vector3Int.right].DestroyCat();
+                instance.CellContent[pos + Vector3Int.up + Vector3Int.right].DestroyCat();
+            }
+
             instance.CellContent[pos].RemoveCell();
         }
 
@@ -322,6 +344,7 @@ namespace SCR
                         {
                             _emptyPositions.Add(pos);
                         }
+                _emptyPositions = _emptyPositions.Distinct().ToList();
                 if (_emptyPositions.Count == 0)
                 {
                     allEmptyCor = null;
@@ -412,7 +435,7 @@ namespace SCR
                     _matchedPositions = _matchedPositions.Distinct().ToList();
                     if (_splashDamageTargets.Count > 0)
                         _splashDamageTargets = _splashDamageTargets
-                                .Distinct().Except(_matchedPositions.Distinct()).ToList();
+                                .Distinct().Except(_matchedPositions).ToList();
                     DamageCheck();
                 }
                 yield return new WaitForSeconds(0.2f);
@@ -445,7 +468,6 @@ namespace SCR
             {
                 // 중복 제거
                 _matchedPositions = _matchedPositions.Distinct().ToList();
-
                 foreach (var matchedPos in _matchedPositions)
                 {
                     AddSplashTargets(matchedPos);
@@ -454,7 +476,7 @@ namespace SCR
                 // 스플래시 데미지 대상 리스트에서 매치 블록과 중복을 제거
                 if (_splashDamageTargets.Count > 0)
                     _splashDamageTargets = _splashDamageTargets
-                        .Distinct().Except(_matchedPositions.Distinct()).ToList();
+                        .Distinct().Except(_matchedPositions).ToList();
             }
         }
 
@@ -462,30 +484,15 @@ namespace SCR
 
         private void DamageCheck()
         {
-            int addEmpty = _matchedPositions.Count + _splashDamageTargets.Count;
             foreach (var matchedPos in _matchedPositions)
             {
                 if (instance.CellContent.ContainsKey(matchedPos))
-                {
-                    if (instance.CellContent[matchedPos].GetCatStatuse() == GemType.CatStatues_s)
-                    {
-                        if (!_matchedPositions.Contains(CatStatuesPos(matchedPos)))
-                            instance.CellContent[CatStatuesPos(matchedPos)].Damage();
-                    }
-                    else instance.CellContent[matchedPos].Damage();
-                }
+                    instance.CellContent[matchedPos].Damage();
             }
             foreach (var splashPos in _splashDamageTargets)
             {
                 if (instance.CellContent.ContainsKey(splashPos))
-                {
-                    if (instance.CellContent[splashPos].GetCatStatuse() == GemType.CatStatues_s)
-                    {
-                        if (!_splashDamageTargets.Contains(CatStatuesPos(splashPos)))
-                            instance.CellContent[CatStatuesPos(splashPos)].SplashDamage();
-                    }
-                    else instance.CellContent[splashPos].SplashDamage();
-                }
+                    instance.CellContent[splashPos].SplashDamage();
             }
 
             _matchedPositions.Clear(); // 다음 매치 확인을 위해 리스트 초기화
@@ -494,33 +501,44 @@ namespace SCR
 
         private Vector3Int CatStatuesPos(Vector3Int cat_sPos)
         {
-            Vector3Int pos;
-            pos = cat_sPos + Vector3Int.down;
-            if (instance.CellContent.ContainsKey(pos))
+            List<Vector3Int> catPos = new()
             {
-                if (instance.CellContent[pos].GetCatStatuse() == GemType.CatStatues)
+                Vector3Int.down,
+                Vector3Int.left,
+                Vector3Int.down + Vector3Int.left
+            };
+            foreach (Vector3Int pos in catPos)
+            {
+                if (instance.CellContent.ContainsKey(cat_sPos + pos))
                 {
-                    return pos;
+                    if (instance.CellContent[cat_sPos].GetCatStatuse() == GemType.CatStatues)
+                    {
+                        return pos;
+                    }
                 }
             }
-            pos = cat_sPos + Vector3Int.left;
-            if (instance.CellContent.ContainsKey(pos))
+            return default;
+        }
+
+        public static void CatStatuesDistroy(Vector3Int CatStatuesPos)
+        {
+            List<Vector3Int> catPos = new()
             {
-                Debug.Log(instance.CellContent[pos].getCellType());
-                if (instance.CellContent[pos].GetCatStatuse() == GemType.CatStatues)
+                CatStatuesPos + Vector3Int.up,
+                CatStatuesPos + Vector3Int.right,
+                CatStatuesPos + Vector3Int.up + Vector3Int.right
+            };
+            foreach (Vector3Int pos in catPos)
+            {
+                if (instance.CellContent.ContainsKey(pos))
                 {
-                    return pos;
+                    if (instance.CellContent[pos].GetCatStatuse() == GemType.CatStatues_s)
+                    {
+                        instance.CellContent[pos].DestroyCat();
+
+                    }
                 }
             }
-            pos = pos + Vector3Int.down;
-            if (instance.CellContent.ContainsKey(pos))
-            {
-                if (instance.CellContent[pos].GetCatStatuse() == GemType.CatStatues)
-                {
-                    return pos;
-                }
-            }
-            return Vector3Int.zero;
         }
 
         private int CheckDirection(Vector3Int startPos, Vector3Int direction)
@@ -556,8 +574,8 @@ namespace SCR
         {
             Vector3Int[] directions = new Vector3Int[]
             {
-                new Vector3Int(0, 1, 0), new Vector3Int(0, -1, 0),
-                new Vector3Int(1, 0, 0), new Vector3Int(-1, 0, 0)
+                Vector3Int.up, Vector3Int.down,
+                Vector3Int.left, Vector3Int.right
             };
 
             foreach (var direction in directions)
@@ -565,7 +583,22 @@ namespace SCR
                 Vector3Int targetPos = centerPos + direction;
                 if (instance.CellContent.ContainsKey(targetPos))
                 {
-                    _splashDamageTargets.Add(targetPos);
+                    if (instance.CellContent[targetPos].GetCatStatuse() == GemType.CatStatues_s)
+                    {
+                        if (!instance.CellContent.ContainsKey(CatStatuesPos(targetPos)))
+                        {
+                            Debug.Log(CatStatuesPos(targetPos));
+                            _splashDamageTargets.Add(CatStatuesPos(targetPos));
+                        }
+
+                    }
+                    else
+                    {
+                        Debug.Log(instance.CellContent[targetPos].GetCatStatuse());
+                        Debug.Log(targetPos);
+                        _splashDamageTargets.Add(targetPos);
+                    }
+
                 }
             }
         }

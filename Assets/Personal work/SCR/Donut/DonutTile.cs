@@ -7,13 +7,11 @@ namespace SCR
     public class DonutTile : TileBase
     {
         public Sprite PreviewEditorSprite;
-        public Color PreviewEditorColor;
         public GemType Donut;
 
         public override void GetTileData(Vector3Int position, ITilemap tilemap, ref TileData tileData)
         {
-            tileData.sprite = !Application.isPlaying ? PreviewEditorSprite : null;
-            tileData.color = !Application.isPlaying ? PreviewEditorColor : Color.white;
+            tileData.sprite = PreviewEditorSprite;
         }
 
         public override bool StartUp(Vector3Int position, ITilemap tilemap, GameObject go)
@@ -24,7 +22,7 @@ namespace SCR
 #endif
 
 
-            Board.AddObject(position, Donut);
+            PuzzelEditBoard.DrawObject(position, Donut);
 
             return true;
         }
