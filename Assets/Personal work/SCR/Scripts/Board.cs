@@ -16,8 +16,8 @@ namespace SCR
         Cheese,
         Strawberry,
         Sugar,
-        RollingPin_v,
-        RollingPin_h,
+        Roller_v,
+        Roller_h,
         Milk,
         Popcorn,
         DonutBox,
@@ -244,7 +244,7 @@ namespace SCR
         }
 
         // 블록 삭제
-        public static void RemoveGem(Vector3Int pos)
+        public static void RemoveCatStatues(Vector3Int pos)
         {
             if (instance == null)
             {
@@ -257,8 +257,6 @@ namespace SCR
                 instance.CellContent[pos + Vector3Int.right].DestroyCat();
                 instance.CellContent[pos + Vector3Int.up + Vector3Int.right].DestroyCat();
             }
-
-            instance.CellContent[pos].RemoveCell();
         }
 
         // 
@@ -587,15 +585,12 @@ namespace SCR
                     {
                         if (!instance.CellContent.ContainsKey(CatStatuesPos(targetPos)))
                         {
-                            Debug.Log(CatStatuesPos(targetPos));
                             _splashDamageTargets.Add(CatStatuesPos(targetPos));
                         }
 
                     }
                     else
                     {
-                        Debug.Log(instance.CellContent[targetPos].GetCatStatuse());
-                        Debug.Log(targetPos);
                         _splashDamageTargets.Add(targetPos);
                     }
 

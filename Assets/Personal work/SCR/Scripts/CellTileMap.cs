@@ -17,9 +17,10 @@ public class CellTileMap : MonoBehaviour
         tilemap = GetComponent<Tilemap>();
         CameraZ = Camera.main.transform.position.z;
     }
-#if UNITY_ANDROID
+
     void Update()
     {
+#if UNITY_ANDROID
         if (Input.touchCount > 0)
         {
             Touch touch = Input.GetTouch(0);
@@ -32,6 +33,7 @@ public class CellTileMap : MonoBehaviour
                 OnTouchUp(touch.position);
             }
         }
+#endif
 
     }
 
@@ -65,9 +67,10 @@ public class CellTileMap : MonoBehaviour
         }
         Board.SetDragDir(_dragDir);
     }
-#elif UNITY_EDITOR
+#if UNITY_EDITOR
     void OnMouseDown()
     {
+
         Vector3 mousePos = Input.mousePosition;
         mousePos.z = -CameraZ;
         Vector3 mouseWorldPos = Camera.main.ScreenToWorldPoint(mousePos);

@@ -1,3 +1,4 @@
+using LHJ;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -7,7 +8,10 @@ namespace SCR
     public class BoardCell
     {
         private Vector3Int _pos;
+        // 기본 블럭
         private Donut _donut;
+        // 특수 블럭
+        private SpecialBlock _speacial;
         // 고양 지폐, 선물 상자, 계란, 고양이 동상
         private Obstacle _obstacle;
         // 클로체, 얼음만 확인
@@ -40,7 +44,7 @@ namespace SCR
 
         public void SetObject(GemType gem)
         {
-            if (gem < GemType.RollingPin_v) SetDonut(gem);
+            if (gem < GemType.Roller_v) SetDonut(gem);
             else if (gem < GemType.Dough) { }
             else if (gem < GemType.Empty) SetObstacle(gem);
             if (gem == GemType.Random) SetDonut(gem);
@@ -94,6 +98,17 @@ namespace SCR
             }
         }
 
+        public void SetSpecial(SpecialBlock special)
+        {
+            _speacial = null;
+            _speacial = special;
+        }
+
+        private void SetSpecial(GemType special)
+        {
+
+        }
+
         public bool IsEmpty()
         {
             if (_catS) return false;
@@ -101,17 +116,11 @@ namespace SCR
             else return false;
         }
 
-        public void RemoveCell()
-        {
-            if (_obstacle != null)
-                _obstacle = null;
-        }
-
         public GemType getCellType()
         {
             if (_firstGemtype != GemType.Empty)
             {
-                if (_firstGemtype < GemType.RollingPin_v) return _firstGemtype;
+                if (_firstGemtype < GemType.Roller_v) return _firstGemtype;
                 else
                 {
                     if (_firstGemtype == GemType.Dough ||
