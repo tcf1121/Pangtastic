@@ -25,11 +25,20 @@ namespace KDJ.States
 
         public void OnUpdate(BoardManager boardManager)
         {
-            if (boardManager.Spawner.HasEmptyBlockObjects())
+            if (boardManager.Spawner.HasEmptyBlocks())
             {
-                // 빈 블럭이 있으면 RefillState로 전환
-                boardManager.ChangeState(new RefillState());
-                return;
+                // 빈 블록이 있을경우 먼저 이동이 가능한 상태인지 확인
+                if (boardManager.Spawner.CanBlockMoveInArray())
+                {
+                    Debug.Log("이동 가능");
+                    // 이동이 가능하다면 RefillState로 이동
+                    boardManager.ChangeState(new RefillState());
+                }
+            }
+            else
+            {
+                boardManager.MatchChecker.AllBlockMatchPossibilityCheck(boardManager, out int possibleCount);
+                Debug.Log($"매칭 가능한 블럭이 {possibleCount}개 있습니다.");
             }
 
             if (Input.GetMouseButtonDown(0))

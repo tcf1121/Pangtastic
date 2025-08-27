@@ -45,7 +45,7 @@ namespace KDJ
                 return false;
             }
 
-            if (boardManager.Spawner.BlockArray[startGrid.y, startGrid.x] is Cloche)
+            if (boardManager.Spawner.BlockArray[startGrid.y, startGrid.x] == null || boardManager.Spawner.BlockArray[startGrid.y, startGrid.x].IsObstacle)
             {
                 Debug.Log("방해 블록은 이동할 수 없습니다.");
                 return false;
@@ -80,7 +80,7 @@ namespace KDJ
             Vector2Int swapPos = startGrid + new Vector2Int((int)direction.x, (int)direction.y);
             EndBlockPos = swapPos; // 끝 위치 저장
 
-            if (boardManager.Spawner.BlockArray[swapPos.y, swapPos.x] is Cloche)
+            if (boardManager.Spawner.BlockArray[swapPos.y, swapPos.x] == null || boardManager.Spawner.BlockArray[swapPos.y, swapPos.x].IsObstacle)
             {
                 Debug.Log("스왑할 위치에 방해 블록이 있습니다.");
                 return false;
@@ -114,7 +114,7 @@ namespace KDJ
         {
             // 블록을 원래 위치로 되돌리는 로직
             // 블럭들의 시작 위치와 끝 위치를 저장해뒀기에 그걸 사용
-            if (boardManager.Spawner.BlockArray[StartBlockPos.y, StartBlockPos.x].GemType == GemType.Cloche || boardManager.Spawner.BlockArray[EndBlockPos.y, EndBlockPos.x].GemType == GemType.Cloche) return;
+            if (boardManager.Spawner.BlockArray[StartBlockPos.y, StartBlockPos.x].IsObstacle || boardManager.Spawner.BlockArray[EndBlockPos.y, EndBlockPos.x].IsObstacle) return;
 
             if (boardManager.Spawner.BlockPlate.BlockPlateHeight < StartPos.y || boardManager.Spawner.BlockPlate.BlockPlateWidth < StartPos.x
             || boardManager.Spawner.BlockPlate.BlockPlateHeight < EndPos.y || boardManager.Spawner.BlockPlate.BlockPlateWidth < EndPos.x)

@@ -24,8 +24,10 @@ namespace KDJ
         public void TakeDamage(BoardManager boardManager)
         {
             CurrentHP--;
+
             if (CurrentHP <= 0)
             {
+                Debug.Log("파괴됨");
                 Broken(boardManager, X, Y);
             }
         }
@@ -35,6 +37,11 @@ namespace KDJ
             Object.Destroy(boardManager.Spawner.BlockArray[y, x].BlockInstance);
             boardManager.Spawner.SpawnRandomBlock(x, y);
         }
+    }
+
+    public class ObstacleBlock : Block
+    {
+        public BoardCell Cell { get; set; }
     }
 
     public class BlockSpawner : MonoBehaviour
@@ -90,9 +97,22 @@ namespace KDJ
                 _blockWaitingQueue[x] = new Queue<Block>();
             }
 
-            BlockArray[3, 3] = new Cloche { BlockType = 15, GemType = GemType.Cloche, IsObstacle = true, CurrentHP = 2, X = 3, Y = 3 };
+            // BlockArray[0, 0] = new Cloche { BlockType = 15, GemType = GemType.Cloche, IsObstacle = true, CurrentHP = 1, X = 0, Y = 0 };
+            // BlockArray[0, 1] = new Cloche { BlockType = 15, GemType = GemType.Cloche, IsObstacle = true, CurrentHP = 1, X = 1, Y = 0 };
+            // BlockArray[0, 2] = new Cloche { BlockType = 15, GemType = GemType.Cloche, IsObstacle = true, CurrentHP = 1, X = 2, Y = 0 };
+            // BlockArray[0, 3] = new Cloche { BlockType = 15, GemType = GemType.Cloche, IsObstacle = true, CurrentHP = 1, X = 3, Y = 0 };
+            // BlockArray[0, 4] = new Cloche { BlockType = 15, GemType = GemType.Cloche, IsObstacle = true, CurrentHP = 1, X = 4, Y = 0 };
+            // BlockArray[0, 5] = new Cloche { BlockType = 15, GemType = GemType.Cloche, IsObstacle = true, CurrentHP = 1, X = 5, Y = 0 };
+            // BlockArray[3, 0] = new Cloche { BlockType = 15, GemType = GemType.Cloche, IsObstacle = true, CurrentHP = 1, X = 0, Y = 1 };
+            // BlockArray[3, 1] = new Cloche { BlockType = 15, GemType = GemType.Cloche, IsObstacle = true, CurrentHP = 1, X = 1, Y = 1 };
+            // BlockArray[3, 2] = new Cloche { BlockType = 15, GemType = GemType.Cloche, IsObstacle = true, CurrentHP = 1, X = 2, Y = 1 };
+            BlockArray[2, 3] = new Cloche { BlockType = 15, GemType = GemType.Cloche, IsObstacle = true, CurrentHP = 1, X = 3, Y = 2 };
+            BlockArray[2, 4] = new Cloche { BlockType = 15, GemType = GemType.Cloche, IsObstacle = true, CurrentHP = 1, X = 4, Y = 2 };
+            BlockArray[2, 5] = new Cloche { BlockType = 15, GemType = GemType.Cloche, IsObstacle = true, CurrentHP = 1, X = 5, Y = 2 };
 
             // 테스트 코드
+
+            //BlockArray[3, 4] = new ObstacleBlock { Cell = new BoardCell(new Vector3Int(3, 4, 0), GemType.Cloche), IsObstacle = true, BlockType = (int)GemType.Cloche + 1, GemType = GemType.Cloche };
             //BlockArray[3, 2].BlockType = 10;
             //BlockArray[3, 2].GemType = (GemType)9;
             //BlockArray[3, 3].BlockType = 7;
@@ -164,132 +184,263 @@ namespace KDJ
 
         #region 블럭 관리
         /// <summary>
-        /// 블럭 배열 정렬
+        /// 블럭 배열 정렬 x축 0번부터 위로 한줄씩 진행
         /// </summary>
         public void SortBlockArray()
         {
             Debug.Log("블럭 배열 정렬");
             for (int x = 0; x < BlockPlate.BlockPlateWidth; x++)
             {
-                for (int y = 0; y < BlockPlate.BlockPlateHeight; y++)
+                while (true)
                 {
-                    if (BlockArray[y, x] != null && BlockArray[y, x].GemType == GemType.Cloche) continue; // 6번 블럭은 건너뜀
-
-                    if (BlockArray[y, x] == null && BlockPlate.BlockPlateArray[y, x])
+                    bool canMove = false;
+                    for (int y = 0; y < BlockPlate.BlockPlateHeight; y++)
                     {
-                        if (BlockArray[y + 1, x] != null)
+                        if (BlockArray[y, x] != null && BlockArray[y, x].IsObstacle) continue;
+
+                        if (BlockArray[y, x] == null && BlockPlate.BlockPlateArray[y, x])
                         {
-                            if (BlockArray[y + 1, x].GemType == GemType.Cloche)
+                            // 내가 비어있다면 윗칸의 블럭을 내 위치로 내림
+
+                            if (BlockArray[y + 1, x] != null)
                             {
-                                if (BlockPlate.BlockPlateArray[y + 1, x - 1] && BlockArray[y + 1, x - 1] != null && BlockArray[y + 1, x - 1].GemType != GemType.Cloche)
+                                if (!BlockArray[y + 1, x].IsObstacle)
                                 {
-                                    // 오른쪽 위에 블럭이 있는 경우
-                                    BlockArray[y, x] = BlockArray[y + 1, x - 1];
-                                    BlockArray[y + 1, x - 1] = null;
+                                    // 내 위가 방해 블럭이 아니라면 바로 내림
+                                    BlockArray[y, x] = BlockArray[y + 1, x];
+                                    BlockArray[y + 1, x] = null;
                                     BlockArray[y, x].BlockInstance.transform.position = new Vector3(
-                                        BlockArray[y, x].BlockInstance.transform.position.x + 1,
+                                        BlockArray[y, x].BlockInstance.transform.position.x,
                                         BlockArray[y, x].BlockInstance.transform.position.y - 1, 0);
-                                }
-                                else if (BlockPlate.BlockPlateArray[y + 1, x + 1] && BlockArray[y + 1, x + 1] != null && BlockArray[y + 1, x + 1].GemType != GemType.Cloche)
-                                {
-                                    // 오른쪽 위에 없고 왼쪽 위에 있는 경우
-                                    BlockArray[y, x] = BlockArray[y + 1, x + 1];
-                                    BlockArray[y + 1, x + 1] = null;
-                                    BlockArray[y, x].BlockInstance.transform.position = new Vector3(
-                                        BlockArray[y, x].BlockInstance.transform.position.x - 1,
-                                        BlockArray[y, x].BlockInstance.transform.position.y - 1, 0);
+                                    canMove = true;
                                 }
                                 else
                                 {
-                                    // 둘다 없는 경우 건너뜀
-                                    continue;
+                                    // 방해 블럭이고
+                                    if (x - 1 >= 0 && BlockPlate.BlockPlateArray[y + 1, x - 1] && BlockArray[y + 1, x - 1] != null && !BlockArray[y + 1, x - 1].IsObstacle)
+                                    {
+                                        // 왼쪽 위가 일반 블럭이라면
+                                        Debug.Log("왼쪽 위에 있는 블록 가져옴");
+                                        BlockArray[y, x] = BlockArray[y + 1, x - 1];
+                                        BlockArray[y + 1, x - 1] = null;
+                                        BlockArray[y, x].BlockInstance.transform.position = new Vector3(
+                                            BlockArray[y, x].BlockInstance.transform.position.x + 1,
+                                            BlockArray[y, x].BlockInstance.transform.position.y - 1, 0);
+                                        canMove = true;
+                                    }
+                                    else if (x + 1 < BlockPlate.BlockPlateWidth && BlockPlate.BlockPlateArray[y + 1, x + 1] && BlockArray[y + 1, x + 1] != null && !BlockArray[y + 1, x + 1].IsObstacle)
+                                    {
+                                        // 왼쪽 위가 방해 블럭이고 오른쪽 위가 일반 블럭이라면
+                                        Debug.Log("오른쪽 위에 있는 블록 가져옴");
+                                        BlockArray[y, x] = BlockArray[y + 1, x + 1];
+                                        BlockArray[y + 1, x + 1] = null;
+                                        BlockArray[y, x].BlockInstance.transform.position = new Vector3(
+                                            BlockArray[y, x].BlockInstance.transform.position.x - 1,
+                                            BlockArray[y, x].BlockInstance.transform.position.y - 1, 0);
+                                        canMove = true;
+                                    }
+                                    else
+                                    {
+                                        // 둘 다 방해 블럭이라면 패스
+                                        continue;
+                                    }
                                 }
                             }
                             else
                             {
-                                BlockArray[y, x] = BlockArray[y + 1, x];
-                                BlockArray[y + 1, x] = null;
-                                BlockArray[y, x].BlockInstance.transform.position = new Vector3(
-                                    BlockArray[y, x].BlockInstance.transform.position.x,
-                                    BlockArray[y, x].BlockInstance.transform.position.y - 1, 0);
-                            }
-                        }
-                        if (y < BlockPlate.BlockPlateHeight - 1 && !BlockPlate.BlockPlateArray[y + 1, x])
-                        {
-                            bool allAboveBlockEmpty = true;
-
-                            for (int i = y + 1; i < BlockPlate.BlockPlateHeight; i++)
-                            {
-                                if (BlockPlate.BlockPlateArray[i, x])
+                                // 내 위가 비어있다면 내 윗칸에 방해 블럭이 있는지 체크하고 내 아래가 비어있는지도 체크
+                                if (GetAboveObstacleBlock(x, y))
                                 {
-                                    allAboveBlockEmpty = false;
+                                    // 있다면 내 위치에서 왼쪽 위가 일반 블럭일 경우 가져오기
+                                    if (x - 1 >= 0 && BlockPlate.BlockPlateArray[y + 1, x - 1] && BlockArray[y + 1, x - 1] != null && !BlockArray[y + 1, x - 1].IsObstacle)
+                                    {
+                                        Debug.Log("왼쪽 위에 있는 블록 가져옴");
+                                        BlockArray[y, x] = BlockArray[y + 1, x - 1];
+                                        BlockArray[y + 1, x - 1] = null;
+                                        BlockArray[y, x].BlockInstance.transform.position = new Vector3(
+                                            BlockArray[y, x].BlockInstance.transform.position.x + 1,
+                                            BlockArray[y, x].BlockInstance.transform.position.y - 1, 0);
+                                        canMove = true;
+                                    }
+                                    else if (x + 1 < BlockPlate.BlockPlateWidth && BlockPlate.BlockPlateArray[y + 1, x + 1] && BlockArray[y + 1, x + 1] != null && !BlockArray[y + 1, x + 1].IsObstacle)
+                                    {
+                                        // 왼쪽 위가 비어있다면 오른쪽 위를 체크
+                                        Debug.Log("오른쪽 위에 있는 블록 가져옴");
+                                        BlockArray[y, x] = BlockArray[y + 1, x + 1];
+                                        BlockArray[y + 1, x + 1] = null;
+                                        BlockArray[y, x].BlockInstance.transform.position = new Vector3(
+                                            BlockArray[y, x].BlockInstance.transform.position.x - 1,
+                                            BlockArray[y, x].BlockInstance.transform.position.y - 1, 0);
+                                        canMove = true;
+                                    }
+                                    else
+                                    {
+                                        // 둘 다 없다면 패스
+                                        continue;
+                                    }
                                 }
                             }
-
-                            if (allAboveBlockEmpty)
-                            {
-                                // 내 위의 블록이 전부 빈칸인 경우
-                                BlockArray[y, x] = BlockArray[BlockArray.GetLength(0) - 1, x];
-                                BlockArray[BlockArray.GetLength(0) - 1, x] = null;
-                                BlockArray[y, x].BlockInstance.transform.position = new Vector3(
-                                    BlockArray[y, x].BlockInstance.transform.position.x,
-                                    BlockArray[y, x].BlockInstance.transform.position.y - (BlockPlate.BlockPlateHeight - y), 0);
-                            }
                         }
-                    }
-                    else if (!BlockPlate.BlockPlateArray[y, x])
-                    {
-                        if (y - 1 < 0 || !BlockPlate.BlockPlateArray[y - 1, x]) continue;
 
-                        if (BlockArray[y + 1, x] != null)
+                        if (_blockWaitingQueue[x].Count == 0)
                         {
-                            if (BlockArray[y - 1, x] == null)
+                            int num = Random.Range(1, 7);
+                            _blockWaitingQueue[x].Enqueue(new Block { BlockType = num, GemType = (GemType)num - 1 });
+                        }
+
+                        // y축 생성이 끝나고 대기열 [_blockPlate.BlockPlateHeight, x]에 블럭이 없는 경우 큐에서 꺼내와서 할당
+                        if (BlockArray[BlockPlate.BlockPlateHeight, x] == null && _blockWaitingQueue[x].Count > 0)
+                        {
+                            Vector3 position;
+
+                            if (BlockPlate.BlockPlateWidth % 2 == 0)
                             {
-                                BlockArray[y - 1, x] = BlockArray[y + 1, x];
-                                BlockArray[y + 1, x] = null;
-                                BlockArray[y - 1, x].BlockInstance.transform.position = new Vector3(
-                                    BlockArray[y - 1, x].BlockInstance.transform.position.x,
-                                    BlockArray[y - 1, x].BlockInstance.transform.position.y - 2, 0);
+                                position = new Vector3(x - BlockPlate.BlockPlateWidth / 2 + 0.5f, BlockPlate.BlockPlateHeight - BlockPlate.BlockPlateHeight / 2 + 0.5f, 0);
                             }
+                            else
+                            {
+                                position = new Vector3(x - BlockPlate.BlockPlateWidth / 2, BlockPlate.BlockPlateHeight - BlockPlate.BlockPlateHeight / 2, 0);
+                            }
+
+                            BlockArray[BlockPlate.BlockPlateHeight, x] = _blockWaitingQueue[x].Dequeue();
+                            BlockArray[BlockPlate.BlockPlateHeight, x].BlockInstance = Instantiate(GetBlockTile(BlockArray[BlockPlate.BlockPlateHeight, x].BlockType), position, Quaternion.identity);
                         }
                     }
-                    // else if (x > 0 && BlockArray[y, x - 1] == null && BlockArray[y + 1, x].GemType != GemType.Box)
-                    // {
-                    //     BlockArray[y, x - 1] = BlockArray[y + 1, x];
-                    //     BlockArray[y + 1, x] = null;
-                    //     BlockArray[y, x - 1].BlockInstance.transform.position = new Vector3(
-                    //         BlockArray[y, x - 1].BlockInstance.transform.position.x - 1,
-                    //         BlockArray[y, x - 1].BlockInstance.transform.position.y - 1, 0);
-                    // }
 
-
-                }
-
-                if (_blockWaitingQueue[x].Count == 0)
-                {
-                    int num = Random.Range(1, 7);
-                    _blockWaitingQueue[x].Enqueue(new Block { BlockType = num, GemType = (GemType)num - 1 });
-                }
-
-                // y축 생성이 끝나고 대기열 [_blockPlate.BlockPlateHeight, x]에 블럭이 없는 경우 큐에서 꺼내와서 할당
-                if (BlockArray[BlockPlate.BlockPlateHeight, x] == null && _blockWaitingQueue[x].Count > 0)
-                {
-                    Vector3 position;
-
-                    if (BlockPlate.BlockPlateWidth % 2 == 0)
-                    {
-                        position = new Vector3(x - BlockPlate.BlockPlateWidth / 2 + 0.5f, BlockPlate.BlockPlateHeight - BlockPlate.BlockPlateHeight / 2 + 0.5f, 0);
-                    }
-                    else
-                    {
-                        position = new Vector3(x - BlockPlate.BlockPlateWidth / 2, BlockPlate.BlockPlateHeight - BlockPlate.BlockPlateHeight / 2, 0);
-                    }
-
-                    BlockArray[BlockPlate.BlockPlateHeight, x] = _blockWaitingQueue[x].Dequeue();
-                    BlockArray[BlockPlate.BlockPlateHeight, x].BlockInstance = Instantiate(GetBlockTile(BlockArray[BlockPlate.BlockPlateHeight, x].BlockType), position, Quaternion.identity);
+                    if (canMove == false) break;
                 }
             }
+        }
 
+
+        /// <summary>
+        /// 위에서 아래로 순회하며 블록을 이동
+        /// </summary>
+        public void SortBlockArray2()
+        {
+            // 이번엔 위에서 아래로 내려오면서 순환하는 로직
+            for (int x = 0; x < BlockPlate.BlockPlateWidth; x++)
+            {
+                while (true)
+                {
+                    bool canMove = false;
+
+                    for (int y = BlockPlate.BlockPlateHeight - 1; y >= 0; y--)
+                    {
+                        if (BlockArray[y, x] != null && BlockArray[y, x].IsObstacle) continue;
+
+                        if (BlockArray[y, x] == null && BlockPlate.BlockPlateArray[y, x])
+                        {
+                            // 내가 비어있다면 윗칸의 블럭을 내 위치로 내림
+
+                            if (BlockArray[y + 1, x] != null)
+                            {
+                                if (!BlockArray[y + 1, x].IsObstacle)
+                                {
+                                    // 내 위가 방해 블럭이 아니라면 바로 내림
+                                    BlockArray[y, x] = BlockArray[y + 1, x];
+                                    BlockArray[y + 1, x] = null;
+                                    BlockArray[y, x].BlockInstance.transform.position = new Vector3(
+                                        BlockArray[y, x].BlockInstance.transform.position.x,
+                                        BlockArray[y, x].BlockInstance.transform.position.y - 1, 0);
+                                    canMove = true;
+                                }
+                                else
+                                {
+                                    // 방해 블럭이고
+                                    if (x - 1 >= 0 && BlockPlate.BlockPlateArray[y + 1, x - 1] && BlockArray[y + 1, x - 1] != null && !BlockArray[y + 1, x - 1].IsObstacle)
+                                    {
+                                        // 왼쪽 위가 일반 블럭이라면
+                                        Debug.Log("왼쪽 위에 있는 블록 가져옴");
+                                        BlockArray[y, x] = BlockArray[y + 1, x - 1];
+                                        BlockArray[y + 1, x - 1] = null;
+                                        BlockArray[y, x].BlockInstance.transform.position = new Vector3(
+                                            BlockArray[y, x].BlockInstance.transform.position.x + 1,
+                                            BlockArray[y, x].BlockInstance.transform.position.y - 1, 0);
+                                        canMove = true;
+                                    }
+                                    else if (x + 1 < BlockPlate.BlockPlateWidth && BlockPlate.BlockPlateArray[y + 1, x + 1] && BlockArray[y + 1, x + 1] != null && !BlockArray[y + 1, x + 1].IsObstacle)
+                                    {
+                                        // 왼쪽 위가 방해 블럭이고 오른쪽 위가 일반 블럭이라면
+                                        Debug.Log("오른쪽 위에 있는 블록 가져옴");
+                                        BlockArray[y, x] = BlockArray[y + 1, x + 1];
+                                        BlockArray[y + 1, x + 1] = null;
+                                        BlockArray[y, x].BlockInstance.transform.position = new Vector3(
+                                            BlockArray[y, x].BlockInstance.transform.position.x - 1,
+                                            BlockArray[y, x].BlockInstance.transform.position.y - 1, 0);
+                                        canMove = true;
+                                    }
+                                    else
+                                    {
+                                        // 둘 다 방해 블럭이라면 패스
+                                        continue;
+                                    }
+                                }
+                            }
+                            else
+                            {
+                                // 내 위가 비어있다면 내 윗칸에 방해 블럭이 있는지 체크하고 내 아래가 비어있는지도 체크
+                                if (GetAboveObstacleBlock(x, y))
+                                {
+                                    // 있다면 내 위치에서 왼쪽 위가 일반 블럭일 경우 가져오기
+                                    if (x - 1 >= 0 && BlockPlate.BlockPlateArray[y + 1, x - 1] && BlockArray[y + 1, x - 1] != null && !BlockArray[y + 1, x - 1].IsObstacle)
+                                    {
+                                        Debug.Log("왼쪽 위에 있는 블록 가져옴");
+                                        BlockArray[y, x] = BlockArray[y + 1, x - 1];
+                                        BlockArray[y + 1, x - 1] = null;
+                                        BlockArray[y, x].BlockInstance.transform.position = new Vector3(
+                                            BlockArray[y, x].BlockInstance.transform.position.x + 1,
+                                            BlockArray[y, x].BlockInstance.transform.position.y - 1, 0);
+                                        canMove = true;
+                                    }
+                                    else if (x + 1 < BlockPlate.BlockPlateWidth && BlockPlate.BlockPlateArray[y + 1, x + 1] && BlockArray[y + 1, x + 1] != null && !BlockArray[y + 1, x + 1].IsObstacle)
+                                    {
+                                        // 왼쪽 위가 비어있다면 오른쪽 위를 체크
+                                        Debug.Log("오른쪽 위에 있는 블록 가져옴");
+                                        BlockArray[y, x] = BlockArray[y + 1, x + 1];
+                                        BlockArray[y + 1, x + 1] = null;
+                                        BlockArray[y, x].BlockInstance.transform.position = new Vector3(
+                                            BlockArray[y, x].BlockInstance.transform.position.x - 1,
+                                            BlockArray[y, x].BlockInstance.transform.position.y - 1, 0);
+                                        canMove = true;
+                                    }
+                                    else
+                                    {
+                                        // 둘 다 없다면 패스
+                                        continue;
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    if (_blockWaitingQueue[x].Count == 0)
+                    {
+                        int num = Random.Range(1, 7);
+                        _blockWaitingQueue[x].Enqueue(new Block { BlockType = num, GemType = (GemType)num - 1 });
+                    }
+
+                    // y축 생성이 끝나고 대기열 [_blockPlate.BlockPlateHeight, x]에 블럭이 없는 경우 큐에서 꺼내와서 할당
+                    if (BlockArray[BlockPlate.BlockPlateHeight, x] == null && _blockWaitingQueue[x].Count > 0)
+                    {
+                        Vector3 position;
+
+                        if (BlockPlate.BlockPlateWidth % 2 == 0)
+                        {
+                            position = new Vector3(x - BlockPlate.BlockPlateWidth / 2 + 0.5f, BlockPlate.BlockPlateHeight - BlockPlate.BlockPlateHeight / 2 + 0.5f, 0);
+                        }
+                        else
+                        {
+                            position = new Vector3(x - BlockPlate.BlockPlateWidth / 2, BlockPlate.BlockPlateHeight - BlockPlate.BlockPlateHeight / 2, 0);
+                        }
+
+                        BlockArray[BlockPlate.BlockPlateHeight, x] = _blockWaitingQueue[x].Dequeue();
+                        BlockArray[BlockPlate.BlockPlateHeight, x].BlockInstance = Instantiate(GetBlockTile(BlockArray[BlockPlate.BlockPlateHeight, x].BlockType), position, Quaternion.identity);
+                    }
+
+                    if (!canMove) break;
+                }
+            }
         }
 
         /// <summary>
@@ -331,14 +482,13 @@ namespace KDJ
         /// </summary>
         public void CheckBlockArray(BoardManager boardManager)
         {
-            int score = 0;
             for (int x = 0; x < BlockPlate.BlockPlateWidth; x++)
             {
                 for (int y = 0; y < BlockPlate.BlockPlateHeight; y++)
                 {
                     if (BlockPlate.BlockPlateArray[y, x])
                     {
-                        if (BlockArray[y, x] == null || BlockArray[y, x].BlockInstance == null)
+                        if (BlockArray[y, x] != null && BlockArray[y, x].BlockInstance == null)
                         {
                             // if (BlockArray[y, x].BlockInstance != null) Destroy(BlockArray[y, x].BlockInstance);
 
@@ -385,6 +535,38 @@ namespace KDJ
         // 추후에 3번째 매개변수 Gemtype을 받도록 변경해야합니다.
         public void SpawnBlock(int x, int y, int blockNum)
         {
+            GameObject blockPrefab = GetBlockTile(blockNum);
+            if (blockPrefab != null)
+            {
+                GameObject blockInstance = Instantiate(blockPrefab);
+
+                if (BlockPlate.BlockPlateWidth % 2 == 0)
+                    blockInstance.transform.position = new Vector3(x - BlockPlate.BlockPlateWidth / 2 + 0.5f, y - BlockPlate.BlockPlateHeight / 2 + 0.5f, 0);
+                else
+                    blockInstance.transform.position = new Vector3(x - BlockPlate.BlockPlateWidth / 2, y - BlockPlate.BlockPlateHeight / 2, 0);
+
+                BlockArray[y, x] = new Block { BlockInstance = blockInstance, BlockType = blockNum, GemType = (GemType)blockNum - 1 };
+            }
+        }
+
+        public void RandomPosSpawnBlock(int blockNum)
+        {
+            int x = Random.Range(0, BlockPlate.BlockPlateWidth);
+            int y = Random.Range(0, BlockPlate.BlockPlateHeight);
+
+            while (true)
+            {
+                if (BlockPlate.BlockPlateArray[y, x] && BlockArray[y, x].GemType <= GemType.Sugar && BlockArray[y, x].GemType >= GemType.Dough)
+                {
+                    x = Random.Range(0, BlockPlate.BlockPlateWidth);
+                    y = Random.Range(0, BlockPlate.BlockPlateHeight);
+                }
+                else
+                {
+                    break;
+                }
+            }
+
             GameObject blockPrefab = GetBlockTile(blockNum);
             if (blockPrefab != null)
             {
@@ -488,7 +670,7 @@ namespace KDJ
         /// <returns></returns>
         public bool HasEmptyBlocks()
         {
-            BlankBlockCount = 0; // 빈 블럭 카운트 초기화
+            int blankBlockCount = 0; // 빈 블럭 카운트 초기화
 
             for (int x = 0; x < BlockPlate.BlockPlateWidth; x++)
             {
@@ -496,11 +678,12 @@ namespace KDJ
                 {
                     if (BlockPlate.BlockPlateArray[y, x] && BlockArray[y, x] == null)
                     {
-                        BlankBlockCount++;
+                        blankBlockCount++;
                     }
                 }
             }
-            return BlankBlockCount > 0;
+            Debug.Log($"빈칸 개수 : {blankBlockCount}");
+            return blankBlockCount > 0;
         }
 
         /// <summary>
@@ -525,6 +708,133 @@ namespace KDJ
         }
 
         /// <summary>
+        /// 배열을 순회하며 블록이 빈칸으로 움직일 수 있는지 확인
+        /// </summary>
+        /// <returns></returns>
+        public bool CanBlockMoveInArray()
+        {
+            bool result = false;
+
+            Debug.Log("블럭 배열 이동 체크");
+            for (int x = 0; x < BlockPlate.BlockPlateWidth; x++)
+            {
+                for (int y = 0; y < BlockPlate.BlockPlateHeight; y++)
+                {
+                    if (BlockArray[y, x] != null && BlockArray[y, x].IsObstacle) continue;
+
+                    if (BlockArray[y, x] == null && BlockPlate.BlockPlateArray[y, x])
+                    {
+                        if (BlockArray[y + 1, x] != null)
+                        {
+                            if (!BlockArray[y + 1, x].IsObstacle)
+                            {
+                                result = true;
+                            }
+                            else
+                            {
+                                if (x - 1 >= 0 && BlockPlate.BlockPlateArray[y + 1, x - 1] && BlockArray[y + 1, x - 1] != null && !BlockArray[y + 1, x - 1].IsObstacle)
+                                {
+                                    result = true;
+                                }
+                                else if (x + 1 < BlockPlate.BlockPlateWidth && BlockPlate.BlockPlateArray[y + 1, x + 1] && BlockArray[y + 1, x + 1] != null && !BlockArray[y + 1, x + 1].IsObstacle)
+                                {
+                                    result = true;
+                                }
+                                else
+                                {
+                                    continue;
+                                }
+                            }
+                        }
+                        else
+                        {
+                            if (GetAboveObstacleBlock(x, y))
+                            {
+                                if (x - 1 >= 0 && BlockPlate.BlockPlateArray[y + 1, x - 1] && BlockArray[y + 1, x - 1] != null && !BlockArray[y + 1, x - 1].IsObstacle)
+                                {
+                                    result = true;
+                                }
+                                else if (x + 1 < BlockPlate.BlockPlateWidth && BlockPlate.BlockPlateArray[y + 1, x + 1] && BlockArray[y + 1, x + 1] != null && !BlockArray[y + 1, x + 1].IsObstacle)
+                                {
+                                    result = true;
+                                }
+                                else
+                                {
+                                    continue;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            return result;
+        }
+
+
+        /// <summary>
+        /// 위에서 아래로 순회하며 이동이 가능한지 체크
+        /// </summary>
+        /// <returns></returns>
+        public bool CanBlockMoveInArray2()
+        {
+            bool result = false;
+            // 이번엔 위에서 아래로 내려오면서 순환하는 로직
+            for (int x = 0; x < BlockPlate.BlockPlateWidth; x++)
+            {
+                for (int y = BlockPlate.BlockPlateHeight - 1; y >= 0; y--)
+                {
+                    if (BlockArray[y, x] != null && BlockArray[y, x].IsObstacle) continue;
+
+                    if (BlockArray[y, x] == null && BlockPlate.BlockPlateArray[y, x])
+                    {
+                        if (BlockArray[y + 1, x] != null)
+                        {
+                            if (!BlockArray[y + 1, x].IsObstacle)
+                            {
+                                result = true;
+                            }
+                            else
+                            {
+                                if (x - 1 >= 0 && BlockPlate.BlockPlateArray[y + 1, x - 1] && BlockArray[y + 1, x - 1] != null && !BlockArray[y + 1, x - 1].IsObstacle)
+                                {
+                                    result = true;
+                                }
+                                else if (x + 1 < BlockPlate.BlockPlateWidth && BlockPlate.BlockPlateArray[y + 1, x + 1] && BlockArray[y + 1, x + 1] != null && !BlockArray[y + 1, x + 1].IsObstacle)
+                                {
+                                    result = true;
+                                }
+                                else
+                                {
+                                    continue;
+                                }
+                            }
+                        }
+                        else
+                        {
+                            if (GetAboveObstacleBlock(x, y))
+                            {
+                                if (x - 1 >= 0 && BlockPlate.BlockPlateArray[y + 1, x - 1] && BlockArray[y + 1, x - 1] != null && !BlockArray[y + 1, x - 1].IsObstacle)
+                                {
+                                    result = true;
+                                }
+                                else if (x + 1 < BlockPlate.BlockPlateWidth && BlockPlate.BlockPlateArray[y + 1, x + 1] && BlockArray[y + 1, x + 1] != null && !BlockArray[y + 1, x + 1].IsObstacle)
+                                {
+                                    result = true;
+                                }
+                                else
+                                {
+                                    continue;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            return result;
+        }
+
+        /// <summary>
         /// 주어진 y좌표 위에 있는 빈 공간의 개수를 반환
         /// </summary>
         /// <param name="x"></param>
@@ -545,6 +855,24 @@ namespace KDJ
                 }
             }
             return count;
+        }
+
+        /// <summary>
+        /// 윗칸을 순회하며 방해 블럭이 있는지 확인
+        /// </summary>
+        /// <param name="x"></param>
+        /// <param name="y"></param>
+        /// <returns></returns>
+        public bool GetAboveObstacleBlock(int x, int y)
+        {
+            for (int i = y; i < BlockPlate.BlockPlateHeight; i++)
+            {
+                if (BlockArray[i, x] is ObstacleBlock || BlockArray[i, x] is Cloche)
+                {
+                    return true; // 장애물이 있으면 true 반환
+                }
+            }
+            return false; // 장애물이 없으면 false 반환
         }
         #endregion
     }
