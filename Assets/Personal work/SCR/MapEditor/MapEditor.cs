@@ -17,10 +17,6 @@ namespace SCR
         private List<Vector3Int> _spawnPoint = new();
 
         string path = "Personal work/SCR/StageInfo.csv";
-        void Awake()
-        {
-            if (!canvas.activeSelf) canvas.SetActive(true);
-        }
 
         public void SaveMapInfo()
         {
