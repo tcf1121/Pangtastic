@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using UnityEngine;
 
 namespace SCR
@@ -7,7 +6,6 @@ namespace SCR
     {
         public GemType ObstaclType;
         protected Vector3Int _cellPos;
-        protected List<Vector3Int> _fourCellPos;
 
         protected int _currentHP;
         protected int _score;
@@ -39,14 +37,9 @@ namespace SCR
             //해당 오브젝트 삭제
             int x = (int)transform.position.x;
             int y = (int)transform.position.y;
-            Board.RemoveGem(new Vector3Int(x, y, 0));
+            if (ObstaclType == GemType.CatStatues)
+                Board.RemoveCatStatues(new Vector3Int(x, y, 0));
             Destroy(gameObject);
-        }
-
-        public bool IsFourPos(Vector3Int pos)
-        {
-            if (pos == _cellPos) return true;
-            else return false;
         }
 
         // 매치 시 주변에 있을 때 파괴되는건지 확인

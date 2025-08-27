@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 namespace SCR
@@ -37,7 +35,6 @@ namespace SCR
             //해당 오브젝트 삭제
             int x = (int)(transform.position.x - 0.5f);
             int y = (int)(transform.position.y - 0.5f);
-            Board.RemoveGem(new Vector3Int(x, y, 0));
             // 점수 주기
             Destroy(gameObject);
         }

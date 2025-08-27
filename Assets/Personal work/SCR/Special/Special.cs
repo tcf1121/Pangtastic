@@ -4,39 +4,44 @@ namespace SCR
 {
     public abstract class Special : MonoBehaviour
     {
-        public Sprite Sprite;
-
-        protected SpriteRenderer spriteRenderer;
+        public GemType SpecialType;
 
         protected Vector3Int _cellPos;
+        protected bool _isHorizon;
+        protected int _hp;
 
-        //private bool _isDone = false;
-
-        public virtual void Init(Vector3Int cell)
+        public virtual void Init(Vector3Int cell, bool isHorizon = false)
         {
-            spriteRenderer = GetComponent<SpriteRenderer>();
-            spriteRenderer.sprite = Sprite;
+            _hp = 1;
             _cellPos = cell;
-
+            _isHorizon = isHorizon;
+            transform.position = new Vector3(cell.x, cell.y, 0);
+            transform.rotation = transform.rotation;
             //보드의 cell 위치에 특수 블록 추가
         }
 
-        // 사용할 때의 효과
-        public virtual void Use()
+        // 데미지를 받았을 때
+        public virtual void Damage()
         {
+            _hp--;
+            if (_hp == 0)
+                Use();
 
         }
 
-        // 생성 조건 확인
-        public virtual bool CheckCondition()
+        public void UsedSpecial()
         {
-            return false;
+            Destroy(gameObject);
         }
 
-        // 다른 특수 효과 아이템이랑 사용할 때의 효과
-        public virtual void UseWith(Special special)
+        // 특수 블록을 사용할 때의 효과
+        public virtual void Use(Special special = null)
         {
-
+            Destroy(gameObject);
+            if (special == null)
+                Board.UseSpeical(_cellPos, SpecialType);
+            else
+                Board.UseSpeical(_cellPos, SpecialType, special.SpecialType);
         }
 
     }

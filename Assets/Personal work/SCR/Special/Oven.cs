@@ -1,9 +1,8 @@
 using UnityEngine;
 
-
 namespace SCR
 {
-    public class Milk : Special
+    public class Oven : Special
     {
         public override void Use(Special special = null)
         {
