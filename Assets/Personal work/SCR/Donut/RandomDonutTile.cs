@@ -12,7 +12,7 @@ namespace SCR
 
         public override void GetTileData(Vector3Int position, ITilemap tilemap, ref TileData tileData)
         {
-            tileData.sprite = !Application.isPlaying ? PreviewEditorSprite : null;
+            tileData.sprite = PreviewEditorSprite;
             tileData.color = !Application.isPlaying ? PreviewEditorColor : Color.white;
         }
 
@@ -24,7 +24,7 @@ namespace SCR
 #endif
 
 
-            Board.AddObject(position, GemType.Random);
+            PuzzelEditBoard.DrawObject(position, GemType.Random);
 
             return true;
         }

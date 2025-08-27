@@ -11,7 +11,7 @@ namespace SCR
         public override void GetTileData(Vector3Int position, ITilemap tilemap, ref TileData tileData)
         {
             tileData.sprite = PreviewEditorSprite;
-            tileData.colliderType = Tile.ColliderType.Sprite;
+            //tileData.colliderType = Tile.ColliderType.Grid;
         }
 
         public override bool StartUp(Vector3Int position, ITilemap tilemap, GameObject go)
@@ -22,7 +22,7 @@ namespace SCR
 #endif
 
 
-            Board.AddCell(position);
+            PuzzelEditBoard.AddCell(position);
 
             return base.StartUp(position, tilemap, go);
         }

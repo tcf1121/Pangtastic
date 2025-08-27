@@ -8,13 +8,10 @@ public class RecipeSO : ScriptableObject
     [Header("id")]
     public int ID;
 
-    [Header("ÀÌ¸§")]
+    [Header("ì´ë¦„")]
     public string Name;
 
-    [Header("Å¸ÀÔ")]
-    public string Type;
-
-    [Header("ÀÌ¹ÌÁö")]
+    [Header("ì´ë¯¸ì§€")]
     public Sprite FoodPic;
 
     [System.Serializable]
@@ -24,6 +21,6 @@ public class RecipeSO : ScriptableObject
         public int Amount;
     }
 
-    [Header("ÇÊ¿ä Àç·á ¸ñ·Ï")]
+    [Header("í•„ìš” ì¬ë£Œ ëª©ë¡")]
     public IngredientRequirement[] Ingredients;
 }
