@@ -44,6 +44,13 @@ namespace KDJ
                 Debug.Log("시작 위치가 보드 영역을 벗어났습니다.");
                 return false;
             }
+
+            if (boardManager.Spawner.BlockArray[startGrid.y, startGrid.x] is Cloche)
+            {
+                Debug.Log("방해 블록은 이동할 수 없습니다.");
+                return false;
+            }
+
             StartBlockPos = startGrid; // 시작 위치 저장
 
             // 방향 구하기
@@ -72,6 +79,13 @@ namespace KDJ
 
             Vector2Int swapPos = startGrid + new Vector2Int((int)direction.x, (int)direction.y);
             EndBlockPos = swapPos; // 끝 위치 저장
+
+            if (boardManager.Spawner.BlockArray[swapPos.y, swapPos.x] is Cloche)
+            {
+                Debug.Log("스왑할 위치에 방해 블록이 있습니다.");
+                return false;
+            }
+
             EndPos = new Vector2(swapPos.x, swapPos.y); // EndPos도 갱신
 
             // 스왑할 위치가 보드를 벗어나면 이동안함

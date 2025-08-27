@@ -12,6 +12,29 @@ namespace KDJ
         public int Score { get; private set; } = 10;
         public GameObject BlockInstance { get; set; } = null;
         public GemType GemType { get; set; }
+        public bool IsObstacle { get; set; } = false;
+    }
+
+    public class Cloche : Block
+    {
+        public int CurrentHP { get; set; } = 1;
+        public int X { get; set; }
+        public int Y { get; set; }
+
+        public void TakeDamage(BoardManager boardManager)
+        {
+            CurrentHP--;
+            if (CurrentHP <= 0)
+            {
+                Broken(boardManager, X, Y);
+            }
+        }
+
+        public void Broken(BoardManager boardManager, int x, int y)
+        {
+            Object.Destroy(boardManager.Spawner.BlockArray[y, x].BlockInstance);
+            boardManager.Spawner.SpawnRandomBlock(x, y);
+        }
     }
 
     public class BlockSpawner : MonoBehaviour
@@ -47,6 +70,8 @@ namespace KDJ
             // _test = FindObjectOfType<CustomerFlowController>();
             // _test.Spawn();
 
+            // BlockArray[3, 3] = new Cloche { BlockType = 15, GemType = GemType.Cloche, IsObstacle = true, CurrentHP = 2, X = 3, Y = 3 };
+
             for (int x = 0; x < BlockPlate.BlockPlateWidth; x++)
             {
                 for (int y = 0; y < BlockArray.GetLength(0); y++)
@@ -55,7 +80,7 @@ namespace KDJ
 
                     if (y < BlockPlate.BlockPlateHeight)
                     {
-                        if (BlockPlate.BlockPlateArray[y, x]) BlockArray[y, x] = new Block { BlockType = num, GemType = (GemType)num - 1 };
+                        if (BlockPlate.BlockPlateArray[y, x] && BlockArray[y, x] == null) BlockArray[y, x] = new Block { BlockType = num, GemType = (GemType)num - 1 };
                     }
                     else
                     {
@@ -64,6 +89,8 @@ namespace KDJ
                 }
                 _blockWaitingQueue[x] = new Queue<Block>();
             }
+
+            BlockArray[3, 3] = new Cloche { BlockType = 15, GemType = GemType.Cloche, IsObstacle = true, CurrentHP = 2, X = 3, Y = 3 };
 
             // 테스트 코드
             //BlockArray[3, 2].BlockType = 10;
@@ -337,6 +364,11 @@ namespace KDJ
                             //        break;
                             //
                             //}
+                            if (BlockArray[y, x] is Cloche)
+                            {
+                                SpawnRandomBlock(x, y);
+                                continue;
+                            }
 
                             BlockArray[y, x] = null;
                         }
@@ -437,6 +469,15 @@ namespace KDJ
                 case 9: return _blockPrefabs[8];
                 case 10: return _blockPrefabs[9];
                 case 11: return _blockPrefabs[10];
+                case 12: return _blockPrefabs[11];
+                case 13: return _blockPrefabs[12];
+                case 14: return _blockPrefabs[13];
+                case 15: return _blockPrefabs[14];
+                case 16: return _blockPrefabs[15];
+                case 17: return _blockPrefabs[16];
+                case 18: return _blockPrefabs[17];
+                case 19: return _blockPrefabs[18];
+                case 20: return _blockPrefabs[19];
                 default: return null;
             }
         }
