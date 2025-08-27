@@ -1,7 +1,4 @@
-using System;
 using System.Collections.Generic;
-using System.Linq.Expressions;
-using UnityEditor.U2D.Aseprite;
 using UnityEngine;
 
 namespace SCR
