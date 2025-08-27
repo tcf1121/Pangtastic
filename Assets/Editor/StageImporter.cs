@@ -4,26 +4,27 @@ using System.IO;
 using UnityEditor;
 using UnityEngine;
 
-public class CustomerImporter
+public class StageImporter
 {
-    private static string csvPath = "Assets/CSV/Customers.csv"; // 손님 CSV 경로
+    private static string csvPath = "Assets/CSV/Stages.csv"; // 스테이지 CSV 경로
+    private static string customerSoDir = "Assets/ScriptableObject/Customers";
     private static string recipeSoDir = "Assets/ScriptableObject/Recipes"; // 레시피 SO경로
-    private static string customerSoDir = "Assets/ScriptableObject/Customers"; // 손님 SO 저장 경로
+    private static string StageSoDir = "Assets/ScriptableObject/Stages"; // 스테이지 SO 저장 경로
     private static int startRow = 3; // 데이터 시작 행
     private static int columnCount = 7; //열 개수
     private static bool isNew;
 
-    [MenuItem("PangTastic/Import Customer CSV")] // 메뉴 경로
-    public static void StartImportCustomers()
+    [MenuItem("PangTastic/Import Stage CSV")] // 메뉴 경로
+    public static void StartImportStages()
     {
-        ImportCustomerCSV();
+        ImportStageCSV();
     }
 
-    private static void ImportCustomerCSV()
+    private static void ImportStageCSV()
     {
         if (File.Exists(csvPath) == false) // CSV 파일 없으면
         {
-            Debug.LogError("손님 CSV 파일 없음: " + csvPath);
+            Debug.LogError("스테이지 CSV 파일 없음: " + csvPath);
             return;
         }
 
@@ -31,13 +32,13 @@ public class CustomerImporter
 
         if (lines.Length < startRow) // 데이터가 시작되는 행보다 줄이 적으면
         {
-            Debug.LogError("손님 CSV에 데이터 없음");
+            Debug.LogError("스테이지 CSV에 데이터 없음");
             return;
         }
 
-        if (Directory.Exists(customerSoDir) == false) //폴더 없으면
+        if (Directory.Exists(StageSoDir) == false) //폴더 없으면
         {
-            Directory.CreateDirectory(customerSoDir); // 폴더 생성
+            Directory.CreateDirectory(StageSoDir); // 폴더 생성
         }
 
         for (int i = startRow; i < lines.Length; i++) // 데이터 행부터 끝까지 순회
@@ -66,9 +67,9 @@ public class CustomerImporter
             int like_menu3 = (splitData[5].ToLower() == "null") ? 0 : int.Parse(splitData[5]);
             string spritePath = splitData[6];
 
-            string soPath = customerSoDir + "/Customer_" + customer_id + ".asset"; // SO파일 저장경로/파일이름
+            string soPath = StageSoDir + "/Customer_" + customer_id + ".asset"; // SO파일 저장경로/파일이름
 
-            CustomerSO customer = AssetDatabase.LoadAssetAtPath<CustomerSO>(soPath); // 기존 손님 SO 불러오기
+            CustomerSO customer = AssetDatabase.LoadAssetAtPath<CustomerSO>(soPath); // 기존 레시피 SO 불러오기
 
             if (customer == null) // 경로에 "/Ingredient_" + id + ".asset" 이름의 SO가 없으면
             {

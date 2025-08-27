@@ -103,7 +103,7 @@ public class OrderStateController : MonoBehaviour
 
     private void StartPatience() //인내심 시작
     {
-        _maxPatience = _curCustomer.BASE_PATIENCE;
+        _maxPatience = 100;
         _curPatience = _maxPatience;
 
         //슬라이더 설정
@@ -136,10 +136,29 @@ public class OrderStateController : MonoBehaviour
             return;
         }
 
-        float total = _curCustomer.TimeToReachZero; //0까지 도달하는 총 시간초
+        float timeToReachZero = 0;
+
+        if(_curCustomer.Type == CustomerType.Normal)
+        {
+            timeToReachZero = 60f;
+        }
+        else if (_curCustomer.Type == CustomerType.Unique)
+        {
+            timeToReachZero = 50f;
+        }
+        else if(_curCustomer.Type == CustomerType.Special)
+        {
+            timeToReachZero = 30f;
+        }
+        else
+        {
+            Debug.LogWarning("커스터머 타입 이상함");
+        }
+
+
         _elapsed += Time.deltaTime; //경과시간 누적
 
-        float progress = _elapsed / total; //진행 비율 계산
+        float progress = _elapsed / timeToReachZero; //진행 비율 계산
         if (progress > 1) //혹시 음수로 내려가면 
         {
             progress = 1; //0으로 고정
