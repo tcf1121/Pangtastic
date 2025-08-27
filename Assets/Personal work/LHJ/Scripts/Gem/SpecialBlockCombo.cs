@@ -72,6 +72,9 @@ namespace LHJ
         /// 5. 우유+우유: 필요 재료가 있으면 그 타입 랜덤 5개, 없으면 아무 재료 5개 제거
         /// 6. 우유+팝콘: 필요 재료 중 1종 전부 제거
         /// 7. 우유+도넛: 우유 위치 중심 5x5 제거
+        /// 8. 팝콘(오븐)+팝콘(오븐): 보드 전체 제거
+        /// 9. 팝콘(오븐)+도넛: 선택된 재료 전부가 도넛(5x5) 효과로 발동
+        /// 10. 도넛+도넛: 스왑 위치 중심 9x9 제거
         /// </summary>
         public bool ResolveRollerCombos(BoardManager board, Vector2Int startPos, Vector2Int endPos)
         {
@@ -283,10 +286,125 @@ namespace LHJ
             // 7. 우유 + 도넛상자 
             if ((IsMilk(a) && IsDonut(b)) || (IsDonut(a) && IsMilk(b)))
             {
-                var milk = IsMilk(a) ? aGo : bGo;
-                var center = WorldToGrid(board, milk.transform.position);
+                var spawner = board.Spawner;
+                int w = spawner.BlockPlate.BlockPlateWidth;
+                int h = spawner.BlockPlate.BlockPlateHeight;
 
-                ClearSquare(board, center, 2, aGo, bGo, true);
+
+                var candidates = new List<Vector2Int>();
+                for (int y = 0; y < h; y++)
+                {
+                    for (int x = 0; x < w; x++)
+                    {
+                        var cell = spawner.BlockArray[y, x];
+                        if (cell == null || cell.BlockInstance == null) continue;
+                        if (cell.BlockInstance.GetComponent<SpecialBlock>() != null) continue; // 특수 제외
+                        if (!IsIngredient(cell.GemType)) continue; // 재료만
+
+                        candidates.Add(new Vector2Int(x, y));
+                    }
+                }
+
+                // 우유가 고르는 3개 좌표 선택(겹치지 않게 무작위)
+                int toFire = Mathf.Min(3, candidates.Count);
+                for (int i = 0; i < toFire; i++)
+                {
+                    int idx = Random.Range(0, candidates.Count);
+                    var centerPos = candidates[idx]; 
+                    candidates.RemoveAt(idx);
+                    ClearSquare(board, centerPos, 2, aGo, bGo, true);
+                }
+
+                // 스왑된 두 특수는 소비(중복 발동 방지)
+                ConsumeSwapped(board, startPos, endPos);
+                return true;
+            }
+
+            // 8. 팝콘 + 팝콘
+            if (IsPopcorn(a) && IsPopcorn(b))
+            {
+                var spawner = board.Spawner;
+                int w = spawner.BlockPlate.BlockPlateWidth;
+                int h = spawner.BlockPlate.BlockPlateHeight;
+
+                int destroyed = 0;
+                for (int y = 0; y < h; y++)
+                {
+                    for (int x = 0; x < w; x++)
+                    {
+                        var cell = spawner.BlockArray[y, x];
+                        if (cell == null || cell.BlockInstance == null) continue;
+
+                        var go = cell.BlockInstance;
+
+                        // 체인: 다른 특수블록은 먼저 Activate
+                        if (go != aGo && go != bGo)
+                        {
+                            var sb = go.GetComponent<SpecialBlock>();
+                            if (sb != null) sb.Activate(board);
+                        }
+
+                        Object.Destroy(go);
+                        spawner.BlockArray[y, x].BlockInstance = null;
+                        destroyed++;
+                    }
+                }
+                if (destroyed > 0) board.UpdateUI(destroyed * 10);
+                ConsumeSwapped(board, startPos, endPos);
+                return true;
+            }
+
+            // 9. 팝콘 + 도넛상자
+            if ((IsPopcorn(a) && IsDonut(b)) || (IsDonut(a) && IsPopcorn(b)))
+            {
+                var spawner = board.Spawner;
+                int w = spawner.BlockPlate.BlockPlateWidth;
+                int h = spawner.BlockPlate.BlockPlateHeight;
+
+                // 보드에 실제로 존재하는 "재료" 타입 수집
+                var presentTypes = new List<GemType>();
+                for (int i = 0; i < _ingredientTypes.Length; i++)
+                {
+                    var t = _ingredientTypes[i];
+                    bool exists = false;
+                    for (int y = 0; y < h && !exists; y++)
+                        for (int x = 0; x < w && !exists; x++)
+                        {
+                            var c = spawner.BlockArray[y, x];
+                            if (c == null || c.BlockInstance == null) continue;
+                            if (c.BlockInstance.GetComponent<SpecialBlock>() != null) continue;
+                            if (c.GemType == t) exists = true;
+                        }
+                    if (exists) presentTypes.Add(t);
+                }
+
+                // 존재하면 그중에서, 없다면 전체 재료 집합에서 랜덤 선정
+                var targetType = (presentTypes.Count > 0)
+                    ? presentTypes[Random.Range(0, presentTypes.Count)]
+                    : _ingredientTypes[Random.Range(0, _ingredientTypes.Length)];
+
+                var centers = new List<Vector2Int>();
+                for (int y = 0; y < h; y++)
+                    for (int x = 0; x < w; x++)
+                    {
+                        var cell = spawner.BlockArray[y, x];
+                        if (cell == null || cell.BlockInstance == null) continue;
+                        if (cell.BlockInstance.GetComponent<SpecialBlock>() != null) continue;
+                        if (cell.GemType != targetType) continue;
+                        centers.Add(new Vector2Int(x, y));
+                    }
+                for (int i = 0; i < centers.Count; i++)
+                    ClearSquare(board, centers[i], 2, aGo, bGo, true);
+
+                ConsumeSwapped(board, startPos, endPos);
+                return true;
+            }
+
+            // 10. 도넛상자 + 도넛상자
+            if (IsDonut(a) && IsDonut(b))
+            {
+                var center = endPos; 
+                ClearSquare(board, center, 4, aGo, bGo, true);
                 ConsumeSwapped(board, startPos, endPos);
                 return true;
             }
