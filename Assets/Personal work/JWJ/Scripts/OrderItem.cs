@@ -18,7 +18,7 @@ public class OrderItem : MonoBehaviour
         //메뉴 이름 추가할거면 여기에 추가
     }
 
-    public void BuildRows(Dictionary<IngredientSO, int> required) //필요 재료 리스트 만들기
+    public void BuildRows(OrderRecipe orderRecipe) //필요 재료 리스트 만들기
     {
         _rows.Clear();
 
@@ -28,17 +28,28 @@ public class OrderItem : MonoBehaviour
         }
 
         int slotIndex = 0;
+        int ingredientCount = orderRecipe.IngredientCount;
 
-        foreach (KeyValuePair<IngredientSO, int> kv in required) // 필요재료 수량 순회
+        for (int j = 0; j < ingredientCount; j++) // 레시피의 재료 개수만큼 반복
         {
-            IngredientItem slot = ingredientSlots[slotIndex]; //할당
-            slot.gameObject.SetActive(true); // 활성화
-            slot.Init(kv.Key.IngredientPic, 0, kv.Value); // 이미지, 수량 세팅
-            _rows[kv.Key] = slot; //딕셔너리에 저장
+            if (slotIndex >= ingredientSlots.Count) // 재료 수가 슬롯 수를 초과하면
+            {
+                Debug.LogError("재료 수가 슬롯 수를 초과함");
+                break;
+            }
+
+            IngredientSO ing = orderRecipe.GetIngredient(j); //재료
+            int need = orderRecipe.GetRequiredAmount(j); // 필요수량
+            int have = orderRecipe.GetCollectedAmount(j); //모은 수량
+
+            IngredientItem slot = ingredientSlots[slotIndex];
+            slot.gameObject.SetActive(true);
+            slot.Init(ing.IngredientPic, have, need);
+            _rows[ing] = slot;
             slotIndex++;
         }
 
-        RecipeComplete(false); // 클리어 마크 리셋
+        RecipeComplete(false); // 레시피 완료 마크를 초기화(처음에는 미완료)
     }
 
     public void UpdateRow(IngredientSO ing, int have, int need) //필요 개수 업데이트

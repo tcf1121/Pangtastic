@@ -10,16 +10,7 @@ public static class RecipeRule
         List<RecipeSO> result = new List<RecipeSO>();
 
         // 주문 메뉴 수 설정
-        int orderCount; 
-        if(customer.Type == CustomerType.Special) //스페셜 손님일때
-        {
-            orderCount = Random.Range(3, 6); // 3~5개
-        }
-        else //노멀이나 유니크일때
-        {
-            orderCount= Random.Range(stage.MinOrderCount, 5); // 최대 4개
-        }
-
+        int orderCount = stage.OrderCount;
 
         //주문 목록 설정
         if(customer.Type == CustomerType.Normal)
@@ -60,33 +51,41 @@ public static class RecipeRule
         }
         else if (customer.Type == CustomerType.Special) // 스페셜
         {
+            List<RecipeSO> orderOptions = new List<RecipeSO>(); //선호 메뉴 리스트 생성
+
             foreach (var fav in customer.FavoriteRecipes) // 선호메뉴 순회
             {
                 if (stagePool.Contains(fav)) // 스테이지에 선호메뉴 있으면
                 {
-                    result.Add(fav); // 주문 리스트에 추가
+                    orderOptions.Add(fav); // 주문 리스트에 추가 (교집합 리스트)
                 }
+            }
+
+            while (result.Count < orderCount && orderOptions.Count > 0)
+            {
+                int rand = Random.Range(0, orderOptions.Count);
+                result.Add(orderOptions[rand]);
+                orderOptions.RemoveAt(rand);
             }
 
             int need = orderCount - result.Count; // 부족한 주문수 
 
             if (need > 0) // 주문 더 해야하면
             {
-                List<RecipeSO> favPool = new List<RecipeSO>(); //선호 메뉴 리스트 생성
-
+                //리스트에 다시 주문가능 옵션 넣어줌
                 foreach (var fav in customer.FavoriteRecipes)
                 {
                     if (stagePool.Contains(fav))
                     {
-                        favPool.Add(fav); // 선호 메뉴 리스트에 넣어줌
+                        orderOptions.Add(fav);
                     }
                 }
 
-                while (need > 0 && favPool.Count > 0) // 추가분은 중복없이 추가
+                while (need > 0 && orderOptions.Count > 0) // 추가분은 중복없이 추가
                 {
-                    int rand = Random.Range(0, favPool.Count);
-                    result.Add(favPool[rand]);
-                    favPool.RemoveAt(rand);
+                    int rand = Random.Range(0, orderOptions.Count);
+                    result.Add(orderOptions[rand]);
+                    orderOptions.RemoveAt(rand);
                     need--;
                 }
             }

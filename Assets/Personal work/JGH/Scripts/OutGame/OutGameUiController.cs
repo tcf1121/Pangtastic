@@ -3,6 +3,7 @@ using UnityEngine.SceneManagement;
 
 public class OutGameUiController : MonoBehaviour
 {
+    
     private void Start()
     {
         // 배경음, 효과음 설정에 따라 초기 볼륨 조정 :: S
@@ -37,6 +38,9 @@ public class OutGameUiController : MonoBehaviour
         }
         // 게임 클리어 후 계속하기 누르면 로비 화면으로 넘어오고 게임 시작 화면 활성화 :: E
     }
+    
+
+  
 
     public void ChangeInGameScene(int num)
     {

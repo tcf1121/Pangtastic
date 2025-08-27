@@ -1,5 +1,4 @@
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 namespace SCR
@@ -14,11 +13,23 @@ namespace SCR
         private Obstacle _donutObstacle;
         // 시럽, 반죽 뭉치만 확인
         private Obstacle _cellObstacle;
+        private GemType _firstGemtype;
+        private GemType _firstDonut;
+        private bool _catS;
 
         public BoardCell(Vector3Int pos, GemType gem)
         {
             SetCellPos(pos);
-            SetObject(gem);
+            _catS = false;
+            if (gem == GemType.Random) _firstGemtype = (GemType)Random.Range(0, 6);
+            else
+            {
+                _firstGemtype = gem;
+                if (gem == GemType.Dough ||
+                    gem == GemType.Syrup ||
+                    gem == GemType.Ice)
+                    _firstDonut = (GemType)Random.Range(0, 6);
+            }
         }
 
         private void SetCellPos(Vector3Int pos)
@@ -34,22 +45,30 @@ namespace SCR
             if (gem == GemType.Random) SetDonut(gem);
         }
 
+        public void Init()
+        {
+            if (_firstGemtype == GemType.CatStatues_s) _catS = true;
+            else SetObject(_firstGemtype);
+            _firstGemtype = GemType.Empty;
+        }
+
+
+
         public void SetDonut(Donut donut)
         {
+            _donut = null;
             _donut = donut;
         }
 
         private void SetDonut(GemType donut)
         {
-            if (donut == GemType.Random)
-            {
-                donut = (GemType)Random.Range(0, 6);
-            }
+            if (donut == GemType.Random) donut = (GemType)Random.Range(0, 6);
             _donut = Board.GetDonut(_pos, donut);
         }
 
         public void SetObstacle(Obstacle obstacle)
         {
+            _obstacle = null;
             _obstacle = obstacle;
         }
 
@@ -59,20 +78,16 @@ namespace SCR
             {
                 _cellObstacle = Board.GetObstacle(_pos, obstacle);
                 _cellObstacle.Init(_pos);
-                SetDonut(GemType.Random);
+                SetDonut(_firstDonut);
             }
             else if (obstacle < GemType.Coin)
             {
-                if (obstacle == GemType.Ice) SetDonut(GemType.Random);
+                if (obstacle == GemType.Ice) SetDonut(_firstDonut);
                 _donutObstacle = Board.GetObstacle(_pos, obstacle);
                 _donutObstacle.Init(_pos);
             }
             else
             {
-                if (obstacle == GemType.CatStatues_s)
-                {
-                    return;
-                }
                 _obstacle = Board.GetObstacle(_pos, obstacle);
                 _obstacle.Init(_pos);
             }
@@ -80,6 +95,7 @@ namespace SCR
 
         public bool IsEmpty()
         {
+            if (_catS) return false;
             if (_obstacle == null && _donut == null && _donutObstacle == null) return true;
             else return false;
         }
@@ -92,6 +108,17 @@ namespace SCR
 
         public GemType getCellType()
         {
+            if (_firstGemtype != GemType.Empty)
+            {
+                if (_firstGemtype < GemType.RollingPin_v) return _firstGemtype;
+                else
+                {
+                    if (_firstGemtype == GemType.Dough ||
+                    _firstGemtype == GemType.Syrup ||
+                    _firstGemtype == GemType.Ice) return _firstDonut;
+                    return GemType.Empty;
+                }
+            }
             if (_donutObstacle != null)
             {
                 if (_donutObstacle.GetBlockType() == GemType.Cloche)
@@ -102,13 +129,22 @@ namespace SCR
             else return GemType.Empty;
         }
 
+        public GemType GetCatStatuse()
+        {
+            if (_catS) return GemType.CatStatues_s;
+            if (_obstacle != null &&
+            _obstacle.GetBlockType() == GemType.CatStatues)
+                return GemType.CatStatues;
+            else return GemType.Empty;
+        }
+
         public bool CanMove()
         {
             if (_donutObstacle != null)
                 return false;
-            if (_obstacle != null && (_obstacle.GetBlockType() == GemType.CatStatues ||
-                    _obstacle.GetBlockType() == GemType.CatStatues_s))
+            if (_obstacle != null && _obstacle.GetBlockType() == GemType.CatStatues)
                 return false;
+            if (_catS) return false;
             return true;
         }
 
@@ -125,6 +161,36 @@ namespace SCR
                 _obstacle = null;
             }
         }
+
+        public IEnumerator SetPos(float duration)
+        {
+            float elapsedTime = 0f;
+            Transform target = null;
+            if (_donut != null)
+            {
+                target = _donut.gameObject.transform;
+            }
+            else if (_obstacle != null && _obstacle.ObstaclType < GemType.CatStatues)
+            {
+                target = _obstacle.gameObject.transform;
+            }
+            if (target.gameObject != null)
+            {
+                Vector3 startPosition = target.position;
+
+                while (elapsedTime < duration)
+                {
+                    if (target != null)
+                        target.position = Vector3.Lerp(startPosition, _pos, (elapsedTime / duration));
+                    elapsedTime += Time.deltaTime;
+                    yield return null;
+                }
+                if (target != null)
+                    target.position = _pos;
+            }
+        }
+
+
 
         public Donut GetDonut()
         {
@@ -150,11 +216,20 @@ namespace SCR
         {
             if (_obstacle != null)
             {
-                _obstacle.Damage(1);
+                _obstacle.Damage();
+                if (_obstacle != null)
+                    if (_obstacle.gameObject == null)
+                        _obstacle = null;
             }
             if (_donutObstacle != null)
             {
-                _donutObstacle.Damage(1);
+                if (_donutObstacle.GetBlockType() == GemType.Cloche)
+                {
+                    _donutObstacle.Damage();
+                    if (_donutObstacle != null)
+                        if (_donutObstacle.gameObject == null)
+                            _donutObstacle = null;
+                }
             }
         }
 
@@ -163,21 +238,38 @@ namespace SCR
         {
             if (_obstacle != null)
             {
-                _obstacle.Damage(1);
+                _obstacle.Damage();
+                if (_obstacle != null)
+                    if (_obstacle.gameObject == null)
+                        _obstacle = null;
             }
             if (_donutObstacle != null)
             {
-                _donutObstacle.Damage(1);
+                _donutObstacle.Damage();
+                if (_donutObstacle != null)
+                    if (_donutObstacle.gameObject == null)
+                        _donutObstacle = null;
             }
             if (_donut != null)
             {
                 _donut.Damage();
+                if (_donut != null)
+                    if (_donut.gameObject == null)
+                        _donut = null;
             }
             if (_cellObstacle != null)
             {
-                _cellObstacle.Damage(1);
+                _cellObstacle.Damage();
+                if (_cellObstacle != null)
+                    if (_cellObstacle.gameObject == null)
+                        _cellObstacle = null;
             }
 
+        }
+
+        public void DestroyCat()
+        {
+            if (_catS) _catS = false;
         }
     }
 }

@@ -4,7 +4,7 @@ using UnityEngine;
 using UnityEngine.UI;
 
 public class CustomerSpawner : MonoBehaviour
-{
+{/*
     [SerializeField] private StageSetting _stageSetting; // 스테이지 세팅 스크립트
     [SerializeField] private CustomerOrder _customerOrder; // 주문 처리 스크립트
     [SerializeField] private Button spawnButton; //테스트용 버튼
@@ -121,4 +121,5 @@ public class CustomerSpawner : MonoBehaviour
         yield return new WaitForSeconds(1.5f);
         SpawnRandomCustomer();
     }
+    */
 }
