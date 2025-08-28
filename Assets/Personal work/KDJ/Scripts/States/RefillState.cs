@@ -11,13 +11,12 @@ namespace KDJ.States
         public void OnEnter(BoardManager boardManager)
         {
             Debug.Log("블록 재충전 상태");
-            boardManager.Spawner.CheckBlockInArray();
             boardManager.Spawner.CheckBlockArray(boardManager);
         }
 
         public void OnUpdate(BoardManager boardManager)
         {
-            if (boardManager.Spawner.HasEmptyBlocks())
+            if (boardManager.Spawner.CanBlockMoveInArray())
             {
                 if (_fallingCoroutine == null)
                 {
@@ -55,7 +54,7 @@ namespace KDJ.States
 
         private IEnumerator ChangeStateDelay(BoardManager boardManager)
         {
-            yield return new WaitForSeconds(0.2f);
+            yield return new WaitForSeconds(0.1f);
             boardManager.ChangeState(new ReadyState());
             _changeStateCoroutine = null;
         }

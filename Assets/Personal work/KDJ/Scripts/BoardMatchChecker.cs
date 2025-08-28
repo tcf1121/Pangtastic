@@ -1,37 +1,123 @@
+using LHJ;
 using SCR;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace KDJ
 {
     public class BoardMatchChecker : MonoBehaviour
     {
+
+        #region 배열 체크
+
+        /// <summary>
+        /// 모든 배열의 매치 가능성 체크 (가상 교환 방식)
+        /// </summary>
+        public bool AllBlockMatchPossibilityCheck(BoardManager boardManager, out int matchCount)
+        {
+            // 찾은 매치 가능성을 중복 없이 저장하기 위한 HashSet
+            // 예: "(0,0):(0,1)" -> 0,0과 0,1 블록을 바꾸면 매치 가능
+            var possibleMoves = new HashSet<string>();
+            var blockArray = boardManager.Spawner.BlockArray;
+            var blockPlate = boardManager.Spawner.BlockPlate;
+            int height = blockPlate.BlockPlateHeight;
+            int width = blockPlate.BlockPlateWidth;
+
+            for (int y = 0; y < height; y++)
+            {
+                for (int x = 0; x < width; x++)
+                {
+                    // 블럭판이 없거나 블럭이 없는 경우
+                    if (!blockPlate.BlockPlateArray[y, x] || blockArray[y, x] == null) continue;
+
+                    if (blockArray[y, x].GemType > GemType.Sugar && blockArray[y, x].GemType < GemType.Dough)
+                    {
+                        // 특수 블럭이 있는 경우 매치 가능 횟수에 1회 더함. 해당 좌표를 키로 추가 후 continue
+                        string key = $"({x},{y})";
+                        possibleMoves.Add(key);
+                        continue;
+                    }
+
+
+                    // 오른쪽 블록과 교환 테스트
+                    if (x + 1 < width && blockPlate.BlockPlateArray[y, x + 1])
+                    {
+                        // 가상 교환
+                        var temp = blockArray[y, x];
+                        blockArray[y, x] = blockArray[y, x + 1];
+                        blockArray[y, x + 1] = temp;
+
+                        // 교환된 위치 주변에서 매치가 발생하는지 확인
+                        if (CheckForMatchAt(boardManager, x, y) || CheckForMatchAt(boardManager, x + 1, y))
+                        {
+                            // 중복 저장을 막기 위해 항상 좌표를 정렬하여 키로 사용
+                            string key = $"({x},{y}):({x + 1},{y})";
+                            possibleMoves.Add(key);
+                        }
+
+                        // 교환 원상 복구
+                        temp = blockArray[y, x];
+                        blockArray[y, x] = blockArray[y, x + 1];
+                        blockArray[y, x + 1] = temp;
+                    }
+
+                    // 아래쪽 블록과 교환 테스트
+                    if (y + 1 < height && blockPlate.BlockPlateArray[y + 1, x])
+                    {
+                        // 가상 교환
+                        var temp = blockArray[y, x];
+                        blockArray[y, x] = blockArray[y + 1, x];
+                        blockArray[y + 1, x] = temp;
+
+                        // 교환된 위치 주변에서 매치가 발생하는지 확인
+                        if (CheckForMatchAt(boardManager, x, y) || CheckForMatchAt(boardManager, x, y + 1))
+                        {
+                            // 중복 저장을 막기 위해 항상 좌표를 정렬하여 키로 사용
+                            string key = $"({x},{y}):({x},{y + 1})";
+                            possibleMoves.Add(key);
+                        }
+
+                        // 교환 원상 복구
+                        temp = blockArray[y, x];
+                        blockArray[y, x] = blockArray[y + 1, x];
+                        blockArray[y + 1, x] = temp;
+                    }
+                }
+            }
+
+            matchCount = possibleMoves.Count;
+            return matchCount > 0;
+        }
+
         /// <summary>
         /// 모든 블럭의 매치 체크
         /// </summary>
         /// <param name="boardManager"></param>
         /// <returns>매칭되는 블럭이 있는지 여부 반환</returns>
-        #region 배열 체크
         public bool AllBlockMatchCheck(BoardManager boardManager)
         {
-            // 블럭 매치 체크 로직
-            // x축부터 쭉 체크하고 y축도 체크
+            int height = boardManager.Spawner.BlockPlate.BlockPlateHeight;
+            int width = boardManager.Spawner.BlockPlate.BlockPlateWidth;
+            var blockArray = boardManager.Spawner.BlockArray;
+            var blockPlateArray = boardManager.Spawner.BlockPlate.BlockPlateArray;
 
             bool isMatched = false;
 
-            for (int y = 0; y < boardManager.Spawner.BlockPlate.BlockPlateHeight; y++)
+            // x축 체크
+            for (int y = 0; y < height; y++)
             {
-                int count = 1;
                 int matchStartIndex = 0;
+                int count = 1;
                 GemType curGemType = (GemType)(-1);
                 GemType prevGemType = (GemType)(-1);
 
-                for (int x = 0; x < boardManager.Spawner.BlockPlate.BlockPlateWidth; x++)
+                for (int x = 0; x < width; x++)
                 {
-                    if (boardManager.Spawner.BlockPlate.BlockPlateArray[y, x] && boardManager.Spawner.BlockArray[y, x] != null)
+                    if (blockPlateArray[y, x] && blockArray[y, x] != null)
                     {
-                        curGemType = boardManager.Spawner.BlockArray[y, x].GemType;
+                        curGemType = blockArray[y, x].GemType;
 
-                        if (curGemType == prevGemType)
+                        if (curGemType == prevGemType && !blockArray[y, x].IsObstacle)
                         {
                             count++;
                         }
@@ -51,21 +137,21 @@ namespace KDJ
             }
 
             // y축 체크
-            for (int x = 0; x < boardManager.Spawner.BlockPlate.BlockPlateWidth; x++)
+            for (int x = 0; x < width; x++)
             {
-                int count = 1;
                 int matchStartIndex = 0;
+                int count = 1;
                 GemType curGemType = (GemType)(-1);
                 GemType prevGemType = (GemType)(-1);
 
-                for (int y = 0; y < boardManager.Spawner.BlockPlate.BlockPlateHeight; y++)
+                for (int y = 0; y < height; y++)
                 {
 
-                    if (boardManager.Spawner.BlockPlate.BlockPlateArray[y, x] && boardManager.Spawner.BlockArray[y, x] != null)
+                    if (blockPlateArray[y, x] && blockArray[y, x] != null)
                     {
-                        curGemType = boardManager.Spawner.BlockArray[y, x].GemType;
+                        curGemType = blockArray[y, x].GemType;
 
-                        if (curGemType == prevGemType)
+                        if (curGemType == prevGemType && !blockArray[y, x].IsObstacle)
                         {
                             count++;
                         }
@@ -85,21 +171,22 @@ namespace KDJ
             }
 
             // 큐브 체크
-            for (int y = 0; y < boardManager.Spawner.BlockPlate.BlockPlateHeight; y++)
+            for (int y = 0; y < height; y++)
             {
-                for (int x = 0; x < boardManager.Spawner.BlockPlate.BlockPlateWidth; x++)
+                for (int x = 0; x < width; x++)
                 {
-                    if (boardManager.Spawner.BlockPlate.BlockPlateArray[y, x] && boardManager.Spawner.BlockArray[y, x] != null)
+                    if (blockPlateArray[y, x] && blockArray[y, x] != null)
                     {
-                        if (x + 1 < boardManager.Spawner.BlockPlate.BlockPlateWidth && y + 1 < boardManager.Spawner.BlockPlate.BlockPlateHeight)
+                        if (x + 1 < width && y + 1 < height)
                         {
-                            if (boardManager.Spawner.BlockPlate.BlockPlateArray[y + 1, x] && boardManager.Spawner.BlockPlate.BlockPlateArray[y, x + 1]
-                            && boardManager.Spawner.BlockArray[y + 1, x] != null && boardManager.Spawner.BlockArray[y, x + 1] != null
-                            && boardManager.Spawner.BlockArray[y, x].BlockType == boardManager.Spawner.BlockArray[y + 1, x].BlockType
-                            && boardManager.Spawner.BlockArray[y, x].BlockType == boardManager.Spawner.BlockArray[y, x + 1].BlockType)
+                            if (blockPlateArray[y + 1, x] && blockPlateArray[y, x + 1]
+                            && blockArray[y + 1, x] != null && blockArray[y, x + 1] != null
+                            && blockArray[y, x].BlockType == blockArray[y + 1, x].BlockType
+                            && blockArray[y, x].BlockType == blockArray[y, x + 1].BlockType)
                             {
-                                if (IsCubeMatched(boardManager, x, y))
+                                if (IsCubeMatched(boardManager, x, y) && !blockArray[y, x].IsObstacle)
                                 {
+                                    Debug.Log($"큐브 매치 감지");
                                     isMatched = true;
                                 }
                             }
@@ -108,6 +195,7 @@ namespace KDJ
                 }
             }
 
+            Debug.Log($"매칭 여부: {isMatched}");
             return isMatched;
         }
 
@@ -118,14 +206,17 @@ namespace KDJ
         /// <param name="boardManager"></param>
         public void AllMatchBlockDestroy(BoardManager boardManager)
         {
-            int score = 0;
+            int height = boardManager.Spawner.BlockPlate.BlockPlateHeight;
+            int width = boardManager.Spawner.BlockPlate.BlockPlateWidth;
+            var blockArray = boardManager.Spawner.BlockArray;
+            var blockPlateArray = boardManager.Spawner.BlockPlate.BlockPlateArray;
 
             // x,y 통합 체크
-            for (int y = 0; y < boardManager.Spawner.BlockPlate.BlockPlateHeight; y++)
+            for (int y = 0; y < height; y++)
             {
-                for (int x = 0; x < boardManager.Spawner.BlockPlate.BlockPlateWidth; x++)
+                for (int x = 0; x < width; x++)
                 {
-                    if (boardManager.Spawner.BlockPlate.BlockPlateArray[y, x] && boardManager.Spawner.BlockArray[y, x] != null)
+                    if (blockPlateArray[y, x] && blockArray[y, x] != null && !blockArray[y, x].IsObstacle)
                     {
                         int xMatchCount = XAxisMatchCheck(x, y, boardManager);
                         int yMatchCount = YAxisMatchCheck(x, y, boardManager);
@@ -154,164 +245,6 @@ namespace KDJ
                     }
                 }
             }
-
-            /* 안쓰는 코드
-            // 블럭 매치 체크 로직
-            // x축부터 쭉 체크하고 y축도 체크
-            for (int y = 0; y < boardManager.Spawner.BlockPlate.BlockPlateHeight; y++)
-            {
-                int count = 1;
-                int matchStartIndex = 0;
-                GemType curGemType = (GemType)(-1);
-                GemType prevGemType = (GemType)(-1);
-
-                for (int x = 0; x < boardManager.Spawner.BlockPlate.BlockPlateWidth; x++)
-                {
-
-                    if (boardManager.Spawner.BlockPlate.BlockPlateArray[y, x] && boardManager.Spawner.BlockArray[y, x] != null)
-                    {
-                        curGemType = boardManager.Spawner.BlockArray[y, x].GemType;
-
-                        if (curGemType == prevGemType)
-                        {
-                            count++;
-                        }
-                        else if (count < 3)
-                        {
-                            count = 1;
-                            matchStartIndex = x;
-                        }
-                        else if (curGemType != prevGemType && count >= 3)
-                        {
-                            break; // 매치가 끊기고 이전에 3개 이상 매치된 경우 루프 종료
-                        }
-                    }
-                    prevGemType = curGemType;
-                }
-
-                if (count >= 3)
-                {
-                    for (int i = matchStartIndex; i < matchStartIndex + count; i++)
-                    {
-                        if (boardManager.Spawner.BlockPlate.BlockPlateArray[y, i] && boardManager.Spawner.BlockArray[y, i].BlockInstance != null)
-                        {
-                            Debug.Log($"매칭 된 블럭 수: {count}");
-                            Debug.Log($"X축 매치된 블록 파괴 위치: x={i}, y={y}");
-                            Debug.Log($"매치된 블록 GemType: {boardManager.Spawner.BlockArray[y, i].GemType}");
-                            Destroy(boardManager.Spawner.BlockArray[y, i].BlockInstance);
-                            boardManager.Spawner.BlockArray[y, i].BlockInstance = null;
-                            score += 10;
-                        }
-                    }
-
-                    if (count == 4)
-                    {
-                        boardManager.Spawner.SpawnBlock(matchStartIndex, y, 7);
-                    }
-
-                    boardManager.MatchCombo.UpCombo();
-                    if (boardManager.MatchCombo.CurCombo > 1)
-                    {
-                        boardManager.UpdateUI((int)(score * (0.5f * boardManager.MatchCombo.CurCombo)));
-                    }
-                    else
-                    {
-                        boardManager.UpdateUI(score);
-                    }
-                    score = 0;
-                }
-            }
-
-            // y축 체크
-            for (int x = 0; x < boardManager.Spawner.BlockPlate.BlockPlateWidth; x++)
-            {
-                int count = 1;
-                int matchStartIndex = 0;
-                GemType curGemType = (GemType)(-1);
-                GemType prevGemType = (GemType)(-1);
-
-                for (int y = 0; y < boardManager.Spawner.BlockPlate.BlockPlateHeight; y++)
-                {
-                    if (boardManager.Spawner.BlockPlate.BlockPlateArray[y, x] && boardManager.Spawner.BlockArray[y, x] != null)
-                    {
-                        curGemType = boardManager.Spawner.BlockArray[y, x].GemType;
-
-                        if (curGemType == prevGemType)
-                        {
-                            count++;
-                        }
-                        else if (count < 3)
-                        {
-                            count = 1;
-                            matchStartIndex = y;
-                        }
-                        else if (curGemType != prevGemType && count >= 3)
-                        {
-                            break; // 매치가 끊기고 이전에 3개 이상 매치된 경우 루프 종료
-                        }
-                    }
-                    prevGemType = curGemType;
-                }
-
-                if (count >= 3)
-                {
-                    for (int i = matchStartIndex; i < matchStartIndex + count; i++)
-                    {
-                        if (boardManager.Spawner.BlockPlate.BlockPlateArray[i, x] && boardManager.Spawner.BlockArray[i, x] != null)
-                        {
-                            if (boardManager.Spawner.BlockArray[i, x].BlockInstance != null)
-                            {
-                                Debug.Log($"매칭 된 블럭 수: {count}");
-                                Debug.Log($"Y축 매치된 블록 파괴 위치: x={x}, y={i}");
-                                Debug.Log($"매치된 블록 GemType: {boardManager.Spawner.BlockArray[i, x].GemType}");
-                                Destroy(boardManager.Spawner.BlockArray[i, x].BlockInstance);
-                                boardManager.Spawner.BlockArray[i, x].BlockInstance = null;
-                                score += 10;
-                            }
-                        }
-                    }
-
-                    if (count == 4)
-                    {
-                        boardManager.Spawner.SpawnBlock(x, matchStartIndex, 8);
-                    }
-
-                    boardManager.MatchCombo.UpCombo();
-                    if (boardManager.MatchCombo.CurCombo > 1)
-                    {
-                        boardManager.UpdateUI((int)(score * (0.5f * boardManager.MatchCombo.CurCombo)));
-                    }
-                    else
-                    {
-                        boardManager.UpdateUI(score);
-                    }
-                    score = 0;
-                }
-            }
-            */
-
-            // 큐브 체크
-            // for (int y = 0; y < boardManager.Spawner.BlockPlate.BlockPlateHeight; y++)
-            // {
-            //     for (int x = 0; x < boardManager.Spawner.BlockPlate.BlockPlateWidth; x++)
-            //     {
-            //         if (boardManager.Spawner.BlockArray[y, x] != null)
-            //         {
-            //             if (x + 1 < boardManager.Spawner.BlockPlate.BlockPlateWidth && y + 1 < boardManager.Spawner.BlockPlate.BlockPlateHeight)
-            //             {
-            //                 if (boardManager.Spawner.BlockPlate.BlockPlateArray[y + 1, x] && boardManager.Spawner.BlockPlate.BlockPlateArray[y, x + 1]
-            //                 && boardManager.Spawner.BlockArray[y + 1, x] != null && boardManager.Spawner.BlockArray[y, x + 1] != null
-            //                 && boardManager.Spawner.BlockArray[y, x].BlockType == boardManager.Spawner.BlockArray[y + 1, x].BlockType
-            //                 && boardManager.Spawner.BlockArray[y, x].BlockType == boardManager.Spawner.BlockArray[y, x + 1].BlockType)
-            //                 {
-            //                     CubeCheck(boardManager, x, y, 1);
-            //                 }
-            //             }
-            //         }
-            //     }
-            // }
-
-            // boardManager.UpdateUI(score);
         }
 
         #endregion
@@ -354,8 +287,10 @@ namespace KDJ
 
         public int XAxisMatchCheck(int x, int y, BoardManager boardManager)
         {
-            // x축 매치 체크 로직
-            //Debug.Log($"X축 매치 체크. 시작 좌표: x={x}, y={y}");
+            var blockArray = boardManager.Spawner.BlockArray;
+            var blockPlateArray = boardManager.Spawner.BlockPlate.BlockPlateArray;
+            int width = boardManager.Spawner.BlockPlate.BlockPlateWidth;
+            int height = boardManager.Spawner.BlockPlate.BlockPlateHeight;
 
             int score = 0;
             int count = 1;
@@ -368,13 +303,17 @@ namespace KDJ
             {
                 int curIndex = x + i;
 
-                //Debug.Log($"x축 매치 체크 인덱스: {curIndex}");
-
-                if (boardManager.Spawner.BlockPlate.BlockPlateArray[y, x] && boardManager.Spawner.BlockArray.GetLength(1) > curIndex && curIndex >= 0 && boardManager.Spawner.BlockArray[y, curIndex] != null)
+                if (blockPlateArray[y, x] && width > curIndex && curIndex >= 0 && blockArray[y, curIndex] != null)
                 {
-                    curGemType = boardManager.Spawner.BlockArray[y, curIndex].GemType;
+                    curGemType = blockArray[y, curIndex].GemType;
 
-                    //Debug.Log($"x축 현재 GemType: {curGemType}, 이전 GemType: {prevGemType}");
+                    // 검사하는 블록이 일반 블록이 아닐경우 continue.
+                    if (curGemType > GemType.Sugar)
+                    {
+                        count = 1;
+                        matchStartIndex = curIndex + 1;
+                        continue;
+                    }
 
                     if (curGemType == prevGemType)
                     {
@@ -393,34 +332,32 @@ namespace KDJ
                 prevGemType = curGemType;
             }
 
-            //Debug.Log("x축 매치 완료. 매치된 블록 수: " + count);
-
             if (count >= 3)
             {
                 for (int i = matchStartIndex; i < matchStartIndex + count; i++)
                 {
-                    if (boardManager.Spawner.BlockPlate.BlockPlateArray[y, i] && boardManager.Spawner.BlockArray[y, i] != null && boardManager.Spawner.BlockArray[y, i].BlockInstance != null)
+                    if (blockPlateArray[y, i] && blockArray[y, i] != null && blockArray[y, i].BlockInstance != null)
                     {
                         Debug.Log($"매칭 된 블럭 수: {count}");
                         Debug.Log($"X축 매치된 블록 파괴 위치: x={i}, y={y}");
-                        Debug.Log($"매치된 블록 GemType: {boardManager.Spawner.BlockArray[y, i].GemType}");
-                        Destroy(boardManager.Spawner.BlockArray[y, i].BlockInstance);
-                        boardManager.Spawner.BlockArray[y, i].BlockInstance = null;
-                        if (y + 1 < boardManager.Spawner.BlockPlate.BlockPlateHeight && boardManager.Spawner.BlockArray[y + 1, i] is Cloche)
+                        Debug.Log($"매치된 블록 GemType: {blockArray[y, i].GemType}");
+                        Destroy(blockArray[y, i].BlockInstance);
+                        blockArray[y, i].BlockInstance = null;
+                        if (y + 1 < height && blockArray[y + 1, i] is Cloche)
                         {
-                            (boardManager.Spawner.BlockArray[y + 1, i] as Cloche).TakeDamage(boardManager);
+                            (blockArray[y + 1, i] as Cloche).TakeDamage(boardManager);
                         }
-                        if (y - 1 >= 0 && boardManager.Spawner.BlockArray[y - 1, i] is Cloche)
+                        if (y - 1 >= 0 && blockArray[y - 1, i] is Cloche)
                         {
-                            (boardManager.Spawner.BlockArray[y - 1, i] as Cloche).TakeDamage(boardManager);
+                            (blockArray[y - 1, i] as Cloche).TakeDamage(boardManager);
                         }
-                        if (i + 1 < boardManager.Spawner.BlockPlate.BlockPlateWidth && boardManager.Spawner.BlockArray[y, i + 1] is Cloche)
+                        if (i + 1 < width && blockArray[y, i + 1] is Cloche)
                         {
-                            (boardManager.Spawner.BlockArray[y, i + 1] as Cloche).TakeDamage(boardManager);
+                            (blockArray[y, i + 1] as Cloche).TakeDamage(boardManager);
                         }
-                        if (i - 1 >= 0 && boardManager.Spawner.BlockArray[y, i - 1] is Cloche)
+                        if (i - 1 >= 0 && blockArray[y, i - 1] is Cloche)
                         {
-                            (boardManager.Spawner.BlockArray[y, i - 1] as Cloche).TakeDamage(boardManager);
+                            (blockArray[y, i - 1] as Cloche).TakeDamage(boardManager);
                         }
                         score += 10;
                         isMatched = true;
@@ -446,8 +383,11 @@ namespace KDJ
 
         public int YAxisMatchCheck(int x, int y, BoardManager boardManager)
         {
-            // y축 매치 체크 로직
-            //Debug.Log($"Y축 매치 체크. 시작 좌표: x={x}, y={y}");
+            var blockArray = boardManager.Spawner.BlockArray;
+            var blockPlateArray = boardManager.Spawner.BlockPlate.BlockPlateArray;
+            int width = boardManager.Spawner.BlockPlate.BlockPlateWidth;
+            int height = boardManager.Spawner.BlockPlate.BlockPlateHeight;
+
             int score = 0;
             int count = 1;
             int matchStartIndex = 0;
@@ -459,13 +399,17 @@ namespace KDJ
             {
                 int curIndex = y + i;
 
-                //Debug.Log($"y축 매치 체크 인덱스: {curIndex}");
-
-                if (boardManager.Spawner.BlockPlate.BlockPlateArray[y, x] && boardManager.Spawner.BlockPlate.BlockPlateHeight > curIndex && curIndex >= 0 && boardManager.Spawner.BlockArray[curIndex, x] != null)
+                if (blockPlateArray[y, x] && height > curIndex && curIndex >= 0 && blockArray[curIndex, x] != null)
                 {
-                    curGemType = boardManager.Spawner.BlockArray[curIndex, x].GemType;
+                    curGemType = blockArray[curIndex, x].GemType;
 
-                    //Debug.Log($"y축 현재 GemType: {curGemType}, 이전 GemType: {prevGemType}");
+                    // 검사하는 블록이 일반 블록이 아닐경우 continue.
+                    if (curGemType > GemType.Sugar)
+                    {
+                        count = 1;
+                        matchStartIndex = curIndex + 1;
+                        continue;
+                    }
 
                     if (curGemType == prevGemType)
                     {
@@ -484,34 +428,32 @@ namespace KDJ
                 prevGemType = curGemType;
             }
 
-            //Debug.Log("y축 매치 완료. 매치된 블록 수: " + count);
-
             if (count >= 3)
             {
                 for (int i = matchStartIndex; i < matchStartIndex + count; i++)
                 {
-                    if (boardManager.Spawner.BlockPlate.BlockPlateArray[i, x] && boardManager.Spawner.BlockArray[i, x] != null && boardManager.Spawner.BlockArray[y, i].BlockInstance != null)
+                    if (blockPlateArray[i, x] && blockArray[i, x] != null && blockArray[i, x].BlockInstance != null)
                     {
                         Debug.Log($"매칭 된 블럭 수: {count}");
                         Debug.Log($"Y축 매치된 블록 파괴 위치: x={x}, y={i}");
-                        Debug.Log($"매치된 블록 GemType: {boardManager.Spawner.BlockArray[i, x].GemType}");
-                        Destroy(boardManager.Spawner.BlockArray[i, x].BlockInstance);
-                        boardManager.Spawner.BlockArray[i, x].BlockInstance = null;
-                        if (i + 1 < boardManager.Spawner.BlockPlate.BlockPlateHeight && boardManager.Spawner.BlockArray[i + 1, x] is Cloche)
+                        Debug.Log($"매치된 블록 GemType: {blockArray[i, x].GemType}");
+                        Destroy(blockArray[i, x].BlockInstance);
+                        blockArray[i, x].BlockInstance = null;
+                        if (i + 1 < height && blockArray[i + 1, x] is Cloche)
                         {
-                            (boardManager.Spawner.BlockArray[i + 1, x] as Cloche).TakeDamage(boardManager);
+                            (blockArray[i + 1, x] as Cloche).TakeDamage(boardManager);
                         }
-                        if (i - 1 >= 0 && boardManager.Spawner.BlockArray[i - 1, x] is Cloche)
+                        if (i - 1 >= 0 && blockArray[i - 1, x] is Cloche)
                         {
-                            (boardManager.Spawner.BlockArray[i - 1, x] as Cloche).TakeDamage(boardManager);
+                            (blockArray[i - 1, x] as Cloche).TakeDamage(boardManager);
                         }
-                        if (x + 1 < boardManager.Spawner.BlockPlate.BlockPlateWidth && boardManager.Spawner.BlockArray[i, x + 1] is Cloche)
+                        if (x + 1 < width && blockArray[i, x + 1] is Cloche)
                         {
-                            (boardManager.Spawner.BlockArray[i, x + 1] as Cloche).TakeDamage(boardManager);
+                            (blockArray[i, x + 1] as Cloche).TakeDamage(boardManager);
                         }
-                        if (x - 1 >= 0 && boardManager.Spawner.BlockArray[i, x - 1] is Cloche)
+                        if (x - 1 >= 0 && blockArray[i, x - 1] is Cloche)
                         {
-                            (boardManager.Spawner.BlockArray[i, x - 1] as Cloche).TakeDamage(boardManager);
+                            (blockArray[i, x - 1] as Cloche).TakeDamage(boardManager);
                         }
                         score += 10;
                         isMatched = true;
@@ -588,6 +530,11 @@ namespace KDJ
         /// <param name="startArray">1 = 좌측 하단, 2 = 우측 하단, 3 = 좌측 상단, 4 = 우측 상단</param>
         private bool CubeCheck(BoardManager boardManager, int x, int y, int startArray = 1)
         {
+            int height = boardManager.Spawner.BlockPlate.BlockPlateHeight;
+            int width = boardManager.Spawner.BlockPlate.BlockPlateWidth;
+            var blockArray = boardManager.Spawner.BlockArray;
+            var blockPlateArray = boardManager.Spawner.BlockPlate.BlockPlateArray;
+
             int score = 0;
             int matchCount = 0;
             int offsetX = 0;
@@ -620,20 +567,20 @@ namespace KDJ
             // 매치 체크
             for (int i = offsetY; i < offsetY + 2; i++)
             {
-                if (i < 0 || i >= boardManager.Spawner.BlockPlate.BlockPlateHeight)
+                if (i < 0 || i >= height)
                 {
                     return false;
                 }
 
                 for (int j = offsetX; j < offsetX + 2; j++)
                 {
-                    if (j < 0 || j >= boardManager.Spawner.BlockPlate.BlockPlateWidth)
+                    if (j < 0 || j >= width)
                     {
                         return false;
                     }
 
-                    if (boardManager.Spawner.BlockPlate.BlockPlateArray[i, j] && boardManager.Spawner.BlockPlate.BlockPlateArray[y, x] && boardManager.Spawner.BlockArray[i, j] != null
-                    && boardManager.Spawner.BlockArray[y, x] != null && boardManager.Spawner.BlockArray[i, j].BlockType == boardManager.Spawner.BlockArray[y, x].BlockType)
+                    if (blockPlateArray[i, j] && blockPlateArray[y, x] && blockArray[i, j] != null
+                    && blockArray[y, x] != null && blockArray[i, j].BlockType == blockArray[y, x].BlockType)
                     {
                         matchCount++;
                     }
@@ -647,27 +594,27 @@ namespace KDJ
                 {
                     for (int j = offsetX; j < offsetX + 2; j++)
                     {
-                        if (boardManager.Spawner.BlockArray[i, j] != null)
+                        if (blockArray[i, j] != null)
                         {
-                            if (boardManager.Spawner.BlockArray[i, j].BlockInstance != null)
+                            if (blockArray[i, j].BlockInstance != null)
                             {
-                                Destroy(boardManager.Spawner.BlockArray[i, j].BlockInstance);
-                                boardManager.Spawner.BlockArray[i, j].BlockInstance = null;
-                                if (i + 1 < boardManager.Spawner.BlockPlate.BlockPlateHeight && boardManager.Spawner.BlockArray[i + 1, j] is Cloche)
+                                Destroy(blockArray[i, j].BlockInstance);
+                                blockArray[i, j].BlockInstance = null;
+                                if (i + 1 < height && blockArray[i + 1, j] is Cloche)
                                 {
-                                    (boardManager.Spawner.BlockArray[i + 1, j] as Cloche).TakeDamage(boardManager);
+                                    (blockArray[i + 1, j] as Cloche).TakeDamage(boardManager);
                                 }
-                                if (i - 1 >= 0 && boardManager.Spawner.BlockArray[i - 1, j] is Cloche)
+                                if (i - 1 >= 0 && blockArray[i - 1, j] is Cloche)
                                 {
-                                    (boardManager.Spawner.BlockArray[i - 1, j] as Cloche).TakeDamage(boardManager);
+                                    (blockArray[i - 1, j] as Cloche).TakeDamage(boardManager);
                                 }
-                                if (j + 1 < boardManager.Spawner.BlockPlate.BlockPlateWidth && boardManager.Spawner.BlockArray[i, j + 1] is Cloche)
+                                if (j + 1 < width && blockArray[i, j + 1] is Cloche)
                                 {
-                                    (boardManager.Spawner.BlockArray[i, j + 1] as Cloche).TakeDamage(boardManager);
+                                    (blockArray[i, j + 1] as Cloche).TakeDamage(boardManager);
                                 }
-                                if (j - 1 >= 0 && boardManager.Spawner.BlockArray[i, j - 1] is Cloche)
+                                if (j - 1 >= 0 && blockArray[i, j - 1] is Cloche)
                                 {
-                                    (boardManager.Spawner.BlockArray[i, j - 1] as Cloche).TakeDamage(boardManager);
+                                    (blockArray[i, j - 1] as Cloche).TakeDamage(boardManager);
                                 }
                                 score += 10;
                                 isMatched = true;
@@ -696,6 +643,80 @@ namespace KDJ
 
         #region 유틸 함수
         /// <summary>
+        /// 특정 위치의 블록을 기준으로 가로/세로 3개 이상 매치가 있는지 확인하는 도우미 함수
+        /// </summary>
+        private bool CheckForMatchAt(BoardManager boardManager, int x, int y)
+        {
+            var blockPlate = boardManager.Spawner.BlockPlate;
+            if (!blockPlate.BlockPlateArray[y, x])
+            {
+                return false;
+            }
+
+            var block = boardManager.Spawner.BlockArray[y, x];
+            if (block == null || block.IsObstacle)
+            {
+                return false;
+            }
+
+            GemType gemType = block.GemType;
+            int height = boardManager.Spawner.BlockPlate.BlockPlateHeight;
+            int width = boardManager.Spawner.BlockPlate.BlockPlateWidth;
+
+            // 가로 체크
+            int horizontalCount = 1;
+            // 왼쪽으로 체크
+            for (int i = x - 1; i >= 0; i--)
+            {
+                if (!blockPlate.BlockPlateArray[y, i]) break;
+                var nextBlock = boardManager.Spawner.BlockArray[y, i];
+                if (nextBlock != null && !nextBlock.IsObstacle && nextBlock.GemType == gemType)
+                    horizontalCount++;
+                else
+                    break;
+            }
+            // 오른쪽으로 체크
+            for (int i = x + 1; i < width; i++)
+            {
+                if (!blockPlate.BlockPlateArray[y, i]) break;
+                var nextBlock = boardManager.Spawner.BlockArray[y, i];
+                if (nextBlock != null && !nextBlock.IsObstacle && nextBlock.GemType == gemType)
+                    horizontalCount++;
+                else
+                    break;
+            }
+
+            if (horizontalCount >= 3) return true;
+
+            // 세로 체크
+            int verticalCount = 1;
+            // 위쪽으로 체크
+            for (int i = y - 1; i >= 0; i--)
+            {
+                if (!blockPlate.BlockPlateArray[i, x]) break;
+                var nextBlock = boardManager.Spawner.BlockArray[i, x];
+                if (nextBlock != null && !nextBlock.IsObstacle && nextBlock.GemType == gemType)
+                    verticalCount++;
+                else
+                    break;
+            }
+            // 아래쪽으로 체크
+            for (int i = y + 1; i < height; i++)
+            {
+                if (!blockPlate.BlockPlateArray[i, x]) break;
+                var nextBlock = boardManager.Spawner.BlockArray[i, x];
+                if (nextBlock != null && !nextBlock.IsObstacle && nextBlock.GemType == gemType)
+                    verticalCount++;
+                else
+                    break;
+            }
+
+            if (verticalCount >= 3) return true;
+
+            return false;
+        }
+
+        /// <summary>
         /// 배열에 매칭가능한 2x2 배열이 있는지 체크
         /// </summary>
         /// <param name="boardManager"></param>
@@ -704,25 +725,30 @@ namespace KDJ
         /// <returns></returns>
         private bool IsCubeMatched(BoardManager boardManager, int x, int y)
         {
+            int height = boardManager.Spawner.BlockPlate.BlockPlateHeight;
+            int width = boardManager.Spawner.BlockPlate.BlockPlateWidth;
+            var blockArray = boardManager.Spawner.BlockArray;
+            var blockPlateArray = boardManager.Spawner.BlockPlate.BlockPlateArray;
+
             int matchCount = 0;
             bool isMatched = false;
 
             for (int i = y; i < y + 2; i++)
             {
-                if (i < 0 || i >= boardManager.Spawner.BlockPlate.BlockPlateHeight)
+                if (i < 0 || i >= height)
                 {
                     return isMatched;
                 }
 
                 for (int j = x; j < x + 2; j++)
                 {
-                    if (j < 0 || j >= boardManager.Spawner.BlockPlate.BlockPlateWidth)
+                    if (j < 0 || j >= width)
                     {
                         return isMatched;
                     }
 
-                    if (boardManager.Spawner.BlockPlate.BlockPlateArray[i, j] && boardManager.Spawner.BlockPlate.BlockPlateArray[y, x] && boardManager.Spawner.BlockArray[i, j] != null
-                    && boardManager.Spawner.BlockArray[y, x] != null && boardManager.Spawner.BlockArray[i, j].BlockType == boardManager.Spawner.BlockArray[y, x].BlockType)
+                    if (blockPlateArray[i, j] && blockPlateArray[y, x] && blockArray[i, j] != null
+                    && blockArray[y, x] != null && blockArray[i, j].BlockType == blockArray[y, x].BlockType)
                     {
                         matchCount++;
                     }
@@ -736,6 +762,54 @@ namespace KDJ
 
             return isMatched;
         }
+
+        /// <summary>
+        /// 배열 인덱스가 유효한지 체크
+        /// </summary>
+        /// <param name="boardManager"></param>
+        /// <param name="x"></param>
+        /// <param name="y"></param>
+        /// <returns></returns>
+        public bool CheckInOfArray(BoardManager boardManager, int x, int y)
+        {
+            int height = boardManager.Spawner.BlockPlate.BlockPlateHeight;
+            int width = boardManager.Spawner.BlockPlate.BlockPlateWidth;
+
+            if (y >= 0 && y < height && x >= 0 && x < width)
+            {
+                return true;
+            }
+            return false;
+        }
+
+        /// <summary>
+        /// 배열 인덱스의 위치에 블럭이 존재하는지 체크
+        /// </summary>
+        /// <param name="boardManager"></param>
+        /// <param name="x"></param>
+        /// <param name="y"></param>
+        /// <returns></returns>
+        public bool CheckBlockIsValue(BoardManager boardManager, int x, int y)
+        {
+            if (boardManager.Spawner.BlockPlate.BlockPlateArray[y, x] && boardManager.Spawner.BlockArray[y, x] != null)
+            {
+                return true;
+            }
+            return false;
+        }
+
+        /// <summary>
+        /// 배열 인덱스가 유효하고 해당 위치에 블럭이 존재하는지 체크
+        /// </summary>
+        /// <param name="boardManager"></param>
+        /// <param name="x"></param>
+        /// <param name="y"></param>
+        /// <returns></returns>
+        public bool CheckBlockIsAllValid(BoardManager boardManager, int x, int y)
+        {
+            return CheckInOfArray(boardManager, x, y) && CheckBlockIsValue(boardManager, x, y);
+        }
+
         #endregion
     }
 }

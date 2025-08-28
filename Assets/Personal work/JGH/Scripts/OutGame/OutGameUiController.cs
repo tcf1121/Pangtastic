@@ -37,6 +37,10 @@ public class OutGameUiController : MonoBehaviour
             InGameUiController.needStartSetting = false;
         }
         // 게임 클리어 후 계속하기 누르면 로비 화면으로 넘어오고 게임 시작 화면 활성화 :: E
+        
+        
+        // TODO: TEST
+        ScriptingSystem.Instance.ScriptStart("test1", "test2", 50001, 50010);
     }
 
 
