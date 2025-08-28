@@ -11,7 +11,7 @@ public class CustomerImporter
     private static string customerSoDir = "Assets/ScriptableObject/Customers"; // 손님 SO 저장 경로
     private static int startRow = 3; // 데이터 시작 행
     private static int columnCount = 7; //열 개수
-    private static bool isNew;
+    //private static bool isNew;
 
     [MenuItem("PangTastic/Import Customer CSV")] // 메뉴 경로
     public static void StartImportCustomers()
@@ -75,12 +75,12 @@ public class CustomerImporter
                 customer = ScriptableObject.CreateInstance<CustomerSO>(); // 새 SO
                 AssetDatabase.CreateAsset(customer, soPath); // SO 생성
                 Debug.Log("새 손님SO 생성: " + customer_name);
-                isNew = true;
+                //isNew = true;
             }
             else //이미 파일이 있으면
             {
                 Debug.Log("기존 손님SO 갱신: " + customer_name);
-                isNew = false;
+                //isNew = false;
             }
 
             customer.ID = customer_id;
@@ -114,10 +114,12 @@ public class CustomerImporter
 
             customer.FavoriteRecipes = favList.ToArray();
 
-            if (isNew == false) // 수정된 SO 라면
-            {
-                EditorUtility.SetDirty(customer); // 변경사항 저장에 포함
-            }
+            //if (isNew == false) // 수정된 SO 라면
+            //{
+            //    EditorUtility.SetDirty(customer); // 변경사항 저장에 포함
+            //}
+
+            EditorUtility.SetDirty(customer); // 변경사항 저장에 포함
         }
 
         AssetDatabase.SaveAssets(); // 저장

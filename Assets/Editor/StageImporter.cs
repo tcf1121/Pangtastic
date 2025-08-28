@@ -18,7 +18,7 @@ public class StageImporter
     private static int startRow = 3; // 데이터 시작 행
     private static int columnCount = 7; // 열 개수
 
-    private static bool isNew; 
+    //private static bool isNew; 
 
     [MenuItem("PangTastic/Import Stage CSV")]
     public static void StartImportStages()
@@ -109,12 +109,12 @@ public class StageImporter
                 stage = ScriptableObject.CreateInstance<StageSO>(); //새 SO
                 AssetDatabase.CreateAsset(stage, soPath); // 생성
                 Debug.Log("새 StageSO 생성: " + stage_id);
-                isNew = true;
+                //isNew = true;
             }
             else // SO가 있으면
             {
                 Debug.Log("기존 StageSO 갱신: " + stage_id);
-                isNew = false;
+                //isNew = false;
             }
 
             stage.StageID = stage_id;
@@ -159,10 +159,12 @@ public class StageImporter
             List<StageSO.IngredientAdjustment> adjList = BuildAdjustmentsFromLevel(level_id, levelLines); // 배수 리스트 생성
             stage.IngredientAdjustments = adjList.ToArray(); // 배열로 대입
 
-            if (isNew == false) // 기존 SO였다면
-            {
-                EditorUtility.SetDirty(stage); // 변경사항 저장 대상으로 표시
-            }
+            //if (isNew == false) // 기존 SO였다면
+            //{
+            //    EditorUtility.SetDirty(stage); // 변경사항 저장 대상으로 표시
+            //}
+
+            EditorUtility.SetDirty(stage); // 변경사항 저장 대상으로 표시
         }
 
         AssetDatabase.SaveAssets();
