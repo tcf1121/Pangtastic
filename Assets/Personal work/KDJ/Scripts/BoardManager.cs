@@ -12,7 +12,9 @@ namespace KDJ
         public BoardMatchChecker MatchChecker { get; private set; }
         public BlockMover BlockMover { get; private set; }
         public MatchCombo MatchCombo { get; set; }
+        public BoardLoader BoardLoader { get; set; }
         public int Score { get; private set; } = 0;
+        public int CurStage;
 
         private void Awake()
         {
@@ -20,6 +22,7 @@ namespace KDJ
             MatchChecker = GetComponent<BoardMatchChecker>();
             BlockMover = GetComponent<BlockMover>();
             MatchCombo = GetComponent<MatchCombo>();
+            BoardLoader = GetComponent<BoardLoader>();
         }
 
         private void Start()
