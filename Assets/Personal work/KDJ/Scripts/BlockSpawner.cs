@@ -84,8 +84,9 @@ namespace KDJ
         /// </summary>
         public void InitBlockArray()
         {
-            // 추가 생성될 블럭을 담아놓을 큐를 생성. 배열은 미리 블럭을 꺼내 로드할 행 하나만 추가
-            BlockArray = new Block[BlockPlate.BlockPlateHeight + 1, BlockPlate.BlockPlateWidth];
+            // 배열과 큐를 생성. 배열은 없는 경우에만 생성
+            if (BlockArray == null)
+                BlockArray = new Block[BlockPlate.BlockPlateHeight + 1, BlockPlate.BlockPlateWidth];
             _blockWaitingQueue = new Queue<Block>[BlockPlate.BlockPlateWidth];
             // _bakingTest = FindObjectOfType<OrderStateController>();
             // _test = FindObjectOfType<CustomerFlowController>();

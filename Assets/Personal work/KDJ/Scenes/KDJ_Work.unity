@@ -1466,6 +1466,18 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _comboCount: {fileID: 401136070}
   _comboSlider: {fileID: 791756456}
+--- !u!114 &1672193452
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1672193442}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fa712b3cd88529845b07eb3dc28e230d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1791176802
 GameObject:
   m_ObjectHideFlags: 0
@@ -2226,6 +2238,10 @@ PrefabInstance:
     m_TransformParent: {fileID: 0}
     m_Modifications:
     - target: {fileID: 3981300310010789011, guid: 285de4924e1fde841a475f6e261a41bf, type: 3}
+      propertyPath: CurStage
+      value: 4
+      objectReference: {fileID: 0}
+    - target: {fileID: 3981300310010789011, guid: 285de4924e1fde841a475f6e261a41bf, type: 3}
       propertyPath: _blockInfo
       value: 
       objectReference: {fileID: 1649906040}
@@ -2284,6 +2300,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 4308354714321919134, guid: 285de4924e1fde841a475f6e261a41bf, type: 3}
       insertIndex: -1
       addedObject: {fileID: 1672193447}
+    - targetCorrespondingSourceObject: {fileID: 4308354714321919134, guid: 285de4924e1fde841a475f6e261a41bf, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1672193452}
   m_SourcePrefab: {fileID: 100100000, guid: 285de4924e1fde841a475f6e261a41bf, type: 3}
 --- !u!1001 &925850346910445990
 PrefabInstance:
@@ -2363,7 +2382,7 @@ PrefabInstance:
       objectReference: {fileID: 11400000, guid: a453fd8a6f61a4d4f9fcb5e4d13956e6, type: 2}
     - target: {fileID: 8579344169084250576, guid: a6c91df400f25084193b8dfb89592778, type: 3}
       propertyPath: _spawnRangeMax
-      value: 4
+      value: 5
       objectReference: {fileID: 0}
     - target: {fileID: 8579344169084250576, guid: a6c91df400f25084193b8dfb89592778, type: 3}
       propertyPath: _spawnRangeMin
