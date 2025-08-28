@@ -33,6 +33,7 @@ namespace KDJ
             if (CurrentState != null)
             {
                 CurrentState.OnUpdate(this);
+                Debug.Log($"Current State: {CurrentState.GetType().Name}");
             }
         }
 

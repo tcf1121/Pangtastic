@@ -25,21 +25,45 @@ namespace KDJ.States
 
         public void OnUpdate(BoardManager boardManager)
         {
-            if (boardManager.Spawner.HasEmptyBlockObjects())
+            if (boardManager.Spawner.HasEmptyBlocks())
             {
-                // 빈 블럭이 있으면 RefillState로 전환
-                boardManager.ChangeState(new RefillState());
-                return;
+                // 빈 블록이 있을경우 먼저 이동이 가능한 상태인지 확인
+                if (boardManager.Spawner.CanBlockMoveInArray())
+                {
+                    Debug.Log("이동 가능");
+                    // 이동이 가능하다면 RefillState로 이동
+                    boardManager.ChangeState(new RefillState());
+                }
+            }
+            else
+            {
+                if (!boardManager.MatchChecker.AllBlockMatchPossibilityCheck(boardManager, out int possibleCount))
+                {
+                    Debug.Log($"매칭 가능한 블럭이 {possibleCount}개 있습니다.");
+                    // 매칭 가능한 블럭이 없을 경우 블럭 섞기
+                    boardManager.Spawner.ShuffleBlockArray();
+                    // 섞고나서 ReadyState 재진입
+                    boardManager.ChangeState(new ReadyState());
+                }
+                Debug.Log($"매칭 가능한 블럭이 {possibleCount}개 있습니다.");
+            }
+
+            if (Input.GetKeyDown(KeyCode.R))
+            {
+                Debug.Log("R키 감지 - 블럭 섞기");
+                boardManager.Spawner.ShuffleBlockArray();
+                // 섞고나서 ReadyState 재진입
+                boardManager.ChangeState(new ReadyState());
             }
 
             if (Input.GetMouseButtonDown(0))
-            {
-                Debug.Log("마우스 클릭 감지");
-                Vector3 mousePosition = Input.mousePosition;
-                mousePosition.z = -Camera.main.transform.position.z;
-                boardManager.BlockMover.StartPos = Camera.main.ScreenToWorldPoint(mousePosition);
-                TestBlockInfo(boardManager);
-            }
+                {
+                    Debug.Log("마우스 클릭 감지");
+                    Vector3 mousePosition = Input.mousePosition;
+                    mousePosition.z = -Camera.main.transform.position.z;
+                    boardManager.BlockMover.StartPos = Camera.main.ScreenToWorldPoint(mousePosition);
+                    TestBlockInfo(boardManager);
+                }
 
             if (Input.GetMouseButtonUp(0))
             {

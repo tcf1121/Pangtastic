@@ -66,15 +66,29 @@ namespace KDJ.States
             {
                 boardManager.MatchChecker.BlockMatchCheck(boardManager.BlockMover.StartBlockPos, boardManager);
                 boardManager.MatchChecker.BlockMatchCheck(boardManager.BlockMover.EndBlockPos, boardManager);
+                boardManager.Spawner.CheckBlockArray(boardManager);
 
-                if (boardManager.Spawner.HasEmptyBlockObjects())
+                if (boardManager.Spawner.HasEmptyBlocks())
                 {
-                    // 빈 블럭이 있으면 RefillState로 전환
-                    boardManager.ChangeState(new RefillState());
+                    // 빈 블록이 있을경우 먼저 이동이 가능한 상태인지 확인
+                    if (boardManager.Spawner.CanBlockMoveInArray())
+                    {
+                        Debug.Log("이동 가능");
+                        // 이동이 가능하다면 RefillState로 이동
+                        boardManager.ChangeState(new RefillState());
+                    }
+                    else
+                    {
+                        Debug.Log("이동 불가능");
+                        // 이동이 불가능하다면 블록을 원래 위치로 되돌림
+                        boardManager.BlockMover.ReturnBlock(boardManager);
+                        boardManager.ChangeState(new ReadyState());
+                    }
                 }
                 else
                 {
-                    // 빈 블럭이 없으면 블록을 원상 복귀 한 뒤 ReadyState로 이동
+                    Debug.Log("모든 블록이 매치되지 않았습니다.");
+                    // 모든 블록이 매치되지 않았을 경우
                     boardManager.BlockMover.ReturnBlock(boardManager);
                     boardManager.ChangeState(new ReadyState());
                 }
