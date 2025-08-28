@@ -25,6 +25,7 @@ public class OrderStateController : MonoBehaviour
     private bool _isRunning; //타이머 동작중 여부
     private bool _hasEnded; //이미 성공/실패로 종료됐는지
 
+
     public void StartOrder(List<RecipeSO> recipes, StageSO stage, CustomerSO customer)
     {
         _curCustomer = customer;
@@ -40,6 +41,52 @@ public class OrderStateController : MonoBehaviour
         OnOrderStarted?.Invoke(_orderRecipes, recipes); //UI로 정보 전달
 
         StartPatience(); //인내심 감소 시작
+    }
+
+    public void AddIngredientSta(IngredientSO ingredient) //블록 터지면 호출되는 함수
+    {
+        if (_orderRecipes.Count == 0)
+        {
+            Debug.Log("주문 없음");
+            return;
+        }
+        if (_hasEnded)
+        {
+            Debug.Log("스테이지 종료됨 재료수집 불가능");
+            return;
+        }
+
+        for (int i = 0; i < _orderRecipes.Count; i++) //레시피 순회
+        {
+            OrderRecipe recipe = _orderRecipes[i];
+
+            if (recipe.IsCompleted) //이미 완료된 레시피면 건너뜀
+            {
+                continue;
+            }
+
+            bool collected = recipe.CollectIngredient(ingredient, out int have, out int need); //재료 수집 시도
+
+            if (collected) // 재료가 반영되면
+            {
+                OnIngredientProgress?.Invoke(i, ingredient, have, need); // UI 갱신 이벤트
+
+                if (recipe.IsCompleted) // 이 레시피가 완료됐다면
+                {
+                    OnRecipeCompleted?.Invoke(i); // 레시피 완료 이벤트
+                }
+
+                if (IsAllComplete()) //주문 전체 완료되면
+                {
+                    _hasEnded = true; //재료수집 막음
+                    StopPatience();
+
+                    float remainPercent = (_curPatience / _maxPatience) * 100f;
+                    OnOrderCompleted?.Invoke(_curCustomer, remainPercent); //주문 완료 이벤트 (남은 인내심 포함)
+                }
+                break; //재료 반영되면 반복문 종료
+            }
+        }
     }
 
     public void AddIngredient(IngredientSO ingredient) //블록 터지면 호출되는 함수
@@ -87,7 +134,6 @@ public class OrderStateController : MonoBehaviour
             }
         }
     }
-
 
     private bool IsAllComplete()
     {
@@ -138,7 +184,7 @@ public class OrderStateController : MonoBehaviour
 
         float timeToReachZero = 0;
 
-        if(_curCustomer.Type == CustomerType.Normal)
+        if (_curCustomer.Type == CustomerType.Normal)
         {
             timeToReachZero = 60f;
         }
@@ -146,7 +192,7 @@ public class OrderStateController : MonoBehaviour
         {
             timeToReachZero = 50f;
         }
-        else if(_curCustomer.Type == CustomerType.Special)
+        else if (_curCustomer.Type == CustomerType.Special)
         {
             timeToReachZero = 30f;
         }

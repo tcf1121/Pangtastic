@@ -32,10 +32,10 @@ namespace SCR
 
         public void Damage()
         {
-            //해당 오브젝트 삭제
-            int x = (int)(transform.position.x - 0.5f);
-            int y = (int)(transform.position.y - 0.5f);
+
             // 점수 주기
+            InGameManager.AddScore(score);
+            InGameManager.AddIngredientSta(Board.GetPrefabList().GemDatas[(int)DonutType].ingredientSO);
             Destroy(gameObject);
         }
     }

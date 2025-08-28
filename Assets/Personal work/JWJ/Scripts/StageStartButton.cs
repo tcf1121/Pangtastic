@@ -18,8 +18,15 @@ public class StageStartButton : MonoBehaviour
         _stageStartButton.onClick.AddListener(OnStageStartButtonClicked);
     }
 
+    public void SetStage()
+    {
+        int index = StageManager.Instance.CurrentStageIndex;
+        _stageButtonText.text = $"Stage {index + 1}";
+    }
+
     private void OnStageStartButtonClicked()
     {
-        SceneManager.LoadScene("JWJ_TestScene");
+        if (HeartSystem.Instance.TryStartStage())
+            SceneManager.LoadScene("InGameTest Scene");
     }
 }

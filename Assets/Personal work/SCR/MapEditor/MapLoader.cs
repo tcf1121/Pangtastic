@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using UnityEngine;
+using UnityEngine.AddressableAssets;
+using UnityEngine.ResourceManagement.AsyncOperations;
 using UnityEngine.UI;
 
 namespace SCR
@@ -14,25 +16,35 @@ namespace SCR
         [SerializeField] private int _stageNum;
         private Dictionary<Vector3Int, GemType> _mapInfo = new();
         private List<Vector3Int> _spawnPoint = new();
-
-        string path = "Personal work/SCR/StageInfo.csv";
+        private int _stage;
+        string path = "Assets/CSV/Puzzle Board.csv";
 
         void Awake()
         {
-            ReadCSV(_stageNum);
+            LoadCsv(StageManager.Instance.CurrentStageIndex);
         }
 
-        public void ReadCSV(int num)
+        public void LoadCsv(int num)
+        {
+            _stage = num + 2;
+            AsyncOperationHandle<TextAsset> handle = Addressables.LoadAssetAsync<TextAsset>(path);
+            handle.Completed += ReadCSV;
+        }
+
+        public void ReadCSV(AsyncOperationHandle<TextAsset> handle)
         {
             try
             {
-                var splitData = File.ReadLines(Application.dataPath + "/" + path).Skip(num).Take(1).FirstOrDefault();
-                string[] values = splitData.ToString().Split(',');
+                string csvData = handle.Result.text;
+                string[] lines = csvData.Split('\n');
+                if (lines.Count() < _stage) return;
 
+                string[] values = lines[_stage].Split(',');
                 GetPuzzle(values[1]);
                 GetSpawnPoint(values[2]);
                 Board.SetPuzzleInfo(_mapInfo, _spawnPoint);
 
+                Addressables.Release(handle);
             }
             catch (Exception e)
             {
@@ -50,6 +62,17 @@ namespace SCR
                 string[] info = cellInfo.Split(':');
                 _mapInfo.Add(GetVec3Int(info[0], info[1], info[2]), (GemType)Enum.Parse(typeof(GemType), info[3]));
             }
+            var sortedYKeys = _mapInfo.Keys.OrderBy(key => key.y);
+            int minY = sortedYKeys.FirstOrDefault().y;
+            int maxY = sortedYKeys.LastOrDefault().y;
+
+            var sortedXKeys = _mapInfo.Keys.OrderBy(key => key.x);
+            int minX = sortedYKeys.FirstOrDefault().y;
+            int maxX = sortedYKeys.LastOrDefault().y;
+
+            int xLength = maxX - minX + 1;
+            int yLength = maxY - minY + 1;
+            InGameManager.SetPuzzleSize(minX, minY, xLength, yLength);
         }
 
         private void GetSpawnPoint(string value)

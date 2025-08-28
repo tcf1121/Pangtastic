@@ -11,7 +11,6 @@ public class CustomerFlowController : MonoBehaviour
 {
     [SerializeField] private CustomerOrderController _customerOrder;
     //[SerializeField] private BoardManager _boardManager;
-    [SerializeField] private ScoreManager _scoreManager;
     [SerializeField] private Image _customerImage; // 손님 이미지
 
     private CustomerSO _curCustomer;
@@ -32,17 +31,13 @@ public class CustomerFlowController : MonoBehaviour
         //{
         //    _boardManager = FindObjectOfType<BoardManager>();
         //}
-        if(_scoreManager == null)
-        {
-            _scoreManager = FindObjectOfType<ScoreManager>();
-        }
         _customerOrder.OnCustomerSuccess += OnCustomerSuccess;
         _customerOrder.OnCustomerFail += OnCustomerFail;
         _customerOrder.OnSpecialCustomerSuccess += OnSpecialCustomerSuccess;
         //_customerOrder.OnSpecialCustomerFail += OnSpecialCustomerFail;
         _customerOrder.OnSpecialCustomerRewardGiven += OnSpecialCustomerRewardGiven;
 
-        spawnButton.onClick.AddListener(SpawnCustomer); //테스트용 버튼
+        //spawnButton.onClick.AddListener(SpawnCustomer); //테스트용 버튼
     }
 
     private void OnDestroy()
@@ -139,32 +134,32 @@ public class CustomerFlowController : MonoBehaviour
         {
             Debug.Log("블록 3개 제공");
         }
-        else if(percent >= 17)
+        else if (percent >= 17)
         {
             Debug.Log("블록 2개 제공");
-        }    
-        else if(percent >= 0)
+        }
+        else if (percent >= 0)
         {
             Debug.Log("블록 1개 제공");
         }
 
-        _scoreManager.AddScore(percent * 10); //점수 전송
+        InGameManager.AddScore(percent * 10); //점수 전송
 
         OnStageCleared?.Invoke(); //스테이지 클리어 이벤트
-        StartCoroutine(TmpChangeSceneRoutine()); //임시 씬 넘기기 코루틴
+        //StartCoroutine(TmpChangeSceneRoutine()); //임시 씬 넘기기 코루틴
     }
-    
+
     private void StageFail()
     {
         Debug.Log("스테이지 실패");
         OnStageFailed?.Invoke();
 
-        StartCoroutine(TmpChangeSceneRoutine()); //임시 씬 넘기기 코루틴
+        //StartCoroutine(TmpChangeSceneRoutine()); //임시 씬 넘기기 코루틴
     }
 
     private IEnumerator TmpChangeSceneRoutine() //임시 씬 넘기기 코루틴
     {
         yield return new WaitForSeconds(3);
-        SceneManager.LoadScene("StageSelectScene");
+        SceneManager.LoadScene("OutGame Test Scene");
     }
 }
