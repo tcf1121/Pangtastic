@@ -14,7 +14,7 @@ public class CustomerOrderController : MonoBehaviour
 
     private float _specialPatientSum;
 
-    public event Action<float> OnCustomerSuccess;
+    public event Action<CustomerSO, float> OnCustomerSuccess;
     public event Action<float> OnSpecialCustomerRewardGiven;
     public event Action<CustomerSO ,float> OnSpecialCustomerSuccess;
     //public event Action<CustomerSO> OnSpecialCustomerFail; //혹시라도 스페셜손님 실패 이벤트 추가될까봐 넣음 OnCustomerFail로 바꿔도 작동함
@@ -107,7 +107,7 @@ public class CustomerOrderController : MonoBehaviour
         }
         else //노멀, 유니크 손님 성공
         {
-            OnCustomerSuccess?.Invoke(remainPercent);
+            OnCustomerSuccess?.Invoke(_curCustomer, remainPercent);
             Debug.Log($"주문 클리어");
         }
     }

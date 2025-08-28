@@ -75,12 +75,12 @@ public class RecipeImporter // 레시피 CSV를 RecipeSO로 변환하는 클래�
             {
                 recipe = ScriptableObject.CreateInstance<RecipeSO>(); // 새 SO
                 AssetDatabase.CreateAsset(recipe, soPath); // SO 생성
-                Debug.Log("새 재료SO 생성: " + recipe_name);
+                Debug.Log("새 레시피SO 생성: " + recipe_name);
                 isNew = true;
             }
             else //이미 파일이 있으면
             {
-                Debug.Log("기존 재료SO 갱신: " + recipe_name);
+                Debug.Log("기존 레시피SO 갱신: " + recipe_name);
                 isNew = false;
             }
 
@@ -90,7 +90,7 @@ public class RecipeImporter // 레시피 CSV를 RecipeSO로 변환하는 클래�
 
             if (recipe.FoodPic == null)
             {
-                Debug.LogError($"재료 이미지 없음 {recipe.Name}, 경로 : {spritePath}");
+                Debug.LogError($"레시피 이미지 없음 {recipe.Name}, 경로 : {spritePath}");
             }
 
             // 재료 목록 리스트
