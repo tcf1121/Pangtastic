@@ -10,8 +10,8 @@ public class CustomerImporter
     private static string recipeSoDir = "Assets/ScriptableObject/Recipes"; // 레시피 SO경로
     private static string customerSoDir = "Assets/ScriptableObject/Customers"; // 손님 SO 저장 경로
     private static int startRow = 3; // 데이터 시작 행
-    private static int columnCount = 7; //열 개수
-    private static bool isNew;
+    private static int columnCount = 14; //열 개수
+    //private static bool isNew;
 
     [MenuItem("PangTastic/Import Customer CSV")] // 메뉴 경로
     public static void StartImportCustomers()
@@ -60,11 +60,20 @@ public class CustomerImporter
             int customer_id = int.Parse(splitData[0]);
             string customer_name = splitData[1];
             string customer_type = splitData[2];
+            string spritePath = splitData[3];
 
-            int like_menu1 = (splitData[3].ToLower() == "null") ? 0 : int.Parse(splitData[3]); //값이 null(소문자 변경)이면 0, 아니면 파싱
-            int like_menu2 = (splitData[4].ToLower() == "null") ? 0 : int.Parse(splitData[4]);
-            int like_menu3 = (splitData[5].ToLower() == "null") ? 0 : int.Parse(splitData[5]);
-            string spritePath = splitData[6];
+            int like_menu1 = (splitData[4].ToLower() == "null") ? 0 : int.Parse(splitData[4]); //값이 null(소문자 변경)이면 0, 아니면 파싱
+            int like_menu2 = (splitData[5].ToLower() == "null") ? 0 : int.Parse(splitData[5]);
+            int like_menu3 = (splitData[6].ToLower() == "null") ? 0 : int.Parse(splitData[6]);
+            int like_menu4 = (splitData[7].ToLower() == "null") ? 0 : int.Parse(splitData[7]);
+            int like_menu5 = (splitData[8].ToLower() == "null") ? 0 : int.Parse(splitData[8]);
+            int like_menu6 = (splitData[9].ToLower() == "null") ? 0 : int.Parse(splitData[9]);
+            int like_menu7 = (splitData[10].ToLower() == "null") ? 0 : int.Parse(splitData[10]);
+            int like_menu8 = (splitData[11].ToLower() == "null") ? 0 : int.Parse(splitData[11]);
+            int like_menu9 = (splitData[12].ToLower() == "null") ? 0 : int.Parse(splitData[12]);
+            int like_menu10 = (splitData[13].ToLower() == "null") ? 0 : int.Parse(splitData[13]);
+
+
 
             string soPath = customerSoDir + "/Customer_" + customer_id + ".asset"; // SO파일 저장경로/파일이름
 
@@ -75,12 +84,12 @@ public class CustomerImporter
                 customer = ScriptableObject.CreateInstance<CustomerSO>(); // 새 SO
                 AssetDatabase.CreateAsset(customer, soPath); // SO 생성
                 Debug.Log("새 손님SO 생성: " + customer_name);
-                isNew = true;
+                //isNew = true;
             }
             else //이미 파일이 있으면
             {
                 Debug.Log("기존 손님SO 갱신: " + customer_name);
-                isNew = false;
+                //isNew = false;
             }
 
             customer.ID = customer_id;
@@ -111,13 +120,22 @@ public class CustomerImporter
             AddFavRecipe(like_menu1, favList, i); //레시피1 추가 i는 디버깅용
             AddFavRecipe(like_menu2, favList, i); //레시피2 추가
             AddFavRecipe(like_menu3, favList, i); //레시피3 추가
+            AddFavRecipe(like_menu4, favList, i);
+            AddFavRecipe(like_menu5, favList, i);
+            AddFavRecipe(like_menu6, favList, i);
+            AddFavRecipe(like_menu7, favList, i);
+            AddFavRecipe(like_menu8, favList, i);
+            AddFavRecipe(like_menu9, favList, i);
+            AddFavRecipe(like_menu10, favList, i);
 
             customer.FavoriteRecipes = favList.ToArray();
 
-            if (isNew == false) // 수정된 SO 라면
-            {
-                EditorUtility.SetDirty(customer); // 변경사항 저장에 포함
-            }
+            //if (isNew == false) // 수정된 SO 라면
+            //{
+            //    EditorUtility.SetDirty(customer); // 변경사항 저장에 포함
+            //}
+
+            EditorUtility.SetDirty(customer); // 변경사항 저장에 포함
         }
 
         AssetDatabase.SaveAssets(); // 저장
