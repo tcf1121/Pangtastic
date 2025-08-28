@@ -11,7 +11,7 @@ public class RecipeImporter // 레시피 CSV를 RecipeSO로 변환하는 클래�
     private static string recipeSoDir = "Assets/ScriptableObject/Recipes"; // 레시피 SO 저장 경로
     private static int startRow = 3; // 데이터 시작 행
     private static int columnCount = 9; //열 개수
-    private static bool isNew;
+    //private static bool isNew;
 
     [MenuItem("PangTastic/Import Recipes CSV")] // 메뉴 경로
     public static void StartImportRecipes()
@@ -76,12 +76,12 @@ public class RecipeImporter // 레시피 CSV를 RecipeSO로 변환하는 클래�
                 recipe = ScriptableObject.CreateInstance<RecipeSO>(); // 새 SO
                 AssetDatabase.CreateAsset(recipe, soPath); // SO 생성
                 Debug.Log("새 레시피SO 생성: " + recipe_name);
-                isNew = true;
+                //isNew = true;
             }
             else //이미 파일이 있으면
             {
                 Debug.Log("기존 레시피SO 갱신: " + recipe_name);
-                isNew = false;
+                //isNew = false;
             }
 
             recipe.ID = recipe_id;
@@ -102,10 +102,7 @@ public class RecipeImporter // 레시피 CSV를 RecipeSO로 변환하는 클래�
 
             recipe.Ingredients = reqList.ToArray();
 
-            if (isNew == false) // 수정된 SO 라면
-            {
-                EditorUtility.SetDirty(recipe); // 변경사항 저장에 포함
-            }
+            EditorUtility.SetDirty(recipe); // 변경사항 저장에 포함
         }
 
         AssetDatabase.SaveAssets(); // 저장
