@@ -20,6 +20,6 @@ public class StageStartButton : MonoBehaviour
 
     private void OnStageStartButtonClicked()
     {
-        SceneManager.LoadScene("JWJ_TestScene");
+        SceneManager.LoadScene("InGameTest Scene");
     }
 }

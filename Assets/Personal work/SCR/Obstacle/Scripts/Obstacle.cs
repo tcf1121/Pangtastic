@@ -39,6 +39,9 @@ namespace SCR
             int y = (int)transform.position.y;
             if (ObstaclType == GemType.CatStatues)
                 Board.RemoveCatStatues(new Vector3Int(x, y, 0));
+            if (ObstaclType == GemType.Syrup || ObstaclType == GemType.Egg)
+                InGameManager.AddIngredientSta(Board.GetPrefabList().GemDatas[(int)ObstaclType].ingredientSO);
+            InGameManager.AddScore(_score);
             Destroy(gameObject);
         }
 

@@ -154,6 +154,8 @@ namespace SCR
             {
                 AddSpawner(data);
             }
+
+            InGameManager.SpawnCustomer();
         }
 
         public void InitObject()
@@ -286,6 +288,10 @@ namespace SCR
             }
         }
 
+        public static PrefabList GetPrefabList()
+        {
+            return instance.prefabList;
+        }
 
         // 도넛 생성
         public static Donut GetDonut(Vector3Int pos, GemType donut)

@@ -9,33 +9,33 @@ using UnityEngine.SceneManagement;
 public class CurrencySystem : MonoBehaviour
 {
     public static CurrencySystem Instance { get; private set; } // 싱글톤 인스턴스
-    
-    [System.Serializable] 
+
+    [System.Serializable]
     public class CoinData
     {
         public int coins; // 보유 코인 수
     }
-    [System.Serializable] 
+    [System.Serializable]
     public class StarData
     {
         public int stars; // 보유 코인 수
     }
-    
+
     public enum SpawnType { None, Continue, Exit }
     public SpawnType pendingSpawnType = SpawnType.None;
-    
+
     [SerializeField] private GameObject _coinPrefab; // 코인 프리팹 
     [SerializeField] private GameObject _starPrefab; // 별 프리팹
-    
+
     [SerializeField] private TMP_Text _coinText; // Coin 갯수
     [SerializeField] private TMP_Text _starText; // 별 갯수
-    
+
     private int _currentCoins = 0; // 현재 보유 코인 수
     private string _saveCoinPath; // JSON 저장 경로
 
     private int _currentStars = 0; // 현재 보유 코인 수
     private string _saveStarPath; // JSON 저장 경로
-    
+
     private void Awake()
     {
         // 싱글톤 보장
@@ -79,13 +79,13 @@ public class CurrencySystem : MonoBehaviour
 
         StartCoroutine(SetupAndPlayEffect());
     }
-    
+
     public void SetCoinText(TMP_Text text)
     {
         _coinText = text;
         UpdateCoinUI(); // 바로 최신 값 반영
     }
-    
+
     public void SetStarText(TMP_Text text)
     {
         _starText = text;
@@ -101,7 +101,7 @@ public class CurrencySystem : MonoBehaviour
         CoinSave();                  // JSON 저장
         UpdateCoinUI();          // UI 갱신
     }
-    
+
     /// <summary>
     /// 별 추가
     /// </summary>
@@ -111,7 +111,7 @@ public class CurrencySystem : MonoBehaviour
         StarSave();                  // JSON 저장
         UpdateStarUI();          // UI 갱신
     }
-    
+
     /// <summary>
     /// 코인 사용 (부족하면 false 반환)
     /// </summary>
@@ -126,7 +126,7 @@ public class CurrencySystem : MonoBehaviour
         }
         return false; // 코인이 부족하면 실패
     }
-    
+
     /// <summary>
     /// 별 사용 (부족하면 false 반환)
     /// </summary>
@@ -157,7 +157,7 @@ public class CurrencySystem : MonoBehaviour
     {
         return _currentStars;
     }
-    
+
     /// <summary>
     /// UI(TextMeshPro) 업데이트
     /// </summary>
@@ -166,7 +166,7 @@ public class CurrencySystem : MonoBehaviour
         if (_coinText != null)
             _coinText.text = _currentCoins.ToString();
     }
-    
+
     /// <summary>
     /// UI(TextMeshPro) 업데이트
     /// </summary>
@@ -185,7 +185,7 @@ public class CurrencySystem : MonoBehaviour
         string json = JsonUtility.ToJson(data, true);          // 객체 → JSON 변환
         File.WriteAllText(_saveCoinPath, json);                     // 파일에 저장
     }
-    
+
     /// <summary>
     /// JSON 파일로 저장
     /// </summary>
@@ -212,7 +212,7 @@ public class CurrencySystem : MonoBehaviour
             _currentCoins = 0; // 파일이 없으면 기본값 0
         }
     }
-    
+
     /// <summary>
     /// JSON 파일에서 불러오기
     /// </summary>
@@ -229,20 +229,20 @@ public class CurrencySystem : MonoBehaviour
             _currentStars = 0; // 파일이 없으면 기본값 0
         }
     }
-    
+
     private IEnumerator SetupAndPlayEffect()
     {
         yield return null; // UI 로딩 대기
         yield return null; // UI 로딩 대기
         yield return null; // UI 로딩 대기
-        
+
         var coinText = GameObject.FindWithTag("CoinText");
         if (coinText)
         {
             var tmp = coinText.GetComponent<TMPro.TMP_Text>();
             if (tmp) SetCoinText(tmp);
         }
-        
+
         var startText = GameObject.FindWithTag("StarText");
         if (startText)
         {
@@ -254,7 +254,7 @@ public class CurrencySystem : MonoBehaviour
         {
             yield break;
         }
-        
+
         // 코인 :: S
         RectTransform spawn = null;
 
@@ -271,7 +271,7 @@ public class CurrencySystem : MonoBehaviour
 
         EffectSystem.Instance.CurrencyInPlayStartEffect(_coinPrefab, spawn, GameObject.FindWithTag("CoinTargetUI").GetComponent<RectTransform>());
         // 코인 :: E
-        
+
         // 별 :: S
         RectTransform startspawn = null;
 

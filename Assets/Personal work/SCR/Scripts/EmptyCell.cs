@@ -21,7 +21,7 @@ namespace SCR
                 return false;
 #endif
 
-            if (GameObject.Find("Grid").GetComponent<PuzzelEditBoard>())
+            if (GameObject.Find("Puzzle").GetComponent<PuzzelEditBoard>())
                 PuzzelEditBoard.AddCell(position);
             else
                 Board.AddCell(position);

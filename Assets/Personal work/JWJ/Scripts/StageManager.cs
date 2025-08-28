@@ -16,7 +16,7 @@ public class StageManager : MonoBehaviour
         {
             Instance = this;
             DontDestroyOnLoad(gameObject);
-        }    
+        }
         else
         {
             Destroy(gameObject);
@@ -30,6 +30,7 @@ public class StageManager : MonoBehaviour
             CurrentStageIndex++;
         }
     }
+
     public void ResetStage()
     {
         CurrentStageIndex = 0;
