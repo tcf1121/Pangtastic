@@ -72,7 +72,7 @@ public class IngredientImporter : EditorWindow
             }
             else //이미 파일이 있으면
             {
-                EditorUtility.SetDirty(so); //덮어쓴 파일 저장하라고 알림
+                
                 Debug.Log("기존 재료SO 갱신: " + name);
             }
 
@@ -86,6 +86,7 @@ public class IngredientImporter : EditorWindow
                 Debug.LogError($"재료 이미지 없음 {so.Name}, 경로 : {spritePath}");
                 return;
             }
+            EditorUtility.SetDirty(so); //저장하라고 알림
         }
 
         AssetDatabase.SaveAssets(); // 저장

@@ -156,7 +156,7 @@ public class OrderUIPresenter : MonoBehaviour
 
     private IEnumerator FirstDialogueRoutine(CustomerSO customer)
     {
-        _dialogue.text = customer.FirstDialogue; 
+        _dialogue.text = "Hallo";// customer.FirstDialogue; //차후 수정
         _chatBox.SetActive(true);
         yield return new WaitForSeconds(_dialogueDuration);
         _chatBox.SetActive(false);
@@ -172,17 +172,18 @@ public class OrderUIPresenter : MonoBehaviour
 
     private IEnumerator PairRoutine(CustomerSO curCustomer, float percent) //이모지 + 대사 코루틴
     {
+        //대사 차후 연결
         if (percent <= 0f)
         {
-            _dialogue.text = curCustomer.LeftDialogue;
+            _dialogue.text = "nicht so gut";//curCustomer.LeftDialogue;
         }
         else if (percent <= 50f)
         {
-            _dialogue.text = curCustomer.MidDialogue;
+            _dialogue.text = "Kann man essen";// curCustomer.MidDialogue;
         }
         else
         {
-            _dialogue.text = curCustomer.HighDialogue;
+            _dialogue.text = "Sehr gut";//curCustomer.HighDialogue;
         }
 
         _emojiImage.sprite = GetEmojiSprite(percent);

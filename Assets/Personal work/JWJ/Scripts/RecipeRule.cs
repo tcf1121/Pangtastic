@@ -13,40 +13,56 @@ public static class RecipeRule
         int orderCount = stage.OrderCount;
 
         //주문 목록 설정
-        if(customer.Type == CustomerType.Normal)
+        if (customer.Type == CustomerType.Normal)
         {
-            List<RecipeSO> copy = new List<RecipeSO>(stagePool);
-
-            while (result.Count < orderCount && copy.Count > 0) //스테이지 메뉴에서 랜덤선택. 중복없음
+            List<RecipeSO> orderOptions = new List<RecipeSO>();
+            foreach (var fav in customer.FavoriteRecipes) //교집합 리스트에 넣음
             {
-                int rand = Random.Range(0, copy.Count);
-                result.Add(copy[rand]);
-                copy.RemoveAt(rand);
+                if (stagePool.Contains(fav))
+                {
+                    orderOptions.Add(fav);
+                }
+            }
+
+            if (orderOptions.Count == 0)
+            {
+                Debug.LogError("노멀 손님 교집합이 없음");
+                return result;
+            }
+
+            while (result.Count < orderCount && orderOptions.Count > 0) // 교집합 랜덤
+            {
+                int rand = Random.Range(0, orderOptions.Count);
+                result.Add(orderOptions[rand]);
+                orderOptions.RemoveAt(rand);
             }
         }
 
         else if (customer.Type == CustomerType.Unique)
         {
-            foreach (var must in customer.FavoriteRecipes)
+            List<RecipeSO> orderOptions = new List<RecipeSO>();
+            foreach (var fav in customer.FavoriteRecipes) //교집합 리스트에 넣음
             {
-                if (stagePool.Contains(must) && orderCount > result.Count)
+                if (stagePool.Contains(fav))
                 {
-                    result.Add(must); // 필수메뉴 리스트에 넣음
+                    orderOptions.Add(fav);
                 }
             }
 
-            List<RecipeSO> copy = new List<RecipeSO>(stagePool);
-
-            foreach (var must in customer.FavoriteRecipes)
+            if (orderOptions.Count == 0)
             {
-                copy.Remove(must); //중복 방지를 위해 필수메뉴 스테이지 메뉴에서 지워줌
+                Debug.LogError("유니크 손님 교집합이 없음");
+                return result;
             }
 
-            while (result.Count < orderCount && copy.Count > 0) //필수메뉴 넣고 남은 주문은 스테이지 레시피에서 랜덤으로 채움
+            result.Add(orderOptions[0]); //첫번째 교집합 추가 후 
+            orderOptions.RemoveAt(0); // 옵션에서 지움
+
+            while (result.Count < orderCount && orderOptions.Count > 0) //나머지 교집합은 랜덤으로 뽑음
             {
-                int rand = Random.Range(0, copy.Count);
-                result.Add(copy[rand]);
-                copy.RemoveAt(rand);
+                int rand = Random.Range(0, orderOptions.Count);
+                result.Add(orderOptions[rand]);
+                orderOptions.RemoveAt(rand);
             }
         }
         else if (customer.Type == CustomerType.Special) // 스페셜
@@ -97,9 +113,9 @@ public static class RecipeRule
     {
         Dictionary<IngredientSO, int> result = new Dictionary<IngredientSO, int>();
 
-        foreach (var ing in recipe.Ingredients) 
+        foreach (var ing in recipe.Ingredients)
         {
-            int baseAmount = ing.Amount; 
+            int baseAmount = ing.Amount;
             float multiplier = 1f;
 
             foreach (var adj in stage.IngredientAdjustments) //스테이지의 재료 증감 배열 순회 
@@ -112,7 +128,7 @@ public static class RecipeRule
             }
 
             int finalAmount = Mathf.FloorToInt(baseAmount * multiplier); //곱한 후 수량 int로 바꿔줌
-            
+
             result[ing.Ingredient] = finalAmount; //배수 적용해서 주문에 적용
         }
         return result;
