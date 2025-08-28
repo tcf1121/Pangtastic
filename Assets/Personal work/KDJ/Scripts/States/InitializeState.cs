@@ -22,8 +22,11 @@ namespace KDJ.States
             BoardData boardData = boardManager.BoardLoader.ReadCSV(boardManager.CurStage);
             boardManager.Spawner.BlockPlate.BlockPlateArray = boardData.BlockPlateArray;
             boardManager.Spawner.BlockArray = boardData.BlockArray;
-
+            boardManager.Spawner.BlockPlate.DrawTile();
             boardManager.Spawner.InitBlockArray();
+            Debug.Log($"블록보드 배열 가로 길이: {boardManager.Spawner.BlockPlate.BlockPlateWidth}, 세로 길이: {boardManager.Spawner.BlockPlate.BlockPlateHeight}");
+            Debug.Log($"블록 배열 가로 길이: {boardManager.Spawner.BlockArray.GetLength(1)}, 세로 길이: {boardManager.Spawner.BlockArray.GetLength(0)}");
+            Debug.Log($"블록 배열 최상단의 값 : {boardManager.Spawner.BlockArray[boardManager.Spawner.BlockArray.GetLength(0) - 1, 0].BlockType}");
             boardManager.Spawner.DrawBlock();
             boardManager.ChangeState(new ReadyState());
         }

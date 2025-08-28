@@ -21,14 +21,17 @@ namespace KDJ
 
         private void Awake()
         {
-            SetBackPlate(BlockPlateSize);
+            //SetBackPlate(BlockPlateSize);
 
             // _backPlate.transform.localScale = new Vector3(BlockPlateWidth + 0.1f, BlockPlateHeight + 0.1f, 1);
 
-            DrawTile();
+            //DrawTile();
         }
-        private void DrawTile()
+        public void DrawTile()
         {
+            BlockPlateWidth = BlockPlateArray.GetLength(1);
+            BlockPlateHeight = BlockPlateArray.GetLength(0);
+
             for (int x = 0; x < BlockPlateArray.GetLength(1); x++)
             {
                 for (int y = 0; y < BlockPlateArray.GetLength(0); y++)

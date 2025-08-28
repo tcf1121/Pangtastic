@@ -87,8 +87,8 @@ namespace KDJ
                     if (finalGemType == GemType.Random)
                     {
                         tempNum = UnityEngine.Random.Range(1, 7);
-                        finalGemType = (GemType)tempNum;
-                        blockType = tempNum + 1;
+                        finalGemType = (GemType)tempNum - 1;
+                        blockType = tempNum;
                     }
                     else
                     {

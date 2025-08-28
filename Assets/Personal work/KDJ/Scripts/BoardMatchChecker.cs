@@ -37,7 +37,7 @@ namespace KDJ
                         possibleMoves.Add(key);
                         continue;
                     }
-                    
+
 
                     // 오른쪽 블록과 교환 테스트
                     if (x + 1 < width && blockPlate.BlockPlateArray[y, x + 1])
@@ -102,7 +102,7 @@ namespace KDJ
             var blockPlateArray = boardManager.Spawner.BlockPlate.BlockPlateArray;
 
             bool isMatched = false;
-            
+
             // x축 체크
             for (int y = 0; y < height; y++)
             {
@@ -307,6 +307,14 @@ namespace KDJ
                 {
                     curGemType = blockArray[y, curIndex].GemType;
 
+                    // 검사하는 블록이 일반 블록이 아닐경우 continue.
+                    if (curGemType > GemType.Sugar)
+                    {
+                        count = 1;
+                        matchStartIndex = curIndex + 1;
+                        continue;
+                    }
+
                     if (curGemType == prevGemType)
                     {
                         count++;
@@ -394,6 +402,14 @@ namespace KDJ
                 if (blockPlateArray[y, x] && height > curIndex && curIndex >= 0 && blockArray[curIndex, x] != null)
                 {
                     curGemType = blockArray[curIndex, x].GemType;
+
+                    // 검사하는 블록이 일반 블록이 아닐경우 continue.
+                    if (curGemType > GemType.Sugar)
+                    {
+                        count = 1;
+                        matchStartIndex = curIndex + 1;
+                        continue;
+                    }
 
                     if (curGemType == prevGemType)
                     {
