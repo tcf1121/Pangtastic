@@ -127,29 +127,46 @@ namespace SCR
 
         public static void SetPuzzleInfo(Dictionary<Vector3Int, GemType> PuzzleInfo, List<Vector3Int> SpawnPoint)
         {
-            do
-            {
-                instance.CellList.Clear();
-                instance.CellGemType.Clear();
-                instance.CellContent.Clear();
-                foreach (var data in PuzzleInfo)
-                {
-                    AddCell(data.Key);
-                    AddObject(data.Key, data.Value);
-                    if (data.Value <= GemType.Sugar ||
-                        data.Value == GemType.Egg ||
-                        data.Value == GemType.Coin ||
-                        data.Value == GemType.Random)
-                        if (!instance._spawnType.Contains(data.Value))
-                        {
-                            instance._spawnType.Add(data.Value);
-                        }
-                }
+            // do
+            // {
+            //     instance.CellList.Clear();
+            //     instance.CellGemType.Clear();
+            //     instance.CellContent.Clear();
+            //     foreach (var data in PuzzleInfo)
+            //     {
+            //         AddCell(data.Key);
+            //         AddObject(data.Key, data.Value);
+            //         if (data.Value <= GemType.Sugar ||
+            //             data.Value == GemType.Egg ||
+            //             data.Value == GemType.Coin ||
+            //             data.Value == GemType.Random)
+            //             if (!instance._spawnType.Contains(data.Value))
+            //             {
+            //                 instance._spawnType.Add(data.Value);
+            //             }
+            //     }
 
-            } while (instance.IsStartMatch());
+            // } while (instance.IsStartMatch());
+
+            instance.CellList.Clear();
+            instance.CellGemType.Clear();
+            instance.CellContent.Clear();
+            foreach (var data in PuzzleInfo)
+            {
+                AddCell(data.Key);
+                AddObject(data.Key, data.Value);
+                if (data.Value <= GemType.Sugar ||
+                    data.Value == GemType.Egg ||
+                    data.Value == GemType.Coin ||
+                    data.Value == GemType.Random)
+                    if (!instance._spawnType.Contains(data.Value))
+                    {
+                        instance._spawnType.Add(data.Value);
+                    }
+            }
             instance.ArrangeSpawn();
             instance.InitObject();
-
+            instance._turnCor = instance.StartCoroutine(instance.StartPuzzle());
             foreach (var data in SpawnPoint)
             {
                 AddSpawner(data);
@@ -366,6 +383,29 @@ namespace SCR
             _turnCor = StartCoroutine(HandleTurn(pos1, pos2));
         }
 
+        private IEnumerator StartPuzzle()
+        {
+            while (true)
+            {
+
+                yield return StartCoroutine(DamageCheck());
+
+                yield return new WaitForSeconds(0.5f);
+
+                yield return StartCoroutine(AllCheckEmpty());
+
+                yield return StartCoroutine(AllCheck());
+
+                // 새로운 매치가 없으면 루프 종료
+                if (_matchedPositions.Count == 0 && _emptyPositions.Count == 0)
+                {
+                    _isSpecialEffectActive = false;
+                    break;
+                }
+            }
+            _turnCor = null;
+        }
+
         private IEnumerator HandleTurn(Vector3Int pos1, Vector3Int pos2, bool UseSpeical = false)
         {
             yield return StartCoroutine(SwapCor(pos1, pos2));
@@ -402,7 +442,6 @@ namespace SCR
                 // 새로운 매치가 없으면 루프 종료
                 if (_matchedPositions.Count == 0 && _emptyPositions.Count == 0)
                 {
-                    Debug.Log("매치된거 하나도 없다 마!");
                     _isSpecialEffectActive = false;
                     break;
                 }

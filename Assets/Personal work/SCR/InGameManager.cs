@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class InGameManager : MonoBehaviour
 {
@@ -13,7 +14,6 @@ public class InGameManager : MonoBehaviour
     [SerializeField] TMP_Text WinScore;
     [SerializeField] TMP_Text WinCoin;
     [SerializeField] TMP_Text LoseScore;
-    [SerializeField] TMP_Text LoseCoin;
 
     private static InGameManager instate;
 
@@ -71,7 +71,9 @@ public class InGameManager : MonoBehaviour
     {
         if (instate == null) GameObject.Find("InGameManager").GetComponent<InGameManager>();
         instate._score += score;
+
         Debug.Log($"현재 점수: {instate._score}");
+
     }
 
     public static void ResetScore()
@@ -125,8 +127,9 @@ public class InGameManager : MonoBehaviour
     {
         if (instate == null) GameObject.Find("InGameManager").GetComponent<InGameManager>();
         instate.doNotTouch.SetActive(true);
-        instate.LoseCoin.text = $"{GetCoin()}";
-        //instate.LoseScore.text = $"{GetScore()}";
+        //instate.LoseCoin.text = $"{GetCoin()}";
+        instate.LoseScore.text = $"{GetScore()}";
+        HeartSystem.Instance.UseHearts();
         instate.failUI.SetActive(true);
     }
 }

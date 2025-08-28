@@ -1,12 +1,17 @@
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class StageManager : MonoBehaviour
 {
     public static StageManager Instance;
 
     [SerializeField] private List<StageSO> stages;
+    [SerializeField] private StageStartButton startbtn;
+    [SerializeField] private Button btn;
+    [SerializeField] private TMP_InputField tMP_InputField;
     public int CurrentStageIndex { get; private set; } = 0;
     public StageSO CurrentStage => stages[CurrentStageIndex];
 
@@ -21,6 +26,7 @@ public class StageManager : MonoBehaviour
         {
             Destroy(gameObject);
         }
+        btn.onClick.AddListener(SetStage);
     }
 
     public void AdvanceStage()
@@ -29,6 +35,12 @@ public class StageManager : MonoBehaviour
         {
             CurrentStageIndex++;
         }
+    }
+
+    public void SetStage()
+    {
+        CurrentStageIndex = int.Parse(tMP_InputField.text.ToString()) - 1;
+        startbtn.SetStage();
     }
 
     public void ResetStage()
