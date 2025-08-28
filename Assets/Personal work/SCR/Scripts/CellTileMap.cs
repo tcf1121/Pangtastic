@@ -41,7 +41,15 @@ public class CellTileMap : MonoBehaviour
     {
         Vector3 mouseWorldPos = Camera.main.ScreenToWorldPoint(touchPos);
         _clickPos = tilemap.WorldToCell(mouseWorldPos);
-        Board.SetClickPos(_clickPos);
+        if (ItemCheck.IsSelect())
+        {
+            Debug.Log(ItemCheck.GetItemType());
+            ItemCheck.Deselect();
+        }
+        else
+        {
+            Board.SetClickPos(_clickPos);
+        }
     }
 
     private void OnTouchUp(Vector3 touchPos)
@@ -79,7 +87,16 @@ public class CellTileMap : MonoBehaviour
         mousePos.z = -CameraZ;
         Vector3 mouseWorldPos = Camera.main.ScreenToWorldPoint(mousePos);
         _clickPos = tilemap.WorldToCell(mouseWorldPos);
-        Board.SetClickPos(_clickPos);
+        if (ItemCheck.IsSelect())
+        {
+            Debug.Log(ItemCheck.GetItemType());
+            ItemCheck.Deselect();
+        }
+        else
+        {
+            Board.SetClickPos(_clickPos);
+        }
+
     }
 
     void OnMouseUp()

@@ -44,6 +44,7 @@ namespace SCR
     {
         private static Board instance;
         public Tilemap BlankTilemap;
+        [SerializeField] GameObject gem;
         [SerializeField] TileBase blankTile;
         [SerializeField] private int loadCell = 0;
         private int _cellCount;
@@ -69,12 +70,10 @@ namespace SCR
         private Coroutine allEmptyCor;
         private Coroutine _turnCor;
 
-        private Grid _grid;
 
         public void Awake()
         {
             instance = this;
-            GetReference();
             instance._cellCount = GetTotalTilesOnMap();
         }
 
@@ -83,7 +82,6 @@ namespace SCR
             if (instance == null)
             {
                 instance = GameObject.Find("Grid").GetComponent<Board>();
-                instance.GetReference();
             }
             //     AllCheck();
 
@@ -205,7 +203,6 @@ namespace SCR
             if (instance == null)
             {
                 instance = GameObject.Find("Grid").GetComponent<Board>();
-                instance.GetReference();
             }
             if (!instance.CellGemType.ContainsKey(pos))
             {
@@ -221,7 +218,6 @@ namespace SCR
             if (instance == null)
             {
                 instance = GameObject.Find("Grid").GetComponent<Board>();
-                instance.GetReference();
             }
             instance.BlankTilemap.SetTile(pos, instance.blankTile);
             instance.CellList.Add(pos);
@@ -233,7 +229,6 @@ namespace SCR
             if (instance == null)
             {
                 instance = GameObject.Find("Grid").GetComponent<Board>();
-                instance.GetReference();
             }
             instance.SpawnPoint.Add(pos);
         }
@@ -244,7 +239,6 @@ namespace SCR
             if (instance == null)
             {
                 instance = GameObject.Find("Grid").GetComponent<Board>();
-                instance.GetReference();
             }
             if (!instance.CellContent.ContainsKey(pos))
             {
@@ -278,6 +272,9 @@ namespace SCR
 
             return GemType.Random;
         }
+
+
+
         // 스폰 오브젝트 정리
         public void ArrangeSpawn()
         {
@@ -293,7 +290,11 @@ namespace SCR
         // 도넛 생성
         public static Donut GetDonut(Vector3Int pos, GemType donut)
         {
-            var newDonut = Instantiate(Board.GetPrefab(donut));
+            if (instance == null)
+            {
+                instance = GameObject.Find("Grid").GetComponent<Board>();
+            }
+            var newDonut = Instantiate(Board.GetPrefab(donut), instance.gem.transform);
             newDonut.transform.position = pos;
             return newDonut.GetComponent<Donut>();
         }
@@ -301,7 +302,11 @@ namespace SCR
         // 방해 블록 생성
         public static Obstacle GetObstacle(Vector3Int pos, GemType obstacle)
         {
-            var newDonut = Instantiate(Board.GetPrefab(obstacle));
+            if (instance == null)
+            {
+                instance = GameObject.Find("Grid").GetComponent<Board>();
+            }
+            var newDonut = Instantiate(Board.GetPrefab(obstacle), instance.gem.transform);
             newDonut.transform.position = pos;
             return newDonut.GetComponent<Obstacle>();
         }
@@ -309,7 +314,11 @@ namespace SCR
         // 특수 블록 생성
         public static Special GetSpecial(Vector3Int pos, GemType special)
         {
-            var newSpecial = Instantiate(Board.GetPrefab(special));
+            if (instance == null)
+            {
+                instance = GameObject.Find("Grid").GetComponent<Board>();
+            }
+            var newSpecial = Instantiate(Board.GetPrefab(special), instance.gem.transform);
             newSpecial.transform.position = pos;
             return newSpecial.GetComponent<Special>();
         }
@@ -320,7 +329,6 @@ namespace SCR
             if (instance == null)
             {
                 instance = GameObject.Find("Grid").GetComponent<Board>();
-                instance.GetReference();
             }
             if (instance.CellContent[pos].GetCatStatuse() == GemType.CatStatues)
             {
@@ -981,14 +989,6 @@ namespace SCR
 
                 }
             }
-        }
-
-
-
-
-        private void GetReference()
-        {
-            _grid = GetComponent<Grid>();
         }
     }
 }
