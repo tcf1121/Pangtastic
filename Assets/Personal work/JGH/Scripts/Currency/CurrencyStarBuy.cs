@@ -13,12 +13,12 @@ public class CurrencyStarBuy : MonoBehaviour
     private void Start()
     {
         _button.onClick.AddListener(SetupAndPlayEffect);
-    } 
-    
+    }
+
     private void SetupAndPlayEffect()
     {
 
-        if(CurrencySystem.Instance.GetStars() < int.Parse(transform.Find("Amount").GetComponent<TMP_Text>().text))
+        if (CurrencySystem.Instance.GetStars() < int.Parse(transform.Find("Amount").GetComponent<TMP_Text>().text))
         {
             Debug.LogWarning("별이 부족합니다.");
             return;
@@ -29,17 +29,17 @@ public class CurrencyStarBuy : MonoBehaviour
         {
             CurrencySystem.Instance.SpendStar(int.Parse(transform.Find("Amount").GetComponent<TMP_Text>().text));
             var tmp = startText.GetComponent<TMP_Text>();
-            if (tmp) CurrencySystem.Instance.SetStarText(tmp);
+            //if (tmp) .SetStarText(tmp);
         }
 
         // 이펙트 실행
         EffectSystem.Instance.CurrencyInPlayStartEffectDown(_prefab, GameObject.FindWithTag("StarTargetUI").GetComponent<RectTransform>(), gameObject.GetComponent<RectTransform>());
-        
+
         // 도넛 샵 비활성화
         StartCoroutine(CloseDonut());
-        
+
     }
-    
+
     private IEnumerator CloseDonut()
     {
         // DonutDecoration 찾기
@@ -54,6 +54,6 @@ public class CurrencyStarBuy : MonoBehaviour
             Debug.Log("DonutDecoration 1.3초 후 비활성화 완료");
         }
     }
-    
-  
+
+
 }

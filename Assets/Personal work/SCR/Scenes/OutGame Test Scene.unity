@@ -2221,6 +2221,52 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 191932187}
   m_CullTransparentMesh: 1
+--- !u!1 &202909653
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 202909655}
+  - component: {fileID: 202909654}
+  m_Layer: 0
+  m_Name: OutGameManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &202909654
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 202909653}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: be191641bc442cb44a41f22e58aec52b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _coinText: {fileID: 373903767}
+  _starText: {fileID: 140817995}
+--- !u!4 &202909655
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 202909653}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &210403381
 GameObject:
   m_ObjectHideFlags: 0
@@ -21752,8 +21798,6 @@ MonoBehaviour:
   pendingSpawnType: 0
   _coinPrefab: {fileID: 627193793205392314, guid: c80753297cdf6404aa0df431dd095a4d, type: 3}
   _starPrefab: {fileID: 627193793205392314, guid: 83b0d5ad8110c4f40a4bc7a971cef097, type: 3}
-  _coinText: {fileID: 373903767}
-  _starText: {fileID: 140817995}
 --- !u!1 &7891860631543103166
 GameObject:
   m_ObjectHideFlags: 0
@@ -21807,3 +21851,4 @@ SceneRoots:
   - {fileID: 4216401509625540698}
   - {fileID: 687023515}
   - {fileID: 766682286}
+  - {fileID: 202909655}

@@ -27,8 +27,7 @@ public class CurrencySystem : MonoBehaviour
     [SerializeField] private GameObject _coinPrefab; // 코인 프리팹 
     [SerializeField] private GameObject _starPrefab; // 별 프리팹
 
-    [SerializeField] private TMP_Text _coinText; // Coin 갯수
-    [SerializeField] private TMP_Text _starText; // 별 갯수
+
 
     private int _currentCoins = 0; // 현재 보유 코인 수
     private string _saveCoinPath; // JSON 저장 경로
@@ -46,10 +45,6 @@ public class CurrencySystem : MonoBehaviour
         }
         Instance = this;
         DontDestroyOnLoad(gameObject); // 씬이 바뀌어도 유지
-    }
-
-    private void Start()
-    {
         // 플랫폼별 JSON 저장 경로 지정
         _saveCoinPath = Path.Combine(Application.persistentDataPath, "CoinData.json");
         _saveStarPath = Path.Combine(Application.persistentDataPath, "StarData.json");
@@ -57,10 +52,12 @@ public class CurrencySystem : MonoBehaviour
         // 기존 저장된 데이터 불러오기
         CoinLoad();
         StarLoad();
+    }
 
-        // UI 갱신
-        UpdateCoinUI();
-        UpdateStarUI();
+    private void Start()
+    {
+
+
     }
 
     private void OnEnable()
@@ -80,18 +77,6 @@ public class CurrencySystem : MonoBehaviour
         StartCoroutine(SetupAndPlayEffect());
     }
 
-    public void SetCoinText(TMP_Text text)
-    {
-        _coinText = text;
-        UpdateCoinUI(); // 바로 최신 값 반영
-    }
-
-    public void SetStarText(TMP_Text text)
-    {
-        _starText = text;
-        UpdateStarUI(); // 바로 최신 값 반영
-    }
-
     /// <summary>
     /// 코인 추가
     /// </summary>
@@ -99,7 +84,6 @@ public class CurrencySystem : MonoBehaviour
     {
         _currentCoins += amount;  // 코인 증가
         CoinSave();                  // JSON 저장
-        UpdateCoinUI();          // UI 갱신
     }
 
     /// <summary>
@@ -109,7 +93,6 @@ public class CurrencySystem : MonoBehaviour
     {
         _currentStars += amount;  // 코인 증가
         StarSave();                  // JSON 저장
-        UpdateStarUI();          // UI 갱신
     }
 
     /// <summary>
@@ -121,7 +104,7 @@ public class CurrencySystem : MonoBehaviour
         {
             _currentCoins -= amount; // 코인 차감
             CoinSave();                 // JSON 저장
-            UpdateCoinUI();         // UI 갱신
+            OutGameManager.UpdateCoinUI();
             return true;
         }
         return false; // 코인이 부족하면 실패
@@ -136,7 +119,7 @@ public class CurrencySystem : MonoBehaviour
         {
             _currentStars -= amount; // 코인 차감
             StarSave();                 // JSON 저장
-            UpdateStarUI();         // UI 갱신
+            OutGameManager.UpdateStarUI();
             return true;
         }
         return false; // 코인이 부족하면 실패
@@ -147,6 +130,7 @@ public class CurrencySystem : MonoBehaviour
     /// </summary>
     public int GetCoins()
     {
+        CoinLoad();
         return _currentCoins;
     }
 
@@ -155,26 +139,10 @@ public class CurrencySystem : MonoBehaviour
     /// </summary>
     public int GetStars()
     {
+        StarLoad();
         return _currentStars;
     }
 
-    /// <summary>
-    /// UI(TextMeshPro) 업데이트
-    /// </summary>
-    private void UpdateCoinUI()
-    {
-        if (_coinText != null)
-            _coinText.text = _currentCoins.ToString();
-    }
-
-    /// <summary>
-    /// UI(TextMeshPro) 업데이트
-    /// </summary>
-    private void UpdateStarUI()
-    {
-        if (_starText != null)
-            _starText.text = _currentStars.ToString();
-    }
 
     /// <summary>
     /// JSON 파일로 저장
@@ -240,14 +208,14 @@ public class CurrencySystem : MonoBehaviour
         if (coinText)
         {
             var tmp = coinText.GetComponent<TMPro.TMP_Text>();
-            if (tmp) SetCoinText(tmp);
+            //if (tmp) SetCoinText(tmp);
         }
 
         var startText = GameObject.FindWithTag("StarText");
         if (startText)
         {
             var tmp = startText.GetComponent<TMPro.TMP_Text>();
-            if (tmp) SetStarText(tmp);
+            //if (tmp) SetStarText(tmp);
         }
 
         if (pendingSpawnType == SpawnType.None)
