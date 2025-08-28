@@ -103,7 +103,6 @@ namespace SCR
                 instance.GetReference();
             }
             instance._selectTile = num;
-            Debug.Log(instance._selectTile);
         }
 
         public static Dictionary<Vector3Int, GemType> GetPuzzleInfo()
@@ -223,7 +222,7 @@ namespace SCR
 
         public void SortCells()
         {
-            CellList = CellList.OrderBy(pos => pos.y).ThenBy(pos => pos.x).ToList();
+            CellList = CellList.OrderBy(pos => pos.x).ThenBy(pos => pos.y).ToList();
             CellList.Reverse();
         }
 

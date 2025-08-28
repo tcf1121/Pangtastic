@@ -1,19 +1,16 @@
+using UnityEngine;
+
 namespace SCR
 {
     public class Coffe : Special
     {
-        public override bool CheckCondition()
+        public void Init(Vector3Int cell)
         {
-            //직선 3개 매치시 3% 확률로 등장
-            return false;
+            base.Init(cell);
+            //if(_isHorizon) transform.
         }
 
-        public override void Use()
-        {
-            // 손님 인내심 10% 증가
-        }
-
-        public override void UseWith(Special special)
+        public override void Use(Special special = null)
         {
 
         }

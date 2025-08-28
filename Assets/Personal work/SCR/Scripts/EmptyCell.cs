@@ -21,9 +21,10 @@ namespace SCR
                 return false;
 #endif
 
-
-            PuzzelEditBoard.AddCell(position);
-
+            if (GameObject.Find("Grid").GetComponent<PuzzelEditBoard>())
+                PuzzelEditBoard.AddCell(position);
+            else
+                Board.AddCell(position);
             return base.StartUp(position, tilemap, go);
         }
     }
