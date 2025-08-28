@@ -60,6 +60,20 @@ namespace KDJ
         private OrderStateController _bakingTest;
         private CustomerFlowController _test;
 
+        [Header("생성될 블럭 타입 범위 설정")]
+        [Range(1, 6)]
+        [SerializeField] private int _spawnRangeMin;
+        [Range(1, 6)]
+        [SerializeField] private int _spawnRangeMax;
+        public int SpawnRangeMin {
+            get { return _spawnRangeMin; } 
+            set { _spawnRangeMin = value; } 
+        }
+        public int SpawnRangeMax {
+            get { return _spawnRangeMax; }
+            set { _spawnRangeMax = value; }
+        }
+
         public List<GemType> DestroyBlockData { get; private set; } = new List<GemType>();
         public Block[,] BlockArray;
         public int BlankBlockCount = 0;
@@ -83,7 +97,7 @@ namespace KDJ
             {
                 for (int y = 0; y < BlockArray.GetLength(0); y++)
                 {
-                    int num = Random.Range(1, 7);
+                    int num = Random.Range(SpawnRangeMin, SpawnRangeMax + 1);
 
                     if (y < BlockPlate.BlockPlateHeight)
                     {
@@ -106,9 +120,9 @@ namespace KDJ
             // BlockArray[3, 0] = new Cloche { BlockType = 15, GemType = GemType.Cloche, IsObstacle = true, CurrentHP = 1, X = 0, Y = 1 };
             // BlockArray[3, 1] = new Cloche { BlockType = 15, GemType = GemType.Cloche, IsObstacle = true, CurrentHP = 1, X = 1, Y = 1 };
             // BlockArray[3, 2] = new Cloche { BlockType = 15, GemType = GemType.Cloche, IsObstacle = true, CurrentHP = 1, X = 2, Y = 1 };
-            BlockArray[2, 3] = new Cloche { BlockType = 15, GemType = GemType.Cloche, IsObstacle = true, CurrentHP = 1, X = 3, Y = 2 };
-            BlockArray[2, 4] = new Cloche { BlockType = 15, GemType = GemType.Cloche, IsObstacle = true, CurrentHP = 1, X = 4, Y = 2 };
-            BlockArray[2, 5] = new Cloche { BlockType = 15, GemType = GemType.Cloche, IsObstacle = true, CurrentHP = 1, X = 5, Y = 2 };
+            // BlockArray[2, 3] = new Cloche { BlockType = 15, GemType = GemType.Cloche, IsObstacle = true, CurrentHP = 1, X = 3, Y = 2 };
+            // BlockArray[2, 4] = new Cloche { BlockType = 15, GemType = GemType.Cloche, IsObstacle = true, CurrentHP = 1, X = 4, Y = 2 };
+            // BlockArray[2, 5] = new Cloche { BlockType = 15, GemType = GemType.Cloche, IsObstacle = true, CurrentHP = 1, X = 5, Y = 2 };
 
             // 테스트 코드
 
@@ -246,6 +260,24 @@ namespace KDJ
                                     }
                                 }
                             }
+                            else if (!BlockPlate.BlockPlateArray[y + 1, x])
+                            {
+                                // 내 위의 블럭판이 없는 경우
+                                for (int i = y + 1; i < BlockPlate.BlockPlateHeight; i++)
+                                {
+                                    // 위쪽에서 블록을 가져올 수 있는지 체크
+                                    if (BlockPlate.BlockPlateArray[i, x] && BlockArray[i, x] != null && !BlockArray[i, x].IsObstacle)
+                                    {
+                                        Debug.Log($"위쪽에서 블록 가져옴: {i}, {x}");
+                                        BlockArray[y, x] = BlockArray[i, x];
+                                        BlockArray[i, x] = null;
+                                        BlockArray[y, x].BlockInstance.transform.position = new Vector3(
+                                            BlockArray[y, x].BlockInstance.transform.position.x,
+                                            BlockArray[y, x].BlockInstance.transform.position.y - (i - y), 0);
+                                        canMove = true;
+                                    }
+                                }
+                            }
                             else
                             {
                                 // 내 위가 비어있다면 내 윗칸에 방해 블럭이 있는지 체크하고 내 아래가 비어있는지도 체크
@@ -284,7 +316,7 @@ namespace KDJ
 
                         if (_blockWaitingQueue[x].Count == 0)
                         {
-                            int num = Random.Range(1, 7);
+                            int num = Random.Range(SpawnRangeMin, SpawnRangeMax + 1);
                             _blockWaitingQueue[x].Enqueue(new Block { BlockType = num, GemType = (GemType)num - 1 });
                         }
 
@@ -416,7 +448,7 @@ namespace KDJ
 
                     if (_blockWaitingQueue[x].Count == 0)
                     {
-                        int num = Random.Range(1, 7);
+                        int num = Random.Range(SpawnRangeMin, SpawnRangeMax + 1);
                         _blockWaitingQueue[x].Enqueue(new Block { BlockType = num, GemType = (GemType)num - 1 });
                     }
 
@@ -455,7 +487,7 @@ namespace KDJ
                     if (BlockPlate.BlockPlateArray[y, x] && BlockArray[y, x] == null)
                     {
                         // 빈칸이 있는 경우 해당 열 큐에 블럭을 생성해서 추가
-                        int num = Random.Range(1, 7);
+                        int num = Random.Range(SpawnRangeMin, SpawnRangeMax + 1);
                         _blockWaitingQueue[x].Enqueue(new Block { BlockType = num, GemType = (GemType)num - 1 });
                     }
                 }
@@ -590,7 +622,7 @@ namespace KDJ
         /// <param name="y"></param>
         public void SpawnRandomBlock(int x, int y)
         {
-            int randomBlockType = Random.Range(1, 7); // 1부터 6까지의 랜덤 블럭 타입
+            int randomBlockType = Random.Range(SpawnRangeMin, SpawnRangeMax + 1); // 1부터 6까지의 랜덤 블럭 타입
             SpawnBlock(x, y, randomBlockType);
         }
 
@@ -608,7 +640,7 @@ namespace KDJ
                         {
                             Destroy(BlockArray[y, x].BlockInstance);
                             BlockArray[y, x] = null;
-                            int randomBlockType = Random.Range(1, 7); // 1부터 6까지의 랜덤 블럭 타입
+                            int randomBlockType = Random.Range(SpawnRangeMin, SpawnRangeMax + 1); // _spawnRangeMin부터 _spawnRangeMax까지의 랜덤 블럭 타입
                             SpawnBlock(x, y, randomBlockType);
                         }
                     }
@@ -770,6 +802,17 @@ namespace KDJ
                                 }
                             }
                         }
+                        else if (!BlockPlate.BlockPlateArray[y + 1, x])
+                            {
+                                for (int i = y + 1; i < BlockPlate.BlockPlateHeight; i++)
+                                {
+
+                                    if (BlockPlate.BlockPlateArray[i, x] && BlockArray[i, x] != null && !BlockArray[i, x].IsObstacle)
+                                    {
+                                        result = true;
+                                    }
+                                }
+                            }
                         else
                         {
                             if (GetAboveObstacleBlock(x, y))
