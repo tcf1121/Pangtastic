@@ -20,7 +20,7 @@ namespace KDJ.States
         public IEnumerator StageInit(BoardManager boardManager)
         {
             Debug.Log("초기화 상태");
-            BoardData boardData = boardManager.BoardLoader.ReadCSV(boardManager.CurStage);
+            BoardData boardData = boardManager.BoardLoader.LoadBoard(); //JWJ 수정함
             yield return new WaitForSeconds(1f);
             boardManager.Spawner.BlockPlate.BlockPlateArray = boardData.BlockPlateArray;
             boardManager.Spawner.BlockArray = boardData.BlockArray;

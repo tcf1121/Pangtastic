@@ -13,6 +13,7 @@ public class StageImporter
     private static string customerSoDir = "Assets/ScriptableObject/Customers"; // 손님 SO 경로
     private static string recipeSoDir = "Assets/ScriptableObject/Recipes"; // 레시피 SO 경로
     private static string ingredientSoDir = "Assets/ScriptableObject/Ingredients"; // 재료SO 경로
+    private static string puzzleBoardSoDir = "Assets/ScriptableObject/PuzzleBoards"; //퍼즐 보드 경로
     private static string stageSoDir = "Assets/ScriptableObject/Stages"; // 스테이지 SO 저장 경로
 
     private static int startRow = 3; // 데이터 시작 행
@@ -150,7 +151,19 @@ public class StageImporter
                 return;
             }
 
-            stage.PuzzleBoardID = puzzle_board_id; //퍼즐보드 아이디 (쓸지 안쓸지 모름)
+            string puzzleBoardSOPath = puzzleBoardSoDir + "/PuzzleBoard_" + puzzle_board_id + ".asset"; // 퍼즐보드SO 경로
+
+            PuzzleBoardSO puzzleBoardSO = AssetDatabase.LoadAssetAtPath<PuzzleBoardSO>(puzzleBoardSOPath); // 퍼즐보드SO 로드
+
+            if (puzzleBoardSO == null) // 보드SO가 없으면
+            {
+                Debug.LogError($"PuzzleBoardSO 없음 : {puzzleBoardSOPath} / {i} 행 확인");
+                return;
+            }
+            else // 보드SO가 있으면
+            {
+                stage.PuzzleBoard = puzzleBoardSO; // 퍼즐보드 설정
+            }
 
             List<RecipeSO> recipeList = BuildRecipesFromBundle(stage_recipe_bundle, bundleLines); // 레시피 리스트 생성
 

@@ -27,8 +27,8 @@ public class StageSO : ScriptableObject
     [Header("스테이지 타입")]
     public StageType Type;
 
-    [Header("퍼즐보드 ID")]
-    public int PuzzleBoardID;
+    [Header("퍼즐보드")]
+    public PuzzleBoardSO PuzzleBoard;
 
     [Header("재료 배수")]
     public IngredientAdjustment[] IngredientAdjustments;
