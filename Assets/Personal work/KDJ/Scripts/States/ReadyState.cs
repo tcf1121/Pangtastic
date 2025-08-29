@@ -57,13 +57,13 @@ namespace KDJ.States
             }
 
             if (Input.GetMouseButtonDown(0))
-                {
-                    Debug.Log("마우스 클릭 감지");
-                    Vector3 mousePosition = Input.mousePosition;
-                    mousePosition.z = -Camera.main.transform.position.z;
-                    boardManager.BlockMover.StartPos = Camera.main.ScreenToWorldPoint(mousePosition);
-                    TestBlockInfo(boardManager);
-                }
+            {
+                Debug.Log("마우스 클릭 감지");
+                Vector3 mousePosition = Input.mousePosition;
+                mousePosition.z = -Camera.main.transform.position.z;
+                boardManager.BlockMover.StartPos = Camera.main.ScreenToWorldPoint(mousePosition);
+                TestBlockInfo(boardManager);
+            }
 
             if (Input.GetMouseButtonUp(0))
             {

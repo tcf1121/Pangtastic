@@ -17,7 +17,6 @@ public class InGameManager : MonoBehaviour
     [SerializeField] TMP_Text LoseScore;
 
     private static InGameManager instate;
-
     private int _score;
     private int _coin;
 
