@@ -8,7 +8,8 @@ namespace LHJ
     {
         Whisk,    // 3x3
         Scissor,  // 가로+세로
-        DonutPan
+        DonutPan,
+        Coffee
     }
 
     [CreateAssetMenu(fileName = "ItemData", menuName = "Puzzle/ItemData")]
