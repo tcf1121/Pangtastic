@@ -1,4 +1,5 @@
 using TMPro;
+using UnityEditor.Localization.Plugins.XLIFF.V12;
 using UnityEngine;
 
 namespace KDJ
@@ -51,9 +52,9 @@ namespace KDJ
         }
 
         #region 테스트 코드
-        public void UpdateUI(Block block)
+        public void UpdateUI(Block block, int x, int y)
         {
-            _blockInfo.text = $"Block Type: {block.BlockType}\nGem Type: {block.GemType}";
+            _blockInfo.text = $"Block Type: {block.BlockType}\nGem Type: {block.GemType}\nPosition: ({y}, {x})";
         }
 
         public void UpdateUI(int score)

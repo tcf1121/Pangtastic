@@ -1,13 +1,13 @@
 using LHJ;
 using SCR;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 namespace KDJ
 {
     public class BoardMatchChecker : MonoBehaviour
     {
-
         #region 배열 체크
 
         /// <summary>
@@ -39,8 +39,8 @@ namespace KDJ
                     }
 
 
-                    // 오른쪽 블록과 교환 테스트
-                    if (x + 1 < width && blockPlate.BlockPlateArray[y, x + 1])
+                    // 오른쪽 블록과 교환 테스트 (상대방이 null이 아닌지 체크 추가)
+                    if (x + 1 < width && blockPlate.BlockPlateArray[y, x + 1] && blockArray[y, x + 1] != null)
                     {
                         // 가상 교환
                         var temp = blockArray[y, x];
@@ -61,8 +61,8 @@ namespace KDJ
                         blockArray[y, x + 1] = temp;
                     }
 
-                    // 아래쪽 블록과 교환 테스트
-                    if (y + 1 < height && blockPlate.BlockPlateArray[y + 1, x])
+                    // 아래쪽 블록과 교환 테스트 (상대방이 null이 아닌지 체크 추가)
+                    if (y + 1 < height && blockPlate.BlockPlateArray[y + 1, x] && blockArray[y + 1, x] != null)
                     {
                         // 가상 교환
                         var temp = blockArray[y, x];
@@ -98,548 +98,195 @@ namespace KDJ
         {
             int height = boardManager.Spawner.BlockPlate.BlockPlateHeight;
             int width = boardManager.Spawner.BlockPlate.BlockPlateWidth;
-            var blockArray = boardManager.Spawner.BlockArray;
-            var blockPlateArray = boardManager.Spawner.BlockPlate.BlockPlateArray;
 
-            bool isMatched = false;
-
-            // x축 체크
-            for (int y = 0; y < height; y++)
-            {
-                int matchStartIndex = 0;
-                int count = 1;
-                GemType curGemType = (GemType)(-1);
-                GemType prevGemType = (GemType)(-1);
-
-                for (int x = 0; x < width; x++)
-                {
-                    if (blockPlateArray[y, x] && blockArray[y, x] != null)
-                    {
-                        curGemType = blockArray[y, x].GemType;
-
-                        if (curGemType == prevGemType && !blockArray[y, x].IsObstacle)
-                        {
-                            count++;
-                        }
-                        else if (count < 3)
-                        {
-                            count = 1;
-                            matchStartIndex = x;
-                        }
-                    }
-                    prevGemType = curGemType;
-                }
-
-                if (count >= 3)
-                {
-                    isMatched = true;
-                }
-            }
-
-            // y축 체크
-            for (int x = 0; x < width; x++)
-            {
-                int matchStartIndex = 0;
-                int count = 1;
-                GemType curGemType = (GemType)(-1);
-                GemType prevGemType = (GemType)(-1);
-
-                for (int y = 0; y < height; y++)
-                {
-
-                    if (blockPlateArray[y, x] && blockArray[y, x] != null)
-                    {
-                        curGemType = blockArray[y, x].GemType;
-
-                        if (curGemType == prevGemType && !blockArray[y, x].IsObstacle)
-                        {
-                            count++;
-                        }
-                        else if (count < 3)
-                        {
-                            count = 1;
-                            matchStartIndex = y;
-                        }
-                    }
-                    prevGemType = curGemType;
-                }
-
-                if (count >= 3)
-                {
-                    isMatched = true;
-                }
-            }
-
-            // 큐브 체크
             for (int y = 0; y < height; y++)
             {
                 for (int x = 0; x < width; x++)
                 {
-                    if (blockPlateArray[y, x] && blockArray[y, x] != null)
+                    if (!CheckBlockIsAllValid(boardManager, x, y)) continue;
+
+                    // 3개 이상의 가로 매치 확인
+                    if (FindFullLineMatch(boardManager, x, y, true).Count >= 3)
                     {
-                        if (x + 1 < width && y + 1 < height)
-                        {
-                            if (blockPlateArray[y + 1, x] && blockPlateArray[y, x + 1]
-                            && blockArray[y + 1, x] != null && blockArray[y, x + 1] != null
-                            && blockArray[y, x].BlockType == blockArray[y + 1, x].BlockType
-                            && blockArray[y, x].BlockType == blockArray[y, x + 1].BlockType)
-                            {
-                                if (IsCubeMatched(boardManager, x, y) && !blockArray[y, x].IsObstacle)
-                                {
-                                    Debug.Log($"큐브 매치 감지");
-                                    isMatched = true;
-                                }
-                            }
-                        }
+                        return true;
+                    }
+
+                    // 3개 이상의 세로 매치 확인
+                    if (FindFullLineMatch(boardManager, x, y, false).Count >= 3)
+                    {
+                        return true;
+                    }
+                    
+                    // 2x2 큐브 매치 확인
+                    if (x < width - 1 && y < height - 1)
+                    {
+                        if (IsCubeMatched(boardManager, x, y)) return true;
                     }
                 }
             }
 
-            Debug.Log($"매칭 여부: {isMatched}");
-            return isMatched;
+            return false;
         }
 
-
-        /// <summary>
-        /// 매치 여부를 체크하고 매치되었을 경우 파괴함
-        /// </summary>
-        /// <param name="boardManager"></param>
-        public void AllMatchBlockDestroy(BoardManager boardManager)
+        public bool ProcessMatches(BoardManager boardManager, Vector2Int? swapPosition = null)
         {
             int height = boardManager.Spawner.BlockPlate.BlockPlateHeight;
             int width = boardManager.Spawner.BlockPlate.BlockPlateWidth;
             var blockArray = boardManager.Spawner.BlockArray;
-            var blockPlateArray = boardManager.Spawner.BlockPlate.BlockPlateArray;
 
-            // x,y 통합 체크
+            HashSet<Vector2Int> coordsToDestroy = new HashSet<Vector2Int>();
+            (Vector2Int pos, int type)? specialToCreate = null;
+            bool[,] visited = new bool[height, width];
+
+            // 우선순위: 1x5 > L/T > 2x2 > 1x4
+
+            // 1. 1x5 매치 탐색
             for (int y = 0; y < height; y++)
             {
                 for (int x = 0; x < width; x++)
                 {
-                    if (blockPlateArray[y, x] && blockArray[y, x] != null && !blockArray[y, x].IsObstacle)
+                    if (visited[y, x] || !CheckBlockIsAllValid(boardManager, x, y)) continue;
+                    var hMatch = FindFullLineMatch(boardManager, x, y, true);
+                    if (hMatch.Count >= 5)
                     {
-                        int xMatchCount = XAxisMatchCheck(x, y, boardManager);
-                        int yMatchCount = YAxisMatchCheck(x, y, boardManager);
-                        bool isCubeMatched = CubeCheck(boardManager, x, y, 1);
-
-                        if (xMatchCount == 5 || yMatchCount == 5)
-                        {
-                            boardManager.Spawner.SpawnBlock(x, y, 10);
-                        }
-                        else if (5 > xMatchCount && xMatchCount >= 3 && 5 > yMatchCount && yMatchCount >= 3)
-                        {
-                            boardManager.Spawner.SpawnBlock(x, y, 11);
-                        }
-                        else if (isCubeMatched)
-                        {
-                            boardManager.Spawner.SpawnBlock(x, y, 9);
-                        }
-                        else if (xMatchCount == 4)
-                        {
-                            boardManager.Spawner.SpawnBlock(x, y, 7);
-                        }
-                        else if (yMatchCount == 4)
-                        {
-                            boardManager.Spawner.SpawnBlock(x, y, 8);
-                        }
+                        if (!specialToCreate.HasValue) specialToCreate = (new Vector2Int(x, y), 10);
+                        foreach (var c in hMatch) { coordsToDestroy.Add(c); visited[c.y, c.x] = true; }
+                    }
+                    var vMatch = FindFullLineMatch(boardManager, x, y, false);
+                    if (vMatch.Count >= 5)
+                    {
+                        if (!specialToCreate.HasValue) specialToCreate = (new Vector2Int(x, y), 10);
+                        foreach (var c in vMatch) { coordsToDestroy.Add(c); visited[c.y, c.x] = true; }
                     }
                 }
             }
-        }
 
+            // 2. L/T 매치 탐색
+            for (int y = 0; y < height; y++)
+            {
+                for (int x = 0; x < width; x++)
+                {
+                    if (visited[y, x] || !CheckBlockIsAllValid(boardManager, x, y)) continue;
+                    var hMatch = FindFullLineMatch(boardManager, x, y, true);
+                    var vMatch = FindFullLineMatch(boardManager, x, y, false);
+                    if (hMatch.Count >= 3 && vMatch.Count >= 3)
+                    {
+                        if (!specialToCreate.HasValue) specialToCreate = (new Vector2Int(x, y), 11);
+                        foreach (var c in hMatch) { coordsToDestroy.Add(c); visited[c.y, c.x] = true; }
+                        foreach (var c in vMatch) { coordsToDestroy.Add(c); visited[c.y, c.x] = true; }
+                    }
+                }
+            }
+
+            // 3. 2x2 매치 탐색
+            for (int y = 0; y < height - 1; y++)
+            {
+                for (int x = 0; x < width - 1; x++)
+                {
+                    if (visited[y, x]) continue;
+                    if (IsCubeMatched(boardManager, x, y))
+                    {
+                        var coords = new Vector2Int[] { new(x, y), new(x + 1, y), new(x, y + 1), new(x + 1, y + 1) };
+                        bool isOverlapped = false;
+                        foreach (var c in coords) { if (visited[c.y, c.x]) isOverlapped = true; }
+                        if (isOverlapped) continue;
+
+                        if (!specialToCreate.HasValue) specialToCreate = (new Vector2Int(x, y), 9);
+                        foreach (var c in coords) { coordsToDestroy.Add(c); visited[c.y, c.x] = true; }
+                    }
+                }
+            }
+
+            // 4. 1x4 매치 탐색
+            for (int y = 0; y < height; y++)
+            {
+                for (int x = 0; x < width; x++)
+                {
+                    if (visited[y, x] || !CheckBlockIsAllValid(boardManager, x, y)) continue;
+                    var hMatch = FindFullLineMatch(boardManager, x, y, true);
+                    if (hMatch.Count == 4)
+                    {
+                        if (!specialToCreate.HasValue) specialToCreate = (new Vector2Int(x, y), 7);
+                        foreach (var c in hMatch) { coordsToDestroy.Add(c); visited[c.y, c.x] = true; }
+                    }
+                    var vMatch = FindFullLineMatch(boardManager, x, y, false);
+                    if (vMatch.Count == 4)
+                    {
+                        if (!specialToCreate.HasValue) specialToCreate = (new Vector2Int(x, y), 8);
+                        foreach (var c in vMatch) { coordsToDestroy.Add(c); visited[c.y, c.x] = true; }
+                    }
+                }
+            }
+
+            // 5. 3매치 탐색
+            for (int y = 0; y < height; y++)
+            {
+                for (int x = 0; x < width; x++)
+                {
+                    if (visited[y, x] || !CheckBlockIsAllValid(boardManager, x, y)) continue;
+                    var hMatch = FindFullLineMatch(boardManager, x, y, true);
+                    if (hMatch.Count == 3)
+                    {
+                        foreach (var c in hMatch) { coordsToDestroy.Add(c); visited[c.y, c.x] = true; }
+                    }
+                    var vMatch = FindFullLineMatch(boardManager, x, y, false);
+                    if (vMatch.Count == 3)
+                    {
+                        foreach (var c in vMatch) { coordsToDestroy.Add(c); visited[c.y, c.x] = true; }
+                    }
+                }
+            }
+
+            // --- 파괴 및 생성 ---
+            if (coordsToDestroy.Count > 0)
+            {
+                boardManager.MatchCombo.UpCombo();
+                int score = 0;
+                foreach (var coord in coordsToDestroy)
+                {
+                    if (CheckBlockIsAllValid(boardManager, coord.x, coord.y) && blockArray[coord.y, coord.x].BlockInstance != null)
+                    {
+                        Destroy(blockArray[coord.y, coord.x].BlockInstance);
+                        blockArray[coord.y, coord.x].BlockInstance = null;
+                        score += 10;
+                    }
+                }
+                boardManager.UpdateUI(score);
+
+                if (specialToCreate.HasValue)
+                {
+                    var creation = specialToCreate.Value;
+                    Vector2Int spawnPos;
+
+                    if (swapPosition.HasValue && coordsToDestroy.Contains(swapPosition.Value))
+                    {
+                        spawnPos = swapPosition.Value;
+                    }
+                    else
+                    {
+                        int minX = int.MaxValue;
+                        int maxY = int.MinValue;
+                        foreach (var coord in coordsToDestroy)
+                        {
+                            if (coord.x < minX) minX = coord.x;
+                            if (coord.y > maxY) maxY = coord.y;
+                        }
+                        spawnPos = new Vector2Int(minX, maxY);
+
+                        if (!coordsToDestroy.Contains(spawnPos))
+                        {
+                            spawnPos = creation.pos;
+                        }
+                    }
+                    boardManager.Spawner.SpawnBlock(spawnPos.x, spawnPos.y, creation.type);
+                }
+                return true; 
+            }
+
+            return false; 
+        }
         #endregion
 
-
-        #region 블럭 매치 체크
-        /// <summary>
-        /// 블럭 매치 체크 로직. x,y,큐브 형태의 매치를 전부 체크함
-        /// </summary>
-        /// <param name="blockGrid"></param>
-        /// <param name="boardManager"></param>
-        public void BlockMatchCheck(Vector2Int blockGrid, BoardManager boardManager)
-        {
-            // 블럭 매치 체크 로직
-            int xBlockBreakCount = XAxisMatchCheck(blockGrid.x, blockGrid.y, boardManager);
-            int yBlockBreakCount = YAxisMatchCheck(blockGrid.x, blockGrid.y, boardManager);
-            bool isCubeMatched = CubeMatchCheck(blockGrid.x, blockGrid.y, boardManager);
-            Debug.Log("큐브 매치 결과: " + isCubeMatched);
-            if (xBlockBreakCount == 5 || yBlockBreakCount == 5)
-            {
-                boardManager.Spawner.SpawnBlock(blockGrid.x, blockGrid.y, 10);
-            }
-            else if (5 > xBlockBreakCount && xBlockBreakCount >= 3 && 5 > yBlockBreakCount && yBlockBreakCount >= 3)
-            {
-                boardManager.Spawner.SpawnBlock(blockGrid.x, blockGrid.y, 11);
-            }
-            else if (isCubeMatched)
-            {
-                boardManager.Spawner.SpawnBlock(blockGrid.x, blockGrid.y, 9);
-            }
-            else if (xBlockBreakCount == 4)
-            {
-                boardManager.Spawner.SpawnBlock(blockGrid.x, blockGrid.y, 7);
-            }
-            else if (yBlockBreakCount == 4)
-            {
-                boardManager.Spawner.SpawnBlock(blockGrid.x, blockGrid.y, 8);
-            }
-        }
-
-        public int XAxisMatchCheck(int x, int y, BoardManager boardManager)
-        {
-            var blockArray = boardManager.Spawner.BlockArray;
-            var blockPlateArray = boardManager.Spawner.BlockPlate.BlockPlateArray;
-            int width = boardManager.Spawner.BlockPlate.BlockPlateWidth;
-            int height = boardManager.Spawner.BlockPlate.BlockPlateHeight;
-
-            int score = 0;
-            int count = 1;
-            int matchStartIndex = 0;
-            bool isMatched = false;
-            GemType curGemType = (GemType)(-1);
-            GemType prevGemType = (GemType)(-1);
-
-            for (int i = -2; i < 3; i++)
-            {
-                int curIndex = x + i;
-
-                if (blockPlateArray[y, x] && width > curIndex && curIndex >= 0 && blockArray[y, curIndex] != null)
-                {
-                    curGemType = blockArray[y, curIndex].GemType;
-
-                    // 검사하는 블록이 일반 블록이 아닐경우 continue.
-                    if (curGemType > GemType.Sugar)
-                    {
-                        count = 1;
-                        matchStartIndex = curIndex + 1;
-                        continue;
-                    }
-
-                    if (curGemType == prevGemType)
-                    {
-                        count++;
-                    }
-                    else if (count < 3)
-                    {
-                        count = 1;
-                        matchStartIndex = curIndex;
-                    }
-                    else if (curGemType != prevGemType && count >= 3)
-                    {
-                        break; // 매치가 끊기고 이전에 3개 이상 매치된 경우 루프 종료
-                    }
-                }
-                prevGemType = curGemType;
-            }
-
-            if (count >= 3)
-            {
-                for (int i = matchStartIndex; i < matchStartIndex + count; i++)
-                {
-                    if (blockPlateArray[y, i] && blockArray[y, i] != null && blockArray[y, i].BlockInstance != null)
-                    {
-                        Debug.Log($"매칭 된 블럭 수: {count}");
-                        Debug.Log($"X축 매치된 블록 파괴 위치: x={i}, y={y}");
-                        Debug.Log($"매치된 블록 GemType: {blockArray[y, i].GemType}");
-                        Destroy(blockArray[y, i].BlockInstance);
-                        blockArray[y, i].BlockInstance = null;
-                        if (y + 1 < height && blockArray[y + 1, i] is Cloche)
-                        {
-                            (blockArray[y + 1, i] as Cloche).TakeDamage(boardManager);
-                        }
-                        if (y - 1 >= 0 && blockArray[y - 1, i] is Cloche)
-                        {
-                            (blockArray[y - 1, i] as Cloche).TakeDamage(boardManager);
-                        }
-                        if (i + 1 < width && blockArray[y, i + 1] is Cloche)
-                        {
-                            (blockArray[y, i + 1] as Cloche).TakeDamage(boardManager);
-                        }
-                        if (i - 1 >= 0 && blockArray[y, i - 1] is Cloche)
-                        {
-                            (blockArray[y, i - 1] as Cloche).TakeDamage(boardManager);
-                        }
-                        score += 10;
-                        isMatched = true;
-                    }
-                }
-
-                if (isMatched)
-                {
-                    boardManager.MatchCombo.UpCombo();
-                    if (boardManager.MatchCombo.CurCombo > 1)
-                    {
-                        boardManager.UpdateUI((int)(score * (0.5f * boardManager.MatchCombo.CurCombo)));
-                    }
-                    else
-                    {
-                        boardManager.UpdateUI(score);
-                    }
-                }
-            }
-
-            return count;
-        }
-
-        public int YAxisMatchCheck(int x, int y, BoardManager boardManager)
-        {
-            var blockArray = boardManager.Spawner.BlockArray;
-            var blockPlateArray = boardManager.Spawner.BlockPlate.BlockPlateArray;
-            int width = boardManager.Spawner.BlockPlate.BlockPlateWidth;
-            int height = boardManager.Spawner.BlockPlate.BlockPlateHeight;
-
-            int score = 0;
-            int count = 1;
-            int matchStartIndex = 0;
-            bool isMatched = false;
-            GemType curGemType = (GemType)(-1);
-            GemType prevGemType = (GemType)(-1);
-
-            for (int i = -2; i < 3; i++)
-            {
-                int curIndex = y + i;
-
-                if (blockPlateArray[y, x] && height > curIndex && curIndex >= 0 && blockArray[curIndex, x] != null)
-                {
-                    curGemType = blockArray[curIndex, x].GemType;
-
-                    // 검사하는 블록이 일반 블록이 아닐경우 continue.
-                    if (curGemType > GemType.Sugar)
-                    {
-                        count = 1;
-                        matchStartIndex = curIndex + 1;
-                        continue;
-                    }
-
-                    if (curGemType == prevGemType)
-                    {
-                        count++;
-                    }
-                    else if (count < 3)
-                    {
-                        count = 1;
-                        matchStartIndex = curIndex;
-                    }
-                    else if (curGemType != prevGemType && count >= 3)
-                    {
-                        break; // 매치가 끊기고 이전에 3개 이상 매치된 경우 루프 종료
-                    }
-                }
-                prevGemType = curGemType;
-            }
-
-            if (count >= 3)
-            {
-                for (int i = matchStartIndex; i < matchStartIndex + count; i++)
-                {
-                    if (blockPlateArray[i, x] && blockArray[i, x] != null && blockArray[i, x].BlockInstance != null)
-                    {
-                        Debug.Log($"매칭 된 블럭 수: {count}");
-                        Debug.Log($"Y축 매치된 블록 파괴 위치: x={x}, y={i}");
-                        Debug.Log($"매치된 블록 GemType: {blockArray[i, x].GemType}");
-                        Destroy(blockArray[i, x].BlockInstance);
-                        blockArray[i, x].BlockInstance = null;
-                        if (i + 1 < height && blockArray[i + 1, x] is Cloche)
-                        {
-                            (blockArray[i + 1, x] as Cloche).TakeDamage(boardManager);
-                        }
-                        if (i - 1 >= 0 && blockArray[i - 1, x] is Cloche)
-                        {
-                            (blockArray[i - 1, x] as Cloche).TakeDamage(boardManager);
-                        }
-                        if (x + 1 < width && blockArray[i, x + 1] is Cloche)
-                        {
-                            (blockArray[i, x + 1] as Cloche).TakeDamage(boardManager);
-                        }
-                        if (x - 1 >= 0 && blockArray[i, x - 1] is Cloche)
-                        {
-                            (blockArray[i, x - 1] as Cloche).TakeDamage(boardManager);
-                        }
-                        score += 10;
-                        isMatched = true;
-                    }
-                }
-
-                if (isMatched)
-                {
-                    boardManager.MatchCombo.UpCombo();
-                    if (boardManager.MatchCombo.CurCombo > 1)
-                    {
-                        boardManager.UpdateUI((int)(score * (0.5f * boardManager.MatchCombo.CurCombo)));
-                    }
-                    else
-                    {
-                        boardManager.UpdateUI(score);
-                    }
-                }
-            }
-
-            return count;
-        }
-
-        public bool CubeMatchCheck(int x, int y, BoardManager boardManager)
-        {
-            // 2x2 매치 체크 로직
-            bool isMatched = false;
-            // 이동 방향을 기준으로 6칸만 체크하면됨.
-            Vector2Int moveDirection = boardManager.BlockMover.EndBlockPos - boardManager.BlockMover.StartBlockPos;
-
-            //대각선은 나오지 않고 무조건 x,y중 하나만 값이 들어가므로 4방향에서의 조건만 체크
-            if (moveDirection.x == 1)
-            {
-                // 우측 이동시 체크 로직
-                if (CubeCheck(boardManager, x, y, 1) || CubeCheck(boardManager, x, y, 3))
-                {
-                    isMatched = true;
-                }
-            }
-            else if (moveDirection.x == -1)
-            {
-                // 좌측 이동시 체크 로직
-                if (CubeCheck(boardManager, x, y, 2) || CubeCheck(boardManager, x, y, 4))
-                {
-                    isMatched = true;
-                }
-            }
-            else if (moveDirection.y == 1)
-            {
-                // 상단 이동시 체크 로직
-                if (CubeCheck(boardManager, x, y, 1) || CubeCheck(boardManager, x, y, 2))
-                {
-                    isMatched = true;
-                }
-            }
-            else if (moveDirection.y == -1)
-            {
-                // 하단 이동시 체크 로직
-                if (CubeCheck(boardManager, x, y, 3) || CubeCheck(boardManager, x, y, 4))
-                {
-                    isMatched = true;
-                }
-            }
-
-            return isMatched;
-        }
-
-        /// <summary>
-        /// startarray값으로 위치를 지정하면 해당 위치에서 2x2 매치 체크, startArray에는 1~4의 값을 넣어야 함
-        /// </summary>
-        /// <param name="boardManager"></param>
-        /// <param name="x"></param>
-        /// <param name="y"></param>
-        /// <param name="startArray">1 = 좌측 하단, 2 = 우측 하단, 3 = 좌측 상단, 4 = 우측 상단</param>
-        private bool CubeCheck(BoardManager boardManager, int x, int y, int startArray = 1)
-        {
-            int height = boardManager.Spawner.BlockPlate.BlockPlateHeight;
-            int width = boardManager.Spawner.BlockPlate.BlockPlateWidth;
-            var blockArray = boardManager.Spawner.BlockArray;
-            var blockPlateArray = boardManager.Spawner.BlockPlate.BlockPlateArray;
-
-            int score = 0;
-            int matchCount = 0;
-            int offsetX = 0;
-            int offsetY = 0;
-            bool isMatched = false;
-
-            switch (startArray)
-            {
-                case 1: // 좌측 하단
-                    offsetX = x;
-                    offsetY = y;
-                    break;
-                case 2: // 우측 하단
-                    offsetX = x - 1;
-                    offsetY = y;
-                    break;
-                case 3: // 좌측 상단
-                    offsetX = x;
-                    offsetY = y - 1;
-                    break;
-                case 4: // 우측 상단
-                    offsetX = x - 1;
-                    offsetY = y - 1;
-                    break;
-                default:
-                    Debug.LogError("CubeCheck의 startArray 파라미터는 1~4 사이의 값이어야 합니다.");
-                    return false;
-            }
-
-            // 매치 체크
-            for (int i = offsetY; i < offsetY + 2; i++)
-            {
-                if (i < 0 || i >= height)
-                {
-                    return false;
-                }
-
-                for (int j = offsetX; j < offsetX + 2; j++)
-                {
-                    if (j < 0 || j >= width)
-                    {
-                        return false;
-                    }
-
-                    if (blockPlateArray[i, j] && blockPlateArray[y, x] && blockArray[i, j] != null
-                    && blockArray[y, x] != null && blockArray[i, j].BlockType == blockArray[y, x].BlockType)
-                    {
-                        matchCount++;
-                    }
-                }
-            }
-
-            if (matchCount == 4)
-            {
-                // 2x2 블록 매치 처리
-                for (int i = offsetY; i < offsetY + 2; i++)
-                {
-                    for (int j = offsetX; j < offsetX + 2; j++)
-                    {
-                        if (blockArray[i, j] != null)
-                        {
-                            if (blockArray[i, j].BlockInstance != null)
-                            {
-                                Destroy(blockArray[i, j].BlockInstance);
-                                blockArray[i, j].BlockInstance = null;
-                                if (i + 1 < height && blockArray[i + 1, j] is Cloche)
-                                {
-                                    (blockArray[i + 1, j] as Cloche).TakeDamage(boardManager);
-                                }
-                                if (i - 1 >= 0 && blockArray[i - 1, j] is Cloche)
-                                {
-                                    (blockArray[i - 1, j] as Cloche).TakeDamage(boardManager);
-                                }
-                                if (j + 1 < width && blockArray[i, j + 1] is Cloche)
-                                {
-                                    (blockArray[i, j + 1] as Cloche).TakeDamage(boardManager);
-                                }
-                                if (j - 1 >= 0 && blockArray[i, j - 1] is Cloche)
-                                {
-                                    (blockArray[i, j - 1] as Cloche).TakeDamage(boardManager);
-                                }
-                                score += 10;
-                                isMatched = true;
-                            }
-                        }
-                    }
-                }
-
-                if (isMatched)
-                {
-                    boardManager.MatchCombo.UpCombo();
-                    if (boardManager.MatchCombo.CurCombo > 1)
-                    {
-                        boardManager.UpdateUI((int)(score * (0.5f * boardManager.MatchCombo.CurCombo)));
-                    }
-                    else
-                    {
-                        boardManager.UpdateUI(score);
-                    }
-                }
-            }
-
-            return isMatched;
-        }
-        #endregion
 
         #region 유틸 함수
         /// <summary>
@@ -761,6 +408,52 @@ namespace KDJ
             }
 
             return isMatched;
+        }
+
+        private List<Vector2Int> FindFullLineMatch(BoardManager boardManager, int startX, int startY, bool isHorizontal)
+        {
+            var matches = new List<Vector2Int>();
+            if (!CheckBlockIsAllValid(boardManager, startX, startY) || boardManager.Spawner.BlockArray[startY, startX].IsObstacle)
+                return matches;
+
+            var startType = boardManager.Spawner.BlockArray[startY, startX].GemType;
+            matches.Add(new Vector2Int(startX, startY));
+
+            if (isHorizontal)
+            {
+                // 왼쪽 탐색
+                for (int x = startX - 1; x >= 0; x--)
+                {
+                    if (CheckBlockIsAllValid(boardManager, x, startY) && !boardManager.Spawner.BlockArray[startY, x].IsObstacle && boardManager.Spawner.BlockArray[startY, x].GemType == startType)
+                        matches.Add(new Vector2Int(x, startY));
+                    else break;
+                }
+                // 오른쪽 탐색
+                for (int x = startX + 1; x < boardManager.Spawner.BlockPlate.BlockPlateWidth; x++)
+                {
+                    if (CheckBlockIsAllValid(boardManager, x, startY) && !boardManager.Spawner.BlockArray[startY, x].IsObstacle && boardManager.Spawner.BlockArray[startY, x].GemType == startType)
+                        matches.Add(new Vector2Int(x, startY));
+                    else break;
+                }
+            }
+            else // 세로
+            {
+                // 위쪽 탐색
+                for (int y = startY - 1; y >= 0; y--)
+                {
+                    if (CheckBlockIsAllValid(boardManager, startX, y) && !boardManager.Spawner.BlockArray[y, startX].IsObstacle && boardManager.Spawner.BlockArray[y, startX].GemType == startType)
+                        matches.Add(new Vector2Int(startX, y));
+                    else break;
+                }
+                // 아래쪽 탐색
+                for (int y = startY + 1; y < boardManager.Spawner.BlockPlate.BlockPlateHeight; y++)
+                {
+                    if (CheckBlockIsAllValid(boardManager, startX, y) && !boardManager.Spawner.BlockArray[y, startX].IsObstacle && boardManager.Spawner.BlockArray[y, startX].GemType == startType)
+                        matches.Add(new Vector2Int(startX, y));
+                    else break;
+                }
+            }
+            return matches;
         }
 
         /// <summary>

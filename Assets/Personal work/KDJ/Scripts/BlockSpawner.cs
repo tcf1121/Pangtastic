@@ -316,6 +316,7 @@ namespace KDJ
                                         BlockArray[i, x] = null;
                                         BlockArray[y, x].BlockInstance.transform.position = GetWorldPosition(x, y);
                                         canMove = true;
+                                        break;
                                     }
                                 }
                             }
@@ -527,11 +528,11 @@ namespace KDJ
                             //        break;
                             //
                             //}
-                            if (BlockArray[y, x] is Cloche)
-                            {
-                                SpawnRandomBlock(x, y);
-                                continue;
-                            }
+                            //if (BlockArray[y, x] is Cloche)
+                            //{
+                            //    SpawnRandomBlock(x, y);
+                            //    continue;
+                            //}
 
                             BlockArray[y, x] = null;
                         }
@@ -719,7 +720,7 @@ namespace KDJ
                     }
                 }
             }
-            Debug.Log($"빈칸 개수 : {blankBlockCount}");
+            //Debug.Log($"빈칸 개수 : {blankBlockCount}");
             return blankBlockCount > 0;
         }
 
@@ -752,7 +753,7 @@ namespace KDJ
         {
             bool result = false;
 
-            Debug.Log("블럭 배열 이동 체크");
+            //Debug.Log("블럭 배열 이동 체크");
             for (int x = 0; x < BlockPlate.BlockPlateWidth; x++)
             {
                 for (int y = 0; y < BlockPlate.BlockPlateHeight; y++)
