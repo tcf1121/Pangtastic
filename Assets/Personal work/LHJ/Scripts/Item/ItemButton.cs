@@ -21,6 +21,24 @@ namespace LHJ
             var manager = CopyBoardManager.Instance;
             if (manager == null) return;
 
+            if (_type == ItemType.DonutPan)
+            {
+                var itemCheck = FindObjectOfType<ItemCheck>();
+                if (itemCheck != null)
+                    itemCheck.UseDonutPan();
+                return;
+            }
+            if (_type == ItemType.Coffee)
+            {
+                var itemCheck = FindObjectOfType<ItemCheck>();
+                if (itemCheck != null)
+                {
+                    itemCheck.UseCoffee(30f);
+                }
+                return;
+            }
+
+
             if (manager.IsItemSelected && manager.SelectedItemType == _type)
                 manager.ClearItemSelection();
             else
