@@ -11,7 +11,6 @@ namespace LHJ
     public class ItemCheck : MonoBehaviour
     {
         [SerializeField] private BoardManager _board;
-        [SerializeField] private GameObject[] _specialPrefabs;
 
         private void Update()
         {
@@ -45,7 +44,24 @@ namespace LHJ
                 manager.ClearItemSelection();
             }
         }
+        public void UseCoffee(float amount = 30f)
+        {
+            var order = FindObjectOfType<OrderStateController>();
+            if (order == null || order._curPatience <= 0f) return;
+            order._curPatience = Mathf.Min(order._curPatience + amount, 100f);
 
+            float timeToZero = 60f;
+            if (order._curCustomer != null)
+            {
+                if (order._curCustomer.Type == CustomerType.Unique)
+                    timeToZero = 50f;
+                else if (order._curCustomer.Type == CustomerType.Special)
+                    timeToZero = 30f;
+            }
+
+            float progress = 1f - (order._curPatience / 100f);
+            order._elapsed = progress * timeToZero;
+        }
         private bool InBounds(Vector2Int p)
         {
             var sp = _board.Spawner;
@@ -71,7 +87,10 @@ namespace LHJ
             }
 
             if (destroyed > 0)
+            {
                 _board.UpdateUI(destroyed * 10);
+                _board.ChangeState(new RefillState());
+            }
         }
 
         private int ApplyScissor(Vector2Int pos)
@@ -140,6 +159,12 @@ namespace LHJ
             }
             return destroyedCount;
         }
+        public void UseDonutPan()
+        {
+            var manager = CopyBoardManager.Instance;
+            if (manager != null) manager.ClearItemSelection();
+            StartCoroutine(RegenSpecialBlockRoutine());
+        }
         private IEnumerator RegenSpecialBlockRoutine()
         {
             ClearBoard();
@@ -155,7 +180,6 @@ namespace LHJ
             var sp = _board.Spawner;
             int w = sp.BlockPlate.BlockPlateWidth;
             int h = sp.BlockPlate.BlockPlateHeight;
-            if (_specialPrefabs == null || _specialPrefabs.Length == 0) return;
 
             for (int t = 0; t < 100; t++)
             {
@@ -166,16 +190,11 @@ namespace LHJ
                 if (cell == null || cell.BlockInstance == null) continue;
 
                 Destroy(cell.BlockInstance);
-                var prefab = _specialPrefabs[Random.Range(0, _specialPrefabs.Length)];
-                var go = Instantiate(prefab);
+                sp.BlockArray[y, x] = null;
 
-                go.transform.position = new Vector3(
-                    x - (w / 2f) + 0.5f,
-                    y - (h / 2f) + 0.5f,
-                    0f
-                );
-
-                sp.BlockArray[y, x].BlockInstance = go;
+                int[] specialIds = { 7, 8, 9, 10, 11 };
+                int id = specialIds[Random.Range(0, specialIds.Length)];
+                sp.SpawnBlock(x, y, id);
                 break;
             }
         }

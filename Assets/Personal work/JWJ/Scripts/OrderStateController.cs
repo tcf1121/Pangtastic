@@ -15,13 +15,13 @@ public class OrderStateController : MonoBehaviour
 
     [SerializeField] private Slider patienceSlider;
 
-    private CustomerSO _curCustomer;
+    public CustomerSO _curCustomer;
 
     private List<OrderRecipe> _orderRecipes = new List<OrderRecipe>();
 
     private float _maxPatience; //인내심 최대값
-    private float _curPatience; //현재 인내심
-    private float _elapsed; //경과 시간
+    public float _curPatience; //현재 인내심
+    public float _elapsed; //경과 시간
     private bool _isRunning; //타이머 동작중 여부
     private bool _hasEnded; //이미 성공/실패로 종료됐는지
 

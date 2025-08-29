@@ -39,13 +39,13 @@ namespace KDJ.States
             {
                 if (!boardManager.MatchChecker.AllBlockMatchPossibilityCheck(boardManager, out int possibleCount))
                 {
-                    Debug.Log($"매칭 가능한 블럭이 {possibleCount}개 있습니다.");
+                    //Debug.Log($"매칭 가능한 블럭이 {possibleCount}개 있습니다.");
                     // 매칭 가능한 블럭이 없을 경우 블럭 섞기
                     boardManager.Spawner.ShuffleBlockArray();
                     // 섞고나서 ReadyState 재진입
                     boardManager.ChangeState(new ReadyState());
                 }
-                Debug.Log($"매칭 가능한 블럭이 {possibleCount}개 있습니다.");
+                //Debug.Log($"매칭 가능한 블럭이 {possibleCount}개 있습니다.");
             }
 
             if (Input.GetKeyDown(KeyCode.R))
@@ -57,13 +57,13 @@ namespace KDJ.States
             }
 
             if (Input.GetMouseButtonDown(0))
-                {
-                    Debug.Log("마우스 클릭 감지");
-                    Vector3 mousePosition = Input.mousePosition;
-                    mousePosition.z = -Camera.main.transform.position.z;
-                    boardManager.BlockMover.StartPos = Camera.main.ScreenToWorldPoint(mousePosition);
-                    TestBlockInfo(boardManager);
-                }
+            {
+                Debug.Log("마우스 클릭 감지");
+                Vector3 mousePosition = Input.mousePosition;
+                mousePosition.z = -Camera.main.transform.position.z;
+                boardManager.BlockMover.StartPos = Camera.main.ScreenToWorldPoint(mousePosition);
+                TestBlockInfo(boardManager);
+            }
 
             if (Input.GetMouseButtonUp(0))
             {
@@ -114,7 +114,7 @@ namespace KDJ.States
             Block block = boardManager.Spawner.BlockArray[gridPos.y, gridPos.x];
             if (block != null)
             {
-                boardManager.UpdateUI(block);
+                boardManager.UpdateUI(block, gridPos.x, gridPos.y);
             }
         }
 

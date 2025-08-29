@@ -156,7 +156,7 @@ namespace SCR
                 instance.GemTilemap.SetTile(pos + Vector3Int.up, null);
                 instance.GemTilemap.SetTile(pos + Vector3Int.right, null);
                 instance.GemTilemap.SetTile(pos + Vector3Int.up + Vector3Int.right, null);
-                DrawObject(pos, GemType.CatStatues);
+                DrawObject(pos, GemType.FlourBag);
             }
             else
             {

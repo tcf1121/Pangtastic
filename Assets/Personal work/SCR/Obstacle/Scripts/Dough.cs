@@ -12,7 +12,7 @@ namespace SCR
             _onCollider = false;
             _isSpawn = false;
             _isSplashDamage = false;
-            ObstaclType = GemType.Dough;
+            ObstaclType = GemType.Dust;
             base.Init(cell);
         }
     }

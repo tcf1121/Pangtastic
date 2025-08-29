@@ -29,7 +29,7 @@ namespace SCR
             else
             {
                 _firstGemtype = gem;
-                if (gem == GemType.Dough ||
+                if (gem == GemType.Dust ||
                     gem == GemType.Syrup ||
                     gem == GemType.Ice)
                     _firstDonut = (GemType)Random.Range(0, 6);
@@ -44,14 +44,14 @@ namespace SCR
         public void SetObject(GemType gem)
         {
             if (gem < GemType.Roller_v) SetDonut(gem);
-            else if (gem < GemType.Dough) SetSpecial(gem);
+            else if (gem < GemType.Dust) SetSpecial(gem);
             else if (gem < GemType.Empty) SetObstacle(gem);
             if (gem == GemType.Random) SetDonut(gem);
         }
 
         public void Init()
         {
-            if (_firstGemtype == GemType.CatStatues_s) _catS = true;
+            if (_firstGemtype == GemType.Flour_s) _catS = true;
             else SetObject(_firstGemtype);
             _firstGemtype = GemType.Empty;
         }
@@ -123,7 +123,7 @@ namespace SCR
                 if (_firstGemtype < GemType.Roller_v) return _firstGemtype;
                 else
                 {
-                    if (_firstGemtype == GemType.Dough ||
+                    if (_firstGemtype == GemType.Dust ||
                     _firstGemtype == GemType.Syrup ||
                     _firstGemtype == GemType.Ice) return _firstDonut;
                     return GemType.Empty;
@@ -131,7 +131,7 @@ namespace SCR
             }
             if (_donutObstacle != null)
             {
-                if (_donutObstacle.GetBlockType() == GemType.Cloche)
+                if (_donutObstacle.GetBlockType() == GemType.DonutBag)
                     return GemType.Empty;
                 else return _donut.DonutType;
             }
@@ -141,10 +141,10 @@ namespace SCR
 
         public GemType GetCatStatuse()
         {
-            if (_catS) return GemType.CatStatues_s;
+            if (_catS) return GemType.Flour_s;
             if (_obstacle != null &&
-            _obstacle.GetBlockType() == GemType.CatStatues)
-                return GemType.CatStatues;
+            _obstacle.GetBlockType() == GemType.FlourBag)
+                return GemType.FlourBag;
             else return GemType.Empty;
         }
 
@@ -152,7 +152,7 @@ namespace SCR
         {
             if (_donutObstacle != null)
                 return false;
-            if (_obstacle != null && _obstacle.GetBlockType() == GemType.CatStatues)
+            if (_obstacle != null && _obstacle.GetBlockType() == GemType.FlourBag)
                 return false;
             if (_catS) return false;
             return true;
@@ -165,7 +165,7 @@ namespace SCR
                 moveCell.SetDonut(_donut);
                 _donut = null;
             }
-            if (_obstacle != null && _obstacle.ObstaclType < GemType.CatStatues)
+            if (_obstacle != null && _obstacle.ObstaclType < GemType.FlourBag)
             {
                 moveCell.SetObstacle(_obstacle);
                 _obstacle = null;
@@ -189,7 +189,7 @@ namespace SCR
             {
                 target = _special.gameObject.transform;
             }
-            else if (_obstacle != null && _obstacle.ObstaclType < GemType.CatStatues)
+            else if (_obstacle != null && _obstacle.ObstaclType < GemType.FlourBag)
             {
                 target = _obstacle.gameObject.transform;
             }
@@ -251,7 +251,7 @@ namespace SCR
             }
             if (_donutObstacle != null)
             {
-                if (_donutObstacle.GetBlockType() == GemType.Cloche)
+                if (_donutObstacle.GetBlockType() == GemType.DonutBag)
                 {
                     _donutObstacle.Damage();
                     if (_donutObstacle != null)

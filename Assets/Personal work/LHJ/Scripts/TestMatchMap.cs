@@ -21,7 +21,7 @@ public class TestMatchMap : MonoBehaviour
         { SCR.GemType.Lavender, SCR.GemType.Chocolate, SCR.GemType.Chocolate, SCR.GemType.Blueberry, SCR.GemType.Blueberry, SCR.GemType.Chocolate },
         { SCR.GemType.Lavender, SCR.GemType.Chocolate, SCR.GemType.Chocolate, SCR.GemType.Blueberry, SCR.GemType.Chocolate, SCR.GemType.Blueberry },
         { SCR.GemType.Blueberry,  SCR.GemType.Blueberry, SCR.GemType.Lavender, SCR.GemType.Chocolate, SCR.GemType.Blueberry, SCR.GemType.Blueberry },
-        { SCR.GemType.Lavender, SCR.GemType.Chocolate, SCR.GemType.Chocolate, SCR.GemType.Cloche,   SCR.GemType.Chocolate, SCR.GemType.Chocolate },
+        { SCR.GemType.Lavender, SCR.GemType.Chocolate, SCR.GemType.Chocolate, SCR.GemType.DonutBag,   SCR.GemType.Chocolate, SCR.GemType.Chocolate },
         { SCR.GemType.Lavender, SCR.GemType.Blueberry, SCR.GemType.Chocolate, SCR.GemType.Chocolate, SCR.GemType.Lavender, SCR.GemType.Lavender },
         { SCR.GemType.Blueberry,  SCR.GemType.Blueberry, SCR.GemType.Lavender, SCR.GemType.Blueberry, SCR.GemType.Blueberry, SCR.GemType.Lavender },
     };

@@ -4,6 +4,7 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
+[DefaultExecutionOrder(-20)]
 public class StageManager : MonoBehaviour
 {
     public static StageManager Instance;
@@ -17,6 +18,7 @@ public class StageManager : MonoBehaviour
 
     private void Awake()
     {
+        Debug.Log("스테이지");
         if (Instance == null)
         {
             Instance = this;

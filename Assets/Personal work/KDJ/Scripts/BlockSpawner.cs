@@ -2,6 +2,9 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using SCR;
+using UnityEngine.UI;
+using SCR_O;
+using UnityEngine.Localization.Pseudo;
 
 namespace KDJ
 {
@@ -9,7 +12,7 @@ namespace KDJ
     public class Block
     {
         public int BlockType { get; set; }
-        public int Score { get; private set; } = 10;
+        public int Score { get; protected set; } = 10;
         public GameObject BlockInstance { get; set; } = null;
         public GemType GemType { get; set; }
         public bool IsObstacle { get; set; } = false;
@@ -65,17 +68,21 @@ namespace KDJ
         [SerializeField] private int _spawnRangeMin;
         [Range(1, 6)]
         [SerializeField] private int _spawnRangeMax;
-        public int SpawnRangeMin {
-            get { return _spawnRangeMin; } 
-            set { _spawnRangeMin = value; } 
+        public int SpawnRangeMin
+        {
+            get { return _spawnRangeMin; }
+            set { _spawnRangeMin = value; }
         }
-        public int SpawnRangeMax {
+        public int SpawnRangeMax
+        {
             get { return _spawnRangeMax; }
             set { _spawnRangeMax = value; }
         }
 
         public List<GemType> DestroyBlockData { get; private set; } = new List<GemType>();
+        public Vector2Int ZeroPos;
         public Block[,] BlockArray;
+        public Block[,] OverlayArray;
         public int BlankBlockCount = 0;
 
         #region 초기화
@@ -150,6 +157,7 @@ namespace KDJ
                 {
                     if (BlockPlate.BlockPlateWidth % 2 == 0)
                     {
+
                         if (y < BlockPlate.BlockPlateHeight)
                         {
                             if (BlockPlate.BlockPlateArray[y, x] && BlockArray[y, x].BlockType != 0)
@@ -157,6 +165,9 @@ namespace KDJ
                                 Vector3 position = new Vector3(x - BlockPlate.BlockPlateWidth / 2 + 0.5f, y - BlockPlate.BlockPlateHeight / 2 + 0.5f, 0);
                                 GameObject blockPrefab = GetBlockTile(BlockArray[y, x].BlockType);
                                 BlockArray[y, x].BlockInstance = Instantiate(blockPrefab, position, Quaternion.identity);
+                                if (BlockArray[y, x].GemType == GemType.Ice)
+                                    BlockArray[y, x].BlockInstance.GetComponent<SpriteRenderer>().sprite = (BlockArray[y, x] as SCR_O.Ice).GetIceImage();
+
                             }
                         }
                         else
@@ -166,6 +177,8 @@ namespace KDJ
                                 Vector3 position = new Vector3(x - BlockPlate.BlockPlateWidth / 2 + 0.5f, y - BlockPlate.BlockPlateHeight / 2 + 0.5f, 0);
                                 GameObject blockPrefab = GetBlockTile(BlockArray[y, x].BlockType);
                                 BlockArray[y, x].BlockInstance = Instantiate(blockPrefab, position, Quaternion.identity);
+                                if (BlockArray[y, x].GemType == GemType.Ice)
+                                    BlockArray[y, x].BlockInstance.GetComponent<SpriteRenderer>().sprite = (BlockArray[y, x] as SCR_O.Ice).GetIceImage();
                             }
                         }
 
@@ -179,6 +192,8 @@ namespace KDJ
                                 Vector3 position = new Vector3(x - BlockPlate.BlockPlateWidth / 2, y - BlockPlate.BlockPlateHeight / 2, 0);
                                 GameObject blockPrefab = GetBlockTile(BlockArray[y, x].BlockType);
                                 BlockArray[y, x].BlockInstance = Instantiate(blockPrefab, position, Quaternion.identity);
+                                if (BlockArray[y, x].GemType == GemType.Ice)
+                                    BlockArray[y, x].BlockInstance.GetComponent<SpriteRenderer>().sprite = (BlockArray[y, x] as SCR_O.Ice).GetIceImage();
                             }
                         }
                         else
@@ -188,9 +203,31 @@ namespace KDJ
                                 Vector3 position = new Vector3(x - BlockPlate.BlockPlateWidth / 2, y - BlockPlate.BlockPlateHeight / 2, 0);
                                 GameObject blockPrefab = GetBlockTile(BlockArray[y, x].BlockType);
                                 BlockArray[y, x].BlockInstance = Instantiate(blockPrefab, position, Quaternion.identity);
+                                if (BlockArray[y, x].GemType == GemType.Ice)
+                                    BlockArray[y, x].BlockInstance.GetComponent<SpriteRenderer>().sprite = (BlockArray[y, x] as SCR_O.Ice).GetIceImage();
                             }
                         }
 
+                    }
+                }
+            }
+        }
+
+        public void DrawBlock2()
+        {
+            for (int x = 0; x < BlockPlate.BlockPlateWidth; x++)
+            {
+                for (int y = 0; y < BlockArray.GetLength(0); y++)
+                {
+                    Vector3 pos = new Vector3(x + 0.5f + ZeroPos.x, y + 0.5f + ZeroPos.x, 0);
+                    BlockArray[y, x].BlockInstance = Instantiate(_blockPrefabs[BlockArray[y, x].BlockType - 1]);
+                    BlockArray[y, x].BlockInstance.transform.position = pos;
+                    if (BlockArray[y, x].GemType == GemType.Ice)
+                        BlockArray[y, x].BlockInstance.GetComponent<SpriteRenderer>().sprite = (BlockArray[y, x] as SCR_O.Ice).GetIceImage();
+                    if (OverlayArray[y, x] != null)
+                    {
+                        OverlayArray[y, x].BlockInstance = Instantiate(_blockPrefabs[OverlayArray[y, x].BlockType - 1]);
+                        OverlayArray[y, x].BlockInstance.transform.position = pos;
                     }
                 }
             }
@@ -279,6 +316,7 @@ namespace KDJ
                                         BlockArray[i, x] = null;
                                         BlockArray[y, x].BlockInstance.transform.position = GetWorldPosition(x, y);
                                         canMove = true;
+                                        break;
                                     }
                                 }
                             }
@@ -490,11 +528,11 @@ namespace KDJ
                             //        break;
                             //
                             //}
-                            if (BlockArray[y, x] is Cloche)
-                            {
-                                SpawnRandomBlock(x, y);
-                                continue;
-                            }
+                            //if (BlockArray[y, x] is Cloche)
+                            //{
+                            //    SpawnRandomBlock(x, y);
+                            //    continue;
+                            //}
 
                             BlockArray[y, x] = null;
                         }
@@ -682,7 +720,7 @@ namespace KDJ
                     }
                 }
             }
-            Debug.Log($"빈칸 개수 : {blankBlockCount}");
+            //Debug.Log($"빈칸 개수 : {blankBlockCount}");
             return blankBlockCount > 0;
         }
 
@@ -715,7 +753,7 @@ namespace KDJ
         {
             bool result = false;
 
-            Debug.Log("블럭 배열 이동 체크");
+            //Debug.Log("블럭 배열 이동 체크");
             for (int x = 0; x < BlockPlate.BlockPlateWidth; x++)
             {
                 for (int y = 0; y < BlockPlate.BlockPlateHeight; y++)
@@ -747,16 +785,16 @@ namespace KDJ
                             }
                         }
                         else if (!BlockPlate.BlockPlateArray[y + 1, x])
+                        {
+                            for (int i = y + 1; i < BlockPlate.BlockPlateHeight; i++)
                             {
-                                for (int i = y + 1; i < BlockPlate.BlockPlateHeight; i++)
-                                {
 
-                                    if (BlockPlate.BlockPlateArray[i, x] && BlockArray[i, x] != null && !BlockArray[i, x].IsObstacle)
-                                    {
-                                        result = true;
-                                    }
+                                if (BlockPlate.BlockPlateArray[i, x] && BlockArray[i, x] != null && !BlockArray[i, x].IsObstacle)
+                                {
+                                    result = true;
                                 }
                             }
+                        }
                         else
                         {
                             if (GetAboveObstacleBlock(x, y))

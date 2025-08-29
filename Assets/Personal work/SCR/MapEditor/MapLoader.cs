@@ -16,6 +16,7 @@ namespace SCR
         [SerializeField] private int _stageNum;
         private Dictionary<Vector3Int, GemType> _mapInfo = new();
         private List<Vector3Int> _spawnPoint = new();
+
         private int _stage;
         string path = "Assets/CSV/Puzzle Board.csv";
 
@@ -42,6 +43,7 @@ namespace SCR
                 string[] values = lines[_stage].Split(',');
                 GetPuzzle(values[1]);
                 GetSpawnPoint(values[2]);
+
                 Board.SetPuzzleInfo(_mapInfo, _spawnPoint);
 
                 Addressables.Release(handle);
