@@ -10,8 +10,10 @@ namespace KDJ
 {
     public class BoardData
     {
+        public Vector2Int ZeroPos;
         public bool[,] BlockPlateArray;
         public Block[,] BlockArray;
+        public Block[,] OverlayArray;
     }
 
     public class BoardLoader : MonoBehaviour
@@ -30,14 +32,16 @@ namespace KDJ
                     return new BoardData { BlockPlateArray = new bool[0, 0], BlockArray = new Block[0, 0] };
                 }
 
-                var blockInfos = values.Select(v => {
+                var blockInfos = values.Select(v =>
+                {
                     var parts = v.Split(':');
                     if (parts.Length < 4)
                     {
                         Debug.LogWarning($"잘못된 형식의 셀 데이터를 건너뜁니다: {v}");
                         return null;
                     }
-                    return new {
+                    return new
+                    {
                         x = int.Parse(parts[0]),
                         y = int.Parse(parts[1]),
                         gemType = (GemType)Enum.Parse(typeof(GemType), parts[3])
@@ -55,13 +59,16 @@ namespace KDJ
                 int yMin = blockInfos.Min(b => b.y);
                 int yMax = blockInfos.Max(b => b.y);
 
+
                 int plateHeight = yMax - yMin + 1;
                 int plateWidth = xMax - xMin + 1;
 
                 var boardData = new BoardData
                 {
+                    ZeroPos = new Vector2Int(xMin, yMin),
                     BlockPlateArray = new bool[plateHeight, plateWidth],
-                    BlockArray = new Block[plateHeight + 1, plateWidth] // BlockArray는 한 줄 더 높습니다.
+                    BlockArray = new Block[plateHeight + 1, plateWidth], // BlockArray는 한 줄 더 높습니다.
+                    OverlayArray = new Block[plateHeight + 1, plateWidth]
                 };
 
                 int xOffset = -xMin;
@@ -79,7 +86,7 @@ namespace KDJ
                     }
 
                     boardData.BlockPlateArray[y, x] = true;
-                    
+
                     int tempNum = 0;
                     GemType finalGemType = info.gemType;
                     int blockType;
@@ -94,13 +101,45 @@ namespace KDJ
                     {
                         blockType = (int)finalGemType + 1;
                     }
-                    
+
                     // BlockArray의 해당 위치에 블록을 배치합니다.
-                    boardData.BlockArray[y, x] = new Block()
+
+                    if (finalGemType == GemType.Dust)
                     {
-                        GemType = finalGemType,
-                        BlockType = blockType,
-                    };
+                        boardData.OverlayArray[y, x] = new SCR_O.Dust(x, y);
+                        int donutNum = UnityEngine.Random.Range(0, 6);
+                        boardData.BlockArray[y, x] = new Block()
+                        {
+                            BlockType = donutNum + 1,
+                            GemType = (GemType)donutNum,
+
+                        };
+                    }
+                    else if (finalGemType == GemType.Syrup)
+                    {
+                        boardData.OverlayArray[y, x] = new SCR_O.Syrup(x, y);
+                        int donutNum = UnityEngine.Random.Range(0, 6);
+                        boardData.BlockArray[y, x] = new Block()
+                        {
+                            BlockType = donutNum + 1,
+                            GemType = (GemType)donutNum,
+                        };
+                    }
+                    else if (finalGemType == GemType.Ice) boardData.BlockArray[y, x] = new SCR_O.Ice(x, y);
+                    else if (finalGemType == GemType.DonutBag) boardData.BlockArray[y, x] = new SCR_O.DonutBag(x, y);
+                    else if (finalGemType == GemType.Coin) boardData.BlockArray[y, x] = new SCR_O.Coin(x, y);
+                    else if (finalGemType == GemType.GiftBox) boardData.BlockArray[y, x] = new SCR_O.GiftBox(x, y);
+                    else if (finalGemType == GemType.Egg) boardData.BlockArray[y, x] = new SCR_O.Egg(x, y);
+                    else if (finalGemType == GemType.FlourBag) boardData.BlockArray[y, x] = new SCR_O.FlourBag(boardData, x, y);
+                    else if (finalGemType == GemType.Flour_s) { }
+                    else
+                    {
+                        boardData.BlockArray[y, x] = new Block()
+                        {
+                            GemType = finalGemType,
+                            BlockType = blockType,
+                        };
+                    }
                 }
 
                 return boardData;
@@ -111,6 +150,7 @@ namespace KDJ
                 return null;
             }
         }
+
 
         public BoardData ReadCSV(int num)
         {

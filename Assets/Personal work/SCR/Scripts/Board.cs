@@ -19,15 +19,15 @@ namespace SCR
         Milk,
         Oven,
         DonutBox,
-        Dough,
+        Dust,
         Syrup,
         Ice,
-        Cloche,
+        DonutBag,
         Coin,
         GiftBox,
         Egg,
-        CatStatues,
-        CatStatues_s,
+        FlourBag,
+        Flour_s,
         Empty,
         Random
     }
@@ -353,7 +353,7 @@ namespace SCR
             {
                 instance = GameObject.Find("Grid").GetComponent<Board>();
             }
-            if (instance.CellContent[pos].GetCatStatuse() == GemType.CatStatues)
+            if (instance.CellContent[pos].GetCatStatuse() == GemType.FlourBag)
             {
                 instance.CellContent[pos + Vector3Int.up].DestroyCat();
                 instance.CellContent[pos + Vector3Int.right].DestroyCat();
@@ -895,7 +895,7 @@ namespace SCR
             {
                 if (instance.CellContent.ContainsKey(cat_sPos + pos))
                 {
-                    if (instance.CellContent[cat_sPos].GetCatStatuse() == GemType.CatStatues)
+                    if (instance.CellContent[cat_sPos].GetCatStatuse() == GemType.FlourBag)
                     {
                         return pos;
                     }
@@ -916,7 +916,7 @@ namespace SCR
             {
                 if (instance.CellContent.ContainsKey(pos))
                 {
-                    if (instance.CellContent[pos].GetCatStatuse() == GemType.CatStatues_s)
+                    if (instance.CellContent[pos].GetCatStatuse() == GemType.Flour_s)
                     {
                         instance.CellContent[pos].DestroyCat();
 
@@ -1019,7 +1019,7 @@ namespace SCR
                 Vector3Int targetPos = centerPos + direction;
                 if (instance.CellContent.ContainsKey(targetPos))
                 {
-                    if (instance.CellContent[targetPos].GetCatStatuse() == GemType.CatStatues_s)
+                    if (instance.CellContent[targetPos].GetCatStatuse() == GemType.Flour_s)
                     {
                         if (!instance.CellContent.ContainsKey(CatStatuesPos(targetPos)))
                         {

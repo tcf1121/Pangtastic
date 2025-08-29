@@ -27,7 +27,7 @@ namespace KDJ
 
         private void Start()
         {
-            ChangeState(new States.InitializeState());
+            ChangeState(new States.InitializeState() as IGameState);
             UpdateUI(Score);
         }
 
@@ -36,7 +36,7 @@ namespace KDJ
             if (CurrentState != null)
             {
                 CurrentState.OnUpdate(this);
-                Debug.Log($"Current State: {CurrentState.GetType().Name}");
+                //Debug.Log($"Current State: {CurrentState.GetType().Name}");
             }
         }
 

@@ -30,7 +30,7 @@ namespace KDJ
                     // 블럭판이 없거나 블럭이 없는 경우
                     if (!blockPlate.BlockPlateArray[y, x] || blockArray[y, x] == null) continue;
 
-                    if (blockArray[y, x].GemType > GemType.Sugar && blockArray[y, x].GemType < GemType.Dough)
+                    if (blockArray[y, x].GemType > GemType.Sugar && blockArray[y, x].GemType < GemType.Dust)
                     {
                         // 특수 블럭이 있는 경우 매치 가능 횟수에 1회 더함. 해당 좌표를 키로 추가 후 continue
                         string key = $"({x},{y})";

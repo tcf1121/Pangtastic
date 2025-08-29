@@ -16,7 +16,7 @@ namespace SCR
             _onCollider = true;
             _isSpawn = false;
             _isSplashDamage = true;
-            ObstaclType = GemType.CatStatues;
+            ObstaclType = GemType.FlourBag;
             base.Init(cell);
         }
     }

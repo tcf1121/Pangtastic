@@ -37,7 +37,7 @@ namespace SCR
             //해당 오브젝트 삭제
             int x = (int)transform.position.x;
             int y = (int)transform.position.y;
-            if (ObstaclType == GemType.CatStatues)
+            if (ObstaclType == GemType.FlourBag)
                 Board.RemoveCatStatues(new Vector3Int(x, y, 0));
             if (ObstaclType == GemType.Syrup || ObstaclType == GemType.Egg)
                 InGameManager.AddIngredientSta(Board.GetPrefabList().GemDatas[(int)ObstaclType].ingredientSO);

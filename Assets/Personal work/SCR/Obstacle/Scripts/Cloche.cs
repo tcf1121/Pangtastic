@@ -12,7 +12,7 @@ namespace SCR
             _onCollider = true;
             _isSpawn = false;
             _isSplashDamage = true;
-            ObstaclType = GemType.Cloche;
+            ObstaclType = GemType.DonutBag;
             base.Init(cell);
         }
 

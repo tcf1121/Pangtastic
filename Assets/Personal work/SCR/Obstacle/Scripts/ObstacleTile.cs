@@ -23,11 +23,11 @@ namespace SCR
 
 
             PuzzelEditBoard.DrawObject(position, Obstacle);
-            if (Obstacle == GemType.CatStatues)
+            if (Obstacle == GemType.FlourBag)
             {
-                PuzzelEditBoard.DrawObject(new Vector3Int(position.x + 1, position.y), GemType.CatStatues_s);
-                PuzzelEditBoard.DrawObject(new Vector3Int(position.x + 1, position.y + 1), GemType.CatStatues_s);
-                PuzzelEditBoard.DrawObject(new Vector3Int(position.x, position.y + 1), GemType.CatStatues_s);
+                PuzzelEditBoard.DrawObject(new Vector3Int(position.x + 1, position.y), GemType.Flour_s);
+                PuzzelEditBoard.DrawObject(new Vector3Int(position.x + 1, position.y + 1), GemType.Flour_s);
+                PuzzelEditBoard.DrawObject(new Vector3Int(position.x, position.y + 1), GemType.Flour_s);
             }
 
 
