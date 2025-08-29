@@ -1,3 +1,4 @@
+using SCR;
 using System.Collections;
 using System.Collections.Generic;
 using TMPro;
@@ -132,4 +133,10 @@ public class InGameManager : MonoBehaviour
         HeartSystem.Instance.UseHearts();
         instate.failUI.SetActive(true);
     }
+
+    public static void RewardGem(List<GemType> gemList)
+    {
+        //보드판에 추가해라
+    }
+
 }

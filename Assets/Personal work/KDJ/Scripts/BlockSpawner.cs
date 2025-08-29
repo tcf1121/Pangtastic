@@ -65,17 +65,20 @@ namespace KDJ
         [SerializeField] private int _spawnRangeMin;
         [Range(1, 6)]
         [SerializeField] private int _spawnRangeMax;
-        public int SpawnRangeMin {
-            get { return _spawnRangeMin; } 
-            set { _spawnRangeMin = value; } 
+        public int SpawnRangeMin
+        {
+            get { return _spawnRangeMin; }
+            set { _spawnRangeMin = value; }
         }
-        public int SpawnRangeMax {
+        public int SpawnRangeMax
+        {
             get { return _spawnRangeMax; }
             set { _spawnRangeMax = value; }
         }
 
         public List<GemType> DestroyBlockData { get; private set; } = new List<GemType>();
         public Block[,] BlockArray;
+        public Block[,] OverlayArray;
         public int BlankBlockCount = 0;
 
         #region 초기화
@@ -747,16 +750,16 @@ namespace KDJ
                             }
                         }
                         else if (!BlockPlate.BlockPlateArray[y + 1, x])
+                        {
+                            for (int i = y + 1; i < BlockPlate.BlockPlateHeight; i++)
                             {
-                                for (int i = y + 1; i < BlockPlate.BlockPlateHeight; i++)
-                                {
 
-                                    if (BlockPlate.BlockPlateArray[i, x] && BlockArray[i, x] != null && !BlockArray[i, x].IsObstacle)
-                                    {
-                                        result = true;
-                                    }
+                                if (BlockPlate.BlockPlateArray[i, x] && BlockArray[i, x] != null && !BlockArray[i, x].IsObstacle)
+                                {
+                                    result = true;
                                 }
                             }
+                        }
                         else
                         {
                             if (GetAboveObstacleBlock(x, y))
