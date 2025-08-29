@@ -1,24 +1,23 @@
 using KDJ;
 using UnityEngine;
 
-namespace SCR_O
+namespace SCR_B
 {
     public class Syrup : ObstacleBlock
     {
         public Syrup(int xpos, int ypos)
         {
-            X = xpos;
-            Y = ypos;
+            Pos = new Vector2Int(xpos, ypos);
             Score = 0;
             CurrentHP = 1;
             GemType = SCR.GemType.Syrup;
-            BlockType = (int)GemType + 1;
             IsObstacle = true;
+            CanMove = false;
         }
 
-        public override void Broken(BoardManager boardManager, int x, int y)
+        public override void Broken(BoardManager boardManager)
         {
-            Object.Destroy(boardManager.Spawner.OverlayArray[y, x].BlockInstance);
+            Object.Destroy(boardManager.BoardData.OverlayArray[Pos.y, Pos.x].BlockInstance);
         }
     }
 }

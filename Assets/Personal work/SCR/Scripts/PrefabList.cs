@@ -9,6 +9,16 @@ namespace SCR
     public class PrefabList : ScriptableObject
     {
         public List<GemData> GemDatas;
+
+        public GameObject GetPrefab(GemType type)
+        {
+            return GemDatas[(int)type].GemPrefab;
+        }
+
+        public IngredientSO GetSO(GemType type)
+        {
+            return GemDatas[(int)type].ingredientSO;
+        }
     }
 
     [Serializable]

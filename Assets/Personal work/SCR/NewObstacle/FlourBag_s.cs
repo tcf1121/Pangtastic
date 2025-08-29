@@ -1,8 +1,6 @@
-using KDJ;
-using System.Collections.Generic;
 using UnityEngine;
 
-namespace SCR_O
+namespace SCR_B
 {
     public class FlourBag_s : ObstacleBlock
     {
@@ -10,9 +8,9 @@ namespace SCR_O
         public FlourBag_s(FlourBag owner)
         {
             GemType = SCR.GemType.Flour_s;
-            BlockType = (int)GemType + 1;
             _owner = owner;
             IsObstacle = true;
+            CanMove = false;
         }
 
         public override void TakeDamage(BoardManager boardManager)
@@ -22,7 +20,7 @@ namespace SCR_O
 
         public Vector2Int OwnerPos()
         {
-            return new Vector2Int(_owner.X, _owner.Y);
+            return _owner.Pos;
         }
     }
 }

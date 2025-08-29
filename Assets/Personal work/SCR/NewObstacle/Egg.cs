@@ -1,25 +1,22 @@
-using KDJ;
 using SCR;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
 using UnityEngine.ResourceManagement.AsyncOperations;
 using UnityEngine.UI;
 
-namespace SCR_O
+namespace SCR_B
 {
     public class Egg : ObstacleBlock
     {
         [SerializeField] private Sprite _currentImage;
         public Egg(int xpos, int ypos)
         {
-            X = xpos;
-            Y = ypos;
+            Pos = new Vector2Int(xpos, ypos);
             Score = 0;
             CurrentHP = 2;
             GemType = GemType.Egg;
-            BlockType = (int)GemType + 1;
             IsObstacle = true;
+            CanMove = true;
             string path = $"Assets/Imports/Image/Obstacle/Egg_Damage.png";
             AsyncOperationHandle<Sprite> handle = Addressables.LoadAssetAsync<Sprite>(path);
             handle.Completed += OnSpriteLoadCompleted;
@@ -40,11 +37,11 @@ namespace SCR_O
             if (CurrentHP <= 0)
             {
                 Debug.Log("파괴됨");
-                Broken(boardManager, X, Y);
+                Broken(boardManager);
             }
             else
             {
-                boardManager.Spawner.BlockArray[Y, X].
+                boardManager.BoardData.BlockArray[Pos.y, Pos.x].
                 BlockInstance.GetComponent<Image>().sprite = _currentImage;
             }
 
@@ -55,9 +52,9 @@ namespace SCR_O
             TakeDamage(boardManager);
         }
 
-        public override void Broken(BoardManager boardManager, int x, int y)
+        public override void Broken(BoardManager boardManager)
         {
-            Object.Destroy(boardManager.Spawner.BlockArray[y, x].BlockInstance);
+            Object.Destroy(boardManager.BoardData.BlockArray[Pos.y, Pos.x].BlockInstance);
         }
 
     }

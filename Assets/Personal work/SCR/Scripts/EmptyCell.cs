@@ -21,10 +21,10 @@ namespace SCR
                 return false;
 #endif
 
-            if (GameObject.Find("Puzzle").GetComponent<PuzzelEditBoard>())
-                PuzzelEditBoard.AddCell(position);
-            else
-                Board.AddCell(position);
+            // if (GameObject.Find("Puzzle").GetComponent<PuzzelEditBoard>())
+            //     PuzzelEditBoard.AddCell(position);
+            // else
+            //     Board.AddCell(position);
             return base.StartUp(position, tilemap, go);
         }
     }

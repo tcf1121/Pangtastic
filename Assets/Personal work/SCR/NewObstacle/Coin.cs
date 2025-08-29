@@ -1,19 +1,17 @@
-using KDJ;
 using UnityEngine;
 
-namespace SCR_O
+namespace SCR_B
 {
     public class Coin : ObstacleBlock
     {
         public Coin(int xpos, int ypos)
         {
-            X = xpos;
-            Y = ypos;
+            Pos = new Vector2Int(xpos, ypos);
             Score = 0;
             CurrentHP = 1;
             GemType = SCR.GemType.Coin;
-            BlockType = (int)GemType + 1;
             IsObstacle = true;
+            CanMove = true;
         }
 
         public override void SplashDamage(BoardManager boardManager)
@@ -21,10 +19,10 @@ namespace SCR_O
             base.TakeDamage(boardManager);
         }
 
-        public override void Broken(BoardManager boardManager, int x, int y)
+        public override void Broken(BoardManager boardManager)
         {
-            Object.Destroy(boardManager.Spawner.BlockArray[y, x].BlockInstance);
             InGameManager.AddCoin(1);
+            base.Broken(boardManager);
         }
     }
 }

@@ -1,18 +1,17 @@
 using KDJ;
 using UnityEngine;
 
-namespace SCR_O
+namespace SCR_B
 {
     public class DonutBag : ObstacleBlock
     {
         public DonutBag(int xpos, int ypos)
         {
-            X = xpos;
-            Y = ypos;
+            Pos = new Vector2Int(xpos, ypos);
             Score = 0;
             CurrentHP = 1;
             GemType = SCR.GemType.DonutBag;
-            BlockType = (int)GemType + 1;
+            CanMove = false;
             IsObstacle = true;
         }
 
@@ -21,10 +20,10 @@ namespace SCR_O
             base.TakeDamage(boardManager);
         }
 
-        public override void Broken(BoardManager boardManager, int x, int y)
+        public override void Broken(BoardManager boardManager)
         {
-            Object.Destroy(boardManager.Spawner.BlockArray[y, x].BlockInstance);
-            boardManager.Spawner.SpawnRandomBlock(x, y);
+            base.Broken(boardManager);
+            boardManager.Spawner.SpawnDonut(Pos.x, Pos.y);
         }
     }
 }

@@ -1,11 +1,10 @@
-using KDJ;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
 using UnityEngine.ResourceManagement.AsyncOperations;
 using UnityEngine.UI;
 
-namespace SCR_O
+namespace SCR_B
 {
     public class FlourBag : ObstacleBlock
     {
@@ -13,13 +12,12 @@ namespace SCR_O
         private List<Vector2Int> fourPos = new();
         public FlourBag(BoardData boardData, int xpos, int ypos)
         {
-            X = xpos;
-            Y = ypos;
+            Pos = new Vector2Int(xpos, ypos);
             Score = 0;
             CurrentHP = 2;
             GemType = SCR.GemType.FlourBag;
-            BlockType = (int)GemType + 1;
             IsObstacle = true;
+            CanMove = false;
             SetFourPos(boardData);
             string path = $"Assets/Imports/Image/Obstacle/FlourBag_Damage.png";
             AsyncOperationHandle<Sprite> handle = Addressables.LoadAssetAsync<Sprite>(path);
@@ -36,9 +34,9 @@ namespace SCR_O
 
         private void SetFourPos(BoardData boardData)
         {
-            fourPos.Add(new Vector2Int(X + 1, Y));
-            fourPos.Add(new Vector2Int(X, Y + 1));
-            fourPos.Add(new Vector2Int(X + 1, Y + 1));
+            fourPos.Add(Pos + Vector2Int.up);
+            fourPos.Add(Pos + Vector2Int.right);
+            fourPos.Add(Pos + Vector2Int.up + Vector2Int.right);
             foreach (var pos in fourPos)
                 boardData.BlockArray[pos.y, pos.x] = new FlourBag_s(this);
         }
@@ -50,11 +48,11 @@ namespace SCR_O
             if (CurrentHP <= 0)
             {
                 Debug.Log("파괴됨");
-                Broken(boardManager, X, Y);
+                Broken(boardManager);
             }
             else
             {
-                boardManager.Spawner.BlockArray[Y, X].
+                boardManager.Spawner._boardData.BlockArray[Pos.y, Pos.x].
                 BlockInstance.GetComponent<Image>().sprite = _currentImage;
             }
         }
@@ -64,12 +62,12 @@ namespace SCR_O
             TakeDamage(boardManager);
         }
 
-        public override void Broken(BoardManager boardManager, int x, int y)
+        public override void Broken(BoardManager boardManager)
         {
-            Object.Destroy(boardManager.Spawner.BlockArray[y, x].BlockInstance);
+            Object.Destroy(boardManager.BoardData.BlockArray[Pos.y, Pos.x].BlockInstance);
             foreach (var pos in fourPos)
             {
-                Object.Destroy(boardManager.Spawner.BlockArray[pos.y, pos.x].BlockInstance);
+                Object.Destroy(boardManager.BoardData.BlockArray[pos.y, pos.x].BlockInstance);
             }
         }
     }

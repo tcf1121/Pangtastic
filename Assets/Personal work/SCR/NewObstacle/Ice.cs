@@ -1,10 +1,9 @@
-using KDJ;
 using SCR;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
 using UnityEngine.ResourceManagement.AsyncOperations;
 
-namespace SCR_O
+namespace SCR_B
 {
     public class Ice : ObstacleBlock
     {
@@ -12,13 +11,12 @@ namespace SCR_O
         private Sprite iceSprite;
         public Ice(int xpos, int ypos)
         {
-            X = xpos;
-            Y = ypos;
+            Pos = new Vector2Int(xpos, ypos);
             Score = 0;
             CurrentHP = 1;
             GemType = GemType.Ice;
-            BlockType = (int)GemType + 1;
             IsObstacle = true;
+            CanMove = false;
             _dount = (GemType)Random.Range(0, 6);
             string path = $"Assets/Imports/Image/Donut/Iced_{_dount}.png";
             Debug.Log(path);
@@ -48,10 +46,10 @@ namespace SCR_O
             base.TakeDamage(boardManager);
         }
 
-        public override void Broken(BoardManager boardManager, int x, int y)
+        public override void Broken(BoardManager boardManager)
         {
-            Object.Destroy(boardManager.Spawner.BlockArray[y, x].BlockInstance);
-            boardManager.Spawner.SpawnBlock(x, y, (int)_dount + 1);
+            Object.Destroy(boardManager.BoardData.BlockArray[Pos.y, Pos.x].BlockInstance);
+            boardManager.Spawner.SpawnBlock(Pos.x, Pos.y, _dount);
         }
     }
 }
