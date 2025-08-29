@@ -23,13 +23,13 @@ namespace KDJ.States
         public void OnExit(BoardManager boardManager)
         {
             Debug.Log("블럭 매칭 상태 종료");
-            boardManager.BlockMover.StartPos = Vector2.zero; 
-            boardManager.BlockMover.EndPos = Vector2.zero; 
+            boardManager.BlockMover.StartPos = Vector2.zero;
+            boardManager.BlockMover.EndPos = Vector2.zero;
         }
 
         private IEnumerator MatchingCoroutine(BoardManager boardManager)
         {
-            yield return new WaitForSeconds(0.5f); 
+            yield return new WaitForSeconds(0.5f);
 
             Vector2Int startPos = boardManager.BlockMover.StartBlockPos;
             Vector2Int endPos = boardManager.BlockMover.EndBlockPos;
@@ -41,8 +41,8 @@ namespace KDJ.States
                 var startBlock = boardManager.Spawner.BlockArray[startPos.y, startPos.x];
                 var endBlock = boardManager.Spawner.BlockArray[endPos.y, endPos.x];
 
-                bool startIsSpecial = startBlock != null && startBlock.GemType > GemType.Sugar && startBlock.GemType < GemType.Dough;
-                bool endIsSpecial = endBlock != null && endBlock.GemType > GemType.Sugar && endBlock.GemType < GemType.Dough;
+                bool startIsSpecial = startBlock != null && startBlock.GemType > GemType.Sugar && startBlock.GemType < GemType.Dust;
+                bool endIsSpecial = endBlock != null && endBlock.GemType > GemType.Sugar && endBlock.GemType < GemType.Dust;
 
                 if (startIsSpecial || endIsSpecial)
                 {
