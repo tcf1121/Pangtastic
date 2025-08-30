@@ -16,6 +16,7 @@ namespace SCR_B
 
         public IEnumerator Move(Vector2Int firstPos, Vector2Int secondPos, bool check = true)
         {
+            if (_boardData.BlockArray[firstPos.y, firstPos.x].GemType < GemType.Dust) yield break;
             Debug.Log($"{firstPos}{secondPos}");
             var block = _boardData.BlockArray[secondPos.y, secondPos.x].Clone();
             var block2 = _boardData.BlockArray[firstPos.y, firstPos.x].Clone();
@@ -28,7 +29,24 @@ namespace SCR_B
             StartCoroutine(MovePosCor(block2.BlockInstance.transform,
             BoardManager.GetWorldPos(secondPos.x, secondPos.y), 0.3f));
             yield return new WaitForSeconds(0.3f);
-            if (!BoardManager.FistIsMatch() && check)
+            if ((block.GemType > GemType.Sugar && block.GemType < GemType.Dust) ||
+            (block2.GemType > GemType.Sugar && block2.GemType < GemType.Dust))
+            {
+                if (block.GemType > GemType.Sugar && block.GemType < GemType.Dust &&
+            block2.GemType > GemType.Sugar && block2.GemType < GemType.Dust)
+                {
+                    BoardManager.UseTwoSpecial(secondPos, block.GemType, block2.GemType);
+                    _boardData.BlockArray[firstPos.y, firstPos.x].Broken();
+                    _boardData.BlockArray[secondPos.y, secondPos.x].Broken();
+                }
+                else if (block.GemType > GemType.Sugar && block.GemType < GemType.Dust)
+                    _boardData.BlockArray[firstPos.y, firstPos.x].TakeDamage();
+                else
+                    _boardData.BlockArray[secondPos.y, secondPos.x].TakeDamage();
+                StartCoroutine(BoardManager.HandleTurn());
+            }
+
+            else if (!BoardManager.FistIsMatch() && check)
                 StartCoroutine(Move(firstPos, secondPos, false));
             else if (check)
                 StartCoroutine(BoardManager.HandleTurn());

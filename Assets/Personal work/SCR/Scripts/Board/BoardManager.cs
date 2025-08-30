@@ -157,6 +157,11 @@ namespace SCR_B
             instance.MatchChecker.UseSpecial(pos, specialType);
         }
 
+        public static void UseTwoSpecial(Vector2Int pos, GemType specialType, GemType specialType2)
+        {
+            instance.MatchChecker.UseTwoSpecial(pos, specialType, specialType2);
+        }
+
         public static bool FistIsMatch()
         {
             return instance.MatchChecker.FistIsMatch();

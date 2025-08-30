@@ -381,5 +381,10 @@ namespace SCR_B
 
             }
         }
+
+        public void UseTwoSpecial(Vector2Int pos, GemType specialType, GemType specialType2)
+        {
+
+        }
     }
 }
