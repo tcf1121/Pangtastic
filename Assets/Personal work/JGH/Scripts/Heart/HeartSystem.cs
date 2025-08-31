@@ -11,13 +11,13 @@ public class HeartSystem : MonoBehaviour
     {
         public int currentHearts;
         public string lastSaveTime;
-        public int remainingSeconds; 
+        public int remainingSeconds;
     }
-    
-    private string SavePath => System.IO.Path.Combine(Application.persistentDataPath, "HeartData.json"); 
-    
+
+    private string SavePath => System.IO.Path.Combine(Application.persistentDataPath, "HeartData.json");
+
     public static HeartSystem Instance { get; private set; }
-    
+
     [SerializeField] private TMP_Text _timerText; // UI Text (MM:SS 표시)
     [SerializeField] private TMP_Text _textHeart; // 
     [SerializeField] private int _startSeconds = 1800; // 시작 시간 (기본 30분, 초 단위)
@@ -43,19 +43,19 @@ public class HeartSystem : MonoBehaviour
     {
         // 혹시 중복 실행된 코루틴이 있으면 정리
         StopAllCoroutines();
-        
+
         HeartLoadData();
         HeartSaveData();
 
         UpdateHeartUI();
-        
+
         // 초기 시간 설정
         UpdateTimerUI();
 
         // 타이머 시작
         StartCoroutine(TimerCoroutine());
     }
-    
+
     // TODO: 파이어 베이스로 변경 필요
     private void HeartLoadData()
     {
@@ -116,18 +116,15 @@ public class HeartSystem : MonoBehaviour
 
 
     /// <summary>
-    /// 하트를 사용하여 스테이지를 시작합니다.
+    /// 하트의 갯수를 파악하여 하트가 있을 시 스테이지를 시작합니다.
     /// </summary>
     /// <param name="requiredHearts"></param>
     /// <returns></returns>
-    public bool TryUseHearts(int requiredHearts)
+    public bool TryStartStage()
     {
-        if (_currentHearts >= requiredHearts)
+        if (_currentHearts != 0)
         {
-            _currentHearts -= requiredHearts;
-            UpdateHeartUI();
-            HeartSaveData();
-            Debug.Log($"스테이지 시작! 하트 {requiredHearts}개 사용, 남은 하트: {_currentHearts}");
+            Debug.Log($"스테이지 시작!");
             return true;
         }
         else
@@ -136,7 +133,20 @@ public class HeartSystem : MonoBehaviour
             return false;
         }
     }
-    
+
+    /// <summary>
+    /// 스테이지 실패시 하트를 소모합니다.
+    /// </summary>
+    public void UseHearts()
+    {
+        if (_currentHearts > 0)
+        {
+            _currentHearts--;
+        }
+        UpdateHeartUI();
+        HeartSaveData();
+    }
+
     /// <summary>
     /// 하트를 회복(채우기)합니다.
     /// 최대치 제한 없음
@@ -158,7 +168,7 @@ public class HeartSystem : MonoBehaviour
 
         Debug.Log($"하트 {amount}개 회복! ({beforeHearts} → {_currentHearts})");
     }
-    
+
     /// <summary>
     /// 하트 UI를 업데이트합니다.
     /// </summary>
@@ -181,7 +191,7 @@ public class HeartSystem : MonoBehaviour
             if (_currentHearts >= _maxHearts)
             {
                 // if (_timerText != null)
-                    // _timerText.gameObject.SetActive(false);
+                // _timerText.gameObject.SetActive(false);
 
                 yield return new WaitForSeconds(1f);
                 continue;
@@ -214,7 +224,7 @@ public class HeartSystem : MonoBehaviour
             }
         }
     }
-    
+
 
     /// <summary>
     /// 타이머 UI를 업데이트합니다.
@@ -229,12 +239,12 @@ public class HeartSystem : MonoBehaviour
             _timerText.text = "FULL";
             return;
         }
-        
+
         int minutes = _remainingSeconds / 60;
         int seconds = _remainingSeconds % 60;
         _timerText.text = string.Format("{0:D2}:{1:D2}", minutes, seconds);
     }
-    
+
     /// <summary>
     /// 애플리케이션이 종료될 때 하트 데이터를 저장합니다.
     /// </summary>
@@ -271,6 +281,29 @@ public class HeartSystem : MonoBehaviour
         Debug.Log("JSON 저장 완료: " + SavePath);
     }
     
+    /// <summary>
+    /// 
+    /// 하트를 사용하여 스테이지를 시작합니다.
+    /// </summary>
+    /// <param name="requiredHearts"></param>
+    /// <returns></returns>
+    public bool TryUseHearts(int requiredHearts)
+    {
+        if (_currentHearts >= requiredHearts)
+        {
+            _currentHearts -= requiredHearts;
+            UpdateHeartUI();
+            HeartSaveData();
+            Debug.Log($"스테이지 시작! 하트 {requiredHearts}개 사용, 남은 하트: {_currentHearts}");
+            return true;
+        }
+        else
+        {
+            Debug.Log("하트 부족! 스테이지 시작 불가");
+            return false;
+        }
+    }
+
     /// <summary>
     /// 씬이 로드될 때마다 UI를 다시 찾아 연결합니다.
     /// </summary>
