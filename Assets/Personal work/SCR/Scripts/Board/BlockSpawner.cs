@@ -38,9 +38,18 @@ namespace SCR_B
                     else SpawnDonut(x, y);
                 }
             }
-            while (BoardManager.FistIsMatch())
+            while (BoardManager.FistIsMatch() || !BoardManager.HasPossibleMatch())
                 ShuffleBlockArray();
             InGameManager.SpawnCustomer();
+        }
+
+
+        public void CheckPossibleMatch()
+        {
+            while (!BoardManager.HasPossibleMatch())
+            {
+                ShuffleBlockArray();
+            }
         }
         #endregion
 

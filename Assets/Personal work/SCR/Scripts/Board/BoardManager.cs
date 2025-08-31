@@ -131,6 +131,7 @@ namespace SCR_B
                     break;
                 }
             }
+            instance.Spawner.CheckPossibleMatch();
             instance.firstPos = null;
             instance.secondPos = null;
             instance.CanTouch = true;
@@ -164,7 +165,12 @@ namespace SCR_B
 
         public static bool FistIsMatch()
         {
-            return instance.MatchChecker.FistIsMatch();
+            return instance.MatchChecker.IsMatch();
+        }
+
+        public static bool HasPossibleMatch()
+        {
+            return instance.MatchChecker.HasPossibleMatch();
         }
 
         public static void SetFirstPos(Vector2Int pos)

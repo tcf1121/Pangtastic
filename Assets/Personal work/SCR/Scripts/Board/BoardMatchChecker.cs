@@ -42,38 +42,41 @@ namespace SCR_B
             _boardData = boardData;
         }
 
-        public bool CheckArray(Vector2Int pos)
+        public bool CheckArray(Vector2Int pos, BoardData boardData = null)
         {
-            if (pos.y >= 0 && pos.y < _boardData.GetHeight() &&
-                pos.x >= 0 && pos.x < _boardData.GetWidth())
+            if (boardData == null) boardData = _boardData;
+            if (pos.y >= 0 && pos.y < boardData.GetHeight() &&
+                pos.x >= 0 && pos.x < boardData.GetWidth())
             {
-                if (_boardData.BlockArray[pos.y, pos.x] == null) return false;
-                if (_boardData.BlockPlateArray[pos.y, pos.x]) return true;
+                if (boardData.BlockArray[pos.y, pos.x] == null) return false;
+                if (boardData.BlockPlateArray[pos.y, pos.x]) return true;
             }
 
             return false;
         }
 
-        public bool FistIsMatch()
+        public bool IsMatch(BoardData boardData = null)
         {
+            if (boardData == null) boardData = _boardData;
             _matchPos.Clear();
             _splashPos.Clear();
             _matchDatas.Clear();
-            for (int x = 0; x < _boardData.GetWidth(); x++)
-                for (int y = 0; y < _boardData.GetHeight(); y++)
-                    CheckMatch(new Vector2Int(x, y));
+            for (int x = 0; x < boardData.GetWidth(); x++)
+                for (int y = 0; y < boardData.GetHeight(); y++)
+                    CheckMatch(new Vector2Int(x, y), boardData);
             if (_matchDatas.Count > 0) return true;
             else return false;
         }
 
-        public IEnumerator CheckAll()
+        public IEnumerator CheckAll(BoardData boardData = null)
         {
+            if (boardData == null) boardData = _boardData;
             _matchPos.Clear();
             _splashPos.Clear();
             _matchDatas.Clear();
-            for (int x = 0; x < _boardData.GetWidth(); x++)
-                for (int y = 0; y < _boardData.GetHeight(); y++)
-                    CheckMatch(new Vector2Int(x, y));
+            for (int x = 0; x < boardData.GetWidth(); x++)
+                for (int y = 0; y < boardData.GetHeight(); y++)
+                    CheckMatch(new Vector2Int(x, y), boardData);
             yield return new WaitForSeconds(0.2f);
         }
 
@@ -119,28 +122,74 @@ namespace SCR_B
             _matchDatas.Clear();
         }
 
-        private void CheckMatch(Vector2Int pos)
+        public bool HasPossibleMatch()
         {
+            BoardData tempBoardData = _boardData.Clone();
+            for (int y = 0; y < tempBoardData.GetHeight(); y++)
+            {
+                for (int x = 0; x < tempBoardData.GetWidth(); x++)
+                {
+                    // 현재 블록의 위치 (pos)를 설정합니다.
+                    Vector2Int pos = new(x, y);
+
+                    // 오른쪽 블록과 스왑을 시도합니다.
+                    if (x < tempBoardData.GetWidth() - 1)
+                    {
+                        Vector2Int rightPos = new(x + 1, y);
+                        if (CheckForMatchAfterSwap(pos, rightPos))
+                        {
+                            return true; // 매치 가능성을 찾았으므로 즉시 반환
+                        }
+                    }
+
+                    // 위쪽 블록과 스왑을 시도합니다.
+                    if (y < _boardData.GetHeight() - 1)
+                    {
+                        Vector2Int upPos = new(x, y + 1);
+                        if (CheckForMatchAfterSwap(pos, upPos))
+                        {
+                            return true; // 매치 가능성을 찾았으므로 즉시 반환
+                        }
+                    }
+                }
+            }
+            return false;
+        }
+
+        private bool CheckForMatchAfterSwap(Vector2Int pos1, Vector2Int pos2)
+        {
+            BoardData tempBoardData = _boardData.Clone();
+
+            Block tempBlock = tempBoardData.BlockArray[pos1.y, pos1.x];
+            tempBoardData.BlockArray[pos1.y, pos1.x] = tempBoardData.BlockArray[pos2.y, pos2.x];
+            tempBoardData.BlockArray[pos2.y, pos2.x] = tempBlock;
+
+            return IsMatch(tempBoardData);
+        }
+
+        private void CheckMatch(Vector2Int pos, BoardData boardData = null)
+        {
+            if (boardData == null) boardData = _boardData;
             // 초기화
             _matchPos.Clear();
             _splashPos.Clear();
 
 
             // 가로 매치 확인
-            int horizontalCount = CheckDirection(pos, Vector2Int.left) + CheckDirection(pos, Vector2Int.right) + 1;
+            int horizontalCount = CheckDirection(pos, Vector2Int.left, boardData) + CheckDirection(pos, Vector2Int.right, boardData) + 1;
             if (horizontalCount >= 3)
             {
-                AddMatchToList(pos, Vector2Int.left);
-                AddMatchToList(pos, Vector2Int.right);
+                AddMatchToList(pos, Vector2Int.left, boardData);
+                AddMatchToList(pos, Vector2Int.right, boardData);
             }
             // 세로 매치 확인
-            int verticalCount = CheckDirection(pos, Vector2Int.up) + CheckDirection(pos, Vector2Int.down) + 1;
+            int verticalCount = CheckDirection(pos, Vector2Int.up, boardData) + CheckDirection(pos, Vector2Int.down, boardData) + 1;
             if (verticalCount >= 3)
             {
-                AddMatchToList(pos, Vector2Int.up);
-                AddMatchToList(pos, Vector2Int.down);
+                AddMatchToList(pos, Vector2Int.up, boardData);
+                AddMatchToList(pos, Vector2Int.down, boardData);
             }
-            bool squareMatch = CheckSquare(pos);
+            bool squareMatch = CheckSquare(pos, boardData);
             // 매치된 블록이 있을 경우
             if (_matchPos.Count > 0)
             {
@@ -152,7 +201,7 @@ namespace SCR_B
 
                 foreach (var matchedPos in _matchPos)
                 {
-                    AddSplashTargets(matchedPos);
+                    AddSplashTargets(matchedPos, boardData);
                 }
 
                 // 스플래시 데미지 대상 리스트에서 매치 블록과 중복을 제거
@@ -254,15 +303,16 @@ namespace SCR_B
         }
 
 
-        private int CheckDirection(Vector2Int startPos, Vector2Int direction)
+        private int CheckDirection(Vector2Int startPos, Vector2Int direction, BoardData boardData = null)
         {
+            if (boardData == null) boardData = _boardData;
             int count = 0;
             Vector2Int currentPos = startPos + direction;
             if (!CheckArray(startPos)) return 0;
-            var startGemType = _boardData.BlockArray[startPos.y, startPos.x].GemType;
+            var startGemType = boardData.BlockArray[startPos.y, startPos.x].GemType;
             if (startGemType > GemType.Sugar) return 0;
             while (CheckArray(currentPos) &&
-           _boardData.BlockArray[currentPos.y, currentPos.x].GemType == _boardData.BlockArray[startPos.y, startPos.x].GemType)
+           boardData.BlockArray[currentPos.y, currentPos.x].GemType == boardData.BlockArray[startPos.y, startPos.x].GemType)
             {
                 count++;
                 currentPos += direction;
@@ -271,39 +321,41 @@ namespace SCR_B
             return count;
         }
 
-        private void AddMatchToList(Vector2Int startPos, Vector2Int direction)
+        private void AddMatchToList(Vector2Int startPos, Vector2Int direction, BoardData boardData = null)
         {
+            if (boardData == null) boardData = _boardData;
             _matchPos.Add(startPos); // 시작 블록 추가
             Vector2Int currentPos = startPos + direction;
 
             while (CheckArray(currentPos) &&
-                   _boardData.BlockArray[currentPos.y, currentPos.x].GemType == _boardData.BlockArray[startPos.y, startPos.x].GemType)
+                   boardData.BlockArray[currentPos.y, currentPos.x].GemType == boardData.BlockArray[startPos.y, startPos.x].GemType)
             {
                 _matchPos.Add(currentPos);
                 currentPos += direction;
             }
         }
 
-        private bool CheckSquare(Vector2Int startPos)
+        private bool CheckSquare(Vector2Int startPos, BoardData boardData = null)
         {
+            if (boardData == null) boardData = _boardData;
             bool isSquare = false;
             if (!CheckArray(startPos)) return false;
-            var startGemType = _boardData.BlockArray[startPos.y, startPos.x].GemType;
+            var startGemType = boardData.BlockArray[startPos.y, startPos.x].GemType;
             if (startGemType > GemType.Sugar) return false;
             bool upPos = CheckArray(startPos + Vector2Int.up) &&
-            _boardData.BlockArray[startPos.y + 1, startPos.x].GemType == startGemType;
+            boardData.BlockArray[startPos.y + 1, startPos.x].GemType == startGemType;
             bool downPos = CheckArray(startPos + Vector2Int.down) &&
-            _boardData.BlockArray[startPos.y - 1, startPos.x].GemType == startGemType;
+            boardData.BlockArray[startPos.y - 1, startPos.x].GemType == startGemType;
             bool leftPos = CheckArray(startPos + Vector2Int.left) &&
-            _boardData.BlockArray[startPos.y, startPos.x - 1].GemType == startGemType;
+            boardData.BlockArray[startPos.y, startPos.x - 1].GemType == startGemType;
             bool rightPos = CheckArray(startPos + Vector2Int.right) &&
-            _boardData.BlockArray[startPos.y, startPos.x + 1].GemType == startGemType;
+            boardData.BlockArray[startPos.y, startPos.x + 1].GemType == startGemType;
 
             if (upPos)
             {
                 if (leftPos)
                     if (CheckArray(startPos + Vector2Int.up + Vector2Int.left) &&
-            _boardData.BlockArray[startPos.y + 1, startPos.x - 1].GemType == startGemType)
+            boardData.BlockArray[startPos.y + 1, startPos.x - 1].GemType == startGemType)
                     {
                         isSquare = true;
                         _matchPos.Add(startPos);
@@ -313,7 +365,7 @@ namespace SCR_B
                     }
                 if (rightPos)
                     if (CheckArray(startPos + Vector2Int.up + Vector2Int.right) &&
-            _boardData.BlockArray[startPos.y + 1, startPos.x + 1].GemType == startGemType)
+            boardData.BlockArray[startPos.y + 1, startPos.x + 1].GemType == startGemType)
                     {
                         isSquare = true;
                         _matchPos.Add(startPos);
@@ -327,7 +379,7 @@ namespace SCR_B
             {
                 if (leftPos)
                     if (CheckArray(startPos + Vector2Int.down + Vector2Int.left) &&
-            _boardData.BlockArray[startPos.y - 1, startPos.x - 1].GemType == startGemType)
+            boardData.BlockArray[startPos.y - 1, startPos.x - 1].GemType == startGemType)
                     {
                         isSquare = true;
                         _matchPos.Add(startPos);
@@ -337,7 +389,7 @@ namespace SCR_B
                     }
                 if (rightPos)
                     if (CheckArray(startPos + Vector2Int.down + Vector2Int.right) &&
-            _boardData.BlockArray[startPos.y - 1, startPos.x + 1].GemType == startGemType)
+            boardData.BlockArray[startPos.y - 1, startPos.x + 1].GemType == startGemType)
                     {
                         isSquare = true;
                         _matchPos.Add(startPos);
@@ -350,8 +402,9 @@ namespace SCR_B
             return isSquare;
         }
 
-        private void AddSplashTargets(Vector2Int centerPos)
+        private void AddSplashTargets(Vector2Int centerPos, BoardData boardData = null)
         {
+            if (boardData == null) boardData = _boardData;
             Vector2Int[] directions = new Vector2Int[]
             {
                 Vector2Int.up, Vector2Int.down,
@@ -363,7 +416,7 @@ namespace SCR_B
                 Vector2Int targetPos = centerPos + direction;
                 if (CheckArray(targetPos))
                 {
-                    if (_boardData.BlockArray[targetPos.y, targetPos.x].GemType == GemType.Flour_s)
+                    if (boardData.BlockArray[targetPos.y, targetPos.x].GemType == GemType.Flour_s)
                     {
                         AddFlour(_splashPos, targetPos);
                     }
@@ -376,42 +429,45 @@ namespace SCR_B
             }
         }
 
-        public void AddFlour(List<Vector2Int> damagePos, Vector2Int pos)
+        public void AddFlour(List<Vector2Int> damagePos, Vector2Int pos, BoardData boardData = null)
         {
-            Vector2Int flourPos = (_boardData.BlockArray[pos.y, pos.x] as FlourBag_s).OwnerPos();
+            if (boardData == null) boardData = _boardData;
+            Vector2Int flourPos = (boardData.BlockArray[pos.y, pos.x] as FlourBag_s).OwnerPos();
             damagePos.Add(flourPos);
         }
 
-        private void DamageMatch()
+        private void DamageMatch(BoardData boardData = null)
         {
+            if (boardData == null) boardData = _boardData;
             _specialDamage = _specialDamage.Distinct().ToList();
             foreach (var pos in _matchPos)
             {
-                Debug.Log($"{pos}, {_boardData.BlockArray[pos.y, pos.x]?.GetType().Name}");
-                _boardData.BlockArray[pos.y, pos.x]?.TakeDamage();
-                _boardData.OverlayArray[pos.y, pos.x]?.TakeDamage();
+                Debug.Log($"{pos}, {boardData.BlockArray[pos.y, pos.x]?.GetType().Name}");
+                boardData.BlockArray[pos.y, pos.x]?.TakeDamage();
+                boardData.OverlayArray[pos.y, pos.x]?.TakeDamage();
             }
             foreach (var pos in _splashPos)
             {
-                _boardData.BlockArray[pos.y, pos.x]?.SplashDamage();
+                boardData.BlockArray[pos.y, pos.x]?.SplashDamage();
             }
             foreach (var pos in _specialDamage)
             {
                 Debug.Log(pos);
-                _boardData.BlockArray[pos.y, pos.x]?.TakeDamage();
-                _boardData.OverlayArray[pos.y, pos.x]?.TakeDamage();
+                boardData.BlockArray[pos.y, pos.x]?.TakeDamage();
+                boardData.OverlayArray[pos.y, pos.x]?.TakeDamage();
             }
             _matchPos.Clear();
             _splashPos.Clear();
             _specialDamage.Clear();
         }
 
-        public void UseSpecial(Vector2Int pos, GemType specialType)
+        public void UseSpecial(Vector2Int pos, GemType specialType, BoardData boardData = null)
         {
+            if (boardData == null) boardData = _boardData;
             if (specialType == GemType.Milk)
             {
                 List<GemType> targetGems = InGameManager.GetTagetGem();
-                List<Vector2Int> targetPosList = _boardData.GetTargetPos(targetGems);
+                List<Vector2Int> targetPosList = boardData.GetTargetPos(targetGems);
                 System.Random random = new();
 
                 var shuffledPos = targetPosList.OrderBy(a => random.Next()).ToList();
@@ -421,9 +477,9 @@ namespace SCR_B
                     int addCount = 3 - randomThree.Count;
                     while (addCount > 0)
                     {
-                        int x = Random.Range(0, _boardData.Size.x);
-                        int y = Random.Range(0, _boardData.Size.y);
-                        if (randomThree.Contains(new Vector2Int(x, y)))
+                        int x = Random.Range(0, boardData.Size.x);
+                        int y = Random.Range(0, boardData.Size.y);
+                        if (!randomThree.Contains(new Vector2Int(x, y)))
                         {
                             randomThree.Add(new Vector2Int(x, y));
                             addCount--;
@@ -436,7 +492,7 @@ namespace SCR_B
             }
             else if (specialType == GemType.Roller_v)
             {// 세로로 없애기
-                for (int y = 0; y < _boardData.GetHeight(); y++)
+                for (int y = 0; y < boardData.GetHeight(); y++)
                 {
                     _specialDamage.Add(new Vector2Int(pos.x, y));
                 }
@@ -445,7 +501,7 @@ namespace SCR_B
             else if (specialType == GemType.Roller_h)
             {
                 // 가로로 없애기
-                for (int x = 0; x < _boardData.GetWidth(); x++)
+                for (int x = 0; x < boardData.GetWidth(); x++)
                 {
                     _specialDamage.Add(new Vector2Int(x, pos.y));
                 }
@@ -454,9 +510,12 @@ namespace SCR_B
             {
                 for (int x = pos.x - 2; x <= pos.x + 2; x++)
                     for (int y = pos.y - 2; y <= pos.y + 2; y++)
-                        if (x >= 0 && x < _boardData.GetWidth() &&
-                         y >= 0 && y < _boardData.GetHeight())
+                        if (x >= 0 && x < boardData.GetWidth() &&
+                         y >= 0 && y < boardData.GetHeight())
+                        {
                             _specialDamage.Add(new Vector2Int(x, y));
+                        }
+
             }
             else if (specialType == GemType.Oven)
             {
@@ -468,10 +527,10 @@ namespace SCR_B
                 if (movePos != null)
                 {
                     Vector2Int movedPos = (Vector2Int)movePos;
-                    if (_boardData.BlockArray[movedPos.y, movedPos.x].GemType < GemType.Milk)
+                    if (boardData.BlockArray[movedPos.y, movedPos.x].GemType < GemType.Milk)
                     {
                         List<Vector2Int> targetPosList =
-                        _boardData.GetGemTypePos(_boardData.BlockArray[movedPos.y, movedPos.x].GemType);
+                        boardData.GetGemTypePos(boardData.BlockArray[movedPos.y, movedPos.x].GemType);
                         foreach (var data in targetPosList)
                             _specialDamage.Add(data);
                     }
@@ -479,7 +538,7 @@ namespace SCR_B
                 else
                 {
                     List<GemType> targetGems = InGameManager.GetTagetGem();
-                    List<Vector2Int> targetPosList = _boardData.GetTargetPos(targetGems);
+                    List<Vector2Int> targetPosList = boardData.GetTargetPos(targetGems);
                     foreach (var data in targetPosList)
                         _specialDamage.Add(data);
                 }
@@ -487,15 +546,17 @@ namespace SCR_B
             }
         }
 
-        public IEnumerator UseTwoSpecial(Vector2Int firstPos, Vector2Int secondPos, GemType specialType, GemType specialType2)
+        public IEnumerator UseTwoSpecial(Vector2Int firstPos, Vector2Int secondPos, GemType specialType, GemType specialType2, BoardData boardData = null)
         {
-            _boardData.BlockArray[firstPos.y, firstPos.x].Broken();
-            _boardData.BlockArray[secondPos.y, secondPos.x].Broken();
+            Debug.Log("두개의 아이템 조합 하여 사용하기");
+            if (boardData == null) boardData = _boardData;
+            boardData.BlockArray[firstPos.y, firstPos.x].Broken();
+            boardData.BlockArray[secondPos.y, secondPos.x].Broken();
             // 둘 다 우유
             if (specialType == GemType.Milk && specialType2 == GemType.Milk)
             {
                 List<GemType> targetGems = InGameManager.GetTagetGem();
-                List<Vector2Int> targetPosList = _boardData.GetTargetPos(targetGems);
+                List<Vector2Int> targetPosList = boardData.GetTargetPos(targetGems);
                 System.Random random = new();
 
                 var shuffledPos = targetPosList.OrderBy(a => random.Next()).ToList();
@@ -505,8 +566,8 @@ namespace SCR_B
                     int addCount = 5 - randomThree.Count;
                     while (addCount > 0)
                     {
-                        int x = Random.Range(0, _boardData.Size.x);
-                        int y = Random.Range(0, _boardData.Size.y);
+                        int x = Random.Range(0, boardData.Size.x);
+                        int y = Random.Range(0, boardData.Size.y);
                         if (randomThree.Contains(new Vector2Int(x, y)))
                         {
                             randomThree.Add(new Vector2Int(x, y));
@@ -526,11 +587,11 @@ namespace SCR_B
             (specialType == GemType.Roller_h && specialType2 == GemType.Roller_v) ||
             (specialType == GemType.Roller_v && specialType2 == GemType.Roller_h))
             {
-                for (int y = 0; y < _boardData.GetHeight(); y++)
+                for (int y = 0; y < boardData.GetHeight(); y++)
                 {
                     _specialDamage.Add(new Vector2Int(secondPos.x, y));
                 }
-                for (int x = 0; x < _boardData.GetWidth(); x++)
+                for (int x = 0; x < boardData.GetWidth(); x++)
                 {
                     _specialDamage.Add(new Vector2Int(x, secondPos.y));
                 }
@@ -541,7 +602,7 @@ namespace SCR_B
             (specialType == GemType.Milk && specialType2 == GemType.Roller_v))
             {
                 List<GemType> targetGems = InGameManager.GetTagetGem();
-                List<Vector2Int> targetPosList = _boardData.GetTargetPos(targetGems);
+                List<Vector2Int> targetPosList = boardData.GetTargetPos(targetGems);
                 System.Random random = new();
 
                 var shuffledPos = targetPosList.OrderBy(a => random.Next()).ToList();
@@ -551,8 +612,8 @@ namespace SCR_B
                     int addCount = 5 - randomThree.Count;
                     while (addCount > 0)
                     {
-                        int x = Random.Range(0, _boardData.Size.x);
-                        int y = Random.Range(0, _boardData.Size.y);
+                        int x = Random.Range(0, boardData.Size.x);
+                        int y = Random.Range(0, boardData.Size.y);
                         if (randomThree.Contains(new Vector2Int(x, y)))
                         {
                             randomThree.Add(new Vector2Int(x, y));
@@ -563,7 +624,7 @@ namespace SCR_B
                 }
                 foreach (var milkPos in randomThree)
                 {
-                    for (int y = 0; y < _boardData.GetHeight(); y++)
+                    for (int y = 0; y < boardData.GetHeight(); y++)
                     {
                         _specialDamage.Add(new Vector2Int(milkPos.x, y));
                     }
@@ -576,7 +637,7 @@ namespace SCR_B
             (specialType == GemType.Milk && specialType2 == GemType.Roller_h))
             {
                 List<GemType> targetGems = InGameManager.GetTagetGem();
-                List<Vector2Int> targetPosList = _boardData.GetTargetPos(targetGems);
+                List<Vector2Int> targetPosList = boardData.GetTargetPos(targetGems);
                 System.Random random = new();
 
                 var shuffledPos = targetPosList.OrderBy(a => random.Next()).ToList();
@@ -586,8 +647,8 @@ namespace SCR_B
                     int addCount = 5 - randomThree.Count;
                     while (addCount > 0)
                     {
-                        int x = Random.Range(0, _boardData.Size.x);
-                        int y = Random.Range(0, _boardData.Size.y);
+                        int x = Random.Range(0, boardData.Size.x);
+                        int y = Random.Range(0, boardData.Size.y);
                         if (randomThree.Contains(new Vector2Int(x, y)))
                         {
                             randomThree.Add(new Vector2Int(x, y));
@@ -598,7 +659,7 @@ namespace SCR_B
                 }
                 foreach (var milkPos in randomThree)
                 {
-                    for (int x = 0; x < _boardData.GetWidth(); x++)
+                    for (int x = 0; x < boardData.GetWidth(); x++)
                     {
                         _specialDamage.Add(new Vector2Int(x, milkPos.y));
                     }
@@ -613,8 +674,8 @@ namespace SCR_B
             {
                 for (int x = secondPos.x - 4; x <= secondPos.x + 4; x++)
                     for (int y = secondPos.y - 4; y <= secondPos.y + 4; y++)
-                        if (x >= 0 && x < _boardData.GetWidth() &&
-                         y >= 0 && y < _boardData.GetHeight())
+                        if (x >= 0 && x < boardData.GetWidth() &&
+                         y >= 0 && y < boardData.GetHeight())
                             _specialDamage.Add(new Vector2Int(x, y));
                 yield break;
             }
@@ -624,7 +685,7 @@ namespace SCR_B
             (specialType == GemType.DonutBox && specialType2 == GemType.Milk))
             {
                 List<GemType> targetGems = InGameManager.GetTagetGem();
-                List<Vector2Int> targetPosList = _boardData.GetTargetPos(targetGems);
+                List<Vector2Int> targetPosList = boardData.GetTargetPos(targetGems);
                 System.Random random = new();
 
                 var shuffledPos = targetPosList.OrderBy(a => random.Next()).ToList();
@@ -634,8 +695,8 @@ namespace SCR_B
                     int addCount = 5 - randomThree.Count;
                     while (addCount > 0)
                     {
-                        int x = Random.Range(0, _boardData.Size.x);
-                        int y = Random.Range(0, _boardData.Size.y);
+                        int x = Random.Range(0, boardData.Size.x);
+                        int y = Random.Range(0, boardData.Size.y);
                         if (randomThree.Contains(new Vector2Int(x, y)))
                         {
                             randomThree.Add(new Vector2Int(x, y));
@@ -649,8 +710,8 @@ namespace SCR_B
                 {
                     for (int x = milkPos.x - 2; x <= milkPos.x + 2; x++)
                         for (int y = milkPos.y - 2; y <= milkPos.y + 2; y++)
-                            if (x >= 0 && x < _boardData.GetWidth() &&
-                             y >= 0 && y < _boardData.GetHeight())
+                            if (x >= 0 && x < boardData.GetWidth() &&
+                             y >= 0 && y < boardData.GetHeight())
                                 _specialDamage.Add(new Vector2Int(x, y));
                 }
 
@@ -662,8 +723,8 @@ namespace SCR_B
             (specialType == GemType.DonutBox && specialType2 == GemType.Roller_v))
             {
                 for (int x = secondPos.x - 2; x <= secondPos.x + 2; x++)
-                    for (int y = 0; y < _boardData.GetHeight(); y++)
-                        if (x >= 0 && x < _boardData.GetWidth())
+                    for (int y = 0; y < boardData.GetHeight(); y++)
+                        if (x >= 0 && x < boardData.GetWidth())
                             _specialDamage.Add(new Vector2Int(x, y));
 
                 yield break;
@@ -673,9 +734,9 @@ namespace SCR_B
             if ((specialType == GemType.Roller_h && specialType2 == GemType.DonutBox) ||
             (specialType == GemType.DonutBox && specialType2 == GemType.Roller_h))
             {
-                for (int x = 0; x <= _boardData.GetWidth(); x++)
+                for (int x = 0; x <= boardData.GetWidth(); x++)
                     for (int y = secondPos.y - 2; y <= secondPos.y + 2; y++)
-                        if (y >= 0 && y < _boardData.GetHeight())
+                        if (y >= 0 && y < boardData.GetHeight())
                             _specialDamage.Add(new Vector2Int(x, y));
 
                 yield break;
@@ -685,8 +746,8 @@ namespace SCR_B
             // 둘 다 오븐
             if (specialType == GemType.Oven && specialType2 == GemType.Oven)
             {
-                for (int x = 0; x < _boardData.GetWidth(); x++)
-                    for (int y = 0; y < _boardData.GetHeight(); y++)
+                for (int x = 0; x < boardData.GetWidth(); x++)
+                    for (int y = 0; y < boardData.GetHeight(); y++)
                         _specialDamage.Add(new Vector2Int(x, y));
                 yield break;
             }
@@ -716,18 +777,19 @@ namespace SCR_B
 
         }
 
-        private IEnumerator UseOvenWith(GemType gemType)
+        private IEnumerator UseOvenWith(GemType gemType, BoardData boardData = null)
         {
+            if (boardData == null) boardData = _boardData;
             List<GemType> targetGems = InGameManager.GetTagetGem();
-            List<Vector2Int> targetPosList = _boardData.GetTargetPos(targetGems);
+            List<Vector2Int> targetPosList = boardData.GetTargetPos(targetGems);
             GemType special = gemType;
             foreach (var data in targetPosList)
             {
                 if (gemType == GemType.Roller_h)
                     special = (GemType)Random.Range(7, 9);
-                _boardData.BlockArray[data.y, data.x]?.TakeDamage();
-                _boardData.OverlayArray[data.y, data.x]?.TakeDamage();
-                _boardData.SetArray(data.x, data.y, special);
+                boardData.BlockArray[data.y, data.x]?.TakeDamage();
+                boardData.OverlayArray[data.y, data.x]?.TakeDamage();
+                boardData.SetArray(data.x, data.y, special);
                 yield return new WaitForSeconds(0.05f);
             }
 

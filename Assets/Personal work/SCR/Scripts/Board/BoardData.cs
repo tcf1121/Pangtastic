@@ -201,6 +201,38 @@ namespace SCR_B
 
             return targetPos;
         }
+
+        public BoardData Clone()
+        {
+            var newBoardData = new BoardData
+            {
+                ZeroPos = this.ZeroPos,
+                Size = this.Size,
+                BlockPlateArray = new bool[this.BlockPlateArray.GetLength(0), this.BlockPlateArray.GetLength(1)],
+                BlockArray = new Block[this.BlockArray.GetLength(0), this.BlockArray.GetLength(1)],
+                OverlayArray = new Block[this.OverlayArray.GetLength(0), this.OverlayArray.GetLength(1)],
+                RespawnPos = new List<Vector2Int>(this.RespawnPos),
+                _respawnDonut = new List<GemType>(this._respawnDonut)
+            };
+
+            for (int y = 0; y < this.Size.y; y++)
+            {
+                for (int x = 0; x < this.Size.x; x++)
+                {
+                    newBoardData.BlockPlateArray[y, x] = this.BlockPlateArray[y, x];
+                    if (this.BlockArray[y, x] != null)
+                    {
+                        newBoardData.BlockArray[y, x] = this.BlockArray[y, x].Clone();
+                    }
+                    if (this.OverlayArray[y, x] != null)
+                    {
+                        newBoardData.OverlayArray[y, x] = this.OverlayArray[y, x].Clone();
+                    }
+                }
+            }
+
+            return newBoardData;
+        }
     }
 }
 
