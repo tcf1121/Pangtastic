@@ -50,11 +50,5 @@ namespace SCR_B
             TakeDamage();
         }
 
-        public override void Broken()
-        {
-            InGameManager.AddIngredientSta(GemType);
-            Object.Destroy(BlockInstance);
-        }
-
     }
 }

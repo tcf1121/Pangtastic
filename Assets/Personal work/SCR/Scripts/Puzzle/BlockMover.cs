@@ -16,7 +16,7 @@ namespace SCR_B
 
         public IEnumerator Move(Vector2Int firstPos, Vector2Int secondPos, bool check = true)
         {
-            if (_boardData.BlockArray[firstPos.y, firstPos.x].GemType < GemType.Dust) yield break;
+            if (_boardData.BlockArray[firstPos.y, firstPos.x].GemType > GemType.Oven) yield break;
             Debug.Log($"{firstPos}{secondPos}");
             var block = _boardData.BlockArray[secondPos.y, secondPos.x].Clone();
             var block2 = _boardData.BlockArray[firstPos.y, firstPos.x].Clone();

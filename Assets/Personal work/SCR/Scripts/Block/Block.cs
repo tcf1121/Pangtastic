@@ -25,7 +25,13 @@ namespace SCR_B
 
         public virtual void Broken()
         {
-            Object.Destroy(BlockInstance);
+            if (GemType < GemType.Milk || GemType == GemType.Syrup || GemType == GemType.Egg)
+            {
+                InGameManager.AddScore(Score);
+                InGameManager.AddIngredientSta(GemType);
+            }
+            if (BlockInstance != null)
+                Object.Destroy(BlockInstance);
             BoardManager.GetBoard().BoardData.BlockArray[Pos.y, Pos.x] = null;
         }
 

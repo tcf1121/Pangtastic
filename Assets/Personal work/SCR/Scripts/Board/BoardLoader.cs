@@ -53,7 +53,7 @@ namespace SCR_B
                 Size = new Vector2Int(plateWidth, plateHeight),
                 BlockPlateArray = new bool[plateHeight, plateWidth],
                 BlockArray = new Block[plateHeight + 1, plateWidth], // BlockArray는 한 줄 더 높습니다.
-                OverlayArray = new Block[plateHeight, plateWidth],
+                OverlayArray = new Block[plateHeight + 1, plateWidth],
                 RespawnPos = new()
             };
 

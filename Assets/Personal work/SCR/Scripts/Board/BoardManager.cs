@@ -1,4 +1,3 @@
-using KDJ;
 using SCR;
 using System.Collections;
 using UnityEngine;
@@ -75,6 +74,7 @@ namespace SCR_B
         public static void Move()
         {
             if (!instance.CanTouch) return;
+            Debug.Log($"{PuzzleBoard.GetStartPos()}, {PuzzleBoard.GetEndPos()}");
             SetFirstPos(PuzzleBoard.GetStartPos());
             SetSecondPos(PuzzleBoard.GetEndPos());
             instance.StartCoroutine(instance.BlockMover.Move((Vector2Int)instance.firstPos, (Vector2Int)instance.secondPos));
@@ -190,5 +190,6 @@ namespace SCR_B
         {
             return instance.secondPos;
         }
+
     }
 }

@@ -15,12 +15,5 @@ namespace SCR_B
             IsObstacle = false;
             CanMove = true;
         }
-
-        public override void Broken()
-        {
-            InGameManager.AddScore(Score);
-            InGameManager.AddIngredientSta(GemType);
-            base.Broken();
-        }
     }
 }

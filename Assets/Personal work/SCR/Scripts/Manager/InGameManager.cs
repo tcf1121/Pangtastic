@@ -111,6 +111,7 @@ public class InGameManager : MonoBehaviour
     public static void AddIngredientSta(GemType ingredient)
     {
         if (instate == null) GameObject.Find("InGameManager").GetComponent<InGameManager>();
+        Debug.Log(ingredient);
         instate.orderStateController.AddIngredientSta(instate.blockList.GemDatas[(int)ingredient].ingredientSO);
     }
 
@@ -147,7 +148,7 @@ public class InGameManager : MonoBehaviour
 
     public static List<GemType> GetTagetGem()
     {
-        List<GemType> gemTypes = new();
+        List<GemType> gemTypes = instate.orderStateController.GetRequiredGem();
 
         return gemTypes;
     }

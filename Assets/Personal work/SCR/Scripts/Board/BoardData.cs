@@ -1,5 +1,6 @@
 using SCR;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 namespace SCR_B
@@ -126,5 +127,80 @@ namespace SCR_B
         {
             return Size.y;
         }
+
+        public List<Vector2Int> GetTargetPos(List<GemType> gemTypes)
+        {
+            List<Vector2Int> targetPos = new();
+
+            List<Block> ingredentblocks = BlockArray.Cast<Block>().
+            Where(data => data != null &&
+            (data.GemType < GemType.Milk || data.GemType == GemType.Egg))
+            .ToList();
+
+            foreach (var gemType in gemTypes)
+            {
+                List<Vector2Int> blocks = GetGemTypePos(gemType);
+                if (blocks.Count > 0)
+                {
+                    int cycle = 0;
+                    while (cycle < 10)
+                    {
+                        int num = Random.Range(0, blocks.Count);
+                        if (!targetPos.Contains(blocks[num]))
+                        {
+                            targetPos.Add(blocks[num]);
+                            break;
+                        }
+                        cycle++;
+                    }
+                    if (cycle == 10)
+                    {
+                        while (true)
+                        {
+                            int num = Random.Range(0, ingredentblocks.Count);
+                            if (!targetPos.Contains(ingredentblocks[num].Pos))
+                            {
+                                if (ingredentblocks[num].Pos.y < Size.y)
+                                {
+                                    targetPos.Add(ingredentblocks[num].Pos);
+                                    break;
+                                }
+
+                            }
+                        }
+                    }
+                }
+
+            }
+
+            return targetPos;
+        }
+
+        public List<Vector2Int> GetGemTypePos(GemType gemType)
+        {
+            List<Vector2Int> targetPos = new();
+            List<Block> GemTypeblocks = new();
+            if (gemType != GemType.Syrup && gemType != GemType.Dust)
+                GemTypeblocks = BlockArray.Cast<Block>().
+                Where(data => data != null && data.GemType == gemType)
+                .ToList();
+            else
+                GemTypeblocks = OverlayArray.Cast<Block>().
+                    Where(data => data != null && data.GemType == gemType)
+                    .ToList();
+
+            if (GemTypeblocks.Count > 0)
+            {
+                foreach (var b in GemTypeblocks)
+                {
+                    if (b.Pos.y < Size.y)
+                        targetPos.Add(b.Pos);
+                }
+
+            }
+
+            return targetPos;
+        }
     }
 }
+
