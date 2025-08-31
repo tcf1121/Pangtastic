@@ -16,7 +16,7 @@ namespace SCR_B
 
         [SerializeField] private List<Vector2Int> _emptyBlock = new();
         [SerializeField] private Dictionary<Vector2Int, Vector2Int> _canMoveBlock = new();
-        [SerializeField] private Dictionary<Vector2Int, GemType> _specialBlock = new();
+        [SerializeField] private Dictionary<Vector2Int, MatchType> _specialBlock = new();
 
         #region 초기화
 
@@ -96,7 +96,7 @@ namespace SCR_B
             yield return null;
         }
 
-        public void MatchSpecial(Vector2Int pos, GemType specialType)
+        public void MatchSpecial(Vector2Int pos, MatchType specialType)
         {
             if (!_specialBlock.ContainsKey(pos))
                 _specialBlock.Add(pos, specialType);
@@ -115,7 +115,7 @@ namespace SCR_B
                         if (_specialBlock.ContainsKey(pos))
                         {
                             //Debug.Log(_specialBlock[pos]);
-                            SpawnBlock(x, y, _specialBlock[pos]);
+                            SpawnBlock(x, y, MatchToGem(_specialBlock[pos]));
                         }
                     }
                 }
@@ -457,6 +457,16 @@ namespace SCR_B
                         returnPos = targetPos;
                 }
             return returnPos;
+        }
+
+        private GemType MatchToGem(MatchType matchType)
+        {
+            if (matchType == MatchType.Roller_h) return GemType.Roller_h;
+            else if (matchType == MatchType.Roller_v) return GemType.Roller_v;
+            else if (matchType == MatchType.Milk) return GemType.Milk;
+            else if (matchType == MatchType.DonutBox) return GemType.DonutBox;
+            else if (matchType == MatchType.Oven) return GemType.Oven;
+            else return GemType.Empty;
         }
 
         #endregion

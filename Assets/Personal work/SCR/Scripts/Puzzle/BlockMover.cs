@@ -35,9 +35,7 @@ namespace SCR_B
                 if (block.GemType > GemType.Sugar && block.GemType < GemType.Dust &&
             block2.GemType > GemType.Sugar && block2.GemType < GemType.Dust)
                 {
-                    BoardManager.UseTwoSpecial(secondPos, block.GemType, block2.GemType);
-                    _boardData.BlockArray[firstPos.y, firstPos.x].Broken();
-                    _boardData.BlockArray[secondPos.y, secondPos.x].Broken();
+                    yield return StartCoroutine(BoardManager.UseTwoSpecial(firstPos, secondPos, block.GemType, block2.GemType));
                 }
                 else if (block.GemType > GemType.Sugar && block.GemType < GemType.Dust)
                     _boardData.BlockArray[firstPos.y, firstPos.x].TakeDamage();

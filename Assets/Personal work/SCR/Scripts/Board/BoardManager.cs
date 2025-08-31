@@ -147,7 +147,7 @@ namespace SCR_B
             return instance;
         }
 
-        public static void MatchSpecial(Vector2Int pos, GemType specialType)
+        public static void MatchSpecial(Vector2Int pos, MatchType specialType)
         {
             instance.Spawner.MatchSpecial(pos, specialType);
         }
@@ -157,9 +157,9 @@ namespace SCR_B
             instance.MatchChecker.UseSpecial(pos, specialType);
         }
 
-        public static void UseTwoSpecial(Vector2Int pos, GemType specialType, GemType specialType2)
+        public static IEnumerator UseTwoSpecial(Vector2Int firstPos, Vector2Int secondPos, GemType specialType, GemType specialType2)
         {
-            instance.MatchChecker.UseTwoSpecial(pos, specialType, specialType2);
+            yield return instance.StartCoroutine(instance.MatchChecker.UseTwoSpecial(firstPos, secondPos, specialType, specialType2));
         }
 
         public static bool FistIsMatch()

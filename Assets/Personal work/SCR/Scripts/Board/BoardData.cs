@@ -134,7 +134,7 @@ namespace SCR_B
 
             List<Block> ingredentblocks = BlockArray.Cast<Block>().
             Where(data => data != null &&
-            (data.GemType < GemType.Milk || data.GemType == GemType.Egg))
+            (data.GemType < GemType.Milk))
             .ToList();
 
             foreach (var gemType in gemTypes)

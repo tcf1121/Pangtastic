@@ -12,9 +12,19 @@ namespace SCR_B
 {
     public class MatchData
     {
-        public GemType MatchType;
+        public MatchType MatchType;
         public List<Vector2Int> MatchPos = new();
         public List<Vector2Int> SplashPos = new();
+    }
+
+    public enum MatchType
+    {
+        Nomal,
+        Roller_h,
+        Roller_v,
+        Milk,
+        DonutBox,
+        Oven
     }
 
     public class BoardMatchChecker : MonoBehaviour
@@ -82,7 +92,7 @@ namespace SCR_B
             _matchDatas = MergeMatches(_matchDatas);
             foreach (var match in _matchDatas)
             {
-                if (match.MatchType != GemType.Empty)
+                if (match.MatchType != MatchType.Nomal)
                 {
                     Vector2Int matchPos;
                     if (BoardManager.GetFirstPos() != null &&
@@ -153,28 +163,28 @@ namespace SCR_B
                 matchData.SplashPos = new List<Vector2Int>(_splashPos);
                 if (horizontalCount >= 5 || verticalCount >= 5)
                 {
-                    matchData.MatchType = GemType.Oven;
+                    matchData.MatchType = MatchType.Oven;
                 }
                 else
                 {
                     if (horizontalCount >= 3 && verticalCount >= 3)
                     {
-                        matchData.MatchType = GemType.DonutBox;
+                        matchData.MatchType = MatchType.DonutBox;
                     }
                     else if (horizontalCount >= 4)
                     {
-                        matchData.MatchType = GemType.Roller_v;
+                        matchData.MatchType = MatchType.Roller_v;
                     }
                     else if (verticalCount >= 4)
                     {
-                        matchData.MatchType = GemType.Roller_h;
+                        matchData.MatchType = MatchType.Roller_h;
                     }
                     else if (squareMatch)
                     {
-                        matchData.MatchType = GemType.Milk;
+                        matchData.MatchType = MatchType.Milk;
                     }
                     else
-                        matchData.MatchType = GemType.Lavender;
+                        matchData.MatchType = MatchType.Nomal;
                 }
                 AddMatchData(matchData);
             }
@@ -374,6 +384,7 @@ namespace SCR_B
 
         private void DamageMatch()
         {
+            _specialDamage = _specialDamage.Distinct().ToList();
             foreach (var pos in _matchPos)
             {
                 Debug.Log($"{pos}, {_boardData.BlockArray[pos.y, pos.x]?.GetType().Name}");
@@ -476,9 +487,258 @@ namespace SCR_B
             }
         }
 
-        public void UseTwoSpecial(Vector2Int pos, GemType specialType, GemType specialType2)
+        public IEnumerator UseTwoSpecial(Vector2Int firstPos, Vector2Int secondPos, GemType specialType, GemType specialType2)
         {
+            _boardData.BlockArray[firstPos.y, firstPos.x].Broken();
+            _boardData.BlockArray[secondPos.y, secondPos.x].Broken();
+            // 둘 다 우유
+            if (specialType == GemType.Milk && specialType2 == GemType.Milk)
+            {
+                List<GemType> targetGems = InGameManager.GetTagetGem();
+                List<Vector2Int> targetPosList = _boardData.GetTargetPos(targetGems);
+                System.Random random = new();
 
+                var shuffledPos = targetPosList.OrderBy(a => random.Next()).ToList();
+                var randomThree = shuffledPos.Take(5).ToList();
+                if (randomThree.Count < 5)
+                {
+                    int addCount = 5 - randomThree.Count;
+                    while (addCount > 0)
+                    {
+                        int x = Random.Range(0, _boardData.Size.x);
+                        int y = Random.Range(0, _boardData.Size.y);
+                        if (randomThree.Contains(new Vector2Int(x, y)))
+                        {
+                            randomThree.Add(new Vector2Int(x, y));
+                            addCount--;
+                        }
+                    }
+
+                }
+                foreach (var targetPos in randomThree)
+                    _specialDamage.Add(targetPos);
+                yield break;
+            }
+
+            // 둘 다 롤러
+            if ((specialType == GemType.Roller_v && specialType2 == GemType.Roller_v) ||
+            (specialType == GemType.Roller_h && specialType2 == GemType.Roller_h) ||
+            (specialType == GemType.Roller_h && specialType2 == GemType.Roller_v) ||
+            (specialType == GemType.Roller_v && specialType2 == GemType.Roller_h))
+            {
+                for (int y = 0; y < _boardData.GetHeight(); y++)
+                {
+                    _specialDamage.Add(new Vector2Int(secondPos.x, y));
+                }
+                for (int x = 0; x < _boardData.GetWidth(); x++)
+                {
+                    _specialDamage.Add(new Vector2Int(x, secondPos.y));
+                }
+                yield break;
+            }
+            // 롤러 + 우유 (세로)
+            if ((specialType == GemType.Roller_v && specialType2 == GemType.Milk) ||
+            (specialType == GemType.Milk && specialType2 == GemType.Roller_v))
+            {
+                List<GemType> targetGems = InGameManager.GetTagetGem();
+                List<Vector2Int> targetPosList = _boardData.GetTargetPos(targetGems);
+                System.Random random = new();
+
+                var shuffledPos = targetPosList.OrderBy(a => random.Next()).ToList();
+                var randomThree = shuffledPos.Take(5).ToList();
+                if (randomThree.Count < 5)
+                {
+                    int addCount = 5 - randomThree.Count;
+                    while (addCount > 0)
+                    {
+                        int x = Random.Range(0, _boardData.Size.x);
+                        int y = Random.Range(0, _boardData.Size.y);
+                        if (randomThree.Contains(new Vector2Int(x, y)))
+                        {
+                            randomThree.Add(new Vector2Int(x, y));
+                            addCount--;
+                        }
+                    }
+
+                }
+                foreach (var milkPos in randomThree)
+                {
+                    for (int y = 0; y < _boardData.GetHeight(); y++)
+                    {
+                        _specialDamage.Add(new Vector2Int(milkPos.x, y));
+                    }
+                }
+
+                yield break;
+            }
+            // 롤러 + 우유 (가로)
+            if ((specialType == GemType.Roller_h && specialType2 == GemType.Milk) ||
+            (specialType == GemType.Milk && specialType2 == GemType.Roller_h))
+            {
+                List<GemType> targetGems = InGameManager.GetTagetGem();
+                List<Vector2Int> targetPosList = _boardData.GetTargetPos(targetGems);
+                System.Random random = new();
+
+                var shuffledPos = targetPosList.OrderBy(a => random.Next()).ToList();
+                var randomThree = shuffledPos.Take(5).ToList();
+                if (randomThree.Count < 5)
+                {
+                    int addCount = 5 - randomThree.Count;
+                    while (addCount > 0)
+                    {
+                        int x = Random.Range(0, _boardData.Size.x);
+                        int y = Random.Range(0, _boardData.Size.y);
+                        if (randomThree.Contains(new Vector2Int(x, y)))
+                        {
+                            randomThree.Add(new Vector2Int(x, y));
+                            addCount--;
+                        }
+                    }
+
+                }
+                foreach (var milkPos in randomThree)
+                {
+                    for (int x = 0; x < _boardData.GetWidth(); x++)
+                    {
+                        _specialDamage.Add(new Vector2Int(x, milkPos.y));
+                    }
+                }
+
+                yield break;
+            }
+
+
+            // 둘 다 도넛 박스
+            if (specialType == GemType.DonutBox && specialType2 == GemType.DonutBox)
+            {
+                for (int x = secondPos.x - 4; x <= secondPos.x + 4; x++)
+                    for (int y = secondPos.y - 4; y <= secondPos.y + 4; y++)
+                        if (x >= 0 && x < _boardData.GetWidth() &&
+                         y >= 0 && y < _boardData.GetHeight())
+                            _specialDamage.Add(new Vector2Int(x, y));
+                yield break;
+            }
+
+            // 도넛 박스 + 우유
+            if ((specialType == GemType.Milk && specialType2 == GemType.DonutBox) ||
+            (specialType == GemType.DonutBox && specialType2 == GemType.Milk))
+            {
+                List<GemType> targetGems = InGameManager.GetTagetGem();
+                List<Vector2Int> targetPosList = _boardData.GetTargetPos(targetGems);
+                System.Random random = new();
+
+                var shuffledPos = targetPosList.OrderBy(a => random.Next()).ToList();
+                var randomThree = shuffledPos.Take(5).ToList();
+                if (randomThree.Count < 5)
+                {
+                    int addCount = 5 - randomThree.Count;
+                    while (addCount > 0)
+                    {
+                        int x = Random.Range(0, _boardData.Size.x);
+                        int y = Random.Range(0, _boardData.Size.y);
+                        if (randomThree.Contains(new Vector2Int(x, y)))
+                        {
+                            randomThree.Add(new Vector2Int(x, y));
+                            addCount--;
+                        }
+                    }
+
+                }
+
+                foreach (var milkPos in randomThree)
+                {
+                    for (int x = milkPos.x - 2; x <= milkPos.x + 2; x++)
+                        for (int y = milkPos.y - 2; y <= milkPos.y + 2; y++)
+                            if (x >= 0 && x < _boardData.GetWidth() &&
+                             y >= 0 && y < _boardData.GetHeight())
+                                _specialDamage.Add(new Vector2Int(x, y));
+                }
+
+                yield break;
+            }
+
+            // 도넛 박스 + 우유 (세로)
+            if ((specialType == GemType.Roller_v && specialType2 == GemType.DonutBox) ||
+            (specialType == GemType.DonutBox && specialType2 == GemType.Roller_v))
+            {
+                for (int x = secondPos.x - 2; x <= secondPos.x + 2; x++)
+                    for (int y = 0; y < _boardData.GetHeight(); y++)
+                        if (x >= 0 && x < _boardData.GetWidth())
+                            _specialDamage.Add(new Vector2Int(x, y));
+
+                yield break;
+            }
+
+            // 도넛 박스 + 우유 (가로)
+            if ((specialType == GemType.Roller_h && specialType2 == GemType.DonutBox) ||
+            (specialType == GemType.DonutBox && specialType2 == GemType.Roller_h))
+            {
+                for (int x = 0; x <= _boardData.GetWidth(); x++)
+                    for (int y = secondPos.y - 2; y <= secondPos.y + 2; y++)
+                        if (y >= 0 && y < _boardData.GetHeight())
+                            _specialDamage.Add(new Vector2Int(x, y));
+
+                yield break;
+            }
+
+
+            // 둘 다 오븐
+            if (specialType == GemType.Oven && specialType2 == GemType.Oven)
+            {
+                for (int x = 0; x < _boardData.GetWidth(); x++)
+                    for (int y = 0; y < _boardData.GetHeight(); y++)
+                        _specialDamage.Add(new Vector2Int(x, y));
+                yield break;
+            }
+
+            // 오븐 + 우유
+            if ((specialType == GemType.Milk && specialType2 == GemType.Oven) ||
+            (specialType == GemType.Oven && specialType2 == GemType.Milk))
+            {
+                yield return StartCoroutine(UseOvenWith(GemType.Milk));
+            }
+
+            // 오븐 + 밀대
+            if ((specialType == GemType.Roller_h && specialType2 == GemType.Oven) ||
+            (specialType == GemType.Oven && specialType2 == GemType.Roller_h) ||
+            (specialType == GemType.Roller_v && specialType2 == GemType.Oven) ||
+            (specialType == GemType.Oven && specialType2 == GemType.Roller_v))
+            {
+                yield return StartCoroutine(UseOvenWith(GemType.Roller_h));
+            }
+
+            // 오븐 + 도넛 박스
+            if ((specialType == GemType.DonutBox && specialType2 == GemType.Oven) ||
+            (specialType == GemType.Oven && specialType2 == GemType.DonutBox))
+            {
+                yield return StartCoroutine(UseOvenWith(GemType.DonutBox));
+            }
+
+        }
+
+        private IEnumerator UseOvenWith(GemType gemType)
+        {
+            List<GemType> targetGems = InGameManager.GetTagetGem();
+            List<Vector2Int> targetPosList = _boardData.GetTargetPos(targetGems);
+            GemType special = gemType;
+            foreach (var data in targetPosList)
+            {
+                if (gemType == GemType.Roller_h)
+                    special = (GemType)Random.Range(7, 9);
+                _boardData.BlockArray[data.y, data.x]?.TakeDamage();
+                _boardData.OverlayArray[data.y, data.x]?.TakeDamage();
+                _boardData.SetArray(data.x, data.y, special);
+                yield return new WaitForSeconds(0.05f);
+            }
+
+            yield return new WaitForSeconds(0.2f);
+
+            foreach (var data in targetPosList)
+            {
+                _specialDamage.Add(data);
+            }
+
+            yield return null;
         }
     }
 }
