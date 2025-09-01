@@ -1,3 +1,5 @@
+using Firebase.Database;
+using Firebase.Extensions;
 using System;
 using System.Collections;
 using TMPro;
@@ -6,26 +8,16 @@ using UnityEngine.SceneManagement;
 
 public class HeartSystem : MonoBehaviour
 {
-    [Serializable]
-    public class HeartData
-    {
-        public int currentHearts;
-        public string lastSaveTime;
-        public int remainingSeconds;
-    }
-
-    private string SavePath => System.IO.Path.Combine(Application.persistentDataPath, "HeartData.json");
-
     public static HeartSystem Instance { get; private set; }
 
     [SerializeField] private TMP_Text _timerText; // UI Text (MM:SS 표시)
-    [SerializeField] private TMP_Text _textHeart; // 
+    [SerializeField] private TMP_Text _textHeart; // 0/0 표시
+    
     [SerializeField] private int _startSeconds = 1800; // 시작 시간 (기본 30분, 초 단위)
     [SerializeField] private int _maxHearts = 5; // 최대 하트 개수
     [SerializeField] private int _currentHearts = 0; // 현재 하트 개수
 
     private int _remainingSeconds;
-
 
     protected void Awake()
     {
@@ -38,37 +30,64 @@ public class HeartSystem : MonoBehaviour
         Instance = this;
         DontDestroyOnLoad(gameObject);
     }
-
+    
     private void Start()
     {
-        // 혹시 중복 실행된 코루틴이 있으면 정리
-        StopAllCoroutines();
-
-        HeartLoadData();
-        HeartSaveData();
-
-        UpdateHeartUI();
-
-        // 초기 시간 설정
-        UpdateTimerUI();
-
-        // 타이머 시작
-        StartCoroutine(TimerCoroutine());
+        StopAllCoroutines(); // 혹시 중복 실행된 코루틴이 있으면 정리
+        StartCoroutine(CalcHeartData());
     }
 
-    // TODO: 파이어 베이스로 변경 필요
-    private void HeartLoadData()
+
+    private IEnumerator CalcHeartData()
     {
-        if (System.IO.File.Exists(SavePath))
+        string uid = $"{GPGSManager.Instance.GetPlayerId()}";
+
+        var task = DatabaseSystem.Instance.dbRef
+            .Child("users")
+            .Child(uid)
+            .Child("heart")
+            .GetValueAsync();
+
+        yield return new WaitUntil(() => task.IsCompleted);
+
+        if (task.Exception != null)
         {
-            string json = System.IO.File.ReadAllText(SavePath);
-            HeartData data = JsonUtility.FromJson<HeartData>(json);
+            Debug.LogError("불러오기 실패: " + task.Exception);
+            yield break;
+        }
 
-            _currentHearts = data.currentHearts;
+        DataSnapshot snapshot = task.Result;
+        if (snapshot.Exists && snapshot.Value != null)
+        {
+            _currentHearts = int.Parse(snapshot.Value.ToString());
+        }
+        else
+        {
+            _currentHearts = _maxHearts;
+        }
 
-            if (!string.IsNullOrEmpty(data.lastSaveTime))
+        Debug.Log($"현재 하트: {_currentHearts}");
+
+        if (task.IsFaulted)
+        {
+            Debug.LogError("하트 데이터 불러오기 실패: " + task.Exception);
+            // 기본값 세팅
+            _currentHearts = _maxHearts;
+            _remainingSeconds = _startSeconds;
+
+        }
+        else if (task.IsCompleted)
+        {
+            if (snapshot.Exists)
             {
-                DateTime lastTime = DateTime.Parse(data.lastSaveTime);
+                string currentHeart = snapshot.Child("currentHeart").Value?.ToString();
+                string lastSaveTime = snapshot.Child("lastSaveTime").Value?.ToString();
+                string remainingSeconds = snapshot.Child("remainingSeconds").Value?.ToString();
+
+                _currentHearts = int.Parse(currentHeart);
+                _remainingSeconds = int.Parse(remainingSeconds);
+
+                DateTime lastTime = DateTime.Parse(lastSaveTime);
                 TimeSpan diff = DateTime.Now - lastTime;
 
                 // 지난 시간만큼 하트 충전
@@ -77,18 +96,16 @@ public class HeartSystem : MonoBehaviour
 
                 if (_currentHearts < _maxHearts)
                 {
-                    // 남은 시간 계산 (기존 저장된 남은 시간에서 경과 시간 빼기)
-                    _remainingSeconds = data.remainingSeconds - (int)diff.TotalSeconds;
+                    _remainingSeconds -= (int)diff.TotalSeconds;
 
                     if (_remainingSeconds <= 0)
                     {
-                        // 부족하면 추가로 하트 충전
                         int extraHearts = Mathf.Abs(_remainingSeconds) / _startSeconds + 1;
                         _currentHearts = Mathf.Min(_currentHearts + extraHearts, _maxHearts);
 
-                        // 남은 시간 재설정
                         if (_currentHearts < _maxHearts)
-                            _remainingSeconds = _startSeconds - (Mathf.Abs(_remainingSeconds) % _startSeconds);
+                            _remainingSeconds =
+                                _startSeconds - (Mathf.Abs(_remainingSeconds) % _startSeconds);
                         else
                             _remainingSeconds = 0;
                     }
@@ -97,26 +114,95 @@ public class HeartSystem : MonoBehaviour
                 {
                     _remainingSeconds = 0;
                 }
+
+                Debug.Log($"[Firebase Load] Hearts: {_currentHearts}, RemainSec: {_remainingSeconds}");
             }
             else
             {
+                // 데이터가 아예 없는 경우 → 처음 시작
+                _currentHearts = _maxHearts;
                 _remainingSeconds = _startSeconds;
-            }
 
-            Debug.Log("JSON 불러오기 완료");
+                Debug.Log("Firebase에 하트 기본값 저장 완료");
+            }
+        }
+
+        UpdateHeartUI();
+        UpdateTimerUI();
+        StartCoroutine(TimerCoroutine());
+        StartCoroutine(HeartSaveData());
+    }
+
+    private IEnumerator HeartSaveData()
+    {
+        string uid = $"{GPGSManager.Instance.GetPlayerId()}";
+        
+        if (string.IsNullOrEmpty(uid))
+        {
+            Debug.LogError("UID가 비어있습니다! 로그인 완료 후 호출하세요.");
+            yield break;
+        }
+
+        var task = DatabaseSystem.Instance.dbRef
+            .Child("users")
+            .Child(uid)
+            .Child("heart")
+            .Child("currentHeart")
+            .SetValueAsync(_currentHearts);
+        
+        yield return new WaitUntil(() => task.IsCompleted);
+        
+        if (task.Exception != null)
+        {
+            Debug.LogError("currentHeart 저장 실패: " + task.Exception);
+            yield break;
+        }
+
+        if (_currentHearts >= _maxHearts)
+        {
+            // remainingSeconds 저장
+            var taskRemain = DatabaseSystem.Instance.dbRef
+                .Child("users")
+                .Child(uid)
+                .Child("heart")
+                .Child("remainingSeconds")
+                .SetValueAsync(0);
+            yield return new WaitUntil(() => taskRemain.IsCompleted);
+
+            // lastSaveTime 저장
+            var taskLast = DatabaseSystem.Instance.dbRef
+                .Child("users")
+                .Child(uid)
+                .Child("heart")
+                .Child("lastSaveTime")
+                .SetValueAsync("");
+            yield return new WaitUntil(() => taskLast.IsCompleted);
         }
         else
         {
-            _currentHearts = _maxHearts;
-            _remainingSeconds = _startSeconds;
-            Debug.Log("JSON 파일 없음, 기본값으로 시작");
+            // remainingSeconds 저장
+            var taskRemain = DatabaseSystem.Instance.dbRef
+                .Child("users")
+                .Child(uid)
+                .Child("heart")
+                .Child("remainingSeconds")
+                .SetValueAsync(_remainingSeconds);
+            yield return new WaitUntil(() => taskRemain.IsCompleted);
+
+            // lastSaveTime 저장
+            var taskLast = DatabaseSystem.Instance.dbRef
+                .Child("users")
+                .Child(uid)
+                .Child("heart")
+                .Child("lastSaveTime")
+                .SetValueAsync(DateTime.Now.ToString("O")); // ISO 8601 형식
+            yield return new WaitUntil(() => taskLast.IsCompleted);
         }
     }
-
-
-
+    
     /// <summary>
-    /// 하트의 갯수를 파악하여 하트가 있을 시 스테이지를 시작합니다.
+    /// 
+    /// 하트를 사용하여 스테이지를 시작합니다.
     /// </summary>
     /// <param name="requiredHearts"></param>
     /// <returns></returns>
@@ -124,6 +210,11 @@ public class HeartSystem : MonoBehaviour
     {
         if (_currentHearts != 0)
         {
+            // _currentHearts -= requiredHearts;
+            // UpdateHeartUI();
+            // StartCoroutine(CalcHeartData());
+            // StartCoroutine(HeartSaveData());
+            // Debug.Log($"스테이지 시작! 하트 {requiredHearts}개 사용, 남은 하트: {_currentHearts}");
             Debug.Log($"스테이지 시작!");
             return true;
         }
@@ -164,7 +255,7 @@ public class HeartSystem : MonoBehaviour
         _currentHearts += amount; // 제한 없이 누적
 
         UpdateHeartUI();
-        HeartSaveData();
+        StartCoroutine(HeartSaveData());
 
         Debug.Log($"하트 {amount}개 회복! ({beforeHearts} → {_currentHearts})");
     }
@@ -218,8 +309,9 @@ public class HeartSystem : MonoBehaviour
                     // 다시 카운트다운 초기화
                     _remainingSeconds = _startSeconds;
                     UpdateTimerUI();
-
-                    HeartSaveData();
+                    // CalcHeartData();
+                    StartCoroutine(CalcHeartData());
+                    StartCoroutine(HeartSaveData());
                 }
             }
         }
@@ -250,7 +342,8 @@ public class HeartSystem : MonoBehaviour
     /// </summary>
     private void OnApplicationQuit()
     {
-        HeartSaveData(); // 정상 종료 시 저장
+        StartCoroutine(CalcHeartData());
+        StartCoroutine(HeartSaveData());
     }
 
     /// <summary>
@@ -261,26 +354,17 @@ public class HeartSystem : MonoBehaviour
     {
         if (pause)
         {
-            HeartSaveData(); // 앱이 백그라운드로 갔을 때 저장
+            StartCoroutine(CalcHeartData());
+            StartCoroutine(HeartSaveData());
         }
     }
 
-    // TODO: 파이어 베이스로 변경 필요
-    private void HeartSaveData()
-    {
-        HeartData data = new HeartData
-        {
-            currentHearts = _currentHearts,
-            lastSaveTime = (_currentHearts < _maxHearts) ? DateTime.Now.ToString() : "",
-            remainingSeconds = (_currentHearts < _maxHearts) ? _remainingSeconds : 0
-        };
 
-        string json = JsonUtility.ToJson(data, true);
-        System.IO.File.WriteAllText(SavePath, json);
+        // string json = JsonUtility.ToJson(data, true);
+        // System.IO.File.WriteAllText(SavePath, json);
 
-        Debug.Log("JSON 저장 완료: " + SavePath);
-    }
-
+        // Debug.Log("JSON 저장 완료: " + SavePath);
+    // }
     /// <summary>
     /// 씬이 로드될 때마다 UI를 다시 찾아 연결합니다.
     /// </summary>

@@ -94,4 +94,12 @@ public class StageManager : MonoBehaviour
     {
         Debug.Log("스테이지 로드");
     }
+
+    public void SetStartBtn(StageStartButton startbtn, Button btn, TMP_InputField tMP_InputField)
+    {
+        this.startbtn = startbtn;
+        this.btn = btn;
+        this.tMP_InputField = tMP_InputField;
+        btn.onClick.AddListener(SetStage);
+    }
 }

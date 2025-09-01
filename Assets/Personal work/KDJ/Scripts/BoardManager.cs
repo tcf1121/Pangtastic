@@ -1,5 +1,5 @@
+using KDJ.States;
 using TMPro;
-using UnityEditor.Localization.Plugins.XLIFF.V12;
 using UnityEngine;
 
 namespace KDJ
@@ -19,6 +19,7 @@ namespace KDJ
 
         private void Awake()
         {
+            Debug.Log("보드 매니저 초기화");
             Spawner = FindObjectOfType<BlockSpawner>();
             MatchChecker = GetComponent<BoardMatchChecker>();
             BlockMover = GetComponent<BlockMover>();
@@ -28,7 +29,8 @@ namespace KDJ
 
         private void Start()
         {
-            ChangeState(new States.InitializeState() as IGameState);
+            Debug.Log("보드 매니저 시작");
+            ChangeState(new InitializeState());
             UpdateUI(Score);
         }
 

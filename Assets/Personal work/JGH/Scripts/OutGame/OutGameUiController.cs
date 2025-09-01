@@ -41,10 +41,8 @@ public class OutGameUiController : MonoBehaviour
         
         // TODO: TEST
         ScriptingSystem.Instance.ScriptStart("test1", "test2", 50001, 50010);
+        // ScriptingSystem.Instance.ScriptStart("Script", "Character", 1000, 6500);
     }
-
-
-
 
     public void ChangeInGameScene(int num)
     {
