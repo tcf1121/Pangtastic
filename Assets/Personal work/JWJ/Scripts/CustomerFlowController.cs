@@ -87,7 +87,7 @@ public class CustomerFlowController : MonoBehaviour
             else if (rand >= 68)
             {
                 Debug.Log("오븐 제공");
-                rewardGive.Add(GemType.Oven);
+                rewardGive.Add(GemType.DonutBox);
             }
             else if (rand >= 46)
             {
@@ -97,7 +97,7 @@ public class CustomerFlowController : MonoBehaviour
             else if (rand >= 23)
             {
                 Debug.Log("밀대 세로 제공");
-                rewardGive.Add(GemType.Roller_v);
+                rewardGive.Add(GemType.Milk);
             }
             else if (rand >= 0)
             {
