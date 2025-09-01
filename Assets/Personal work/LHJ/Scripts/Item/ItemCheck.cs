@@ -27,7 +27,7 @@ namespace LHJ
                 int w = _board.Spawner.BlockPlate.BlockPlateWidth;
                 int h = _board.Spawner.BlockPlate.BlockPlateHeight;
                 Vector2 target = (Vector2)world + new Vector2(w / 2f, h / 2f);
-                Vector2Int grid = _board.BlockMover.WorldToGrid(target);
+                Vector2Int grid = _board.BlockMover.WorldToGrid(target , w, h);
 
                 if (!InBounds(grid))
                 {

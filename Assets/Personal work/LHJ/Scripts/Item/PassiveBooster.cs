@@ -8,9 +8,6 @@ public class PassiveBooster : MonoBehaviour
 {
     [SerializeField] private BoardManager _board;
 
-    // 켜짐/꺼짐 토글
-    [SerializeField] private bool _enabled = true;
-
     // 특수블록 ID 매핑
     [SerializeField] private int _rollerVId;
     [SerializeField] private int _rollerHId;
@@ -18,8 +15,11 @@ public class PassiveBooster : MonoBehaviour
     [SerializeField] private int _donutId;
 
     [SerializeField] private int _manhattanDist;
-
     private Coroutine _applyCo;
+
+    // 켜짐/꺼짐 토글
+    public bool _enabled;
+
     private void OnEnable()
     {
         if (_enabled && _applyCo == null)
