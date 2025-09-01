@@ -1,11 +1,5 @@
 using KDJ;
 using LHJ;
-using System.Collections;
-using System.Collections.Generic;
-using TMPro;
-using UnityEngine;
-using static UnityEditor.VersionControl.Asset;
-using KDJ.States;
 
 public class CopyBoardManager : BoardManager
 {

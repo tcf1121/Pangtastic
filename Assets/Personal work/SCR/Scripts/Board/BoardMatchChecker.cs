@@ -1,11 +1,7 @@
-using KDJ;
 using SCR;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using Unity.VisualScripting;
-using UnityEditor.Localization.Plugins.XLIFF.V12;
-using UnityEditor.Localization.Plugins.XLIFF.V20;
 using UnityEngine;
 
 namespace SCR_B
@@ -48,8 +44,9 @@ namespace SCR_B
             if (pos.y >= 0 && pos.y < boardData.GetHeight() &&
                 pos.x >= 0 && pos.x < boardData.GetWidth())
             {
-                if (boardData.BlockArray[pos.y, pos.x] == null) return false;
-                if (boardData.BlockPlateArray[pos.y, pos.x]) return true;
+                if (!boardData.BlockPlateArray[pos.y, pos.x]) return false;
+                else if (boardData.BlockArray[pos.y, pos.x] == null) return false;
+                else return true;
             }
 
             return false;
@@ -63,7 +60,8 @@ namespace SCR_B
             _matchDatas.Clear();
             for (int x = 0; x < boardData.GetWidth(); x++)
                 for (int y = 0; y < boardData.GetHeight(); y++)
-                    CheckMatch(new Vector2Int(x, y), boardData);
+                    if (boardData.BlockPlateArray[y, x])
+                        CheckMatch(new Vector2Int(x, y), boardData);
             if (_matchDatas.Count > 0) return true;
             else return false;
         }
@@ -136,6 +134,7 @@ namespace SCR_B
                     if (x < tempBoardData.GetWidth() - 1)
                     {
                         Vector2Int rightPos = new(x + 1, y);
+                        if (!tempBoardData.BlockPlateArray[rightPos.y, rightPos.x]) continue;
                         if (CheckForMatchAfterSwap(pos, rightPos))
                         {
                             return true; // 매치 가능성을 찾았으므로 즉시 반환
@@ -146,6 +145,7 @@ namespace SCR_B
                     if (y < _boardData.GetHeight() - 1)
                     {
                         Vector2Int upPos = new(x, y + 1);
+                        if (!tempBoardData.BlockPlateArray[upPos.y, upPos.x]) continue;
                         if (CheckForMatchAfterSwap(pos, upPos))
                         {
                             return true; // 매치 가능성을 찾았으므로 즉시 반환
@@ -179,7 +179,8 @@ namespace SCR_B
             _splashPos.Clear();
             var startGem = boardData.BlockPlateArray[pos.y, pos.x];
             if (!startGem) return;
-            var startGemType = boardData.BlockArray[pos.y, pos.x].GemType;
+            var startGemType = boardData.BlockArray[pos.y, pos.x]?.GemType;
+            if (startGemType == null) return;
             if (startGemType > GemType.Sugar) return;
             // 가로 매치 확인
             int horizontalCount = CheckDirection(pos, Vector2Int.left, boardData) + CheckDirection(pos, Vector2Int.right, boardData) + 1;
@@ -314,10 +315,10 @@ namespace SCR_B
             if (boardData == null) boardData = _boardData;
             int count = 0;
             Vector2Int currentPos = startPos + direction;
-            if (!CheckArray(startPos)) return 0;
+            if (!CheckArray(startPos, boardData)) return 0;
             var startGemType = boardData.BlockArray[startPos.y, startPos.x].GemType;
             if (startGemType > GemType.Sugar) return 0;
-            while (CheckArray(currentPos) &&
+            while (CheckArray(currentPos, boardData) &&
            boardData.BlockArray[currentPos.y, currentPos.x].GemType == boardData.BlockArray[startPos.y, startPos.x].GemType)
             {
                 count++;
@@ -345,22 +346,22 @@ namespace SCR_B
         {
             if (boardData == null) boardData = _boardData;
             bool isSquare = false;
-            if (!CheckArray(startPos)) return false;
+            if (!CheckArray(startPos, boardData)) return false;
             var startGemType = boardData.BlockArray[startPos.y, startPos.x].GemType;
             if (startGemType > GemType.Sugar) return false;
-            bool upPos = CheckArray(startPos + Vector2Int.up) &&
+            bool upPos = CheckArray(startPos + Vector2Int.up, boardData) &&
             boardData.BlockArray[startPos.y + 1, startPos.x].GemType == startGemType;
-            bool downPos = CheckArray(startPos + Vector2Int.down) &&
+            bool downPos = CheckArray(startPos + Vector2Int.down, boardData) &&
             boardData.BlockArray[startPos.y - 1, startPos.x].GemType == startGemType;
-            bool leftPos = CheckArray(startPos + Vector2Int.left) &&
+            bool leftPos = CheckArray(startPos + Vector2Int.left, boardData) &&
             boardData.BlockArray[startPos.y, startPos.x - 1].GemType == startGemType;
-            bool rightPos = CheckArray(startPos + Vector2Int.right) &&
+            bool rightPos = CheckArray(startPos + Vector2Int.right, boardData) &&
             boardData.BlockArray[startPos.y, startPos.x + 1].GemType == startGemType;
 
             if (upPos)
             {
                 if (leftPos)
-                    if (CheckArray(startPos + Vector2Int.up + Vector2Int.left) &&
+                    if (CheckArray(startPos + Vector2Int.up + Vector2Int.left, boardData) &&
             boardData.BlockArray[startPos.y + 1, startPos.x - 1].GemType == startGemType)
                     {
                         isSquare = true;
@@ -370,7 +371,7 @@ namespace SCR_B
                         _matchPos.Add(startPos + Vector2Int.up + Vector2Int.left);
                     }
                 if (rightPos)
-                    if (CheckArray(startPos + Vector2Int.up + Vector2Int.right) &&
+                    if (CheckArray(startPos + Vector2Int.up + Vector2Int.right, boardData) &&
             boardData.BlockArray[startPos.y + 1, startPos.x + 1].GemType == startGemType)
                     {
                         isSquare = true;
@@ -384,7 +385,7 @@ namespace SCR_B
             if (downPos)
             {
                 if (leftPos)
-                    if (CheckArray(startPos + Vector2Int.down + Vector2Int.left) &&
+                    if (CheckArray(startPos + Vector2Int.down + Vector2Int.left, boardData) &&
             boardData.BlockArray[startPos.y - 1, startPos.x - 1].GemType == startGemType)
                     {
                         isSquare = true;
@@ -394,7 +395,7 @@ namespace SCR_B
                         _matchPos.Add(startPos + Vector2Int.down + Vector2Int.left);
                     }
                 if (rightPos)
-                    if (CheckArray(startPos + Vector2Int.down + Vector2Int.right) &&
+                    if (CheckArray(startPos + Vector2Int.down + Vector2Int.right, boardData) &&
             boardData.BlockArray[startPos.y - 1, startPos.x + 1].GemType == startGemType)
                     {
                         isSquare = true;

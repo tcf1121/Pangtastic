@@ -23,6 +23,7 @@ public class OutGameManager : MonoBehaviour
     {
         UpdateCoinUI();
         UpdateStarUI();
+        StageManager.Instance.SetStartBtn(startbtn, btn, tMP_InputField);
     }
 
     /// <summary>

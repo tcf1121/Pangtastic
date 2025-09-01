@@ -28,5 +28,11 @@ namespace SCR_B
             foreach (var pos in spawnPos)
                 _spawnerPlate.SetTile(pos, _spawner);
         }
+
+        public void DrawWall(Vector3Int WallPos)
+        {
+            _spawnerPlate.SetTile(WallPos, _spawner);
+
+        }
     }
 }

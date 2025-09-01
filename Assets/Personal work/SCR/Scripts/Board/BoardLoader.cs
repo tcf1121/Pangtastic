@@ -82,6 +82,15 @@ namespace SCR_B
                 boardData.SetDonut(gem);
                 boardData.SetArray(x, y, gem);
             }
+
+            for (int x = 0; x < boardData.Size.x; x++)
+                for (int y = 0; y < boardData.Size.y; y++)
+                {
+                    if (!boardData.BlockPlateArray[y, x])
+                    {
+                        blockPlate.DrawWall(new Vector3Int(x - xOffset, y - yOffset, 0));
+                    }
+                }
             BoardDataArray = boardData;
             return boardData;
         }

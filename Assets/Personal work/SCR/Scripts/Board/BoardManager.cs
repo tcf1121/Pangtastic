@@ -69,7 +69,10 @@ namespace SCR_B
             BlockMover.SetBoardData(_boardData);
         }
 
-
+        public static void SetTouch(bool value)
+        {
+            instance.CanTouch = value;
+        }
 
         public static void Move()
         {

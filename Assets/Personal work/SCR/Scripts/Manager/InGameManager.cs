@@ -124,8 +124,8 @@ public class InGameManager : MonoBehaviour
     public static void StageClear()
     {
         if (instate == null) GameObject.Find("InGameManager").GetComponent<InGameManager>();
-        instate.doNotTouch.SetActive(true);
         AddCoin(GetScore() / 10);
+        BoardManager.SetTouch(false);
         instate.WinCoin.text = $"{GetCoin()}";
         instate.WinScore.text = $"{GetScore()}";
         instate.clearUI.SetActive(true);
@@ -134,11 +134,25 @@ public class InGameManager : MonoBehaviour
     public static void StageFail()
     {
         if (instate == null) GameObject.Find("InGameManager").GetComponent<InGameManager>();
-        instate.doNotTouch.SetActive(true);
+        BoardManager.SetTouch(false);
         //instate.LoseCoin.text = $"{GetCoin()}";
         instate.LoseScore.text = $"{GetScore()}";
         HeartSystem.Instance.UseHearts();
         instate.failUI.SetActive(true);
+    }
+
+    public void PauseGame()
+    {
+        Debug.Log("게임 중지");
+        Time.timeScale = 0f;
+        BoardManager.SetTouch(false);
+    }
+
+    public void ResumeGame()
+    {
+        Debug.Log("게임 재실행");
+        Time.timeScale = 1f;
+        BoardManager.SetTouch(true);
     }
 
     public static void RewardGem(List<GemType> gemList)

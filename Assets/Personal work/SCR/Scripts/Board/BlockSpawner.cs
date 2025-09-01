@@ -262,6 +262,7 @@ namespace SCR_B
         {
             SpawnBlock(x, y, _boardData.RespawnDount());
         }
+
         /// <summary>
         /// 지정 위치 블록 삭제
         /// </summary>
@@ -346,6 +347,9 @@ namespace SCR_B
             {
                 for (int y = 0; y < _boardData.GetHeight() + 1; y++)
                 {
+                    if (y < _boardData.GetHeight())
+                        if (!_boardData.BlockPlateArray[y, x])
+                            continue;
                     if (_boardData.RespawnPos.Contains(new Vector2Int(x, y)))
                     {
                         if (_boardData.BlockArray[y, x] == null)
@@ -378,12 +382,16 @@ namespace SCR_B
                 for (int y = _boardData.GetHeight(); y > 0; y--)
                 {
                     pos = new Vector2Int(x, y);
+                    if (y < _boardData.GetHeight())
+                        if (!_boardData.BlockPlateArray[y, x])
+                            continue;
                     if (!_emptyBlock.Contains(pos) && _boardData.BlockArray[y, x].CanMove)
                     {
                         if (num == 0)
                         {
                             if (CheckMoveDownPos(pos) != pos)
                             {
+                                Debug.Log(CheckMoveDownPos(pos));
                                 if (!_canMoveBlock.ContainsKey(pos))
                                 {
                                     _canMoveBlock.Add(pos, CheckMoveDownPos(pos));
