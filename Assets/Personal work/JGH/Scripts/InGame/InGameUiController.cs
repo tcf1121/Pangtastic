@@ -41,6 +41,7 @@ public class InGameUiController : MonoBehaviour
     public void ChangeQuitGameScene()
     {
         SceneManager.LoadScene("OutGame Test Scene");
+        HeartSystem.Instance.UseHearts();
         AudioSystem.Instance.PlaySFXByName("GameToHomeSfx");
     }
 
