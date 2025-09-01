@@ -35,7 +35,7 @@ namespace SCR
 
             // 점수 주기
             InGameManager.AddScore(score);
-            InGameManager.AddIngredientSta(Board.GetPrefabList().GemDatas[(int)DonutType].ingredientSO);
+            InGameManager.AddIngredientSta(DonutType);
             Destroy(gameObject);
         }
     }

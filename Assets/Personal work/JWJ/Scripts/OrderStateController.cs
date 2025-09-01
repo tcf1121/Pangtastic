@@ -1,3 +1,4 @@
+using SCR;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
@@ -69,6 +70,7 @@ public class OrderStateController : MonoBehaviour
 
             if (collected) // 재료가 반영되면
             {
+                Debug.Log("재료 추가");
                 OnIngredientProgress?.Invoke(i, ingredient, have, need); // UI 갱신 이벤트
 
                 if (recipe.IsCompleted) // 이 레시피가 완료됐다면
@@ -220,5 +222,43 @@ public class OrderStateController : MonoBehaviour
             _hasEnded = true;
             OnOrderTimeout?.Invoke(_curCustomer);
         }
+    }
+
+    public List<GemType> GetRequiredGem()
+    {
+        List<GemType> gemTypes = new();
+        foreach (var s in _orderRecipes)
+        {
+            for (int i = 0; i < s.IngredientCount; i++)
+            {
+                int remainder = s.GetRequiredAmount(i) - s.GetCollectedAmount(i);
+                if (remainder > 0)
+                {
+                    for (int j = 0; j < remainder; j++)
+                        gemTypes.Add(SoToGemtype(s.GetIngredient(i)));
+                }
+            }
+        }
+        return gemTypes;
+    }
+
+    private GemType SoToGemtype(IngredientSO ingredientSO)
+    {
+        if (ingredientSO.ID == 101)
+            return GemType.Lavender;
+        else if (ingredientSO.ID == 102)
+            return GemType.Chocolate;
+        else if (ingredientSO.ID == 103)
+            return GemType.Blueberry;
+        else if (ingredientSO.ID == 104)
+            return GemType.Cheese;
+        else if (ingredientSO.ID == 105)
+            return GemType.Strawberry;
+        else if (ingredientSO.ID == 106)
+            return GemType.Sugar;
+        else if (ingredientSO.ID == 107)
+            return GemType.Syrup;
+        else
+            return GemType.Egg;
     }
 }

@@ -10,9 +10,9 @@ public class StageManager : MonoBehaviour
     public static StageManager Instance;
 
     [SerializeField] private List<StageSO> stages;
-    [SerializeField] private StageStartButton startbtn;
-    [SerializeField] private Button btn;
-    [SerializeField] private TMP_InputField tMP_InputField;
+    private StageStartButton startbtn;
+    private Button btn;
+    private TMP_InputField tMP_InputField;
     public int CurrentStageIndex { get; private set; } = 0;
     public StageSO CurrentStage => stages[CurrentStageIndex];
 
@@ -28,7 +28,7 @@ public class StageManager : MonoBehaviour
         {
             Destroy(gameObject);
         }
-        btn.onClick.AddListener(SetStage);
+
     }
 
     public void AdvanceStage()
@@ -58,5 +58,13 @@ public class StageManager : MonoBehaviour
     public void LoadStage()
     {
         Debug.Log("스테이지 로드");
+    }
+
+    public void SetStartBtn(StageStartButton startbtn, Button btn, TMP_InputField tMP_InputField)
+    {
+        this.startbtn = startbtn;
+        this.btn = btn;
+        this.tMP_InputField = tMP_InputField;
+        btn.onClick.AddListener(SetStage);
     }
 }
