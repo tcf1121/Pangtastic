@@ -24,7 +24,7 @@ public class HeartSystem : MonoBehaviour
     [SerializeField] private int _maxHearts = 5; // 최대 하트 개수
     [SerializeField] private int _currentHearts = 0; // 현재 하트 개수
 
-    private int _remainingSeconds;
+    private float _remainingSeconds;
 
 
     protected void Awake()
@@ -83,7 +83,7 @@ public class HeartSystem : MonoBehaviour
                     if (_remainingSeconds <= 0)
                     {
                         // 부족하면 추가로 하트 충전
-                        int extraHearts = Mathf.Abs(_remainingSeconds) / _startSeconds + 1;
+                        int extraHearts = Mathf.Abs((int)_remainingSeconds) / _startSeconds + 1;
                         _currentHearts = Mathf.Min(_currentHearts + extraHearts, _maxHearts);
 
                         // 남은 시간 재설정
@@ -193,17 +193,14 @@ public class HeartSystem : MonoBehaviour
                 // if (_timerText != null)
                 // _timerText.gameObject.SetActive(false);
 
-                yield return new WaitForSeconds(1f);
+                yield return null;
                 continue;
             }
 
             if (_remainingSeconds > 0)
             {
-                yield return new WaitForSeconds(1f);
-
-                // 1초 감소
-                _remainingSeconds--;
-
+                _remainingSeconds -= Time.unscaledDeltaTime;
+                yield return null;
                 UpdateTimerUI();
             }
             else
@@ -222,6 +219,7 @@ public class HeartSystem : MonoBehaviour
                     HeartSaveData();
                 }
             }
+
         }
     }
 
@@ -240,8 +238,8 @@ public class HeartSystem : MonoBehaviour
             return;
         }
 
-        int minutes = _remainingSeconds / 60;
-        int seconds = _remainingSeconds % 60;
+        int minutes = (int)_remainingSeconds / 60;
+        int seconds = (int)_remainingSeconds % 60;
         _timerText.text = string.Format("{0:D2}:{1:D2}", minutes, seconds);
     }
 
@@ -272,7 +270,7 @@ public class HeartSystem : MonoBehaviour
         {
             currentHearts = _currentHearts,
             lastSaveTime = (_currentHearts < _maxHearts) ? DateTime.Now.ToString() : "",
-            remainingSeconds = (_currentHearts < _maxHearts) ? _remainingSeconds : 0
+            remainingSeconds = (_currentHearts < _maxHearts) ? (int)_remainingSeconds : 0
         };
 
         string json = JsonUtility.ToJson(data, true);

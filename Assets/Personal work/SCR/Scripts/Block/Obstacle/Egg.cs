@@ -45,10 +45,30 @@ namespace SCR_B
 
         }
 
+        public override void Broken()
+        {
+            InGameManager.AddScore(Score);
+            InGameManager.AddIngredientSta(GemType);
+            base.Broken();
+        }
+
         public override void SplashDamage()
         {
             TakeDamage();
         }
 
+        public override Block Clone()
+        {
+            return new Egg(Pos.x, Pos.y)
+            {
+                CurrentHP = this.CurrentHP,
+                Pos = this.Pos,
+                Score = this.Score,
+                BlockInstance = this.BlockInstance,
+                GemType = this.GemType,
+                IsObstacle = this.IsObstacle,
+                CanMove = this.CanMove,
+            };
+        }
     }
 }

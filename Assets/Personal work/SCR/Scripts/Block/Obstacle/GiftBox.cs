@@ -82,5 +82,19 @@ namespace SCR_B
                 return GemType.DonutBox;
             }
         }
+
+        public override Block Clone()
+        {
+            return new GiftBox(Pos.x, Pos.y)
+            {
+                CurrentHP = this.CurrentHP,
+                Pos = this.Pos,
+                Score = this.Score,
+                BlockInstance = this.BlockInstance,
+                GemType = this.GemType,
+                IsObstacle = this.IsObstacle,
+                CanMove = this.CanMove,
+            };
+        }
     }
 }

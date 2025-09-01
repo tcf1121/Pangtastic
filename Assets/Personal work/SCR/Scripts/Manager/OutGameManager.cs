@@ -21,6 +21,7 @@ public class OutGameManager : MonoBehaviour
 
     void Start()
     {
+        Time.timeScale = 1f;
         UpdateCoinUI();
         UpdateStarUI();
         StageManager.Instance.SetStartBtn(startbtn, btn, tMP_InputField);
