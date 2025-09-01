@@ -133,7 +133,7 @@ GameObject:
   - component: {fileID: 298001}
   - component: {fileID: 298000}
   m_Layer: 0
-  m_Name: GameObject
+  m_Name: CoroutineManager
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1298,7 +1298,7 @@ GameObject:
   - component: {fileID: 1529438534}
   - component: {fileID: 1529438533}
   m_Layer: 0
-  m_Name: GameObject (1)
+  m_Name: StageManager
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2492,7 +2492,7 @@ PrefabInstance:
       objectReference: {fileID: 11400000, guid: a453fd8a6f61a4d4f9fcb5e4d13956e6, type: 2}
     - target: {fileID: 8579344169084250576, guid: a6c91df400f25084193b8dfb89592778, type: 3}
       propertyPath: _spawnRangeMax
-      value: 6
+      value: 4
       objectReference: {fileID: 0}
     - target: {fileID: 8579344169084250576, guid: a6c91df400f25084193b8dfb89592778, type: 3}
       propertyPath: _spawnRangeMin
@@ -2607,6 +2607,10 @@ PrefabInstance:
       propertyPath: _backPlate
       value: 
       objectReference: {fileID: 305667372}
+    - target: {fileID: 5266263310930390250, guid: 7bbc72687f4523646ad4978aac87d61b, type: 3}
+      propertyPath: _blockTile
+      value: 
+      objectReference: {fileID: 11400000, guid: 521f39fe0c4c3984ea4ffb934dcb1120, type: 2}
     - target: {fileID: 5266263310930390250, guid: 7bbc72687f4523646ad4978aac87d61b, type: 3}
       propertyPath: BlockPlateSize
       value: 1

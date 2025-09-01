@@ -104,6 +104,9 @@ namespace KDJ
                 for (int x = 0; x < width; x++)
                 {
                     if (!CheckBlockIsAllValid(boardManager, x, y)) continue;
+                    
+                    var block = boardManager.Spawner.BlockArray[y, x];
+                    if (block.GemType > GemType.Sugar && block.GemType < GemType.Dust) continue;
 
                     // 3개 이상의 가로 매치 확인
                     if (FindFullLineMatch(boardManager, x, y, true).Count >= 3)
@@ -301,7 +304,7 @@ namespace KDJ
             }
 
             var block = boardManager.Spawner.BlockArray[y, x];
-            if (block == null || block.IsObstacle)
+            if (block == null || block.IsObstacle || (block.GemType > GemType.Sugar && block.GemType < GemType.Dust))
             {
                 return false;
             }
@@ -317,7 +320,7 @@ namespace KDJ
             {
                 if (!blockPlate.BlockPlateArray[y, i]) break;
                 var nextBlock = boardManager.Spawner.BlockArray[y, i];
-                if (nextBlock != null && !nextBlock.IsObstacle && nextBlock.GemType == gemType)
+                if (nextBlock != null && !nextBlock.IsObstacle && !(nextBlock.GemType > GemType.Sugar && nextBlock.GemType < GemType.Dust) && nextBlock.GemType == gemType)
                     horizontalCount++;
                 else
                     break;
@@ -327,7 +330,7 @@ namespace KDJ
             {
                 if (!blockPlate.BlockPlateArray[y, i]) break;
                 var nextBlock = boardManager.Spawner.BlockArray[y, i];
-                if (nextBlock != null && !nextBlock.IsObstacle && nextBlock.GemType == gemType)
+                if (nextBlock != null && !nextBlock.IsObstacle && !(nextBlock.GemType > GemType.Sugar && nextBlock.GemType < GemType.Dust) && nextBlock.GemType == gemType)
                     horizontalCount++;
                 else
                     break;
@@ -342,7 +345,7 @@ namespace KDJ
             {
                 if (!blockPlate.BlockPlateArray[i, x]) break;
                 var nextBlock = boardManager.Spawner.BlockArray[i, x];
-                if (nextBlock != null && !nextBlock.IsObstacle && nextBlock.GemType == gemType)
+                if (nextBlock != null && !nextBlock.IsObstacle && !(nextBlock.GemType > GemType.Sugar && nextBlock.GemType < GemType.Dust) && nextBlock.GemType == gemType)
                     verticalCount++;
                 else
                     break;
@@ -352,7 +355,7 @@ namespace KDJ
             {
                 if (!blockPlate.BlockPlateArray[i, x]) break;
                 var nextBlock = boardManager.Spawner.BlockArray[i, x];
-                if (nextBlock != null && !nextBlock.IsObstacle && nextBlock.GemType == gemType)
+                if (nextBlock != null && !nextBlock.IsObstacle && !(nextBlock.GemType > GemType.Sugar && nextBlock.GemType < GemType.Dust) && nextBlock.GemType == gemType)
                     verticalCount++;
                 else
                     break;
@@ -379,6 +382,12 @@ namespace KDJ
 
             int matchCount = 0;
             bool isMatched = false;
+            
+            var startBlock = blockArray[y,x];
+            if(startBlock == null || (startBlock.GemType > GemType.Sugar && startBlock.GemType < GemType.Dust))
+            {
+                return false;
+            }
 
             for (int i = y; i < y + 2; i++)
             {
@@ -393,9 +402,10 @@ namespace KDJ
                     {
                         return isMatched;
                     }
-
-                    if (blockPlateArray[i, j] && blockPlateArray[y, x] && blockArray[i, j] != null
-                    && blockArray[y, x] != null && blockArray[i, j].BlockType == blockArray[y, x].BlockType)
+                    
+                    var currentBlock = blockArray[i,j];
+                    if (blockPlateArray[i, j] && currentBlock != null && !(currentBlock.GemType > GemType.Sugar && currentBlock.GemType < GemType.Dust) 
+                        && currentBlock.BlockType == startBlock.BlockType)
                     {
                         matchCount++;
                     }
@@ -413,10 +423,12 @@ namespace KDJ
         private List<Vector2Int> FindFullLineMatch(BoardManager boardManager, int startX, int startY, bool isHorizontal)
         {
             var matches = new List<Vector2Int>();
-            if (!CheckBlockIsAllValid(boardManager, startX, startY) || boardManager.Spawner.BlockArray[startY, startX].IsObstacle)
+            var startBlock = boardManager.Spawner.BlockArray[startY, startX];
+
+            if (!CheckBlockIsAllValid(boardManager, startX, startY) || startBlock.IsObstacle || (startBlock.GemType > GemType.Sugar && startBlock.GemType < GemType.Dust))
                 return matches;
 
-            var startType = boardManager.Spawner.BlockArray[startY, startX].GemType;
+            var startType = startBlock.GemType;
             matches.Add(new Vector2Int(startX, startY));
 
             if (isHorizontal)
@@ -424,14 +436,16 @@ namespace KDJ
                 // 왼쪽 탐색
                 for (int x = startX - 1; x >= 0; x--)
                 {
-                    if (CheckBlockIsAllValid(boardManager, x, startY) && !boardManager.Spawner.BlockArray[startY, x].IsObstacle && boardManager.Spawner.BlockArray[startY, x].GemType == startType)
+                    var currentBlock = boardManager.Spawner.BlockArray[startY, x];
+                    if (CheckBlockIsAllValid(boardManager, x, startY) && !currentBlock.IsObstacle && !(currentBlock.GemType > GemType.Sugar && currentBlock.GemType < GemType.Dust) && currentBlock.GemType == startType)
                         matches.Add(new Vector2Int(x, startY));
                     else break;
                 }
                 // 오른쪽 탐색
                 for (int x = startX + 1; x < boardManager.Spawner.BlockPlate.BlockPlateWidth; x++)
                 {
-                    if (CheckBlockIsAllValid(boardManager, x, startY) && !boardManager.Spawner.BlockArray[startY, x].IsObstacle && boardManager.Spawner.BlockArray[startY, x].GemType == startType)
+                    var currentBlock = boardManager.Spawner.BlockArray[startY, x];
+                    if (CheckBlockIsAllValid(boardManager, x, startY) && !currentBlock.IsObstacle && !(currentBlock.GemType > GemType.Sugar && currentBlock.GemType < GemType.Dust) && currentBlock.GemType == startType)
                         matches.Add(new Vector2Int(x, startY));
                     else break;
                 }
@@ -441,14 +455,16 @@ namespace KDJ
                 // 위쪽 탐색
                 for (int y = startY - 1; y >= 0; y--)
                 {
-                    if (CheckBlockIsAllValid(boardManager, startX, y) && !boardManager.Spawner.BlockArray[y, startX].IsObstacle && boardManager.Spawner.BlockArray[y, startX].GemType == startType)
+                    var currentBlock = boardManager.Spawner.BlockArray[y, startX];
+                    if (CheckBlockIsAllValid(boardManager, startX, y) && !currentBlock.IsObstacle && !(currentBlock.GemType > GemType.Sugar && currentBlock.GemType < GemType.Dust) && currentBlock.GemType == startType)
                         matches.Add(new Vector2Int(startX, y));
                     else break;
                 }
                 // 아래쪽 탐색
                 for (int y = startY + 1; y < boardManager.Spawner.BlockPlate.BlockPlateHeight; y++)
                 {
-                    if (CheckBlockIsAllValid(boardManager, startX, y) && !boardManager.Spawner.BlockArray[y, startX].IsObstacle && boardManager.Spawner.BlockArray[y, startX].GemType == startType)
+                    var currentBlock = boardManager.Spawner.BlockArray[y, startX];
+                    if (CheckBlockIsAllValid(boardManager, startX, y) && !currentBlock.IsObstacle && !(currentBlock.GemType > GemType.Sugar && currentBlock.GemType < GemType.Dust) && currentBlock.GemType == startType)
                         matches.Add(new Vector2Int(startX, y));
                     else break;
                 }
