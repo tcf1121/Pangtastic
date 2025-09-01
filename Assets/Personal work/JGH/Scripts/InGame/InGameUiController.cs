@@ -1,45 +1,54 @@
 using System.Collections;
+using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
 public class InGameUiController : MonoBehaviour
 {
     public static bool needStartSetting = false;
-    
+
     private void Start()
     {
         AudioSystem.Instance.PlayBGMByName("InGameMusic");
     }
-    
-    public void ChangeOutGameScene(int addCoin)
+
+    public void ChangeOutGameScene()
     {
         CurrencySystem.Instance.pendingSpawnType = CurrencySystem.SpawnType.Exit;
-        
-        CurrencySystem.Instance.AddCoin(addCoin);
-        CurrencySystem.Instance.AddStar(addCoin);
-        
-        SceneManager.LoadScene("JGH_OutGameUI");
-        
+
+        CurrencySystem.Instance.AddCoin(InGameManager.GetCoin());
+        CurrencySystem.Instance.AddStar(1);
+
+        SceneManager.LoadScene("OutGame Test Scene");
+
         AudioSystem.Instance.PlaySFXByName("GameToHomeSfx");
     }
-    
-    public void ChangeContinueOutGameScene(int addCoin)
+
+    public void ChangeContinueOutGameScene()
     {
         CurrencySystem.Instance.pendingSpawnType = CurrencySystem.SpawnType.Continue;
-        
-        needStartSetting = true;
-        
-        CurrencySystem.Instance.AddCoin(addCoin);
-        CurrencySystem.Instance.AddStar(addCoin);
 
-        SceneManager.LoadScene("JGH_OutGameUI");
-        
+        needStartSetting = true;
+
+        CurrencySystem.Instance.AddCoin(InGameManager.GetCoin());
+        CurrencySystem.Instance.AddStar(1);
+
+        SceneManager.LoadScene("InGameTest Scene");
+
         AudioSystem.Instance.PlaySFXByName("GameToHomeSfx");
     }
-    
+
     public void ChangeQuitGameScene()
     {
-        SceneManager.LoadScene("JGH_OutGameUI");
+        SceneManager.LoadScene("OutGame Test Scene");
+        HeartSystem.Instance.UseHearts();
+        AudioSystem.Instance.PlaySFXByName("GameToHomeSfx");
+    }
+
+    public void ChangeRetryGameScene()
+    {
+        needStartSetting = true;
+        SceneManager.LoadScene("InGameTest Scene");
         AudioSystem.Instance.PlaySFXByName("GameToHomeSfx");
     }
 
@@ -47,5 +56,5 @@ public class InGameUiController : MonoBehaviour
     {
         AudioSystem.Instance.PlaySFXByName("GameExitSfx");
     }
-    
+
 }

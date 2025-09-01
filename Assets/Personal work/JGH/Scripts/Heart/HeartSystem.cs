@@ -206,15 +206,16 @@ public class HeartSystem : MonoBehaviour
     /// </summary>
     /// <param name="requiredHearts"></param>
     /// <returns></returns>
-    public bool TryUseHearts(int requiredHearts)
+    public bool TryStartStage()
     {
-        if (_currentHearts >= requiredHearts)
+        if (_currentHearts != 0)
         {
-            _currentHearts -= requiredHearts;
-            UpdateHeartUI();
-            StartCoroutine(CalcHeartData());
-            StartCoroutine(HeartSaveData());
-            Debug.Log($"스테이지 시작! 하트 {requiredHearts}개 사용, 남은 하트: {_currentHearts}");
+            // _currentHearts -= requiredHearts;
+            // UpdateHeartUI();
+            // StartCoroutine(CalcHeartData());
+            // StartCoroutine(HeartSaveData());
+            // Debug.Log($"스테이지 시작! 하트 {requiredHearts}개 사용, 남은 하트: {_currentHearts}");
+            Debug.Log($"스테이지 시작!");
             return true;
         }
         else
@@ -223,7 +224,20 @@ public class HeartSystem : MonoBehaviour
             return false;
         }
     }
-    
+
+    /// <summary>
+    /// 스테이지 실패시 하트를 소모합니다.
+    /// </summary>
+    public void UseHearts()
+    {
+        if (_currentHearts > 0)
+        {
+            _currentHearts--;
+        }
+        UpdateHeartUI();
+        HeartSaveData();
+    }
+
     /// <summary>
     /// 하트를 회복(채우기)합니다.
     /// 최대치 제한 없음
@@ -245,7 +259,7 @@ public class HeartSystem : MonoBehaviour
 
         Debug.Log($"하트 {amount}개 회복! ({beforeHearts} → {_currentHearts})");
     }
-    
+
     /// <summary>
     /// 하트 UI를 업데이트합니다.
     /// </summary>
@@ -268,7 +282,7 @@ public class HeartSystem : MonoBehaviour
             if (_currentHearts >= _maxHearts)
             {
                 // if (_timerText != null)
-                    // _timerText.gameObject.SetActive(false);
+                // _timerText.gameObject.SetActive(false);
 
                 yield return new WaitForSeconds(1f);
                 continue;
@@ -302,7 +316,7 @@ public class HeartSystem : MonoBehaviour
             }
         }
     }
-    
+
 
     /// <summary>
     /// 타이머 UI를 업데이트합니다.
@@ -317,12 +331,12 @@ public class HeartSystem : MonoBehaviour
             _timerText.text = "FULL";
             return;
         }
-        
+
         int minutes = _remainingSeconds / 60;
         int seconds = _remainingSeconds % 60;
         _timerText.text = string.Format("{0:D2}:{1:D2}", minutes, seconds);
     }
-    
+
     /// <summary>
     /// 애플리케이션이 종료될 때 하트 데이터를 저장합니다.
     /// </summary>
@@ -346,6 +360,11 @@ public class HeartSystem : MonoBehaviour
     }
 
 
+        // string json = JsonUtility.ToJson(data, true);
+        // System.IO.File.WriteAllText(SavePath, json);
+
+        // Debug.Log("JSON 저장 완료: " + SavePath);
+    // }
     /// <summary>
     /// 씬이 로드될 때마다 UI를 다시 찾아 연결합니다.
     /// </summary>

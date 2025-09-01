@@ -1,4 +1,5 @@
 using KDJ;
+using SCR;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -11,7 +12,6 @@ public class CustomerFlowController : MonoBehaviour
 {
     [SerializeField] private CustomerOrderController _customerOrder;
     //[SerializeField] private BoardManager _boardManager;
-    [SerializeField] private ScoreManager _scoreManager;
     [SerializeField] private Image _customerImage; // 손님 이미지
 
     private CustomerSO _curCustomer;
@@ -32,17 +32,13 @@ public class CustomerFlowController : MonoBehaviour
         //{
         //    _boardManager = FindObjectOfType<BoardManager>();
         //}
-        if(_scoreManager == null)
-        {
-            _scoreManager = FindObjectOfType<ScoreManager>();
-        }
         _customerOrder.OnCustomerSuccess += OnCustomerSuccess;
         _customerOrder.OnCustomerFail += OnCustomerFail;
         _customerOrder.OnSpecialCustomerSuccess += OnSpecialCustomerSuccess;
         //_customerOrder.OnSpecialCustomerFail += OnSpecialCustomerFail;
         _customerOrder.OnSpecialCustomerRewardGiven += OnSpecialCustomerRewardGiven;
 
-        spawnButton.onClick.AddListener(SpawnCustomer); //테스트용 버튼
+        //spawnButton.onClick.AddListener(SpawnCustomer); //테스트용 버튼
     }
 
     private void OnDestroy()
@@ -78,7 +74,7 @@ public class CustomerFlowController : MonoBehaviour
     {
         int percent = Mathf.FloorToInt(percentage);
         Debug.Log($"스페셜 중간 성공 인내심 {percent}%. 보상제공");
-
+        List<GemType> rewardGive = new();
         for (int i = 0; i < 2; i++) //보상 개수 두개
         {
             int rand = UnityEngine.Random.Range(0, 100);
@@ -86,24 +82,30 @@ public class CustomerFlowController : MonoBehaviour
             if (rand >= 90)
             {
                 Debug.Log("도넛상자 제공");
+                rewardGive.Add(GemType.DonutBox);
             }
             else if (rand >= 68)
             {
-                Debug.Log("팝콘 제공");
+                Debug.Log("오븐 제공");
+                rewardGive.Add(GemType.DonutBox);
             }
             else if (rand >= 46)
             {
                 Debug.Log("우유 제공");
+                rewardGive.Add(GemType.Milk);
             }
             else if (rand >= 23)
             {
                 Debug.Log("밀대 세로 제공");
+                rewardGive.Add(GemType.Milk);
             }
             else if (rand >= 0)
             {
                 Debug.Log("밀대 가로 제공");
+                rewardGive.Add(GemType.Roller_h);
             }
         }
+        InGameManager.RewardGem(rewardGive);
     }
 
     private void OnSpecialCustomerSuccess(CustomerSO customer, float averagePercent)
@@ -129,42 +131,52 @@ public class CustomerFlowController : MonoBehaviour
 
         StageManager.Instance.AdvanceStage();
 
+        List<GemType> rewardGive = new();
+        int num = 0;
         //특수블록 보상 도넛상자 제외
         if (percent >= 70)
         {
             //_boardManager.Spawner.SpawnRandomBlock
             Debug.Log("블록 4개 제공");
+            num = 4;
         }
         else if (percent >= 40)
         {
             Debug.Log("블록 3개 제공");
+            num = 3;
         }
-        else if(percent >= 17)
+        else if (percent >= 17)
         {
             Debug.Log("블록 2개 제공");
-        }    
-        else if(percent >= 0)
+            num = 2;
+        }
+        else if (percent >= 0)
         {
             Debug.Log("블록 1개 제공");
+            num = 1;
         }
 
-        _scoreManager.AddScore(percent * 10); //점수 전송
+        for (int i = 0; i < num; i++)
+            rewardGive.Add((GemType)UnityEngine.Random.Range(6, 10));
+
+
+        InGameManager.AddScore(percent * 10); //점수 전송
 
         OnStageCleared?.Invoke(); //스테이지 클리어 이벤트
-        StartCoroutine(TmpChangeSceneRoutine()); //임시 씬 넘기기 코루틴
+        //StartCoroutine(TmpChangeSceneRoutine()); //임시 씬 넘기기 코루틴
     }
-    
+
     private void StageFail()
     {
         Debug.Log("스테이지 실패");
         OnStageFailed?.Invoke();
 
-        StartCoroutine(TmpChangeSceneRoutine()); //임시 씬 넘기기 코루틴
+        //StartCoroutine(TmpChangeSceneRoutine()); //임시 씬 넘기기 코루틴
     }
 
     private IEnumerator TmpChangeSceneRoutine() //임시 씬 넘기기 코루틴
     {
         yield return new WaitForSeconds(3);
-        SceneManager.LoadScene("StageSelectScene");
+        SceneManager.LoadScene("OutGame Test Scene");
     }
 }

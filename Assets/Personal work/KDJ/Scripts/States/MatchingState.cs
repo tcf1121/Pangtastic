@@ -1,6 +1,6 @@
 using LHJ;
+using SCR;
 using System.Collections;
-using Unity.VisualScripting;
 using UnityEngine;
 
 namespace KDJ.States
@@ -11,97 +11,80 @@ namespace KDJ.States
 
         public void OnEnter(BoardManager boardManager)
         {
-            // 블럭 매칭 체크
             Debug.Log("블럭 매칭 상태");
-            // boardManager.MatchChecker.BlockMatchCheck(boardManager.BlockMover.EndBlockPos, boardManager);
             if (_matchingCoroutine == null)
             {
                 _matchingCoroutine = boardManager.StartCoroutine(MatchingCoroutine(boardManager));
             }
         }
 
-        public void OnUpdate(BoardManager boardManager)
-        {
-
-        }
+        public void OnUpdate(BoardManager boardManager) { }
 
         public void OnExit(BoardManager boardManager)
         {
             Debug.Log("블럭 매칭 상태 종료");
-            boardManager.BlockMover.StartPos = Vector2.zero; // 초기 시작 위치 설정
-            boardManager.BlockMover.EndPos = Vector2.zero; // 초기 종료 위치 설정
+            boardManager.BlockMover.ResetPos();
         }
 
         private IEnumerator MatchingCoroutine(BoardManager boardManager)
         {
-            SpecialBlock startSpecialBlock = null;
-            SpecialBlock endSpecialBlock = null;
-            Vector2 SPos = boardManager.BlockMover.StartPos;
-            Vector2 EPos = boardManager.BlockMover.EndPos;
+            yield return new WaitForSeconds(0.2f);
 
-            Debug.Log("블럭 매칭 시작");
-            yield return new WaitForSeconds(0.5f);
+            Vector2Int startPos = boardManager.BlockMover.StartBlockPos;
+            Vector2Int endPos = boardManager.BlockMover.EndBlockPos;
+            bool wasSwap = startPos != endPos; // 스왑에 의한 매치인지 확인
+            bool usedSpecial = false;
 
-            if (SPos.x < 0 || SPos.y < 0 || SPos.x >= boardManager.Spawner.BlockPlate.BlockPlateWidth || SPos.y >= boardManager.Spawner.BlockPlate.BlockPlateHeight ||
-                EPos.x < 0 || EPos.y < 0 || EPos.x >= boardManager.Spawner.BlockPlate.BlockPlateWidth || EPos.y >= boardManager.Spawner.BlockPlate.BlockPlateHeight)
+            // 1. 특수 블록 활성화 체크 (스왑 시에만)
+            Debug.Log($"스왑 여부: {wasSwap}, 시작 위치: {startPos}, 종료 위치: {endPos}");
+            if (wasSwap)
             {
-                Debug.Log("StartPos 또는 EndPos가 보드 영역을 벗어났습니다.");
-                boardManager.ChangeState(new ReadyState());
-                yield break;
-            }
+                var startBlock = boardManager.Spawner.BlockArray[startPos.y, startPos.x];
+                var endBlock = boardManager.Spawner.BlockArray[endPos.y, endPos.x];
 
-            if (boardManager.Spawner.BlockPlate.BlockPlateArray[(int)SPos.y, (int)SPos.x] &&
-                boardManager.Spawner.BlockPlate.BlockPlateArray[(int)EPos.y, (int)EPos.x])
-            {
-                bool isStartSpecialBlock = boardManager.Spawner.BlockArray[(int)SPos.y, (int)SPos.x].BlockInstance.TryGetComponent<SpecialBlock>(out startSpecialBlock);
-                bool isEndSpecialBlock = boardManager.Spawner.BlockArray[(int)EPos.y, (int)EPos.x].BlockInstance.TryGetComponent<SpecialBlock>(out endSpecialBlock);
-                if (isStartSpecialBlock || isEndSpecialBlock)
+                bool startIsSpecial = startBlock != null && startBlock.GemType > GemType.Sugar && startBlock.GemType < GemType.Dust;
+                bool endIsSpecial = endBlock != null && endBlock.GemType > GemType.Sugar && endBlock.GemType < GemType.Dust;
+
+                if (startIsSpecial || endIsSpecial)
                 {
-                    startSpecialBlock?.Activate(boardManager);
-                    endSpecialBlock?.Activate(boardManager);
+                    // 특수 블록 로직 실행 (이 부분은 SpecialBlock의 Activate에서 처리 필요)
+                    startBlock.BlockInstance?.GetComponent<SpecialBlock>()?.Activate(boardManager);
+                    endBlock.BlockInstance?.GetComponent<SpecialBlock>()?.Activate(boardManager);
+                    usedSpecial = true;
+                    // 특수 블록 사용 후에는 매치 체크로 넘어가서 추가 매치를 확인
                 }
             }
 
-            if (SPos != Vector2.zero)
-            {
-                boardManager.MatchChecker.BlockMatchCheck(boardManager.BlockMover.StartBlockPos, boardManager);
-                boardManager.MatchChecker.BlockMatchCheck(boardManager.BlockMover.EndBlockPos, boardManager);
-                boardManager.Spawner.CheckBlockArray(boardManager);
+            // 2. 매치 처리
+            bool matchFound = boardManager.MatchChecker.ProcessMatches(boardManager, wasSwap ? endPos : (Vector2Int?)null);
 
-                if (boardManager.Spawner.HasEmptyBlocks())
-                {
-                    // 빈 블록이 있을경우 먼저 이동이 가능한 상태인지 확인
-                    if (boardManager.Spawner.CanBlockMoveInArray())
-                    {
-                        Debug.Log("이동 가능");
-                        // 이동이 가능하다면 RefillState로 이동
-                        boardManager.ChangeState(new RefillState());
-                    }
-                    else
-                    {
-                        Debug.Log("이동 불가능");
-                        // 이동이 불가능하다면 블록을 원래 위치로 되돌림
-                        boardManager.BlockMover.ReturnBlock(boardManager);
-                        boardManager.ChangeState(new ReadyState());
-                    }
-                }
-                else
-                {
-                    Debug.Log("모든 블록이 매치되지 않았습니다.");
-                    // 모든 블록이 매치되지 않았을 경우
-                    boardManager.BlockMover.ReturnBlock(boardManager);
-                    boardManager.ChangeState(new ReadyState());
-                }
-            }
-            else if (SPos == Vector2.zero)
+            // 3. 후속 처리
+            if (matchFound)
             {
-                // 모든 매치된 블럭을 파괴
-                boardManager.MatchChecker.AllMatchBlockDestroy(boardManager);
+                // 매치가 발생했으면, 연쇄 반응을 위해 RefillState로 이동
                 boardManager.ChangeState(new RefillState());
+            }
+            else if (usedSpecial)
+            {
+                // 특수 블록이 사용되었으면 refill 상태로 이동
+                Debug.Log("특수 블록 사용");
+                boardManager.ChangeState(new RefillState());
+            }
+            else if (wasSwap)
+            {
+                // 스왑으로 매치가 없었으면, 블록을 원위치
+                Debug.Log("매치 실패, 블록 원위치");
+                yield return boardManager.StartCoroutine(boardManager.BlockMover.ReturnBlock(boardManager));
+                boardManager.ChangeState(new ReadyState());
+            }
+            else
+            {
+                // 연쇄 반응 확인 후 더 이상 매치가 없으면, ReadyState로 전환
+                Debug.Log("연쇄 반응 종료");
+                boardManager.ChangeState(new ReadyState());
             }
 
             _matchingCoroutine = null;
-
         }
     }
 }

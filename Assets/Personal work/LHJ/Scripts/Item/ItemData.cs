@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 namespace LHJ
@@ -7,7 +5,9 @@ namespace LHJ
     public enum ItemType
     {
         Whisk,    // 3x3
-        Scissor  // 가로+세로
+        Scissor,  // 가로+세로
+        DonutPan,
+        Coffee
     }
 
     [CreateAssetMenu(fileName = "ItemData", menuName = "Puzzle/ItemData")]

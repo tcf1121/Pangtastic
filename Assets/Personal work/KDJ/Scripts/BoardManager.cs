@@ -1,3 +1,4 @@
+using KDJ.States;
 using TMPro;
 using UnityEngine;
 
@@ -12,19 +13,24 @@ namespace KDJ
         public BoardMatchChecker MatchChecker { get; private set; }
         public BlockMover BlockMover { get; private set; }
         public MatchCombo MatchCombo { get; set; }
+        public BoardLoader BoardLoader { get; set; }
         public int Score { get; private set; } = 0;
+        public int CurStage;
 
         private void Awake()
         {
+            Debug.Log("보드 매니저 초기화");
             Spawner = FindObjectOfType<BlockSpawner>();
             MatchChecker = GetComponent<BoardMatchChecker>();
             BlockMover = GetComponent<BlockMover>();
             MatchCombo = GetComponent<MatchCombo>();
+            BoardLoader = GetComponent<BoardLoader>();
         }
 
         private void Start()
         {
-            ChangeState(new States.InitializeState());
+            Debug.Log("보드 매니저 시작");
+            ChangeState(new InitializeState());
             UpdateUI(Score);
         }
 
@@ -33,7 +39,7 @@ namespace KDJ
             if (CurrentState != null)
             {
                 CurrentState.OnUpdate(this);
-                Debug.Log($"Current State: {CurrentState.GetType().Name}");
+                //Debug.Log($"Current State: {CurrentState.GetType().Name}");
             }
         }
 
@@ -48,9 +54,9 @@ namespace KDJ
         }
 
         #region 테스트 코드
-        public void UpdateUI(Block block)
+        public void UpdateUI(Block block, int x, int y)
         {
-            _blockInfo.text = $"Block Type: {block.BlockType}\nGem Type: {block.GemType}";
+            _blockInfo.text = $"Block Type: {block.BlockType}\nGem Type: {block.GemType}\nPosition: ({y}, {x})";
         }
 
         public void UpdateUI(int score)
