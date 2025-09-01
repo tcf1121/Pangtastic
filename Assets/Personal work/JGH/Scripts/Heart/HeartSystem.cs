@@ -241,8 +241,6 @@ public class HeartSystem : MonoBehaviour
         _currentHearts += amount; // 제한 없이 누적
 
         UpdateHeartUI();
-        // CalcHeartData();
-        StartCoroutine(CalcHeartData());
         StartCoroutine(HeartSaveData());
 
         Debug.Log($"하트 {amount}개 회복! ({beforeHearts} → {_currentHearts})");
