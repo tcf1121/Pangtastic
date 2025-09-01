@@ -175,7 +175,7 @@ public class HeartSystem : MonoBehaviour
     private void UpdateHeartUI()
     {
         if (_textHeart != null)
-            _textHeart.text = $"{_currentHearts}/{_maxHearts}";
+            _textHeart.text = $"{_currentHearts}";
     }
 
     /// <summary>
@@ -190,9 +190,6 @@ public class HeartSystem : MonoBehaviour
             // 하트가 최대치라면 충전하지 않고 리턴
             if (_currentHearts >= _maxHearts)
             {
-                // if (_timerText != null)
-                // _timerText.gameObject.SetActive(false);
-
                 yield return null;
                 continue;
             }
@@ -234,10 +231,9 @@ public class HeartSystem : MonoBehaviour
 
         if (_currentHearts >= _maxHearts)
         {
-            _timerText.text = "FULL";
+            _timerText.text = "가득 참";
             return;
         }
-
         int minutes = (int)_remainingSeconds / 60;
         int seconds = (int)_remainingSeconds % 60;
         _timerText.text = string.Format("{0:D2}:{1:D2}", minutes, seconds);

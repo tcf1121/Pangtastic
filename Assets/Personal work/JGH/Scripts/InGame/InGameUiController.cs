@@ -48,6 +48,7 @@ public class InGameUiController : MonoBehaviour
     public void ChangeRetryGameScene()
     {
         needStartSetting = true;
+        HeartSystem.Instance.UseHearts();
         SceneManager.LoadScene("InGameTest Scene");
         AudioSystem.Instance.PlaySFXByName("GameToHomeSfx");
     }
