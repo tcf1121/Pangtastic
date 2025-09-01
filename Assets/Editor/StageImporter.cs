@@ -100,6 +100,7 @@ public class StageImporter
             int stage_recipe_bundle = int.Parse(splitData[4]);
             string stage_type = splitData[5];
             int puzzle_board_id = int.Parse(splitData[6]);
+            int max_gold_gain = int.Parse(splitData[7]);
 
             string soPath = stageSoDir + "/Stage_" + stage_id + ".asset"; // SO파일 저장경로/파일이름
 
@@ -119,6 +120,7 @@ public class StageImporter
             }
 
             stage.StageID = stage_id;
+            stage.MaxGoldGain = max_gold_gain;
 
             string customerSOPath = customerSoDir + "/Customer_" + customer_id + ".asset"; // 손님 SO 경로
             CustomerSO customerSO = AssetDatabase.LoadAssetAtPath<CustomerSO>(customerSOPath); // 손님 SO 로드
