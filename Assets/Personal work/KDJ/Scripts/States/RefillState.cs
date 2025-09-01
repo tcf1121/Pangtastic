@@ -5,58 +5,49 @@ namespace KDJ.States
 {
     public class RefillState : IGameState
     {
-        private Coroutine _fallingCoroutine;
-        private Coroutine _changeStateCoroutine;
+        private Coroutine _refillProcessCoroutine;
 
         public void OnEnter(BoardManager boardManager)
         {
             Debug.Log("블록 재충전 상태");
-            boardManager.Spawner.CheckBlockArray(boardManager);
+            
+            // 상태에 진입하면 전체 리필 프로세스를 한 번만 시작합니다.
+            _refillProcessCoroutine = boardManager.Spawner.StartCoroutine(RefillAndChangeState(boardManager));
         }
 
         public void OnUpdate(BoardManager boardManager)
         {
-            if (boardManager.Spawner.CanBlockMoveInArray())
-            {
-                if (_fallingCoroutine == null)
-                {
-                    _fallingCoroutine = boardManager.Spawner.StartCoroutine(FallingCoroutine(boardManager));
-                }
-            }
-            else
-            {
-                if (_changeStateCoroutine == null)
-                {
-                    _changeStateCoroutine = boardManager.Spawner.StartCoroutine(ChangeStateDelay(boardManager));
-                }
-            }
+            // 모든 로직은 OnEnter에서 시작된 코루틴이 처리하므로 OnUpdate는 비워둡니다.
         }
 
         public void OnExit(BoardManager boardManager)
         {
             Debug.Log("블록 재충전 상태 종료");
-            if (_fallingCoroutine != null)
+            if (_refillProcessCoroutine != null)
             {
-                boardManager.Spawner.StopCoroutine(_fallingCoroutine);
-                _fallingCoroutine = null;
+                boardManager.Spawner.StopCoroutine(_refillProcessCoroutine);
+                _refillProcessCoroutine = null;
             }
             boardManager.Spawner.DestroyBlockData.Clear(); // 파괴된 블럭 데이터 초기화
             boardManager.BlockMover.StartPos = Vector2.zero; // 초기 시작 위치 설정
             boardManager.BlockMover.EndPos = Vector2.zero; // 초기 종료 위치 설정
         }
 
-        private IEnumerator FallingCoroutine(BoardManager boardManager)
+        private IEnumerator RefillAndChangeState(BoardManager boardManager)
         {
-            yield return new WaitForSeconds(0.05f);
-            boardManager.Spawner.SortBlockArray();
-            _fallingCoroutine = null;
-        }
+            // 배열에서 파괴된 블록 인스턴스를 정리
+            boardManager.Spawner.CheckBlockArray(boardManager);
+            
+            // 빈 셀의 개수만큼 대기열에 블록을 채움
+            boardManager.Spawner.SpawnBlock();
 
-        private IEnumerator ChangeStateDelay(BoardManager boardManager)
-        {
+            // Spawner에서 새로운 리필 코루틴을 실행하고 끝날 때까지 대기
+            yield return boardManager.Spawner.StartCoroutine(boardManager.Spawner.RefillBoardCoroutine());
+
+            // 보드가 안정되고 리필된 후, 잠시 기다렸다가 상태를 변경
             yield return new WaitForSeconds(0.1f);
             boardManager.ChangeState(new ReadyState());
-            _changeStateCoroutine = null;
+            _refillProcessCoroutine = null;
         }
     }
 }
