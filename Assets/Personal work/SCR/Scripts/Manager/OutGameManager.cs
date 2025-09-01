@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class OutGameManager : MonoBehaviour
 {
@@ -9,6 +10,9 @@ public class OutGameManager : MonoBehaviour
 
     [SerializeField] private TMP_Text _coinText; // Coin 갯수
     [SerializeField] private TMP_Text _starText; // 별 갯수
+    [SerializeField] private StageStartButton startbtn;
+    [SerializeField] private Button btn;
+    [SerializeField] private TMP_InputField tMP_InputField;
 
     void Awake()
     {

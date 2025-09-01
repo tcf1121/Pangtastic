@@ -43,7 +43,6 @@ namespace SCR_B
                     _boardData.BlockArray[secondPos.y, secondPos.x].TakeDamage();
                 StartCoroutine(BoardManager.HandleTurn());
             }
-
             else if (!BoardManager.FistIsMatch() && check)
                 StartCoroutine(Move(firstPos, secondPos, false));
             else if (check)

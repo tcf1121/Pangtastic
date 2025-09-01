@@ -202,6 +202,7 @@ namespace SCR_B
         /// <param name="y"></param>
         public void SpawnBlock(int x, int y)
         {
+            if (!_boardData.BlockPlateArray[y, x]) return;
             GemType gemType = _boardData.BlockArray[y, x].GemType;
             GameObject blockPrefab = InGameManager.GetPrefab(gemType);
             if (blockPrefab != null)
@@ -309,7 +310,7 @@ namespace SCR_B
                 {
                     if (_boardData.BlockPlateArray[y, x])
                     {
-                        if (_boardData.BlockArray[y, x] != null &&
+                        if (_boardData.BlockPlateArray[y, x] && _boardData.BlockArray[y, x] != null &&
                         _boardData.BlockArray[y, x].BlockInstance != null && !_boardData.BlockArray[y, x].IsObstacle)
                         {
                             DestoryBlock(x, y);

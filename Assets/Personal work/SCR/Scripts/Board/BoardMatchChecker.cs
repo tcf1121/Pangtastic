@@ -161,8 +161,12 @@ namespace SCR_B
             BoardData tempBoardData = _boardData.Clone();
 
             Block tempBlock = tempBoardData.BlockArray[pos1.y, pos1.x];
-            tempBoardData.BlockArray[pos1.y, pos1.x] = tempBoardData.BlockArray[pos2.y, pos2.x];
-            tempBoardData.BlockArray[pos2.y, pos2.x] = tempBlock;
+            if (tempBoardData.BlockPlateArray[pos2.y, pos2.x])
+            {
+                tempBoardData.BlockArray[pos1.y, pos1.x] = tempBoardData.BlockArray[pos2.y, pos2.x];
+                tempBoardData.BlockArray[pos2.y, pos2.x] = tempBlock;
+            }
+
 
             return IsMatch(tempBoardData);
         }
@@ -173,8 +177,10 @@ namespace SCR_B
             // 초기화
             _matchPos.Clear();
             _splashPos.Clear();
-
-
+            var startGem = boardData.BlockPlateArray[pos.y, pos.x];
+            if (!startGem) return;
+            var startGemType = boardData.BlockArray[pos.y, pos.x].GemType;
+            if (startGemType > GemType.Sugar) return;
             // 가로 매치 확인
             int horizontalCount = CheckDirection(pos, Vector2Int.left, boardData) + CheckDirection(pos, Vector2Int.right, boardData) + 1;
             if (horizontalCount >= 3)
