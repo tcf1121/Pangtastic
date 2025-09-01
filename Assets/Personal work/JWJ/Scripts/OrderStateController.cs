@@ -15,7 +15,7 @@ public class OrderStateController : MonoBehaviour
 
     [SerializeField] private Slider patienceSlider;
 
-    public CustomerSO _curCustomer;
+    private CustomerSO _curCustomer;
 
     private List<OrderRecipe> _orderRecipes = new List<OrderRecipe>();
 

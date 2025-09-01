@@ -1,8 +1,7 @@
 using KDJ;
 using KDJ.States;
-using LHJ;
+using SCR;
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
@@ -10,12 +9,11 @@ namespace LHJ
 {
     public class ItemCheck : MonoBehaviour
     {
-        [SerializeField] private BoardManager _board;
+        [SerializeField] private CopyBoardManager _board;
 
         private void Update()
         {
-            var manager = CopyBoardManager.Instance;
-            if (_board == null || manager == null || !manager.IsItemSelected) return;
+            if (_board == null || !_board.IsItemSelected) return;
 
             if (Input.GetMouseButtonDown(0))
             {
@@ -33,35 +31,37 @@ namespace LHJ
 
                 if (!InBounds(grid))
                 {
-                    manager.ClearItemSelection();
+                    _board.ClearItemSelection();
                     return;
                 }
 
                 // 선택된 아이템 발동
-                UseCell(grid, manager.SelectedItemType);
+                UseCell(grid, _board.SelectedItemType);
 
                 // 발동 후 해제
-                manager.ClearItemSelection();
+                _board.ClearItemSelection();
             }
         }
+        
+        // 커피 아이템
         public void UseCoffee(float amount = 30f)
         {
             var order = FindObjectOfType<OrderStateController>();
             if (order == null || order._curPatience <= 0f) return;
-            order._curPatience = Mathf.Min(order._curPatience + amount, 100f);
 
-            float timeToZero = 60f;
-            if (order._curCustomer != null)
-            {
-                if (order._curCustomer.Type == CustomerType.Unique)
-                    timeToZero = 50f;
-                else if (order._curCustomer.Type == CustomerType.Special)
-                    timeToZero = 30f;
-            }
-
+            // 현재 진행률 기반으로 남은 시간 추정
             float progress = 1f - (order._curPatience / 100f);
-            order._elapsed = progress * timeToZero;
+            float estimatedTimeToZero = (progress > 0.001f) ? (order._elapsed / progress) : 60f;
+
+            // 인내심 증가
+            float newCur = Mathf.Min(order._curPatience + amount, 100f);
+            order._curPatience = newCur;
+
+            float newProgress = 1f - (newCur / 100f);
+            order._elapsed = Mathf.Clamp(newProgress * estimatedTimeToZero, 0f, estimatedTimeToZero);
         }
+
+        // 좌표 확인
         private bool InBounds(Vector2Int p)
         {
             var sp = _board.Spawner;
@@ -70,6 +70,8 @@ namespace LHJ
             return p.x >= 0 && p.x < w && p.y >= 0 && p.y < h;
         }
 
+
+        // 아이템 별 해당 아이템 효과 실행
         private void UseCell(Vector2Int pos, ItemType type)
         {
             int destroyed = 0;
@@ -93,6 +95,7 @@ namespace LHJ
             }
         }
 
+        // 가위: 선택 지점의 가로+세로 제거
         private int ApplyScissor(Vector2Int pos)
         {
             var sp = _board.Spawner;
@@ -131,6 +134,7 @@ namespace LHJ
             return destroyedCount;
         }
 
+        // 거품기: 선택 지점 기준 3x3 제거
         private int ApplyWhisk(Vector2Int pos)
         {
             var sp = _board.Spawner;
@@ -159,45 +163,39 @@ namespace LHJ
             }
             return destroyedCount;
         }
+
+        // 도넛판 아이템 실행
         public void UseDonutPan()
         {
-            var manager = CopyBoardManager.Instance;
-            if (manager != null) manager.ClearItemSelection();
+            if (_board != null) _board.ClearItemSelection();
             StartCoroutine(RegenSpecialBlockRoutine());
         }
+
+        // 보드를 초기화 후 특수 블록 하나 생성하는 루틴
         private IEnumerator RegenSpecialBlockRoutine()
         {
             ClearBoard();
             _board.ChangeState(new RefillState());
-            yield return new WaitUntil(IsBoardFilled);
+            while (_board.Spawner.HasEmptyBlockObjects())
+                yield return null;                       
             InjectRandomSpecial();
 
             yield break;
         }
 
+        // 랜덤 위치에 특수 블록 생성
         private void InjectRandomSpecial()
         {
             var sp = _board.Spawner;
-            int w = sp.BlockPlate.BlockPlateWidth;
-            int h = sp.BlockPlate.BlockPlateHeight;
 
-            for (int t = 0; t < 100; t++)
-            {
-                int x = Random.Range(0, w);
-                int y = Random.Range(0, h);
+            // 매치 로직과 동일한 특수블록 아이디만 사용
+            int[] specialIds = { 7, 8, 9, 10, 11 };
+            int id = specialIds[Random.Range(0, specialIds.Length)];
 
-                var cell = sp.BlockArray[y, x];
-                if (cell == null || cell.BlockInstance == null) continue;
-
-                Destroy(cell.BlockInstance);
-                sp.BlockArray[y, x] = null;
-
-                int[] specialIds = { 7, 8, 9, 10, 11 };
-                int id = specialIds[Random.Range(0, specialIds.Length)];
-                sp.SpawnBlock(x, y, id);
-                break;
-            }
+            sp.RandomPosSpawnSpecialBlock(id);
         }
+
+        // 보드 전체 클리어
         private void ClearBoard()
         {
             var sp = _board.Spawner;
@@ -218,23 +216,6 @@ namespace LHJ
                     }
                 }
             }
-        }
-        private bool IsBoardFilled()
-        {
-            var sp = _board.Spawner;
-            int w = sp.BlockPlate.BlockPlateWidth;
-            int h = sp.BlockPlate.BlockPlateHeight;
-
-            for (int y = 0; y < h; y++)
-            {
-                for (int x = 0; x < w; x++)
-                {
-                    var cell = sp.BlockArray[y, x];
-                    if (cell == null || cell.BlockInstance == null)
-                        return false;
-                }
-            }
-            return true;
         }
     }
 }
