@@ -22,7 +22,7 @@ namespace KDJ
         public bool IsItemSelected { get; private set; } = false;
         public ItemType SelectedItemType { get; private set; }
 
-        
+
         private void Awake()
         {
             if (Instance != null && Instance != this)
@@ -103,6 +103,11 @@ namespace KDJ
         public void ResetUI()
         {
             _blockInfo.text = string.Empty;
+        }
+
+        public void TestCode()
+        {
+            Debug.Log("TestCode 실행");
         }
         #endregion
     }

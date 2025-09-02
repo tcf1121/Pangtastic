@@ -326,7 +326,7 @@ namespace KDJ
                     {
                         for (int i = 0; i < 5; i++) // 임의로 5개를 미리 생성
                         {
-                            _blockWaitingQueue[x].Enqueue(new Block { GemType = (GemType)Random.Range(0, _spawnRangeMax) });
+                            _blockWaitingQueue[x].Enqueue(new Block { GemType = (GemType)Random.Range(0, _spawnRangeMax + 1) });
                         }
                     }
 
@@ -545,7 +545,7 @@ namespace KDJ
 
         public Block SpawnRandomBlock(int x, int y)
         {
-            GemType gemType = (GemType)Random.Range(0, _spawnRangeMax);
+            GemType gemType = (GemType)Random.Range(0, _spawnRangeMax + 1);
             Block newBlock = CreateNewBlock(gemType);
             GameBoardData.SetBlock(x, y, newBlock);
             return newBlock;

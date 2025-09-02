@@ -10,7 +10,7 @@ namespace LHJ
 {
     public class ItemCheck : MonoBehaviour
     {
-        [SerializeField] private CopyBoardManager _board;
+        [SerializeField] private BoardManager _board;
 
         private void Update()
         {
@@ -18,8 +18,8 @@ namespace LHJ
 
             if (Input.GetMouseButtonDown(0))
             {
-                if (EventSystem.current != null && EventSystem.current.IsPointerOverGameObject())
-                    return;
+                //if (EventSystem.current != null && EventSystem.current.IsPointerOverGameObject())
+                //    return;
 
                 Vector3 mouse = Input.mousePosition;
                 mouse.z = -Camera.main.transform.position.z;
@@ -179,86 +179,55 @@ namespace LHJ
         private IEnumerator RegenSpecialBlockRoutine()
         {
             var sp = _board.Spawner;
+            sp.Shuffle(_board);
+            yield return null;
 
-            List<GemType> specialTypes = new List<GemType>();
-            List<Vector2Int> specialSrc = new List<Vector2Int>();
-            List<Vector2Int> normalCells = new List<Vector2Int>();
-
-            int w = sp.GameBoardData.BlockPlate.BlockPlateWidth;
-            int h = sp.GameBoardData.BlockPlate.BlockPlateHeight;
-
-            for (int y = 0; y < h; y++)
-            {
-                for (int x = 0; x < w; x++)
-                {
-                    if (!sp.GameBoardData.BlockPlate.BlockPlateArray[y, x]) continue;
-                    var cell = sp.GameBoardData.BlockArray[y, x];
-                    if (cell == null) continue;
-
-                    bool isSpecial = (cell.GemType > GemType.Sugar && cell.GemType < GemType.Dust);
-                    if (isSpecial)
-                    {
-                        specialTypes.Add(cell.GemType);
-                        specialSrc.Add(new Vector2Int(x, y));
-                    }
-                    else if (!cell.IsObstacle)
-                    {
-                        normalCells.Add(new Vector2Int(x, y));
-                    }
-                }
-            }
-
-            sp.Shuffle(BoardManager.Instance);
-
-            ShuffleList(normalCells);
-            for (int i = 0; i < specialTypes.Count && i < normalCells.Count; i++)
-            {
-                Vector2Int src = specialSrc[i];
-                Vector2Int dst = normalCells[i];
-
-                // src(원래 특수 자리): 일반 블록으로 대체
-                if (sp.GameBoardData.BlockArray[src.y, src.x]?.BlockInstance != null)
-                {
-                    Destroy(sp.GameBoardData.BlockArray[src.y, src.x].BlockInstance);
-                    sp.GameBoardData.BlockArray[src.y, src.x].BlockInstance = null;
-                }
-                sp.SpawnRandomBlock(src.x, src.y);
-
-                if (sp.GameBoardData.BlockArray[dst.y, dst.x]?.BlockInstance != null)
-                {
-                    Destroy(sp.GameBoardData.BlockArray[dst.y, dst.x].BlockInstance);
-                    sp.GameBoardData.BlockArray[dst.y, dst.x].BlockInstance = null;
-                }
-                sp.SpawnBlock(dst.x, dst.y, specialTypes[i], BoardManager.Instance.BlockMover);
-            }
-            InjectRandomSpecial();
-
-            // 4) 안정화
-            _board.ChangeState(new RefillState());
+            _board.ChangeState(new KDJ.States.RefillState());
             while (sp.HasEmptyBlockObjects())
                 yield return null;
 
+            InjectRandomSpecial();
+
             yield break;
-        }
-        private void ShuffleList<T>(List<T> list)
-        {
-            for (int i = list.Count - 1; i > 0; i--)
-            {
-                int j = Random.Range(0, i + 1);
-                (list[i], list[j]) = (list[j], list[i]);
-            }
         }
 
         // 랜덤 위치에 특수 블록 생성
         private void InjectRandomSpecial()
         {
             var sp = _board.Spawner;
+            int w = sp.GameBoardData.BlockPlate.BlockPlateWidth;
+            int h = sp.GameBoardData.BlockPlate.BlockPlateHeight;
 
-            // 매치 로직과 동일한 특수블록 아이디만 사용
-            int[] specialIds = { 7, 8, 9, 10, 11 };
-            int id = specialIds[Random.Range(0, specialIds.Length)];
+            List<Vector2Int> candidates = new List<Vector2Int>();
+            for (int y = 0; y < h; y++)
+            {
+                for (int x = 0; x < w; x++)
+                {
+                    if (!sp.GameBoardData.BlockPlate.BlockPlateArray[y, x]) continue;
+                    var blk = sp.GameBoardData.BlockArray[y, x];
+                    if (blk == null || blk.IsObstacle) continue;
 
-            sp.RandomPosSpawnSpecialBlock((GemType)id);
+                    bool isSpecial = (blk.GemType > SCR.GemType.Sugar && blk.GemType < SCR.GemType.Dust);
+                    if (!isSpecial) candidates.Add(new Vector2Int(x, y));
+                }
+            }
+            if (candidates.Count == 0) return;
+
+            Vector2Int pick = candidates[UnityEngine.Random.Range(0, candidates.Count)];
+
+            var cur = sp.GameBoardData.BlockArray[pick.y, pick.x];
+            if (cur?.BlockInstance != null)
+            {
+                Destroy(cur.BlockInstance);
+                cur.BlockInstance = null;
+            }
+
+            int min = (int)SCR.GemType.Sugar + 1;
+            int max = (int)SCR.GemType.Dust - 1;
+            SCR.GemType special = (SCR.GemType)UnityEngine.Random.Range(min, max + 1);
+
+            // 데이터+프리팹 동시 생성
+            sp.SpawnBlock(pick.x, pick.y, special, _board.BlockMover);
         }
     }
 }

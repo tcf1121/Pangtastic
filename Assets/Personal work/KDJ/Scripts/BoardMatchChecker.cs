@@ -118,7 +118,7 @@ namespace KDJ
                 if (visited[y, x] || !CheckBlockIsAllValid(boardManager, x, y)) continue;
                 var hMatch = FindFullLineMatch(boardManager, x, y, true);
                 var vMatch = FindFullLineMatch(boardManager, x, y, false);
-                if (hMatch.Count >= 3 && vMatch.Count >= 3) { if (!specialToCreate.HasValue) specialToCreate = (new Vector2Int(x, y), 11); foreach (var c in hMatch) { coordsToDestroy.Add(c); visited[c.y, c.x] = true; } foreach (var c in vMatch) { coordsToDestroy.Add(c); visited[c.y, c.x] = true; } }
+                if (hMatch.Count >= 3 && vMatch.Count >= 3) { if (!specialToCreate.HasValue) specialToCreate = (new Vector2Int(x, y), 9); foreach (var c in hMatch) { coordsToDestroy.Add(c); visited[c.y, c.x] = true; } foreach (var c in vMatch) { coordsToDestroy.Add(c); visited[c.y, c.x] = true; } }
             }}
 
             for (int y = 0; y < height - 1; y++) { for (int x = 0; x < width - 1; x++) {
@@ -128,7 +128,7 @@ namespace KDJ
                     bool isOverlapped = false;
                     foreach (var c in coords) { if (visited[c.y, c.x]) isOverlapped = true; }
                     if (isOverlapped) continue;
-                    if (!specialToCreate.HasValue) specialToCreate = (new Vector2Int(x, y), 9);
+                    if (!specialToCreate.HasValue) specialToCreate = (new Vector2Int(x, y), 6);
                     foreach (var c in coords) { coordsToDestroy.Add(c); visited[c.y, c.x] = true; }
                 }
             }}
@@ -177,7 +177,7 @@ namespace KDJ
                         spawnPos = new Vector2Int(minX, maxY);
                         if (!coordsToDestroy.Contains(spawnPos)) spawnPos = creation.pos;
                     }
-                    boardManager.Spawner.SpawnBlock(spawnPos.x, spawnPos.y, (GemType)(creation.type - 1), boardManager.BlockMover);
+                    boardManager.Spawner.SpawnBlock(spawnPos.x, spawnPos.y, (GemType)creation.type, boardManager.BlockMover);
                 }
                 return true;
             }

@@ -20,6 +20,8 @@ namespace KDJ.States
         public IEnumerator StageInit(BoardManager boardManager)
         {
             Debug.Log("초기화 상태 진입");
+            // TestCode. 스테이지 세팅
+            //StageManager.Instance.SetStage();
 
             // JWJ의 BoardLoader가 레벨 데이터를 로드하면, 그 데이터를 실제 게임 보드에 적용합니다.
             BoardData loadedBoardData = boardManager.BoardLoader.LoadBoard();
