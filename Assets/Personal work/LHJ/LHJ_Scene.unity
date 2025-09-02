@@ -130,6 +130,14 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 1268427510}
     m_Modifications:
+    - target: {fileID: 1142858069623971105, guid: c07aa5061391f2e469da35ab96d833ed, type: 3}
+      propertyPath: m_Type
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1142858069623971105, guid: c07aa5061391f2e469da35ab96d833ed, type: 3}
+      propertyPath: m_Sprite
+      value: 
+      objectReference: {fileID: 21300000, guid: 6dc94a80a6011c246922690d7f935e2f, type: 3}
     - target: {fileID: 3278845047490844086, guid: c07aa5061391f2e469da35ab96d833ed, type: 3}
       propertyPath: _board
       value: 
@@ -1620,12 +1628,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _board: {fileID: 1672193455}
-  _rollerVId: 7
-  _rollerHId: 8
-  _ovenId: 10
-  _donutId: 11
+  _specialTypes: 0700000008000000090000000a000000
   _manhattanDist: 5
-  _enabled: 1
+  _useRoller: 0
+  _useDonut: 0
+  _useOven: 1
 --- !u!1 &1540079930
 GameObject:
   m_ObjectHideFlags: 0
@@ -1986,6 +1993,7 @@ MonoBehaviour:
   _blockInfo: {fileID: 1649906040}
   _scoreInfo: {fileID: 459489525}
   CurStage: 3
+  MatchDelay: 0
 --- !u!1 &1791176802
 GameObject:
   m_ObjectHideFlags: 0
@@ -2950,23 +2958,23 @@ PrefabInstance:
     - target: {fileID: 8579344169084250576, guid: a6c91df400f25084193b8dfb89592778, type: 3}
       propertyPath: _blockPrefabs.Array.data[6]
       value: 
-      objectReference: {fileID: 7732103167370757450, guid: abaa78b1519a0f842a756a4b83a6cf6c, type: 3}
+      objectReference: {fileID: 7340069888455589625, guid: 4a4202158c531544e8e48795f9ff10f2, type: 3}
     - target: {fileID: 8579344169084250576, guid: a6c91df400f25084193b8dfb89592778, type: 3}
       propertyPath: _blockPrefabs.Array.data[7]
       value: 
-      objectReference: {fileID: 426720338226107974, guid: 75a34cb5470028a4eb0d912416fb3f53, type: 3}
+      objectReference: {fileID: 7732103167370757450, guid: abaa78b1519a0f842a756a4b83a6cf6c, type: 3}
     - target: {fileID: 8579344169084250576, guid: a6c91df400f25084193b8dfb89592778, type: 3}
       propertyPath: _blockPrefabs.Array.data[8]
       value: 
-      objectReference: {fileID: 7340069888455589625, guid: 4a4202158c531544e8e48795f9ff10f2, type: 3}
+      objectReference: {fileID: 426720338226107974, guid: 75a34cb5470028a4eb0d912416fb3f53, type: 3}
     - target: {fileID: 8579344169084250576, guid: a6c91df400f25084193b8dfb89592778, type: 3}
       propertyPath: _blockPrefabs.Array.data[9]
       value: 
-      objectReference: {fileID: 8216247949329258546, guid: 110c05336d55fe74f8b9ea56c501a050, type: 3}
+      objectReference: {fileID: 4815146370632419231, guid: 1590408950eec9a4db41fc407895bd6e, type: 3}
     - target: {fileID: 8579344169084250576, guid: a6c91df400f25084193b8dfb89592778, type: 3}
       propertyPath: _blockPrefabs.Array.data[10]
       value: 
-      objectReference: {fileID: 4815146370632419231, guid: 1590408950eec9a4db41fc407895bd6e, type: 3}
+      objectReference: {fileID: 8216247949329258546, guid: 110c05336d55fe74f8b9ea56c501a050, type: 3}
     - target: {fileID: 8579344169084250576, guid: a6c91df400f25084193b8dfb89592778, type: 3}
       propertyPath: _blockPrefabs.Array.data[11]
       value: 
