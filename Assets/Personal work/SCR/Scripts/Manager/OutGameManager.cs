@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 public class OutGameManager : MonoBehaviour
@@ -10,13 +11,20 @@ public class OutGameManager : MonoBehaviour
 
     [SerializeField] private TMP_Text _coinText; // Coin 갯수
     [SerializeField] private TMP_Text _starText; // 별 갯수
-    [SerializeField] private StageStartButton startbtn;
-    [SerializeField] private Button btn;
-    [SerializeField] private TMP_InputField tMP_InputField;
+    [SerializeField] private Button _stageStartButton;
+    [SerializeField] private TMP_Text _stageButtonText;
+
+    [SerializeField] private Button StartBtn;
+
+    // 테스트용
+    [SerializeField] private Button _settingBtn;
+    [SerializeField] private TMP_InputField _settingInputField;
 
     void Awake()
     {
         instate = this;
+        StartBtn.onClick.AddListener(OnStageStartButtonClicked);
+        _settingBtn.onClick.AddListener(SetStage);
     }
 
     void Start()
@@ -24,7 +32,8 @@ public class OutGameManager : MonoBehaviour
         Time.timeScale = 1f;
         UpdateCoinUI();
         UpdateStarUI();
-        StageManager.Instance.SetStartBtn(startbtn, btn, tMP_InputField);
+        int index = StageManager.Instance.CurrentStageIndex;
+        _stageButtonText.text = $"Stage {index + 1}";
     }
 
     /// <summary>
@@ -43,5 +52,18 @@ public class OutGameManager : MonoBehaviour
     {
         if (instate._starText != null)
             instate._starText.text = CurrencySystem.Instance.GetStars().ToString();
+    }
+
+    private void OnStageStartButtonClicked()
+    {
+        if (HeartSystem.Instance.TryStartStage())
+            SceneManager.LoadScene("InGameTest Scene");
+    }
+
+    public void SetStage()
+    {
+        StageManager.Instance.SetStage(int.Parse(_settingInputField.text.ToString()) - 1);
+        int index = StageManager.Instance.CurrentStageIndex;
+        _stageButtonText.text = $"Stage {index + 1}";
     }
 }
