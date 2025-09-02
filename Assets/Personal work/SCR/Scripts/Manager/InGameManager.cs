@@ -136,7 +136,7 @@ public class InGameManager : MonoBehaviour
         if (instate == null) GameObject.Find("InGameManager").GetComponent<InGameManager>();
         BoardManager.SetTouch(false);
         //instate.LoseCoin.text = $"{GetCoin()}";
-        instate.LoseScore.text = $"{GetScore()}";
+        //instate.LoseScore.text = $"{GetScore()}";
         HeartSystem.Instance.UseHearts();
         instate.failUI.SetActive(true);
     }

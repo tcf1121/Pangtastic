@@ -8059,6 +8059,10 @@ PrefabInstance:
       propertyPath: m_AnchoredPosition.y
       value: -90
       objectReference: {fileID: 0}
+    - target: {fileID: 5341533169520612078, guid: 28ceb7c3a8cf74f3cb0f42adaa901266, type: 3}
+      propertyPath: m_SizeDelta.y
+      value: -53.3949
+      objectReference: {fileID: 0}
     - target: {fileID: 5424883394841418953, guid: 28ceb7c3a8cf74f3cb0f42adaa901266, type: 3}
       propertyPath: m_Color.b
       value: 0.5686275
@@ -8286,18 +8290,18 @@ PrefabInstance:
     - target: {fileID: 7407056468250555058, guid: 28ceb7c3a8cf74f3cb0f42adaa901266, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target
       value: 
-      objectReference: {fileID: 1830214189}
+      objectReference: {fileID: 1299568042}
     - target: {fileID: 7407056468250555058, guid: 28ceb7c3a8cf74f3cb0f42adaa901266, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_CallState
       value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 7407056468250555058, guid: 28ceb7c3a8cf74f3cb0f42adaa901266, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
-      value: StageFail
+      value: ChangeQuitGameScene
       objectReference: {fileID: 0}
     - target: {fileID: 7407056468250555058, guid: 28ceb7c3a8cf74f3cb0f42adaa901266, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_TargetAssemblyTypeName
-      value: InGameManager, Assembly-CSharp
+      value: InGameUiController, Assembly-CSharp
       objectReference: {fileID: 0}
     - target: {fileID: 7407056468250555058, guid: 28ceb7c3a8cf74f3cb0f42adaa901266, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Arguments.m_ObjectArgumentAssemblyTypeName
@@ -8443,6 +8447,7 @@ PrefabInstance:
     - {fileID: 5003520169825330137, guid: 28ceb7c3a8cf74f3cb0f42adaa901266, type: 3}
     - {fileID: 4955503777399802904, guid: 28ceb7c3a8cf74f3cb0f42adaa901266, type: 3}
     - {fileID: 1331489220013621233, guid: 28ceb7c3a8cf74f3cb0f42adaa901266, type: 3}
+    - {fileID: 6790265260086316231, guid: 28ceb7c3a8cf74f3cb0f42adaa901266, type: 3}
     m_AddedGameObjects:
     - targetCorrespondingSourceObject: {fileID: 7247104281864537384, guid: 28ceb7c3a8cf74f3cb0f42adaa901266, type: 3}
       insertIndex: -1
@@ -11635,65 +11640,13 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents:
-    - targetCorrespondingSourceObject: {fileID: 3993373777636790136, guid: e6c03228b7cb54cbaa091673b60fdee5, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 993568402}
+    m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: e6c03228b7cb54cbaa091673b60fdee5, type: 3}
 --- !u!224 &993568400 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 1893858841140150269, guid: e6c03228b7cb54cbaa091673b60fdee5, type: 3}
   m_PrefabInstance: {fileID: 993568399}
   m_PrefabAsset: {fileID: 0}
---- !u!1 &993568401 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 3993373777636790136, guid: e6c03228b7cb54cbaa091673b60fdee5, type: 3}
-  m_PrefabInstance: {fileID: 993568399}
-  m_PrefabAsset: {fileID: 0}
---- !u!114 &993568402
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 993568401}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4e29b1a8efbd4b44bb3f3716e73f07ff, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_Navigation:
-    m_Mode: 3
-    m_WrapAround: 0
-    m_SelectOnUp: {fileID: 0}
-    m_SelectOnDown: {fileID: 0}
-    m_SelectOnLeft: {fileID: 0}
-    m_SelectOnRight: {fileID: 0}
-  m_Transition: 1
-  m_Colors:
-    m_NormalColor: {r: 1, g: 1, b: 1, a: 1}
-    m_HighlightedColor: {r: 0.9607843, g: 0.9607843, b: 0.9607843, a: 1}
-    m_PressedColor: {r: 0.78431374, g: 0.78431374, b: 0.78431374, a: 1}
-    m_SelectedColor: {r: 0.9607843, g: 0.9607843, b: 0.9607843, a: 1}
-    m_DisabledColor: {r: 0.78431374, g: 0.78431374, b: 0.78431374, a: 0.5019608}
-    m_ColorMultiplier: 1
-    m_FadeDuration: 0.1
-  m_SpriteState:
-    m_HighlightedSprite: {fileID: 0}
-    m_PressedSprite: {fileID: 0}
-    m_SelectedSprite: {fileID: 0}
-    m_DisabledSprite: {fileID: 0}
-  m_AnimationTriggers:
-    m_NormalTrigger: Normal
-    m_HighlightedTrigger: Highlighted
-    m_PressedTrigger: Pressed
-    m_SelectedTrigger: Selected
-    m_DisabledTrigger: Disabled
-  m_Interactable: 1
-  m_TargetGraphic: {fileID: 0}
-  m_OnClick:
-    m_PersistentCalls:
-      m_Calls: []
 --- !u!1 &999806740
 GameObject:
   m_ObjectHideFlags: 0
@@ -14458,7 +14411,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   patienceSlider: {fileID: 1920406644}
-  _curCustomer: {fileID: 0}
   _curPatience: 0
   _elapsed: 0
 --- !u!4 &1332223599
@@ -17766,6 +17718,9 @@ MonoBehaviour:
   - {fileID: 11400000, guid: af12b7765192d1e4582bf0d70ad0fc72, type: 2}
   - {fileID: 11400000, guid: df938a3fb304d454ea7d18c3f6fb35e7, type: 2}
   - {fileID: 11400000, guid: f9c08bba87ee6cf4ab04df70b4be39f9, type: 2}
+  startbtn: {fileID: 0}
+  btn: {fileID: 0}
+  tMP_InputField: {fileID: 0}
 --- !u!4 &1732992823
 Transform:
   m_ObjectHideFlags: 0
