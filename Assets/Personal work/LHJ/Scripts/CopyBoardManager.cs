@@ -3,22 +3,18 @@ using LHJ;
 
 public class CopyBoardManager : BoardManager
 {
-    public static CopyBoardManager Instance { get; private set; }
-
 
     public bool IsItemSelected { get; private set; } = false;
     public ItemType SelectedItemType { get; private set; }
-    private void OnEnable()
-    {
-        Instance = this;
-    }
 
+    // 아이템 선택
     public void SelectItem(ItemType type)
     {
         SelectedItemType = type;
         IsItemSelected = true;
     }
-
+    
+    // 아이템 선택 해제
     public void ClearItemSelection()
     {
         IsItemSelected = false;

@@ -7,8 +7,10 @@ namespace LHJ
 {
     public class ItemButton : MonoBehaviour
     {
-        [SerializeField] private ItemType _type;
+        [SerializeField] private ItemType _type; // 버튼에 해당하는 아이템 종류
         [SerializeField] private Button _button;
+        [SerializeField] private CopyBoardManager _board;
+        [SerializeField] private ItemCheck _itemCheck;
 
         private void Awake()
         {
@@ -18,31 +20,29 @@ namespace LHJ
 
         private void OnClick()
         {
-            var manager = CopyBoardManager.Instance;
-            if (manager == null) return;
-
             if (_type == ItemType.DonutPan)
             {
-                var itemCheck = FindObjectOfType<ItemCheck>();
-                if (itemCheck != null)
-                    itemCheck.UseDonutPan();
+                if (_itemCheck != null)
+                    _itemCheck.UseDonutPan();  
                 return;
             }
+
+            // 즉시 발동형: 커피
             if (_type == ItemType.Coffee)
             {
-                var itemCheck = FindObjectOfType<ItemCheck>();
-                if (itemCheck != null)
-                {
-                    itemCheck.UseCoffee(30f);
-                }
+                if (_itemCheck != null)
+                    _itemCheck.UseCoffee(30f); 
                 return;
             }
 
 
-            if (manager.IsItemSelected && manager.SelectedItemType == _type)
-                manager.ClearItemSelection();
+            // 가위, 거품기 선택/해제
+            if (_board == null) return;
+
+            if (_board.IsItemSelected && _board.SelectedItemType == _type)
+                _board.ClearItemSelection();
             else
-                manager.SelectItem(_type);
+                _board.SelectItem(_type);
         }
     }
 }

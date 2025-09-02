@@ -6,12 +6,13 @@ namespace KDJ.States
     public class ReadyState : IGameState
     {
         private Coroutine _matchDelayCoroutine;
+        private bool _isSwapping = false; // 중복 스왑 방지 플래그
 
         public void OnEnter(BoardManager boardManager)
         {
             Debug.Log("입력 준비 상태");
-            boardManager.BlockMover.StartPos = Vector2.zero; // 초기 시작 위치 설정
-            boardManager.BlockMover.EndPos = Vector2.zero; // 초기 종료 위치 설정
+            boardManager.BlockMover.ResetPos();
+            _isSwapping = false;
 
             // 매칭되는 블럭이 있을 경우 매칭 상태로 전환
             if (boardManager.MatchChecker.AllBlockMatchCheck(boardManager))
@@ -25,13 +26,13 @@ namespace KDJ.States
 
         public void OnUpdate(BoardManager boardManager)
         {
+            // 스왑 중에는 다른 입력 및 로직을 처리하지 않음
+            if (_isSwapping) return;
+
             if (boardManager.Spawner.HasEmptyBlocks())
             {
-                // 빈 블록이 있을경우 먼저 이동이 가능한 상태인지 확인
                 if (boardManager.Spawner.CanBlockMoveInArray())
                 {
-                    Debug.Log("이동 가능");
-                    // 이동이 가능하다면 RefillState로 이동
                     boardManager.ChangeState(new RefillState());
                 }
             }
@@ -39,26 +40,19 @@ namespace KDJ.States
             {
                 if (!boardManager.MatchChecker.AllBlockMatchPossibilityCheck(boardManager, out int possibleCount))
                 {
-                    //Debug.Log($"매칭 가능한 블럭이 {possibleCount}개 있습니다.");
-                    // 매칭 가능한 블럭이 없을 경우 블럭 섞기
                     boardManager.Spawner.ShuffleBlockArray();
-                    // 섞고나서 ReadyState 재진입
                     boardManager.ChangeState(new ReadyState());
                 }
-                //Debug.Log($"매칭 가능한 블럭이 {possibleCount}개 있습니다.");
             }
 
             if (Input.GetKeyDown(KeyCode.R))
             {
-                Debug.Log("R키 감지 - 블럭 섞기");
                 boardManager.Spawner.ShuffleBlockArray();
-                // 섞고나서 ReadyState 재진입
                 boardManager.ChangeState(new ReadyState());
             }
 
             if (Input.GetMouseButtonDown(0))
             {
-                Debug.Log("마우스 클릭 감지");
                 Vector3 mousePosition = Input.mousePosition;
                 mousePosition.z = -Camera.main.transform.position.z;
                 boardManager.BlockMover.StartPos = Camera.main.ScreenToWorldPoint(mousePosition);
@@ -70,20 +64,32 @@ namespace KDJ.States
                 boardManager.ResetUI();
                 if (boardManager.BlockMover.StartPos != Vector2.zero)
                 {
-                    // 마우스 버튼을 떼면 EndPos를 설정하고 블록 이동 시작
-                    Vector3 mousePosition = Input.mousePosition;
-                    mousePosition.z = -Camera.main.transform.position.z;
-                    boardManager.BlockMover.EndPos = Camera.main.ScreenToWorldPoint(mousePosition);
-                    if (boardManager.BlockMover.MoveBlock(boardManager))
-                    {
-                        boardManager.ChangeState(new MatchingState());
-                    }
+                    boardManager.StartCoroutine(SwapAndChangeState(boardManager));
                 }
-                else
-                {
-                    boardManager.BlockMover.StartPos = Vector2.zero;
-                    boardManager.BlockMover.EndPos = Vector2.zero;
-                }
+            }
+        }
+
+        private IEnumerator SwapAndChangeState(BoardManager boardManager)
+        {
+            _isSwapping = true; // 스왑 시작, 입력 방지
+
+            Vector3 mousePosition = Input.mousePosition;
+            mousePosition.z = -Camera.main.transform.position.z;
+            boardManager.BlockMover.EndPos = Camera.main.ScreenToWorldPoint(mousePosition);
+
+            bool swapSuccess = false;
+            yield return boardManager.StartCoroutine(
+                boardManager.BlockMover.TrySwap(boardManager, result => swapSuccess = result)
+            );
+
+            if (swapSuccess)
+            {
+                boardManager.ChangeState(new MatchingState());
+            }
+            else
+            {
+                // 스왑에 실패하면 다시 입력 가능 상태로
+                _isSwapping = false;
             }
         }
 
@@ -97,19 +103,15 @@ namespace KDJ.States
             Vector3 mousePosition = Input.mousePosition;
             mousePosition.z = -Camera.main.transform.position.z;
             Vector2 targetPos = Camera.main.ScreenToWorldPoint(mousePosition);
-            targetPos += new Vector2(boardManager.Spawner.BlockPlate.BlockPlateWidth / 2, boardManager.Spawner.BlockPlate.BlockPlateHeight / 2);
 
-            if (targetPos.x < 0 || targetPos.y < 0)
+            Vector2Int gridPos = boardManager.BlockMover.WorldToGrid(targetPos, boardManager.Spawner.BlockPlate.BlockPlateWidth, boardManager.Spawner.BlockPlate.BlockPlateHeight);
+
+            if (gridPos.x < 0 || gridPos.y < 0 || gridPos.x >= boardManager.Spawner.BlockPlate.BlockPlateWidth || gridPos.y >= boardManager.Spawner.BlockPlate.BlockPlateHeight)
             {
                 return;
             }
 
-            Vector2Int gridPos = boardManager.BlockMover.WorldToGrid(targetPos);
-
-            if (gridPos.x >= boardManager.Spawner.BlockPlate.BlockPlateWidth || gridPos.y >= boardManager.Spawner.BlockPlate.BlockPlateHeight)
-            {
-                return;
-            }
+            if (!boardManager.Spawner.BlockPlate.BlockPlateArray[gridPos.y, gridPos.x]) return;
 
             Block block = boardManager.Spawner.BlockArray[gridPos.y, gridPos.x];
             if (block != null)

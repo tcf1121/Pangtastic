@@ -27,6 +27,7 @@ namespace LHJ
         }
 
 
+        // 특수블록의 Activate()가 불렸을 때 콤보 여부를 판정하여 실행.
         public bool TryResolveFromActivate(BoardManager board, GameObject selfGo)
         {
             if (board == null || board.Spawner == null || selfGo == null) return false;
@@ -54,7 +55,7 @@ namespace LHJ
                 return true;
             }
 
-            bool handled = ResolveRollerCombos(board, startPos, endPos);
+            bool handled = SpecialCombos(board, startPos, endPos);
             if (handled)
             {
                 _lastResolvedFrame = Time.frameCount;
@@ -76,7 +77,7 @@ namespace LHJ
         /// 9. 팝콘(오븐)+도넛: 선택된 재료 전부가 도넛(5x5) 효과로 발동
         /// 10. 도넛+도넛: 스왑 위치 중심 9x9 제거
         /// </summary>
-        public bool ResolveRollerCombos(BoardManager board, Vector2Int startPos, Vector2Int endPos)
+        public bool SpecialCombos(BoardManager board, Vector2Int startPos, Vector2Int endPos)
         {
             if (board == null || board.Spawner == null) return false;
 
@@ -419,16 +420,7 @@ namespace LHJ
             return arr[p.y, p.x]?.BlockInstance;
         }
 
-        private Vector2Int WorldToGrid(BoardManager b, Vector3 w)
-        {
-            var plate = b.Spawner.BlockPlate;
-            int W = plate.BlockPlateWidth, H = plate.BlockPlateHeight;
-            return new Vector2Int(
-                Mathf.RoundToInt(w.x + W / 2f - 0.5f),
-                Mathf.RoundToInt(w.y + H / 2f - 0.5f)
-            );
-        }
-
+        // 주어진 GemType이 재료인지 체크
         private bool IsIngredient(GemType t)
         {
             for (int i = 0; i < _ingredientTypes.Length; i++)
@@ -436,6 +428,8 @@ namespace LHJ
             return false;
         }
 
+
+        // 중복 Activate 발생되지않게 방지
         private void ConsumeSwapped(BoardManager board, Vector2Int startPos, Vector2Int endPos)
         {
             var spawner = board.Spawner;
