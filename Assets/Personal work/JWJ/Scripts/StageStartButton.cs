@@ -15,7 +15,7 @@ public class StageStartButton : MonoBehaviour
         int index = StageManager.Instance.CurrentStageIndex;
         _stageButtonText.text = $"Stage {index + 1}";
 
-        _stageStartButton.onClick.AddListener(OnStageStartButtonClicked);
+        //_stageStartButton.onClick.AddListener(OnStageStartButtonClicked);
     }
 
     public void SetStage()
@@ -24,9 +24,9 @@ public class StageStartButton : MonoBehaviour
         _stageButtonText.text = $"Stage {index + 1}";
     }
 
-    private void OnStageStartButtonClicked()
-    {
-        if (HeartSystem.Instance.TryStartStage())
-            SceneManager.LoadScene("InGameTest Scene");
-    }
+    // private void OnStageStartButtonClicked()
+    // {
+    //     if (HeartSystem.Instance.TryStartStage())
+    //         SceneManager.LoadScene("InGameTest Scene");
+    // }
 }

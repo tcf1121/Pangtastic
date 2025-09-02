@@ -12,12 +12,12 @@ public class HeartSystem : MonoBehaviour
 
     [SerializeField] private TMP_Text _timerText; // UI Text (MM:SS 표시)
     [SerializeField] private TMP_Text _textHeart; // 0/0 표시
-    
+
     [SerializeField] private int _startSeconds = 1800; // 시작 시간 (기본 30분, 초 단위)
     [SerializeField] private int _maxHearts = 5; // 최대 하트 개수
     [SerializeField] private int _currentHearts = 0; // 현재 하트 개수
 
-    private int _remainingSeconds;
+    private float _remainingSeconds;
 
     protected void Awake()
     {
@@ -30,7 +30,7 @@ public class HeartSystem : MonoBehaviour
         Instance = this;
         DontDestroyOnLoad(gameObject);
     }
-    
+
     private void Start()
     {
         StopAllCoroutines(); // 혹시 중복 실행된 코루틴이 있으면 정리
@@ -100,7 +100,9 @@ public class HeartSystem : MonoBehaviour
 
                     if (_remainingSeconds <= 0)
                     {
-                        int extraHearts = Mathf.Abs(_remainingSeconds) / _startSeconds + 1;
+                        // 부족하면 추가로 하트 충전
+                        int extraHearts = Mathf.Abs((int)_remainingSeconds) / _startSeconds + 1;
+
                         _currentHearts = Mathf.Min(_currentHearts + extraHearts, _maxHearts);
 
                         if (_currentHearts < _maxHearts)
@@ -136,7 +138,7 @@ public class HeartSystem : MonoBehaviour
     private IEnumerator HeartSaveData()
     {
         string uid = $"{GPGSManager.Instance.GetPlayerId()}";
-        
+
         if (string.IsNullOrEmpty(uid))
         {
             Debug.LogError("UID가 비어있습니다! 로그인 완료 후 호출하세요.");
@@ -149,9 +151,9 @@ public class HeartSystem : MonoBehaviour
             .Child("heart")
             .Child("currentHeart")
             .SetValueAsync(_currentHearts);
-        
+
         yield return new WaitUntil(() => task.IsCompleted);
-        
+
         if (task.Exception != null)
         {
             Debug.LogError("currentHeart 저장 실패: " + task.Exception);
@@ -199,7 +201,7 @@ public class HeartSystem : MonoBehaviour
             yield return new WaitUntil(() => taskLast.IsCompleted);
         }
     }
-    
+
     /// <summary>
     /// 
     /// 하트를 사용하여 스테이지를 시작합니다.
@@ -266,7 +268,7 @@ public class HeartSystem : MonoBehaviour
     private void UpdateHeartUI()
     {
         if (_textHeart != null)
-            _textHeart.text = $"{_currentHearts}/{_maxHearts}";
+            _textHeart.text = $"{_currentHearts}";
     }
 
     /// <summary>
@@ -281,20 +283,14 @@ public class HeartSystem : MonoBehaviour
             // 하트가 최대치라면 충전하지 않고 리턴
             if (_currentHearts >= _maxHearts)
             {
-                // if (_timerText != null)
-                // _timerText.gameObject.SetActive(false);
-
-                yield return new WaitForSeconds(1f);
+                yield return null;
                 continue;
             }
 
             if (_remainingSeconds > 0)
             {
-                yield return new WaitForSeconds(1f);
-
-                // 1초 감소
-                _remainingSeconds--;
-
+                _remainingSeconds -= Time.unscaledDeltaTime;
+                yield return null;
                 UpdateTimerUI();
             }
             else
@@ -314,6 +310,7 @@ public class HeartSystem : MonoBehaviour
                     StartCoroutine(HeartSaveData());
                 }
             }
+
         }
     }
 
@@ -328,12 +325,11 @@ public class HeartSystem : MonoBehaviour
 
         if (_currentHearts >= _maxHearts)
         {
-            _timerText.text = "FULL";
+            _timerText.text = "가득 참";
             return;
         }
-
-        int minutes = _remainingSeconds / 60;
-        int seconds = _remainingSeconds % 60;
+        int minutes = (int)_remainingSeconds / 60;
+        int seconds = (int)_remainingSeconds % 60;
         _timerText.text = string.Format("{0:D2}:{1:D2}", minutes, seconds);
     }
 
@@ -359,15 +355,6 @@ public class HeartSystem : MonoBehaviour
         }
     }
 
-
-        // string json = JsonUtility.ToJson(data, true);
-        // System.IO.File.WriteAllText(SavePath, json);
-
-        // Debug.Log("JSON 저장 완료: " + SavePath);
-    // }
-    /// <summary>
-    /// 씬이 로드될 때마다 UI를 다시 찾아 연결합니다.
-    /// </summary>
     private void OnEnable()
     {
         SceneManager.sceneLoaded += OnSceneLoaded;

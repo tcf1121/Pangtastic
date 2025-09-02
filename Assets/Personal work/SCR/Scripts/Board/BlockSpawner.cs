@@ -81,7 +81,7 @@ namespace SCR_B
                         pos = new Vector2Int(x, y);
                         if (_emptyBlock.Contains(pos))
                         {
-                            if (_boardData.RespawnPos.Contains(pos)) SpawnDonut(x, y);
+                            if (_boardData.RespawnPos.Contains(pos)) SpawnAll(x, y);
                         }
                         else if (_canMoveBlock.ContainsKey(pos))
                         {
@@ -212,7 +212,11 @@ namespace SCR_B
                 blockInstance.transform.position = GetWorldPos(x, y);
 
                 if (_boardData.BlockArray[y, x].GemType == GemType.Ice)
-                    _boardData.BlockArray[y, x].BlockInstance.GetComponent<SpriteRenderer>().sprite = (_boardData.BlockArray[y, x] as Ice).GetIceImage();
+                {
+                    blockInstance.GetComponent<GemPrefab>().SetSprite((_boardData.BlockArray[y, x] as Ice).GetIceImage());
+                    _boardData.BlockArray[y, x].BlockInstance = blockInstance;
+                }
+
                 if (gemType == GemType.Dust || gemType == GemType.Syrup)
                 {
                     _boardData.OverlayArray[y, x].BlockInstance = blockInstance;
@@ -261,6 +265,16 @@ namespace SCR_B
         public void SpawnDonut(int x, int y)
         {
             SpawnBlock(x, y, _boardData.RespawnDount());
+        }
+
+        /// <summary>
+        /// 랜덤 재료 생성(정해진 도넛과 방해 블록 중)
+        /// </summary>
+        /// <param name="x"></param>
+        /// <param name="y"></param>
+        public void SpawnAll(int x, int y)
+        {
+            SpawnBlock(x, y, _boardData.RespawnAll());
         }
 
         /// <summary>

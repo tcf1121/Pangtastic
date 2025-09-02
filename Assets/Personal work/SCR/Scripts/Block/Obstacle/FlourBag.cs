@@ -38,7 +38,11 @@ namespace SCR_B
             fourPos.Add(Pos + Vector2Int.right);
             fourPos.Add(Pos + Vector2Int.up + Vector2Int.right);
             foreach (var pos in fourPos)
+            {
+                boardData.BlockPlateArray[pos.y, pos.x] = true;
                 boardData.BlockArray[pos.y, pos.x] = new FlourBag_s(this);
+            }
+
         }
 
         public override void TakeDamage()

@@ -64,23 +64,22 @@ namespace SCR_B
             int xOffset = -xMin;
             int yOffset = -yMin;
 
-            for (int i = 0; i < cellArray.Length; i++)
+            foreach (var cell in cellArray)
             {
-                Vector3Int pos = cellArray[i].Position;
-                GemType gem = cellArray[i].gemType;
+                boardData.SetDonut(cell.gemType);
+            }
 
-                int x = pos.x + xOffset;
-                int y = pos.y + yOffset;
-
-                if (y >= plateHeight || x >= plateWidth || y < 0 || x < 0)
+            foreach (var cell in cellArray)
+            {
+                int x = cell.Position.x + xOffset;
+                int y = cell.Position.y + yOffset;
+                if (y >= boardData.GetHeight() || x >= boardData.GetWidth() || y < 0 || x < 0)
                 {
-                    Debug.LogWarning($"좌표 {pos} 가 배열 범위를 벗어났습니다.");
+                    Debug.LogWarning($"좌표가 배열 범위를 벗어났습니다.");
                     continue;
                 }
                 boardData.BlockPlateArray[y, x] = true;
-
-                boardData.SetDonut(gem);
-                boardData.SetArray(x, y, gem);
+                boardData.SetArray(x, y, cell.gemType);
             }
 
             for (int x = 0; x < boardData.Size.x; x++)
@@ -92,6 +91,8 @@ namespace SCR_B
                     }
                 }
             BoardDataArray = boardData;
+
+            InGameManager.SetPuzzleSize(-xOffset, -yOffset, boardData.Size.x, boardData.Size.y);
             return boardData;
         }
     }

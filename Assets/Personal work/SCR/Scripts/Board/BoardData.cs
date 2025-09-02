@@ -20,18 +20,20 @@ namespace SCR_B
             if (gemType == GemType.Dust)
             {
                 OverlayArray[y, x] = new Dust(x, y);
-                int donutNum = Random.Range(0, 6);
-                BlockArray[y, x] = new Donut(x, y, (GemType)donutNum);
+                BlockArray[y, x] = new Donut(x, y, RespawnDount());
             }
             else if (gemType == GemType.Syrup)
             {
                 OverlayArray[y, x] = new Syrup(x, y);
-                int donutNum = Random.Range(0, 6);
-                BlockArray[y, x] = new Donut(x, y, (GemType)donutNum);
+                BlockArray[y, x] = new Donut(x, y, RespawnDount());
             }
-            else if (gemType == GemType.Ice) BlockArray[y, x] = new Ice(x, y);
+            else if (gemType == GemType.Ice) BlockArray[y, x] = new Ice(x, y, this);
             else if (gemType == GemType.DonutBag) BlockArray[y, x] = new DonutBag(x, y);
-            else if (gemType == GemType.Coin) BlockArray[y, x] = new Coin(x, y);
+            else if (gemType == GemType.Coin)
+            {
+                Debug.Log("코인 생성");
+                BlockArray[y, x] = new Coin(x, y);
+            }
             else if (gemType == GemType.GiftBox) BlockArray[y, x] = new GiftBox(x, y);
             else if (gemType == GemType.Egg) BlockArray[y, x] = new Egg(x, y);
             else if (gemType == GemType.FlourBag) BlockArray[y, x] = new FlourBag(this, x, y);
@@ -102,6 +104,13 @@ namespace SCR_B
         }
 
         public GemType RespawnDount()
+        {
+            var normalTypes = _respawnDonut.FindAll(v => v < GemType.Milk);
+
+            return normalTypes[Random.Range(0, normalTypes.Count)];
+        }
+
+        public GemType RespawnAll()
         {
             var obstacleTypes = _respawnDonut.FindAll(v => v == GemType.Coin || v == GemType.Egg);
             if (obstacleTypes.Count > 0)
