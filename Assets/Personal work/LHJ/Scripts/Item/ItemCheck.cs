@@ -2,6 +2,7 @@ using KDJ;
 using KDJ.States;
 using SCR;
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
@@ -26,8 +27,8 @@ namespace LHJ
 
                 int w = _board.Spawner.BlockPlate.BlockPlateWidth;
                 int h = _board.Spawner.BlockPlate.BlockPlateHeight;
-                Vector2 target = (Vector2)world + new Vector2(w / 2f, h / 2f);
-                Vector2Int grid = _board.BlockMover.WorldToGrid(target , w, h);
+                Vector2 target = new Vector2(world.x, world.y);
+                Vector2Int grid = _board.BlockMover.WorldToGrid(target, w, h);
 
                 if (!InBounds(grid))
                 {
@@ -42,7 +43,7 @@ namespace LHJ
                 _board.ClearItemSelection();
             }
         }
-        
+
         // 커피 아이템
         public void UseCoffee(float amount = 30f)
         {
@@ -67,7 +68,10 @@ namespace LHJ
             var sp = _board.Spawner;
             int w = sp.BlockPlate.BlockPlateWidth;
             int h = sp.BlockPlate.BlockPlateHeight;
-            return p.x >= 0 && p.x < w && p.y >= 0 && p.y < h;
+            if (p.x < 0 || p.x >= w || p.y < 0 || p.y >= h)
+                return false;
+
+            return sp.BlockPlate.BlockPlateArray[p.y, p.x];
         }
 
 
@@ -174,13 +178,75 @@ namespace LHJ
         // 보드를 초기화 후 특수 블록 하나 생성하는 루틴
         private IEnumerator RegenSpecialBlockRoutine()
         {
-            ClearBoard();
-            _board.ChangeState(new RefillState());
-            while (_board.Spawner.HasEmptyBlockObjects())
-                yield return null;                       
+            var sp = _board.Spawner;
+
+            List<int> specialTypes = new List<int>();
+            List<Vector2Int> specialSrc = new List<Vector2Int>();
+            List<Vector2Int> normalCells = new List<Vector2Int>();
+
+            int w = sp.BlockPlate.BlockPlateWidth;
+            int h = sp.BlockPlate.BlockPlateHeight;
+
+            for (int y = 0; y < h; y++)
+            {
+                for (int x = 0; x < w; x++)
+                {
+                    if (!sp.BlockPlate.BlockPlateArray[y, x]) continue;
+                    var cell = sp.BlockArray[y, x];
+                    if (cell == null) continue;
+
+                    bool isSpecial = (cell.GemType > GemType.Sugar && cell.GemType < GemType.Dust);
+                    if (isSpecial)
+                    {
+                        specialTypes.Add(cell.BlockType);
+                        specialSrc.Add(new Vector2Int(x, y));
+                    }
+                    else if (!cell.IsObstacle)
+                    {
+                        normalCells.Add(new Vector2Int(x, y));
+                    }
+                }
+            }
+
+            sp.ShuffleBlockArray();
+
+            ShuffleList(normalCells);
+            for (int i = 0; i < specialTypes.Count && i < normalCells.Count; i++)
+            {
+                Vector2Int src = specialSrc[i];
+                Vector2Int dst = normalCells[i];
+
+                // src(원래 특수 자리): 일반 블록으로 대체
+                if (sp.BlockArray[src.y, src.x]?.BlockInstance != null)
+                {
+                    Destroy(sp.BlockArray[src.y, src.x].BlockInstance);
+                    sp.BlockArray[src.y, src.x].BlockInstance = null;
+                }
+                sp.SpawnRandomBlock(src.x, src.y);
+
+                if (sp.BlockArray[dst.y, dst.x]?.BlockInstance != null)
+                {
+                    Destroy(sp.BlockArray[dst.y, dst.x].BlockInstance);
+                    sp.BlockArray[dst.y, dst.x].BlockInstance = null;
+                }
+                sp.SpawnBlock(dst.x, dst.y, specialTypes[i]);
+            }
             InjectRandomSpecial();
 
+            // 4) 안정화
+            _board.ChangeState(new RefillState());
+            while (sp.HasEmptyBlockObjects())
+                yield return null;
+
             yield break;
+        }
+        private void ShuffleList<T>(List<T> list)
+        {
+            for (int i = list.Count - 1; i > 0; i--)
+            {
+                int j = Random.Range(0, i + 1);
+                (list[i], list[j]) = (list[j], list[i]);
+            }
         }
 
         // 랜덤 위치에 특수 블록 생성
@@ -193,29 +259,6 @@ namespace LHJ
             int id = specialIds[Random.Range(0, specialIds.Length)];
 
             sp.RandomPosSpawnSpecialBlock(id);
-        }
-
-        // 보드 전체 클리어
-        private void ClearBoard()
-        {
-            var sp = _board.Spawner;
-            int w = sp.BlockPlate.BlockPlateWidth;
-            int h = sp.BlockPlate.BlockPlateHeight;
-
-            for (int y = 0; y < h; y++)
-            {
-                for (int x = 0; x < w; x++)
-                {
-                    var cell = sp.BlockArray[y, x];
-                    if (cell == null) continue;
-
-                    if (cell.BlockInstance != null)
-                    {
-                        Destroy(cell.BlockInstance);
-                        cell.BlockInstance = null;
-                    }
-                }
-            }
         }
     }
 }
