@@ -18,8 +18,8 @@ namespace LHJ
 
             if (Input.GetMouseButtonDown(0))
             {
-                if (EventSystem.current != null && EventSystem.current.IsPointerOverGameObject())
-                    return;
+                //if (EventSystem.current != null && EventSystem.current.IsPointerOverGameObject())
+                //    return;
 
                 Vector3 mouse = Input.mousePosition;
                 mouse.z = -Camera.main.transform.position.z;
