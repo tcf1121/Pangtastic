@@ -23,10 +23,23 @@ public class ToggleBtn : MonoBehaviour
         _toggle.onValueChanged.AddListener(CheckToggle);
     }
 
-    private void CheckToggle(bool value)
+    void OnEnable()
+    {
+        if (_type == ToggleType.BGM)
+            SetToggleBtn(!AudioSystem.Instance.BgmAudioSource.mute);
+        else if (_type == ToggleType.SFX)
+            SetToggleBtn(!AudioSystem.Instance.SfxAudioSource.mute);
+    }
+
+    private void SetToggleBtn(bool value)
     {
         _on.SetActive(value);
         _off.SetActive(!value);
+    }
+
+    private void CheckToggle(bool value)
+    {
+        SetToggleBtn(value);
         if (_type == ToggleType.BGM)
             AudioSystem.Instance.SetBGM(value);
         else if (_type == ToggleType.SFX)
