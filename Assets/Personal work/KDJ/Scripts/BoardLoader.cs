@@ -80,8 +80,7 @@ namespace KDJ
 
                 if (finalGemType == GemType.Random)
                 {
-                    int tempNum = UnityEngine.Random.Range(1, 7);
-                    finalGemType = (GemType)(tempNum - 1);
+                    finalGemType = (GemType)UnityEngine.Random.Range(0, 6); // 0~5 사이의 GemType을 바로 생성
                 }
 
                 if (finalGemType == GemType.Dust)

@@ -159,6 +159,7 @@ namespace KDJ
                     if (block != null && block.BlockInstance != null)
                     {
                         Destroy(block.BlockInstance);
+                        block.BlockInstance = null; // 파괴되었음을 즉시 데이터에 반영
                         score += 10;
                     }
                 }
@@ -191,20 +192,20 @@ namespace KDJ
             if (!gameBoard.BlockPlate.BlockPlateArray[y, x]) return false;
 
             var block = blockArray[y, x];
-            if (block == null || block.IsObstacle || (block.GemType > GemType.Sugar && block.GemType < GemType.Dust)) return false;
+            if (block == null || !block.IsNormal) return false;
 
             GemType gemType = block.GemType;
             int height = gameBoard.Height;
             int width = gameBoard.Width;
 
             int horizontalCount = 1;
-            for (int i = x - 1; i >= 0; i--) { var nextBlock = blockArray[y, i]; if (nextBlock != null && !nextBlock.IsObstacle && !(nextBlock.GemType > GemType.Sugar && nextBlock.GemType < GemType.Dust) && nextBlock.GemType == gemType) horizontalCount++; else break; }
-            for (int i = x + 1; i < width; i++) { var nextBlock = blockArray[y, i]; if (nextBlock != null && !nextBlock.IsObstacle && !(nextBlock.GemType > GemType.Sugar && nextBlock.GemType < GemType.Dust) && nextBlock.GemType == gemType) horizontalCount++; else break; }
+            for (int i = x - 1; i >= 0; i--) { var nextBlock = blockArray[y, i]; if (nextBlock != null && nextBlock.IsNormal && nextBlock.GemType == gemType) horizontalCount++; else break; }
+            for (int i = x + 1; i < width; i++) { var nextBlock = blockArray[y, i]; if (nextBlock != null && nextBlock.IsNormal && nextBlock.GemType == gemType) horizontalCount++; else break; }
             if (horizontalCount >= 3) return true;
 
             int verticalCount = 1;
-            for (int i = y - 1; i >= 0; i--) { var nextBlock = blockArray[i, x]; if (nextBlock != null && !nextBlock.IsObstacle && !(nextBlock.GemType > GemType.Sugar && nextBlock.GemType < GemType.Dust) && nextBlock.GemType == gemType) verticalCount++; else break; }
-            for (int i = y + 1; i < height; i++) { var nextBlock = blockArray[i, x]; if (nextBlock != null && !nextBlock.IsObstacle && !(nextBlock.GemType > GemType.Sugar && nextBlock.GemType < GemType.Dust) && nextBlock.GemType == gemType) verticalCount++; else break; }
+            for (int i = y - 1; i >= 0; i--) { var nextBlock = blockArray[i, x]; if (nextBlock != null && nextBlock.IsNormal && nextBlock.GemType == gemType) verticalCount++; else break; }
+            for (int i = y + 1; i < height; i++) { var nextBlock = blockArray[i, x]; if (nextBlock != null && nextBlock.IsNormal && nextBlock.GemType == gemType) verticalCount++; else break; }
             if (verticalCount >= 3) return true;
 
             return false;
@@ -213,16 +214,21 @@ namespace KDJ
         private bool IsCubeMatched(BoardManager boardManager, int x, int y)
         {
             var gameBoard = boardManager.Spawner.GameBoardData;
-            int height = gameBoard.Height;
-            int width = gameBoard.Width;
-
             var startBlock = gameBoard.GetBlock(x, y);
-            if (startBlock == null || (startBlock.GemType > GemType.Sugar && startBlock.GemType < GemType.Dust)) return false;
 
-            for (int i = y; i < y + 2; i++) {
-                for (int j = x; j < x + 2; j++) {
+            if (startBlock == null || !startBlock.IsNormal) return false;
+
+            var startGemType = startBlock.GemType;
+
+            for (int i = y; i < y + 2; i++)
+            {
+                for (int j = x; j < x + 2; j++)
+                {
                     var currentBlock = gameBoard.GetBlock(j, i);
-                    if (currentBlock == null || !(currentBlock.GemType > GemType.Sugar && currentBlock.GemType < GemType.Dust) || currentBlock.GemType != startBlock.GemType) return false;
+                    if (currentBlock == null || !currentBlock.IsNormal || currentBlock.GemType != startGemType)
+                    {
+                        return false;
+                    }
                 }
             }
             return true;
@@ -234,20 +240,20 @@ namespace KDJ
             var gameBoard = boardManager.Spawner.GameBoardData;
             var startBlock = gameBoard.GetBlock(startX, startY);
 
-            if (startBlock == null || startBlock.IsObstacle || (startBlock.GemType > GemType.Sugar && startBlock.GemType < GemType.Dust)) return matches;
+            if (startBlock == null || !startBlock.IsNormal) return matches;
 
             var startType = startBlock.GemType;
             matches.Add(new Vector2Int(startX, startY));
 
             if (isHorizontal)
             {
-                for (int x = startX - 1; x >= 0; x--) { var currentBlock = gameBoard.GetBlock(x, startY); if (currentBlock != null && !currentBlock.IsObstacle && !(currentBlock.GemType > GemType.Sugar && currentBlock.GemType < GemType.Dust) && currentBlock.GemType == startType) matches.Add(new Vector2Int(x, startY)); else break; }
-                for (int x = startX + 1; x < gameBoard.Width; x++) { var currentBlock = gameBoard.GetBlock(x, startY); if (currentBlock != null && !currentBlock.IsObstacle && !(currentBlock.GemType > GemType.Sugar && currentBlock.GemType < GemType.Dust) && currentBlock.GemType == startType) matches.Add(new Vector2Int(x, startY)); else break; }
+                for (int x = startX - 1; x >= 0; x--) { var currentBlock = gameBoard.GetBlock(x, startY); if (currentBlock != null && currentBlock.IsNormal && currentBlock.GemType == startType) matches.Add(new Vector2Int(x, startY)); else break; }
+                for (int x = startX + 1; x < gameBoard.Width; x++) { var currentBlock = gameBoard.GetBlock(x, startY); if (currentBlock != null && currentBlock.IsNormal && currentBlock.GemType == startType) matches.Add(new Vector2Int(x, startY)); else break; }
             }
             else
             {
-                for (int y = startY - 1; y >= 0; y--) { var currentBlock = gameBoard.GetBlock(startX, y); if (currentBlock != null && !currentBlock.IsObstacle && !(currentBlock.GemType > GemType.Sugar && currentBlock.GemType < GemType.Dust) && currentBlock.GemType == startType) matches.Add(new Vector2Int(startX, y)); else break; }
-                for (int y = startY + 1; y < gameBoard.Height; y++) { var currentBlock = gameBoard.GetBlock(startX, y); if (currentBlock != null && !currentBlock.IsObstacle && !(currentBlock.GemType > GemType.Sugar && currentBlock.GemType < GemType.Dust) && currentBlock.GemType == startType) matches.Add(new Vector2Int(startX, y)); else break; }
+                for (int y = startY - 1; y >= 0; y--) { var currentBlock = gameBoard.GetBlock(startX, y); if (currentBlock != null && currentBlock.IsNormal && currentBlock.GemType == startType) matches.Add(new Vector2Int(startX, y)); else break; }
+                for (int y = startY + 1; y < gameBoard.Height; y++) { var currentBlock = gameBoard.GetBlock(startX, y); if (currentBlock != null && currentBlock.IsNormal && currentBlock.GemType == startType) matches.Add(new Vector2Int(startX, y)); else break; }
             }
             return matches;
         }

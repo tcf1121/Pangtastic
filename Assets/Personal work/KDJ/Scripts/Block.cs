@@ -11,5 +11,7 @@ namespace KDJ
         public GameObject BlockInstance { get; set; } = null;
         public GemType GemType { get; set; }
         public bool IsObstacle { get; set; } = false;
+        public bool IsNormal { get; set; } = true;
+        public bool CanMove { get; set; } = true;
     }
 }
