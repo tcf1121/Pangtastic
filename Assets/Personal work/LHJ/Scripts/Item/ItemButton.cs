@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using KDJ;
 
 namespace LHJ
 {
@@ -9,7 +10,7 @@ namespace LHJ
     {
         [SerializeField] private ItemType _type; // 버튼에 해당하는 아이템 종류
         [SerializeField] private Button _button;
-        [SerializeField] private CopyBoardManager _board;
+        [SerializeField] private BoardManager _board;
         [SerializeField] private ItemCheck _itemCheck;
 
         private void Awake()

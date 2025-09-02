@@ -11,18 +11,19 @@ public class PassiveBooster : MonoBehaviour
     // 특수블록 ID 매핑
     [SerializeField] private int _rollerVId;
     [SerializeField] private int _rollerHId;
-    [SerializeField] private int _ovenId;
     [SerializeField] private int _donutId;
+    [SerializeField] private int _ovenId;
 
     [SerializeField] private int _manhattanDist;
     private Coroutine _applyCo;
 
-    // 켜짐/꺼짐 토글
-    public bool _enabled;
+    [SerializeField] private bool _useRoller;
+    [SerializeField] private bool _useDonut;
+    [SerializeField] private bool _useOven;
 
     private void OnEnable()
     {
-        if (_enabled && _applyCo == null)
+        if (_applyCo == null)
             _applyCo = StartCoroutine(WaitAndApplyRoutine());
     }
 
@@ -69,23 +70,24 @@ public class PassiveBooster : MonoBehaviour
     }
     public void ApplyOnStageStart()
     {
-        if (!_enabled || _board == null) return;
+        if (_board == null) return;
 
         var sp = _board.Spawner;
         int w = sp.GameBoardData.BlockPlate.BlockPlateWidth;
         int h = sp.GameBoardData.BlockPlate.BlockPlateHeight;
 
         var picked = new List<Vector2Int>();
+        if (_useRoller)
+        {
+            int rollerId = (Random.value < 0.5f) ? _rollerHId : _rollerVId;
+            TryPlaceSpecial(sp, w, h, picked, rollerId);
+        }
 
-        // 1) 밀대 1개 (가로/세로 50%)
-        int rollerId = (Random.value < 0.5f) ? _rollerHId : _rollerVId;
-        TryPlaceSpecial(sp, w, h, picked, rollerId);
+        if (_useDonut)
+            TryPlaceSpecial(sp, w, h, picked, _donutId);
 
-        // 2) 도넛상자 1개
-        TryPlaceSpecial(sp, w, h, picked, _donutId);
-
-        // 3) 오븐 1개
-        TryPlaceSpecial(sp, w, h, picked, _ovenId);
+        if (_useOven)
+            TryPlaceSpecial(sp, w, h, picked, _ovenId);
     }
 
     private bool TryPlaceSpecial(BlockSpawner sp, int w, int h, List<Vector2Int> picked, int blockNum)
