@@ -16,6 +16,7 @@ namespace KDJ
         public BoardLoader BoardLoader { get; set; }
         public int Score { get; private set; } = 0;
         public int CurStage;
+        public float MatchDelay;
 
         private void Awake()
         {
@@ -56,7 +57,7 @@ namespace KDJ
         #region 테스트 코드
         public void UpdateUI(Block block, int x, int y)
         {
-            _blockInfo.text = $"Block Type: {block.BlockType}\nGem Type: {block.GemType}\nPosition: ({y}, {x})";
+            _blockInfo.text = $"Gem Type: {block.GemType}\nPosition: ({y}, {x})";
         }
 
         public void UpdateUI(int score)

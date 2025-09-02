@@ -24,5 +24,19 @@ namespace SCR_B
             InGameManager.AddCoin(1);
             base.Broken();
         }
+
+        public override Block Clone()
+        {
+            return new Coin(Pos.x, Pos.y)
+            {
+                CurrentHP = this.CurrentHP,
+                Pos = this.Pos,
+                Score = this.Score,
+                BlockInstance = this.BlockInstance,
+                GemType = this.GemType,
+                IsObstacle = this.IsObstacle,
+                CanMove = this.CanMove,
+            };
+        }
     }
 }

@@ -11,17 +11,17 @@ public class AudioClipGroup
 public class AudioSystem : MonoBehaviour
 {
     public static AudioSystem Instance { get; private set; }
-    
+
     [Header("BGM 클립들")]
     [SerializeField] private List<AudioClipGroup> _bgmClips = new List<AudioClipGroup>();
-    
+
     [Header("SFX 클립들")]
     [SerializeField] private List<AudioClipGroup> _sfxClips = new List<AudioClipGroup>();
-    
+
     // AudioSource 컴포넌트들
     [HideInInspector] public AudioSource BgmAudioSource;
     [HideInInspector] public AudioSource SfxAudioSource;
-    
+
     protected void Awake()
     {
         if (Instance != null && Instance != this)
@@ -31,12 +31,12 @@ public class AudioSystem : MonoBehaviour
         }
         Instance = this;
         DontDestroyOnLoad(gameObject);
-        
+
         // AudioSource 컴포넌트 생성
         BgmAudioSource = gameObject.AddComponent<AudioSource>();
         BgmAudioSource.loop = true;
         BgmAudioSource.playOnAwake = false;
-        
+
         SfxAudioSource = gameObject.AddComponent<AudioSource>();
         SfxAudioSource.loop = false;
         SfxAudioSource.playOnAwake = false;
@@ -76,7 +76,7 @@ public class AudioSystem : MonoBehaviour
             }
         }
     }
-    
+
     /// <summary>
     /// BGM 정지
     /// </summary>
@@ -87,7 +87,15 @@ public class AudioSystem : MonoBehaviour
             BgmAudioSource.Stop();
         }
     }
-    
+
+    public void SetBGM(bool isOn)
+    {
+        if (BgmAudioSource != null)
+        {
+            BgmAudioSource.mute = !isOn;
+        }
+    }
+
     /// <summary>
     /// 재생 중인 SFX 정지
     /// </summary>
@@ -96,6 +104,14 @@ public class AudioSystem : MonoBehaviour
         if (SfxAudioSource != null && SfxAudioSource.isPlaying)
         {
             SfxAudioSource.Stop();
+        }
+    }
+
+    public void SetSFX(bool isOn)
+    {
+        if (BgmAudioSource != null)
+        {
+            SfxAudioSource.mute = !isOn;
         }
     }
 

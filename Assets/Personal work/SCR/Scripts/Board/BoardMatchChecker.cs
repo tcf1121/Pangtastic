@@ -206,8 +206,10 @@ namespace SCR_B
                 _matchPos = _matchPos.Distinct().OrderBy(v => v.y).ThenBy(v => v.x).ToList();
                 matchData.MatchPos = new List<Vector2Int>(_matchPos);
 
+                bool isIced = false;
                 foreach (var matchedPos in _matchPos)
                 {
+                    if (boardData.BlockArray[matchedPos.y, matchedPos.x].GemType == GemType.Ice) isIced = true;
                     AddSplashTargets(matchedPos, boardData);
                 }
 
@@ -217,31 +219,37 @@ namespace SCR_B
                         .Distinct().Except(_matchPos).OrderBy(v => v.y).ThenBy(v => v.x).ToList();
 
                 matchData.SplashPos = new List<Vector2Int>(_splashPos);
-                if (horizontalCount >= 5 || verticalCount >= 5)
-                {
-                    matchData.MatchType = MatchType.Oven;
-                }
+
+                if (isIced) matchData.MatchType = MatchType.Nomal;
                 else
                 {
-                    if (horizontalCount >= 3 && verticalCount >= 3)
+                    if (horizontalCount >= 5 || verticalCount >= 5)
                     {
-                        matchData.MatchType = MatchType.DonutBox;
-                    }
-                    else if (horizontalCount >= 4)
-                    {
-                        matchData.MatchType = MatchType.Roller_v;
-                    }
-                    else if (verticalCount >= 4)
-                    {
-                        matchData.MatchType = MatchType.Roller_h;
-                    }
-                    else if (squareMatch)
-                    {
-                        matchData.MatchType = MatchType.Milk;
+                        matchData.MatchType = MatchType.Oven;
                     }
                     else
-                        matchData.MatchType = MatchType.Nomal;
+                    {
+                        if (horizontalCount >= 3 && verticalCount >= 3)
+                        {
+                            matchData.MatchType = MatchType.DonutBox;
+                        }
+                        else if (horizontalCount >= 4)
+                        {
+                            matchData.MatchType = MatchType.Roller_v;
+                        }
+                        else if (verticalCount >= 4)
+                        {
+                            matchData.MatchType = MatchType.Roller_h;
+                        }
+                        else if (squareMatch)
+                        {
+                            matchData.MatchType = MatchType.Milk;
+                        }
+                        else
+                            matchData.MatchType = MatchType.Nomal;
+                    }
                 }
+
                 AddMatchData(matchData);
             }
         }
@@ -319,7 +327,7 @@ namespace SCR_B
             var startGemType = boardData.BlockArray[startPos.y, startPos.x].GemType;
             if (startGemType > GemType.Sugar) return 0;
             while (CheckArray(currentPos, boardData) &&
-           boardData.BlockArray[currentPos.y, currentPos.x].GemType == boardData.BlockArray[startPos.y, startPos.x].GemType)
+           boardData.BlockArray[currentPos.y, currentPos.x].GetDonut() == boardData.BlockArray[startPos.y, startPos.x].GetDonut())
             {
                 count++;
                 currentPos += direction;
@@ -335,7 +343,7 @@ namespace SCR_B
             Vector2Int currentPos = startPos + direction;
 
             while (CheckArray(currentPos) &&
-                   boardData.BlockArray[currentPos.y, currentPos.x].GemType == boardData.BlockArray[startPos.y, startPos.x].GemType)
+                   boardData.BlockArray[currentPos.y, currentPos.x].GetDonut() == boardData.BlockArray[startPos.y, startPos.x].GetDonut())
             {
                 _matchPos.Add(currentPos);
                 currentPos += direction;
@@ -349,20 +357,21 @@ namespace SCR_B
             if (!CheckArray(startPos, boardData)) return false;
             var startGemType = boardData.BlockArray[startPos.y, startPos.x].GemType;
             if (startGemType > GemType.Sugar) return false;
+            startGemType = boardData.BlockArray[startPos.y, startPos.x].GetDonut();
             bool upPos = CheckArray(startPos + Vector2Int.up, boardData) &&
-            boardData.BlockArray[startPos.y + 1, startPos.x].GemType == startGemType;
+            boardData.BlockArray[startPos.y + 1, startPos.x].GetDonut() == startGemType;
             bool downPos = CheckArray(startPos + Vector2Int.down, boardData) &&
-            boardData.BlockArray[startPos.y - 1, startPos.x].GemType == startGemType;
+            boardData.BlockArray[startPos.y - 1, startPos.x].GetDonut() == startGemType;
             bool leftPos = CheckArray(startPos + Vector2Int.left, boardData) &&
-            boardData.BlockArray[startPos.y, startPos.x - 1].GemType == startGemType;
+            boardData.BlockArray[startPos.y, startPos.x - 1].GetDonut() == startGemType;
             bool rightPos = CheckArray(startPos + Vector2Int.right, boardData) &&
-            boardData.BlockArray[startPos.y, startPos.x + 1].GemType == startGemType;
+            boardData.BlockArray[startPos.y, startPos.x + 1].GetDonut() == startGemType;
 
             if (upPos)
             {
                 if (leftPos)
                     if (CheckArray(startPos + Vector2Int.up + Vector2Int.left, boardData) &&
-            boardData.BlockArray[startPos.y + 1, startPos.x - 1].GemType == startGemType)
+            boardData.BlockArray[startPos.y + 1, startPos.x - 1].GetDonut() == startGemType)
                     {
                         isSquare = true;
                         _matchPos.Add(startPos);
@@ -372,7 +381,7 @@ namespace SCR_B
                     }
                 if (rightPos)
                     if (CheckArray(startPos + Vector2Int.up + Vector2Int.right, boardData) &&
-            boardData.BlockArray[startPos.y + 1, startPos.x + 1].GemType == startGemType)
+            boardData.BlockArray[startPos.y + 1, startPos.x + 1].GetDonut() == startGemType)
                     {
                         isSquare = true;
                         _matchPos.Add(startPos);
@@ -386,7 +395,7 @@ namespace SCR_B
             {
                 if (leftPos)
                     if (CheckArray(startPos + Vector2Int.down + Vector2Int.left, boardData) &&
-            boardData.BlockArray[startPos.y - 1, startPos.x - 1].GemType == startGemType)
+            boardData.BlockArray[startPos.y - 1, startPos.x - 1].GetDonut() == startGemType)
                     {
                         isSquare = true;
                         _matchPos.Add(startPos);
@@ -396,7 +405,7 @@ namespace SCR_B
                     }
                 if (rightPos)
                     if (CheckArray(startPos + Vector2Int.down + Vector2Int.right, boardData) &&
-            boardData.BlockArray[startPos.y - 1, startPos.x + 1].GemType == startGemType)
+            boardData.BlockArray[startPos.y - 1, startPos.x + 1].GetDonut() == startGemType)
                     {
                         isSquare = true;
                         _matchPos.Add(startPos);
