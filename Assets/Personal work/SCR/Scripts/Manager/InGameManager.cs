@@ -11,7 +11,7 @@ public class InGameManager : MonoBehaviour
     [SerializeField] private PrefabList blockList;
     [SerializeField] OrderStateController orderStateController;
     [SerializeField] CustomerFlowController customerFlowController;
-    [SerializeField] GameObject doNotTouch;
+    [SerializeField] TMP_Text doNotTouch;
     [SerializeField] GameObject clearUI;
     [SerializeField] GameObject failUI;
     [SerializeField] TMP_Text WinScore;

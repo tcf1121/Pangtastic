@@ -30,6 +30,9 @@ public class StageSO : ScriptableObject
     [Header("퍼즐보드")]
     public PuzzleBoardSO PuzzleBoard;
 
+    [Header("최대 골드개수")]
+    public int MaxGoldGain;
+
     [Header("재료 배수")]
     public IngredientAdjustment[] IngredientAdjustments;
 

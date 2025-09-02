@@ -7,9 +7,9 @@ namespace SCR_B
 {
     public class Ice : ObstacleBlock
     {
-        private GemType _dount;
+        public GemType DountType;
         private Sprite iceSprite;
-        public Ice(int xpos, int ypos)
+        public Ice(int xpos, int ypos, BoardData boardData = null)
         {
             Pos = new Vector2Int(xpos, ypos);
             Score = 0;
@@ -17,12 +17,17 @@ namespace SCR_B
             GemType = GemType.Ice;
             IsObstacle = true;
             CanMove = false;
-            _dount = (GemType)Random.Range(0, 6);
-            string path = $"Assets/Imports/Image/Donut/Iced_{_dount}.png";
+            DountType = boardData.RespawnDount();
+            string path = $"Assets/Imports/Image/Donut/Iced_{DountType}.png";
             Debug.Log(path);
             AsyncOperationHandle<Sprite> handle = Addressables.LoadAssetAsync<Sprite>(path);
             handle.Completed += OnSpriteLoadCompleted;
 
+        }
+
+        public override GemType GetDonut()
+        {
+            return DountType;
         }
 
         private void OnSpriteLoadCompleted(AsyncOperationHandle<Sprite> handle)
@@ -43,13 +48,12 @@ namespace SCR_B
 
         public override void SplashDamage()
         {
-            base.TakeDamage();
         }
 
         public override void Broken()
         {
             Object.Destroy(BlockInstance);
-            BoardManager.GetBoard().Spawner.SpawnBlock(Pos.x, Pos.y, _dount);
+            BoardManager.GetBoard().Spawner.SpawnBlock(Pos.x, Pos.y, DountType);
         }
     }
 }
