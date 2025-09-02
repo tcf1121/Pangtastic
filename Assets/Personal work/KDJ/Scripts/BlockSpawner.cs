@@ -359,6 +359,21 @@ namespace KDJ
             }
             return false;
         }
+        
+        public bool HasEmptyBlockObjects()
+        {
+            for (int x = 0; x < GameBoardData.Width; x++)
+            {
+                for (int y = 0; y < GameBoardData.Height; y++)
+                {
+                    if (GameBoardData.BlockPlate.BlockPlateArray[y, x] && GameBoardData.GetBlock(x, y) != null && GameBoardData.GetBlock(x, y).BlockInstance == null)
+                    {
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
 
         public bool CanBlockMoveInArray()
         {
@@ -370,7 +385,7 @@ namespace KDJ
                     if (GameBoardData.GetBlock(x, y) == null && GameBoardData.BlockPlate.BlockPlateArray[y, x])
                     {
                         // TODO: 이 부분은 FindNextStepMoves와 같은 로직을 사용해야 함
-                        return true; 
+                        return true;
                     }
                 }
             }
