@@ -42,7 +42,7 @@ namespace LHJ
             }
 
             var spawner = board.Spawner;
-            var plate = spawner.BlockPlate;
+            var plate = spawner.GameBoardData.BlockPlate;
             int width = plate.BlockPlateWidth;
             int height = plate.BlockPlateHeight;
 
@@ -53,11 +53,11 @@ namespace LHJ
 
             if (myPos.y >= 0 && myPos.y < height && myPos.x >= 0 && myPos.x < width)
             {
-                var selfBlk = spawner.BlockArray[myPos.y, myPos.x];
+                var selfBlk = spawner.GameBoardData.BlockArray[myPos.y, myPos.x];
                 if (selfBlk != null && selfBlk.BlockInstance != null)
                 {
                     Object.Destroy(selfBlk.BlockInstance);
-                    spawner.BlockArray[myPos.y, myPos.x].BlockInstance = null;
+                    spawner.GameBoardData.BlockArray[myPos.y, myPos.x].BlockInstance = null;
                 }
             }
 
@@ -66,7 +66,7 @@ namespace LHJ
             {
                 for (int x = 0; x < width; x++)
                 {
-                    var blk = spawner.BlockArray[y, x];
+                    var blk = spawner.GameBoardData.BlockArray[y, x];
                     if (blk == null || blk.BlockInstance == null) continue;
                     if (x == myPos.x && y == myPos.y) continue;
                     if (!_ingredientMap.ContainsKey(blk.GemType)) continue;
@@ -90,13 +90,13 @@ namespace LHJ
                 Vector2Int pos = candidates[idx];
                 candidates.RemoveAt(idx);
 
-                var blk = spawner.BlockArray[pos.y, pos.x];
+                var blk = spawner.GameBoardData.BlockArray[pos.y, pos.x];
 
                 if (order != null)
                     order.AddIngredient(_ingredientMap[blk.GemType]);
 
                 Object.Destroy(blk.BlockInstance);
-                spawner.BlockArray[pos.y, pos.x].BlockInstance = null;
+                spawner.GameBoardData.BlockArray[pos.y, pos.x].BlockInstance = null;
                 destroyedCount++;
             }
             if (destroyedCount > 0)

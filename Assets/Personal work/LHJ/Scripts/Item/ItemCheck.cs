@@ -25,8 +25,8 @@ namespace LHJ
                 mouse.z = -Camera.main.transform.position.z;
                 Vector3 world = Camera.main.ScreenToWorldPoint(mouse);
 
-                int w = _board.Spawner.BlockPlate.BlockPlateWidth;
-                int h = _board.Spawner.BlockPlate.BlockPlateHeight;
+                int w = _board.Spawner.GameBoardData.BlockPlate.BlockPlateWidth;
+                int h = _board.Spawner.GameBoardData.BlockPlate.BlockPlateHeight;
                 Vector2 target = new Vector2(world.x, world.y);
                 Vector2Int grid = _board.BlockMover.WorldToGrid(target, w, h);
 
@@ -66,12 +66,12 @@ namespace LHJ
         private bool InBounds(Vector2Int p)
         {
             var sp = _board.Spawner;
-            int w = sp.BlockPlate.BlockPlateWidth;
-            int h = sp.BlockPlate.BlockPlateHeight;
+            int w = sp.GameBoardData.BlockPlate.BlockPlateWidth;
+            int h = sp.GameBoardData.BlockPlate.BlockPlateHeight;
             if (p.x < 0 || p.x >= w || p.y < 0 || p.y >= h)
                 return false;
 
-            return sp.BlockPlate.BlockPlateArray[p.y, p.x];
+            return sp.GameBoardData.BlockPlate.BlockPlateArray[p.y, p.x];
         }
 
 
@@ -103,35 +103,35 @@ namespace LHJ
         private int ApplyScissor(Vector2Int pos)
         {
             var sp = _board.Spawner;
-            int w = sp.BlockPlate.BlockPlateWidth;
-            int h = sp.BlockPlate.BlockPlateHeight;
+            int w = sp.GameBoardData.BlockPlate.BlockPlateWidth;
+            int h = sp.GameBoardData.BlockPlate.BlockPlateHeight;
             int destroyedCount = 0;
 
             // 가로
             for (int x = 0; x < w; x++)
             {
-                var blk = sp.BlockArray[pos.y, x];
+                var blk = sp.GameBoardData.BlockArray[pos.y, x];
                 if (blk == null || blk.BlockInstance == null) continue;
 
                 var special = blk.BlockInstance.GetComponent<SpecialBlock>();
                 if (special != null) special.Activate(_board);
 
                 Object.Destroy(blk.BlockInstance);
-                sp.BlockArray[pos.y, x].BlockInstance = null;
+                sp.GameBoardData.BlockArray[pos.y, x].BlockInstance = null;
                 destroyedCount++;
             }
 
             // 세로
             for (int y = 0; y < h; y++)
             {
-                var blk = sp.BlockArray[y, pos.x];
+                var blk = sp.GameBoardData.BlockArray[y, pos.x];
                 if (blk == null || blk.BlockInstance == null) continue;
 
                 var special = blk.BlockInstance.GetComponent<SpecialBlock>();
                 if (special != null) special.Activate(_board);
 
                 Object.Destroy(blk.BlockInstance);
-                sp.BlockArray[y, pos.x].BlockInstance = null;
+                sp.GameBoardData.BlockArray[y, pos.x].BlockInstance = null;
                 destroyedCount++;
             }
 
@@ -142,8 +142,8 @@ namespace LHJ
         private int ApplyWhisk(Vector2Int pos)
         {
             var sp = _board.Spawner;
-            int w = sp.BlockPlate.BlockPlateWidth;
-            int h = sp.BlockPlate.BlockPlateHeight;
+            int w = sp.GameBoardData.BlockPlate.BlockPlateWidth;
+            int h = sp.GameBoardData.BlockPlate.BlockPlateHeight;
             int destroyedCount = 0;
 
             int r = 1;
@@ -154,14 +154,14 @@ namespace LHJ
                 {
                     if (x < 0 || x >= w) continue;
 
-                    var blk = sp.BlockArray[y, x];
+                    var blk = sp.GameBoardData.BlockArray[y, x];
                     if (blk == null || blk.BlockInstance == null) continue;
 
                     var special = blk.BlockInstance.GetComponent<SpecialBlock>();
                     if (special != null) special.Activate(_board);
 
                     Object.Destroy(blk.BlockInstance);
-                    sp.BlockArray[y, x].BlockInstance = null;
+                    sp.GameBoardData.BlockArray[y, x].BlockInstance = null;
                     destroyedCount++;
                 }
             }
@@ -180,25 +180,25 @@ namespace LHJ
         {
             var sp = _board.Spawner;
 
-            List<int> specialTypes = new List<int>();
+            List<GemType> specialTypes = new List<GemType>();
             List<Vector2Int> specialSrc = new List<Vector2Int>();
             List<Vector2Int> normalCells = new List<Vector2Int>();
 
-            int w = sp.BlockPlate.BlockPlateWidth;
-            int h = sp.BlockPlate.BlockPlateHeight;
+            int w = sp.GameBoardData.BlockPlate.BlockPlateWidth;
+            int h = sp.GameBoardData.BlockPlate.BlockPlateHeight;
 
             for (int y = 0; y < h; y++)
             {
                 for (int x = 0; x < w; x++)
                 {
-                    if (!sp.BlockPlate.BlockPlateArray[y, x]) continue;
-                    var cell = sp.BlockArray[y, x];
+                    if (!sp.GameBoardData.BlockPlate.BlockPlateArray[y, x]) continue;
+                    var cell = sp.GameBoardData.BlockArray[y, x];
                     if (cell == null) continue;
 
                     bool isSpecial = (cell.GemType > GemType.Sugar && cell.GemType < GemType.Dust);
                     if (isSpecial)
                     {
-                        specialTypes.Add(cell.BlockType);
+                        specialTypes.Add(cell.GemType);
                         specialSrc.Add(new Vector2Int(x, y));
                     }
                     else if (!cell.IsObstacle)
@@ -208,7 +208,7 @@ namespace LHJ
                 }
             }
 
-            sp.ShuffleBlockArray();
+            sp.Shuffle(BoardManager.Instance);
 
             ShuffleList(normalCells);
             for (int i = 0; i < specialTypes.Count && i < normalCells.Count; i++)
@@ -217,19 +217,19 @@ namespace LHJ
                 Vector2Int dst = normalCells[i];
 
                 // src(원래 특수 자리): 일반 블록으로 대체
-                if (sp.BlockArray[src.y, src.x]?.BlockInstance != null)
+                if (sp.GameBoardData.BlockArray[src.y, src.x]?.BlockInstance != null)
                 {
-                    Destroy(sp.BlockArray[src.y, src.x].BlockInstance);
-                    sp.BlockArray[src.y, src.x].BlockInstance = null;
+                    Destroy(sp.GameBoardData.BlockArray[src.y, src.x].BlockInstance);
+                    sp.GameBoardData.BlockArray[src.y, src.x].BlockInstance = null;
                 }
                 sp.SpawnRandomBlock(src.x, src.y);
 
-                if (sp.BlockArray[dst.y, dst.x]?.BlockInstance != null)
+                if (sp.GameBoardData.BlockArray[dst.y, dst.x]?.BlockInstance != null)
                 {
-                    Destroy(sp.BlockArray[dst.y, dst.x].BlockInstance);
-                    sp.BlockArray[dst.y, dst.x].BlockInstance = null;
+                    Destroy(sp.GameBoardData.BlockArray[dst.y, dst.x].BlockInstance);
+                    sp.GameBoardData.BlockArray[dst.y, dst.x].BlockInstance = null;
                 }
-                sp.SpawnBlock(dst.x, dst.y, specialTypes[i]);
+                sp.SpawnBlock(dst.x, dst.y, specialTypes[i], BoardManager.Instance.BlockMover);
             }
             InjectRandomSpecial();
 
@@ -258,7 +258,7 @@ namespace LHJ
             int[] specialIds = { 7, 8, 9, 10, 11 };
             int id = specialIds[Random.Range(0, specialIds.Length)];
 
-            sp.RandomPosSpawnSpecialBlock(id);
+            sp.RandomPosSpawnSpecialBlock((GemType)id);
         }
     }
 }

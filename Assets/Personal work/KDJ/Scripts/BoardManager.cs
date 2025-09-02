@@ -1,4 +1,5 @@
 using KDJ.States;
+using LHJ;
 using TMPro;
 using UnityEngine;
 
@@ -17,15 +18,34 @@ namespace KDJ
         public int Score { get; private set; } = 0;
         public int CurStage;
         public float MatchDelay;
+        public static BoardManager Instance { get; private set; }
+        public bool IsItemSelected { get; private set; } = false;
+        public ItemType SelectedItemType { get; private set; }
 
+        
         private void Awake()
         {
+            if (Instance != null && Instance != this)
+            {
+                Destroy(gameObject);
+                return;
+            }
+            Instance = this;
+
             Debug.Log("보드 매니저 초기화");
             Spawner = FindObjectOfType<BlockSpawner>();
             MatchChecker = GetComponent<BoardMatchChecker>();
             BlockMover = GetComponent<BlockMover>();
             MatchCombo = GetComponent<MatchCombo>();
             BoardLoader = GetComponent<BoardLoader>();
+        }
+
+        private void OnDestroy()
+        {
+            if (Instance == this)
+            {
+                Instance = null;
+            }
         }
 
         private void Start()
@@ -53,6 +73,20 @@ namespace KDJ
             CurrentState = newState;
             CurrentState.OnEnter(this);
         }
+
+        // 아이템 선택
+        public void SelectItem(ItemType type)
+        {
+            SelectedItemType = type;
+            IsItemSelected = true;
+        }
+
+        // 아이템 선택 해제
+        public void ClearItemSelection()
+        {
+            IsItemSelected = false;
+        }
+
 
         #region 테스트 코드
         public void UpdateUI(Block block, int x, int y)

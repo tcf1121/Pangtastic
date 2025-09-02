@@ -257,6 +257,18 @@ namespace KDJ
             GameBoardData.SetBlock(x, y, newBlock);
         }
 
+        public void RandomPosSpawnSpecialBlock(GemType gemType)
+        {
+            int x = Random.Range(0, GameBoardData.Width);
+            int y = Random.Range(0, GameBoardData.Height);
+
+            if (GameBoardData.BlockPlate.BlockPlateArray[y, x])
+            {
+                return;
+            }
+
+        }
+
         public void Shuffle(BoardManager boardManager)
         {
             int maxTries = 100;

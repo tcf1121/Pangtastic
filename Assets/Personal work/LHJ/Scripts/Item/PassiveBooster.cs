@@ -40,15 +40,15 @@ public class PassiveBooster : MonoBehaviour
 
         var sp = _board.Spawner;
         // 스포너/플레이트/배열 준비 될 때까지 대기
-        while (sp == null || sp.BlockPlate == null || sp.BlockArray == null)
+        while (sp == null || sp.GameBoardData.BlockPlate == null || sp.GameBoardData.BlockArray == null)
         {
             sp = _board.Spawner;
             yield return null;
         }
 
         // 보드가 실제로 "채워질" 때까지 대기
-        int w = sp.BlockPlate.BlockPlateWidth;
-        int h = sp.BlockPlate.BlockPlateHeight;
+        int w = sp.GameBoardData.BlockPlate.BlockPlateWidth;
+        int h = sp.GameBoardData.BlockPlate.BlockPlateHeight;
 
         bool filled = false;
         while (!filled)
@@ -58,7 +58,7 @@ public class PassiveBooster : MonoBehaviour
             {
                 for (int x = 0; x < w && filled; x++)
                 {
-                    var cell = sp.BlockArray[y, x];
+                    var cell = sp.GameBoardData.BlockArray[y, x];
                     if (cell == null || cell.BlockInstance == null)
                         filled = false;
                 }
@@ -72,8 +72,8 @@ public class PassiveBooster : MonoBehaviour
         if (!_enabled || _board == null) return;
 
         var sp = _board.Spawner;
-        int w = sp.BlockPlate.BlockPlateWidth;
-        int h = sp.BlockPlate.BlockPlateHeight;
+        int w = sp.GameBoardData.BlockPlate.BlockPlateWidth;
+        int h = sp.GameBoardData.BlockPlate.BlockPlateHeight;
 
         var picked = new List<Vector2Int>();
 
@@ -95,7 +95,7 @@ public class PassiveBooster : MonoBehaviour
             int x = Random.Range(0, w);
             int y = Random.Range(0, h);
 
-            var cell = sp.BlockArray[y, x];
+            var cell = sp.GameBoardData.BlockArray[y, x];
             // 일반 블록만 대상(특수/장애물 제외), 시각 오브젝트가 있는 칸만
             if (cell == null || cell.BlockInstance == null) continue;
             if (cell.IsObstacle) continue;
@@ -112,8 +112,8 @@ public class PassiveBooster : MonoBehaviour
 
             // 해당 칸을 특수블록으로 교체 (스포너 경로 사용)
             Object.Destroy(cell.BlockInstance);
-            sp.BlockArray[y, x] = null;
-            sp.SpawnBlock(x, y, blockNum);
+            sp.GameBoardData.BlockArray[y, x] = null;
+            sp.SpawnBlock(x, y, (GemType)blockNum, BoardManager.Instance.BlockMover);
 
             picked.Add(new Vector2Int(x, y));
             return true;
