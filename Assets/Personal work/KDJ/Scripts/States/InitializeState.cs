@@ -19,19 +19,30 @@ namespace KDJ.States
 
         public IEnumerator StageInit(BoardManager boardManager)
         {
-            Debug.Log("초기화 상태");
-            BoardData boardData = boardManager.BoardLoader.LoadBoard(); //JWJ 수정함
-            yield return new WaitForSeconds(1f);
-            boardManager.Spawner.BlockPlate.BlockPlateArray = boardData.BlockPlateArray;
-            boardManager.Spawner.BlockArray = boardData.BlockArray;
-            boardManager.Spawner.OverlayArray = boardData.OverlayArray;
-            boardManager.Spawner.ZeroPos = boardData.ZeroPos;
-            boardManager.Spawner.BlockPlate.DrawTile();
-            boardManager.Spawner.InitBlockArray();
-            Debug.Log($"블록보드 배열 가로 길이: {boardManager.Spawner.BlockPlate.BlockPlateWidth}, 세로 길이: {boardManager.Spawner.BlockPlate.BlockPlateHeight}");
-            Debug.Log($"블록 배열 가로 길이: {boardManager.Spawner.BlockArray.GetLength(1)}, 세로 길이: {boardManager.Spawner.BlockArray.GetLength(0)}");
-            Debug.Log($"블록 배열 최상단의 값 : {boardManager.Spawner.BlockArray[boardManager.Spawner.BlockArray.GetLength(0) - 1, 0].BlockType}");
-            boardManager.Spawner.DrawBlock2();
+            Debug.Log("초기화 상태 진입");
+
+            // JWJ의 BoardLoader가 레벨 데이터를 로드하면, 그 데이터를 실제 게임 보드에 적용합니다.
+            BoardData loadedBoardData = boardManager.BoardLoader.LoadBoard();
+            
+            // 씬에 있는 실제 BlockPlate 컴포넌트를 찾습니다.
+            BlockPlate blockPlate = Object.FindObjectOfType<BlockPlate>();
+            if (blockPlate == null)
+            {
+                Debug.LogError("BlockPlate를 찾을 수 없습니다!");
+                yield break;
+            }
+
+            // 로드한 데이터로 BlockPlate를 설정하고 타일을 그립니다.
+            blockPlate.BlockPlateArray = loadedBoardData.BlockPlateArray;
+            blockPlate.DrawTile();
+
+            yield return null; // 타일이 그려질 시간을 줍니다.
+
+            // 새로운 구조에 맞게 Spawner를 초기화합니다.
+            boardManager.Spawner.Initialize(boardManager, loadedBoardData, blockPlate, boardManager.BlockMover);
+
+            Debug.Log($"보드 초기화 완료. 가로: {boardManager.Spawner.GameBoardData.Width}, 세로: {boardManager.Spawner.GameBoardData.Height}");
+
             boardManager.ChangeState(new ReadyState());
         }
     }
