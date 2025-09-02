@@ -18,7 +18,6 @@ namespace SCR_O
             Score = 0;
             CurrentHP = 2;
             GemType = SCR.GemType.FlourBag;
-            BlockType = (int)GemType + 1;
             IsObstacle = true;
             SetFourPos(boardData);
             string path = $"Assets/Imports/Image/Obstacle/FlourBag_Damage.png";
@@ -54,7 +53,7 @@ namespace SCR_O
             }
             else
             {
-                boardManager.Spawner.BlockArray[Y, X].
+                boardManager.Spawner.GameBoardData.BlockArray[Y, X].
                 BlockInstance.GetComponent<Image>().sprite = _currentImage;
             }
         }
@@ -66,10 +65,10 @@ namespace SCR_O
 
         public override void Broken(BoardManager boardManager, int x, int y)
         {
-            Object.Destroy(boardManager.Spawner.BlockArray[y, x].BlockInstance);
+            Object.Destroy(boardManager.Spawner.GameBoardData.BlockArray[y, x].BlockInstance);
             foreach (var pos in fourPos)
             {
-                Object.Destroy(boardManager.Spawner.BlockArray[pos.y, pos.x].BlockInstance);
+                Object.Destroy(boardManager.Spawner.GameBoardData.BlockArray[pos.y, pos.x].BlockInstance);
             }
         }
     }

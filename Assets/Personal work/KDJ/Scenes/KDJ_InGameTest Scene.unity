@@ -2770,7 +2770,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!1839735485 &295112731
 Tilemap:
   m_ObjectHideFlags: 0
@@ -5507,13 +5507,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f5b57417d84cbf648be5a13019b73383, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  BlankTilemap: {fileID: 295112731}
-  gem: {fileID: 908817085}
-  blankTile: {fileID: 11400000, guid: 040c0056e6f119043b5514ed767e7e0c, type: 2}
-  loadCell: 0
-  SpawnPoint: []
-  CellList: []
-  prefabList: {fileID: 11400000, guid: 08a7cce9f3f2f5e46be6a0a52f6e74d6, type: 2}
 --- !u!156049354 &573953535
 Grid:
   m_ObjectHideFlags: 0
@@ -5871,6 +5864,58 @@ PrefabInstance:
       propertyPath: _blockPrefabs.Array.data[19]
       value: 
       objectReference: {fileID: 1959876101150019757, guid: 0355b369e148e8a4580e5e05edbacef9, type: 3}
+    - target: {fileID: 8579344169084250576, guid: a6c91df400f25084193b8dfb89592778, type: 3}
+      propertyPath: _test_blockOverrides.Array.size
+      value: 4
+      objectReference: {fileID: 0}
+    - target: {fileID: 8579344169084250576, guid: a6c91df400f25084193b8dfb89592778, type: 3}
+      propertyPath: _test_blockOverrides.Array.data[0].x
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 8579344169084250576, guid: a6c91df400f25084193b8dfb89592778, type: 3}
+      propertyPath: _test_blockOverrides.Array.data[0].y
+      value: 4
+      objectReference: {fileID: 0}
+    - target: {fileID: 8579344169084250576, guid: a6c91df400f25084193b8dfb89592778, type: 3}
+      propertyPath: _test_blockOverrides.Array.data[1].x
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 8579344169084250576, guid: a6c91df400f25084193b8dfb89592778, type: 3}
+      propertyPath: _test_blockOverrides.Array.data[1].y
+      value: 4
+      objectReference: {fileID: 0}
+    - target: {fileID: 8579344169084250576, guid: a6c91df400f25084193b8dfb89592778, type: 3}
+      propertyPath: _test_blockOverrides.Array.data[2].x
+      value: 4
+      objectReference: {fileID: 0}
+    - target: {fileID: 8579344169084250576, guid: a6c91df400f25084193b8dfb89592778, type: 3}
+      propertyPath: _test_blockOverrides.Array.data[2].y
+      value: 4
+      objectReference: {fileID: 0}
+    - target: {fileID: 8579344169084250576, guid: a6c91df400f25084193b8dfb89592778, type: 3}
+      propertyPath: _test_blockOverrides.Array.data[3].x
+      value: 5
+      objectReference: {fileID: 0}
+    - target: {fileID: 8579344169084250576, guid: a6c91df400f25084193b8dfb89592778, type: 3}
+      propertyPath: _test_blockOverrides.Array.data[3].y
+      value: 4
+      objectReference: {fileID: 0}
+    - target: {fileID: 8579344169084250576, guid: a6c91df400f25084193b8dfb89592778, type: 3}
+      propertyPath: _test_blockOverrides.Array.data[0].gemType
+      value: 14
+      objectReference: {fileID: 0}
+    - target: {fileID: 8579344169084250576, guid: a6c91df400f25084193b8dfb89592778, type: 3}
+      propertyPath: _test_blockOverrides.Array.data[1].gemType
+      value: 14
+      objectReference: {fileID: 0}
+    - target: {fileID: 8579344169084250576, guid: a6c91df400f25084193b8dfb89592778, type: 3}
+      propertyPath: _test_blockOverrides.Array.data[2].gemType
+      value: 14
+      objectReference: {fileID: 0}
+    - target: {fileID: 8579344169084250576, guid: a6c91df400f25084193b8dfb89592778, type: 3}
+      propertyPath: _test_blockOverrides.Array.data[3].gemType
+      value: 14
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -8169,7 +8214,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &857296315
 Transform:
   m_ObjectHideFlags: 0
@@ -8786,7 +8831,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &908817086
 Transform:
   m_ObjectHideFlags: 0
@@ -11322,7 +11367,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   patienceSlider: {fileID: 1920406644}
-  _curCustomer: {fileID: 0}
   _curPatience: 0
   _elapsed: 0
 --- !u!4 &1332223599
@@ -14639,6 +14683,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bc6a7c6902e57e344b95c6287c5f17d4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  blockList: {fileID: 0}
   orderStateController: {fileID: 1332223598}
   customerFlowController: {fileID: 1334139403}
   doNotTouch: {fileID: 1725425638}
@@ -15392,6 +15437,10 @@ PrefabInstance:
     - target: {fileID: 3981300310010789011, guid: 285de4924e1fde841a475f6e261a41bf, type: 3}
       propertyPath: CurStage
       value: 4
+      objectReference: {fileID: 0}
+    - target: {fileID: 3981300310010789011, guid: 285de4924e1fde841a475f6e261a41bf, type: 3}
+      propertyPath: MatchDelay
+      value: 0.15
       objectReference: {fileID: 0}
     - target: {fileID: 3981300310010789011, guid: 285de4924e1fde841a475f6e261a41bf, type: 3}
       propertyPath: _blockInfo

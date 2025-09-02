@@ -40,14 +40,14 @@ namespace KDJ.States
             {
                 if (!boardManager.MatchChecker.AllBlockMatchPossibilityCheck(boardManager, out int possibleCount))
                 {
-                    boardManager.Spawner.ShuffleBlockArray();
+                    boardManager.Spawner.Shuffle(boardManager);
                     boardManager.ChangeState(new ReadyState());
                 }
             }
 
             if (Input.GetKeyDown(KeyCode.R))
             {
-                boardManager.Spawner.ShuffleBlockArray();
+                boardManager.Spawner.Shuffle(boardManager);
                 boardManager.ChangeState(new ReadyState());
             }
 
@@ -104,16 +104,16 @@ namespace KDJ.States
             mousePosition.z = -Camera.main.transform.position.z;
             Vector2 targetPos = Camera.main.ScreenToWorldPoint(mousePosition);
 
-            Vector2Int gridPos = boardManager.BlockMover.WorldToGrid(targetPos, boardManager.Spawner.BlockPlate.BlockPlateWidth, boardManager.Spawner.BlockPlate.BlockPlateHeight);
+            Vector2Int gridPos = boardManager.BlockMover.WorldToGrid(targetPos, boardManager.Spawner.GameBoardData.Width, boardManager.Spawner.GameBoardData.Height);
 
-            if (gridPos.x < 0 || gridPos.y < 0 || gridPos.x >= boardManager.Spawner.BlockPlate.BlockPlateWidth || gridPos.y >= boardManager.Spawner.BlockPlate.BlockPlateHeight)
+            if (gridPos.x < 0 || gridPos.y < 0 || gridPos.x >= boardManager.Spawner.GameBoardData.Width || gridPos.y >= boardManager.Spawner.GameBoardData.Height)
             {
                 return;
             }
 
-            if (!boardManager.Spawner.BlockPlate.BlockPlateArray[gridPos.y, gridPos.x]) return;
+            if (!boardManager.Spawner.GameBoardData.BlockPlate.BlockPlateArray[gridPos.y, gridPos.x]) return;
 
-            Block block = boardManager.Spawner.BlockArray[gridPos.y, gridPos.x];
+            Block block = boardManager.Spawner.GameBoardData.GetBlock(gridPos.x, gridPos.y);
             if (block != null)
             {
                 boardManager.UpdateUI(block, gridPos.x, gridPos.y);

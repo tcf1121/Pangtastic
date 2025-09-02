@@ -18,7 +18,6 @@ namespace SCR_O
             Score = 0;
             CurrentHP = 4;
             GemType = GemType.GiftBox;
-            BlockType = (int)GemType + 1;
             IsObstacle = true;
             string path = $"Assets/Imports/Image/Obstacle/GiftBox_Damage.png";
             AsyncOperationHandle<Sprite> handle = Addressables.LoadAssetAsync<Sprite>(path);
@@ -44,7 +43,7 @@ namespace SCR_O
             }
             else if (CurrentHP <= 2)
             {
-                boardManager.Spawner.BlockArray[Y, X].
+                boardManager.Spawner.GameBoardData.BlockArray[Y, X].
                 BlockInstance.GetComponent<Image>().sprite = _currentImage;
             }
 
@@ -57,8 +56,8 @@ namespace SCR_O
 
         public override void Broken(BoardManager boardManager, int x, int y)
         {
-            Object.Destroy(boardManager.Spawner.BlockArray[y, x].BlockInstance);
-            boardManager.Spawner.SpawnBlock(x, y, (int)RandomGift() + 1);
+            Object.Destroy(boardManager.Spawner.GameBoardData.BlockArray[y, x].BlockInstance);
+            boardManager.Spawner.SpawnBlock(x, y, RandomGift(), boardManager.BlockMover);
         }
 
         private GemType RandomGift()

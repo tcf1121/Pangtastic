@@ -76,18 +76,11 @@ namespace KDJ
                 }
                 boardData.BlockPlateArray[y, x] = true;
 
-                int blockType;
                 GemType finalGemType = gem;
 
                 if (finalGemType == GemType.Random)
                 {
-                    int tempNum = UnityEngine.Random.Range(1, 7);
-                    finalGemType = (GemType)(tempNum - 1);
-                    blockType = tempNum;
-                }
-                else
-                {
-                    blockType = (int)finalGemType + 1;
+                    finalGemType = (GemType)UnityEngine.Random.Range(0, 6); // 0~5 사이의 GemType을 바로 생성
                 }
 
                 if (finalGemType == GemType.Dust)
@@ -96,7 +89,6 @@ namespace KDJ
                     int donutNum = UnityEngine.Random.Range(0, 6);
                     boardData.BlockArray[y, x] = new Block()
                     {
-                        BlockType = donutNum + 1,
                         GemType = (GemType)donutNum,
 
                     };
@@ -107,7 +99,6 @@ namespace KDJ
                     int donutNum = UnityEngine.Random.Range(0, 6);
                     boardData.BlockArray[y, x] = new Block()
                     {
-                        BlockType = donutNum + 1,
                         GemType = (GemType)donutNum,
                     };
                 }
@@ -123,7 +114,6 @@ namespace KDJ
                     boardData.BlockArray[y, x] = new Block()
                     {
                         GemType = finalGemType,
-                        BlockType = blockType,
                     };
                 }
             }
