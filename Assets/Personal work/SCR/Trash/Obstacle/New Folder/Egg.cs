@@ -18,7 +18,6 @@ namespace SCR_O
             Score = 0;
             CurrentHP = 2;
             GemType = GemType.Egg;
-            BlockType = (int)GemType + 1;
             IsObstacle = true;
             string path = $"Assets/Imports/Image/Obstacle/Egg_Damage.png";
             AsyncOperationHandle<Sprite> handle = Addressables.LoadAssetAsync<Sprite>(path);
@@ -44,7 +43,7 @@ namespace SCR_O
             }
             else
             {
-                boardManager.Spawner.BlockArray[Y, X].
+                boardManager.Spawner.GameBoardData.BlockArray[Y, X].
                 BlockInstance.GetComponent<Image>().sprite = _currentImage;
             }
 
@@ -57,7 +56,7 @@ namespace SCR_O
 
         public override void Broken(BoardManager boardManager, int x, int y)
         {
-            Object.Destroy(boardManager.Spawner.BlockArray[y, x].BlockInstance);
+            Object.Destroy(boardManager.Spawner.GameBoardData.BlockArray[y, x].BlockInstance);
         }
 
     }
