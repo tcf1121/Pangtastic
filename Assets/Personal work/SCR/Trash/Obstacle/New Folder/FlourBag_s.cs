@@ -10,7 +10,6 @@ namespace SCR_O
         public FlourBag_s(FlourBag owner)
         {
             GemType = SCR.GemType.Flour_s;
-            BlockType = (int)GemType + 1;
             _owner = owner;
             IsObstacle = true;
         }

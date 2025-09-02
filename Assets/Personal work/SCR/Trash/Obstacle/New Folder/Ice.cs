@@ -17,7 +17,6 @@ namespace SCR_O
             Score = 0;
             CurrentHP = 1;
             GemType = GemType.Ice;
-            BlockType = (int)GemType + 1;
             IsObstacle = true;
             _dount = (GemType)Random.Range(0, 6);
             string path = $"Assets/Imports/Image/Donut/Iced_{_dount}.png";
@@ -50,8 +49,8 @@ namespace SCR_O
 
         public override void Broken(BoardManager boardManager, int x, int y)
         {
-            Object.Destroy(boardManager.Spawner.BlockArray[y, x].BlockInstance);
-            boardManager.Spawner.SpawnBlock(x, y, (int)_dount + 1);
+            Object.Destroy(boardManager.Spawner.GameBoardData.BlockArray[y, x].BlockInstance);
+            boardManager.Spawner.SpawnBlock(x, y, _dount, boardManager.BlockMover);
         }
     }
 }
