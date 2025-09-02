@@ -35,10 +35,12 @@ public class AudioSystem : MonoBehaviour
         // AudioSource 컴포넌트 생성
         BgmAudioSource = gameObject.AddComponent<AudioSource>();
         BgmAudioSource.loop = true;
+        BgmAudioSource.volume = 1;
         BgmAudioSource.playOnAwake = false;
 
         SfxAudioSource = gameObject.AddComponent<AudioSource>();
         SfxAudioSource.loop = false;
+        SfxAudioSource.volume = 1;
         SfxAudioSource.playOnAwake = false;
     }
 

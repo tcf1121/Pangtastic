@@ -1399,11 +1399,6 @@ namespace GooglePlayGames
 
             return (val) => PlayGamesHelperObject.RunOnGameThread(() => toConvert(val));
         }
-
-        public string GetServerAuthCode()
-        {
-            throw new NotImplementedException();
-        }
     }
 }
 #endif

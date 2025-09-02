@@ -25,7 +25,7 @@ public class EnterInGamePanel : MonoBehaviour
 
     void OnEnable()
     {
-        _level.text = $"{StageManager.Instance.CurrentStageIndex}레벨";
+        _level.text = $"{StageManager.Instance.CurrentStageIndex + 1}레벨";
         _whistNum.text = $"거품기 갯수";
         _scissorsNum.text = $"가위 갯수";
         _donutPanNum.text = $"도넛팬 갯수";
