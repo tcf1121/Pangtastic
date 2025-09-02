@@ -8,15 +8,20 @@ public class PassiveBooster : MonoBehaviour
 {
     [SerializeField] private BoardManager _board;
 
-    // 특수블록 ID 매핑
-    [SerializeField] private int _rollerVId;
-    [SerializeField] private int _rollerHId;
-    [SerializeField] private int _donutId;
-    [SerializeField] private int _ovenId;
+    // 패시브 아이템에 사용되는 특수블록
+    [SerializeField]
+    private List<GemType> _specialTypes = new List<GemType>
+    {
+        GemType.Roller_v,
+        GemType.Roller_h,
+        GemType.DonutBox,
+        GemType.Oven
+    };
 
-    [SerializeField] private int _manhattanDist;
+    [SerializeField] private int _manhattanDist = 3;
     private Coroutine _applyCo;
 
+    [Header("선택 여부")]
     [SerializeField] private bool _useRoller;
     [SerializeField] private bool _useDonut;
     [SerializeField] private bool _useOven;
@@ -35,19 +40,18 @@ public class PassiveBooster : MonoBehaviour
             _applyCo = null;
         }
     }
+
     private IEnumerator WaitAndApplyRoutine()
     {
         if (_board == null) yield break;
 
         var sp = _board.Spawner;
-        // 스포너/플레이트/배열 준비 될 때까지 대기
         while (sp == null || sp.GameBoardData.BlockPlate == null || sp.GameBoardData.BlockArray == null)
         {
             sp = _board.Spawner;
             yield return null;
         }
 
-        // 보드가 실제로 "채워질" 때까지 대기
         int w = sp.GameBoardData.BlockPlate.BlockPlateWidth;
         int h = sp.GameBoardData.BlockPlate.BlockPlateHeight;
 
@@ -68,6 +72,7 @@ public class PassiveBooster : MonoBehaviour
         }
         ApplyOnStageStart();
     }
+
     public void ApplyOnStageStart()
     {
         if (_board == null) return;
@@ -77,20 +82,22 @@ public class PassiveBooster : MonoBehaviour
         int h = sp.GameBoardData.BlockPlate.BlockPlateHeight;
 
         var picked = new List<Vector2Int>();
+
+        // Roller (H/V 랜덤)
         if (_useRoller)
         {
-            int rollerId = (Random.value < 0.5f) ? _rollerHId : _rollerVId;
-            TryPlaceSpecial(sp, w, h, picked, rollerId);
+            GemType rollerType = (Random.value < 0.5f) ? _specialTypes[0] : _specialTypes[1];
+            TryPlaceSpecial(sp, w, h, picked, rollerType);
         }
 
         if (_useDonut)
-            TryPlaceSpecial(sp, w, h, picked, _donutId);
+            TryPlaceSpecial(sp, w, h, picked, _specialTypes[2]);
 
         if (_useOven)
-            TryPlaceSpecial(sp, w, h, picked, _ovenId);
+            TryPlaceSpecial(sp, w, h, picked, _specialTypes[3]);
     }
 
-    private bool TryPlaceSpecial(BlockSpawner sp, int w, int h, List<Vector2Int> picked, int blockNum)
+    private bool TryPlaceSpecial(BlockSpawner sp, int w, int h, List<Vector2Int> picked, GemType gemType)
     {
         for (int t = 0; t < 200; t++)
         {
@@ -98,12 +105,10 @@ public class PassiveBooster : MonoBehaviour
             int y = Random.Range(0, h);
 
             var cell = sp.GameBoardData.BlockArray[y, x];
-            // 일반 블록만 대상(특수/장애물 제외), 시각 오브젝트가 있는 칸만
             if (cell == null || cell.BlockInstance == null) continue;
             if (cell.IsObstacle) continue;
             if (cell.GemType > GemType.Sugar) continue;
 
-            // 특수블록 거리 보장
             bool ok = true;
             for (int i = 0; i < picked.Count; i++)
             {
@@ -112,10 +117,9 @@ public class PassiveBooster : MonoBehaviour
             }
             if (!ok) continue;
 
-            // 해당 칸을 특수블록으로 교체 (스포너 경로 사용)
             Object.Destroy(cell.BlockInstance);
             sp.GameBoardData.BlockArray[y, x] = null;
-            sp.SpawnBlock(x, y, (GemType)blockNum, BoardManager.Instance.BlockMover);
+            sp.SpawnBlock(x, y, gemType, BoardManager.Instance.BlockMover);
 
             picked.Add(new Vector2Int(x, y));
             return true;
