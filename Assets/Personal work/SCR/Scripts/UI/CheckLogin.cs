@@ -38,6 +38,7 @@ namespace SCR
                 if (auth.CurrentUser.IsAnonymous)
                 {
                     Debug.Log($"이미 게스트 로그인 상태: {auth.CurrentUser.UserId}");
+                    DontDSystem.StatGame();
                     SceneManager.LoadScene(2/*로비씬*/);
                 }
                 // else
@@ -108,6 +109,7 @@ namespace SCR
 
 
             });
+            DontDSystem.StatGame();
             SceneManager.LoadScene(2/*로비씬*/);
         }
     }

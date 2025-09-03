@@ -1,6 +1,7 @@
 using SCR;
 using System.Collections;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace SCR_B
 {
@@ -49,17 +50,49 @@ namespace SCR_B
 
         public IEnumerator StageInit()
         {
+            yield return new WaitForSeconds(0.1f);
             Debug.Log("초기화 상태");
             _boardData = BoardLoader.LoadBoard();
-            yield return new WaitForSeconds(0.5f);
+            yield return new WaitForSeconds(0.1f);
+
             SetBoardData();
+            yield return new WaitForSeconds(0.1f);
             Spawner._boardData = _boardData;
-            Spawner.DrawFirstPuzzle();
             _width = _boardData.GetWidth();
             _height = _boardData.GetHeight();
             Debug.Log($"블록보드 배열 가로 길이: {_boardData.GetWidth()}, 세로 길이: {_boardData.GetHeight()}");
             Debug.Log($"블록 배열 가로 길이: {_boardData.BlockArray.GetLength(1)}, 세로 길이: {_boardData.BlockArray.GetLength(0)}");
             CanTouch = true;
+            Spawner.DrawFirstPuzzle();
+        }
+
+        public IEnumerator StageInit(Image progress)
+        {
+            // instance = this;
+            // Spawner = GetComponent<BlockSpawner>();
+            // MatchChecker = GetComponent<BoardMatchChecker>();
+            // BlockMover = GetComponent<BlockMover>();
+            // MatchCombo = GetComponent<MatchCombo>();
+            // BoardLoader = GetComponent<BoardLoader>();
+            // CanTouch = false;
+            progress.fillAmount = 0.25f;
+            yield return new WaitForSeconds(0.1f);
+            Debug.Log("초기화 상태");
+            _boardData = BoardLoader.LoadBoard();
+            progress.fillAmount = 0.5f;
+            yield return new WaitForSeconds(0.1f);
+
+            SetBoardData();
+            progress.fillAmount = 0.75f;
+            yield return new WaitForSeconds(0.1f);
+            Spawner._boardData = _boardData;
+            _width = _boardData.GetWidth();
+            _height = _boardData.GetHeight();
+            Debug.Log($"블록보드 배열 가로 길이: {_boardData.GetWidth()}, 세로 길이: {_boardData.GetHeight()}");
+            Debug.Log($"블록 배열 가로 길이: {_boardData.BlockArray.GetLength(1)}, 세로 길이: {_boardData.BlockArray.GetLength(0)}");
+            CanTouch = true;
+            Spawner.DrawFirstPuzzle();
+            progress.fillAmount = 1f;
         }
 
         public void SetBoardData()
@@ -81,6 +114,11 @@ namespace SCR_B
             SetFirstPos(PuzzleBoard.GetStartPos());
             SetSecondPos(PuzzleBoard.GetEndPos());
             instance.StartCoroutine(instance.BlockMover.Move((Vector2Int)instance.firstPos, (Vector2Int)instance.secondPos));
+        }
+
+        public static void SetCanTouch(bool value)
+        {
+            instance.CanTouch = value;
         }
 
         public static void Select()
@@ -178,16 +216,12 @@ namespace SCR_B
 
         public static void SetFirstPos(Vector2Int pos)
         {
-            instance.firstPos = pos +
-                        new Vector2Int(instance._boardData.GetHeight(), instance._boardData.GetWidth()) +
-                        instance._boardData.ZeroPos;
+            instance.firstPos = pos - instance._boardData.ZeroPos;
         }
 
         public static void SetSecondPos(Vector2Int pos)
         {
-            instance.secondPos = pos +
-                        new Vector2Int(instance._boardData.GetHeight(), instance._boardData.GetWidth()) +
-                        instance._boardData.ZeroPos;
+            instance.secondPos = pos - instance._boardData.ZeroPos;
         }
 
         public static Vector2Int? GetFirstPos()

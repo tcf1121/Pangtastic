@@ -57,7 +57,7 @@ namespace SCR_B
         private Vector3 GetWorldPos(int x, int y)
         {
 
-            return new Vector3(x + _boardData.ZeroPos.x, y + +_boardData.ZeroPos.y, 0);
+            return new Vector3(x + _boardData.ZeroPos.x, y + _boardData.ZeroPos.y, 0);
         }
 
         /// <summary>
@@ -405,7 +405,6 @@ namespace SCR_B
                         {
                             if (CheckMoveDownPos(pos) != pos)
                             {
-                                Debug.Log(CheckMoveDownPos(pos));
                                 if (!_canMoveBlock.ContainsKey(pos))
                                 {
                                     _canMoveBlock.Add(pos, CheckMoveDownPos(pos));

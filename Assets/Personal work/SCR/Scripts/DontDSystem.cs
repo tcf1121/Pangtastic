@@ -26,7 +26,7 @@ public class DontDSystem : MonoBehaviour
     public static void StatGame()
     {
         Instance._gameSystem.SetActive(true);
-        Instance.heartSystem = new();
+        //Instance.heartSystem = new();
     }
 
 }

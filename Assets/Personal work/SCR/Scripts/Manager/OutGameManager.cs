@@ -14,8 +14,6 @@ public class OutGameManager : MonoBehaviour
     [SerializeField] private Button _stageStartButton;
     [SerializeField] private TMP_Text _stageButtonText;
 
-    [SerializeField] private Button StartBtn;
-
     // 테스트용
     [SerializeField] private Button _settingBtn;
     [SerializeField] private TMP_InputField _settingInputField;
@@ -23,7 +21,6 @@ public class OutGameManager : MonoBehaviour
     void Awake()
     {
         instate = this;
-        StartBtn.onClick.AddListener(OnStageStartButtonClicked);
         _settingBtn.onClick.AddListener(SetStage);
     }
 
@@ -52,12 +49,6 @@ public class OutGameManager : MonoBehaviour
     {
         if (instate._starText != null)
             instate._starText.text = CurrencySystem.Instance.GetStars().ToString();
-    }
-
-    private void OnStageStartButtonClicked()
-    {
-        if (HeartSystem.Instance.TryStartStage())
-            SceneManager.LoadScene(3/*게임씬*/);
     }
 
     public void SetStage()

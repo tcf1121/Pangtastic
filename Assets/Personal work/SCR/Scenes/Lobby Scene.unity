@@ -3001,7 +3001,6 @@ MonoBehaviour:
   _starText: {fileID: 140817995}
   _stageStartButton: {fileID: 1468058680}
   _stageButtonText: {fileID: 1654754658}
-  StartBtn: {fileID: 1888720242}
   _settingBtn: {fileID: 796402596}
   _settingInputField: {fileID: 2096536798}
 --- !u!4 &202909655
@@ -11816,7 +11815,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 0}
+  m_Father: {fileID: 1024213444}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &766979496
 GameObject:
@@ -15488,7 +15487,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &1024213444
 Transform:
   m_ObjectHideFlags: 0
@@ -15507,6 +15506,10 @@ Transform:
   - {fileID: 1227034299}
   - {fileID: 617815542}
   - {fileID: 9202291117675283618}
+  - {fileID: 2044656408}
+  - {fileID: 4216401509625540698}
+  - {fileID: 3467843919896283239}
+  - {fileID: 766682286}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &1032784400
@@ -20968,7 +20971,6 @@ GameObject:
   - component: {fileID: 1468058677}
   - component: {fileID: 1468058676}
   - component: {fileID: 1468058680}
-  - component: {fileID: 1468058679}
   m_Layer: 5
   m_Name: StartBtn
   m_TagString: Untagged
@@ -21051,20 +21053,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1468058674}
   m_CullTransparentMesh: 1
---- !u!114 &1468058679
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1468058674}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 034c1ef093d41294ab7976e256852e6e, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _stageStartButton: {fileID: 1468058680}
-  _stageButtonText: {fileID: 1654754658}
 --- !u!114 &1468058680
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -27982,7 +27970,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8119982348827842688, guid: 2d8241bbf389c46218b1bdd53d8d3a71, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.size
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 8119982348827842688, guid: 2d8241bbf389c46218b1bdd53d8d3a71, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target
@@ -28664,7 +28652,6 @@ GameObject:
   - component: {fileID: 1932895834}
   - component: {fileID: 1932895833}
   - component: {fileID: 1932895832}
-  - component: {fileID: 1932895831}
   m_Layer: 5
   m_Name: SettingBtn(Test)
   m_TagString: Untagged
@@ -28695,20 +28682,6 @@ RectTransform:
   m_AnchoredPosition: {x: -28, y: 194}
   m_SizeDelta: {x: 450, y: 130}
   m_Pivot: {x: 1, y: 0.5}
---- !u!114 &1932895831
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1932895829}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 034c1ef093d41294ab7976e256852e6e, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _stageStartButton: {fileID: 1468058680}
-  _stageButtonText: {fileID: 1654754658}
 --- !u!114 &1932895832
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -30392,12 +30365,12 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2044656406}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 606.8856, y: 1119.2817, z: 2478542.5}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 0}
+  m_Father: {fileID: 1024213444}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &2045715173
 GameObject:
@@ -32500,7 +32473,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 0}
+  m_Father: {fileID: 1024213444}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &3677432536638979771
 MonoBehaviour:
@@ -32536,12 +32509,12 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 7891860631543103166}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 224.21884, y: 1140.603, z: 5743787}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 0}
+  m_Father: {fileID: 1024213444}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &4663281738595415093
 GameObject:
@@ -32616,9 +32589,5 @@ SceneRoots:
   - {fileID: 687023515}
   - {fileID: 945860154}
   - {fileID: 506929095}
-  - {fileID: 2044656408}
-  - {fileID: 4216401509625540698}
   - {fileID: 202909655}
-  - {fileID: 3467843919896283239}
-  - {fileID: 766682286}
   - {fileID: 1024213444}
