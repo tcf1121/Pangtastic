@@ -40,14 +40,25 @@ namespace LHJ
                     special.Activate(board);
                 }
 
-                Object.Destroy(blk.BlockInstance);
-                spawner.GameBoardData.BlockArray[y, myX].BlockInstance = null;
-                destroyedCount ++;
+                if(blk is SCR_O.ObstacleBlock obstacle)
+                {
+                    obstacle.TakeDamage(board);
+                    continue;
+                }
+                 // 일반/특수 블록 처리
+                 Object.Destroy(blk.BlockInstance);
+                 spawner.GameBoardData.BlockArray[y, myX].BlockInstance = null;
+                 destroyedCount++;
+             
             }
             if (destroyedCount > 0)
             {
                 int score = destroyedCount * 10;
                 board.UpdateUI(score);
+            }
+            if (board.MatchCombo != null)
+            {
+                board.MatchCombo.ResetTimer();
             }
         }
     }

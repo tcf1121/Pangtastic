@@ -115,6 +115,11 @@ namespace LHJ
 
                 var special = blk.BlockInstance.GetComponent<SpecialBlock>();
                 if (special != null) special.Activate(_board);
+                if (blk is SCR_O.ObstacleBlock obstacle)
+                {
+                    obstacle.TakeDamage(_board);
+                    continue;
+                }
 
                 Object.Destroy(blk.BlockInstance);
                 sp.GameBoardData.BlockArray[pos.y, x].BlockInstance = null;
@@ -159,6 +164,12 @@ namespace LHJ
 
                     var special = blk.BlockInstance.GetComponent<SpecialBlock>();
                     if (special != null) special.Activate(_board);
+
+                    if (blk is SCR_O.ObstacleBlock obstacle)
+                    {
+                        obstacle.TakeDamage(_board);
+                        continue;
+                    }
 
                     Object.Destroy(blk.BlockInstance);
                     sp.GameBoardData.BlockArray[y, x].BlockInstance = null;

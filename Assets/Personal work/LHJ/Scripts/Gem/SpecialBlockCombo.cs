@@ -61,6 +61,10 @@ namespace LHJ
                 _lastResolvedFrame = Time.frameCount;
                 _lastStart = startPos;
                 _lastEnd = endPos;
+                if (board.MatchCombo != null)
+                {
+                    board.MatchCombo.ResetTimer();
+                }
             }
             return handled;
         }
@@ -453,7 +457,7 @@ namespace LHJ
         private bool IsRollerH(SpecialBlock s) => s is Roller_H;
         private bool IsDonut(SpecialBlock s) => s is DonutBox;
         private bool IsMilk(SpecialBlock s) => s is Milk;
-        private bool IsPopcorn(SpecialBlock s) => s is Popcorn;
+        private bool IsPopcorn(SpecialBlock s) => s is Oven;
 
         private void ClearRow(BoardManager b, int y, GameObject aGo, GameObject bGo, bool chain)
         {
