@@ -1,6 +1,10 @@
+using Firebase.Auth;
+using Firebase.Extensions;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 namespace SCR
@@ -22,18 +26,29 @@ namespace SCR
         {
             _enterBtn.onClick.AddListener(CheckBefore);
             _googlePlayBtn.onClick.AddListener(GPGSManager.Instance.AuthenticateUser);
-            //_guestBtn.onClick.AddListener(게스트 로그인 방법);
+            _guestBtn.onClick.AddListener(LoginAsGuest);
         }
 
         private void CheckBefore()
         {
             _enterPanel.SetActive(false);
-            // if (전에 로그인한 적이 있으면 그 방법으로 로그인)
-            // {
-
-            // }
+            FirebaseAuth auth = FirebaseAuth.DefaultInstance;
+            if (auth.CurrentUser != null)
+            {
+                if (auth.CurrentUser.IsAnonymous)
+                {
+                    Debug.Log($"이미 게스트 로그인 상태: {auth.CurrentUser.UserId}");
+                    SceneManager.LoadScene(2/*로비씬*/);
+                }
+                // else
+                // {
+                //     Debug.Log($"이미 일반 로그인 상태: {auth.CurrentUser.UserId}");
+                //     SceneManager.LoadScene(2/*로비씬*/);
+                // }
+                return;
+            }
             // else
-            //     _loginPanel.SetActive(true);
+            _loginPanel.SetActive(true);
         }
 
         private void HowToLogin(LoginType loginType)
@@ -48,6 +63,52 @@ namespace SCR
             {
                 GPGSManager.Instance.AuthenticateUser();
             }
+        }
+
+        private void LoginAsGuest()
+        {
+            FirebaseAuth auth = FirebaseAuth.DefaultInstance;
+            auth.SignInAnonymouslyAsync().ContinueWithOnMainThread(task =>
+            {
+                if (task.IsCanceled)
+                {
+                    Debug.LogError("익명 로그인 취소");
+                    return;
+                }
+                if (task.IsFaulted)
+                {
+                    Debug.LogError($"익명 로그인 실패 : {task.Exception}");
+                    return;
+                }
+
+                Firebase.Auth.FirebaseUser newUser = task.Result.User;
+                string uid = newUser.UserId;
+
+                Debug.LogFormat($"게스트 로그인 성공 : {newUser.UserId}");
+
+                DatabaseSystem.Instance.GetUserPath(uid)
+                .Child("heart")
+                .Child("currentHeart")
+                .SetValueAsync(HeartSystem.Instance.GetMaxHearts());
+
+                DatabaseSystem.Instance.GetUserPath(uid)
+                .Child("heart")
+                .Child("lastSaveTime")
+                .SetValueAsync(DateTime.Now.ToString("O"));
+
+                DatabaseSystem.Instance.GetUserPath(uid)
+                .Child("heart")
+                .Child("remainingSeconds")
+                .SetValueAsync(0);
+
+                DatabaseSystem.Instance.GetUserPath(uid)
+                .Child("playerName")
+                .SetValueAsync("Guest");
+
+
+
+            });
+            SceneManager.LoadScene(2/*로비씬*/);
         }
     }
 }

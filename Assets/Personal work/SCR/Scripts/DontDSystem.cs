@@ -7,7 +7,10 @@ public class DontDSystem : MonoBehaviour
 {
     public static DontDSystem Instance { get; private set; }
     [SerializeField] private GameObject _gameSystem;
-    // Start is called before the first frame update
+    public GPGSManager GBGS;
+    public DatabaseSystem DB;
+    public HeartSystem heartSystem;
+
     private void Awake()
     {
         if (Instance != null && Instance != this)
@@ -23,6 +26,7 @@ public class DontDSystem : MonoBehaviour
     public static void StatGame()
     {
         Instance._gameSystem.SetActive(true);
+        Instance.heartSystem = new();
     }
 
 }
