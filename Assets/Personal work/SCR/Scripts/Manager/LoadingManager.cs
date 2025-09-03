@@ -20,4 +20,9 @@ public class LoadingManager : MonoBehaviour
         _nextScene = sceneNum;
         SceneManager.LoadScene(1/*로딩씬*/);
     }
+
+    private IEnumerator LoadScene()
+    {
+        yield return null;
+    }
 }
