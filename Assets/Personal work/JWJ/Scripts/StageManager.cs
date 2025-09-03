@@ -1,39 +1,20 @@
 using System.Collections;
 using System.Collections.Generic;
-using TMPro;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
 using UnityEngine.ResourceManagement.AsyncOperations;
-using UnityEngine.UI;
 
 [DefaultExecutionOrder(-20)]
-public class StageManager : MonoBehaviour
+public class StageManager : Singleton<StageManager>
 {
-    public static StageManager Instance;
+    //public static StageManager Instance;
 
     [SerializeField] private List<StageSO> stages = new List<StageSO>(); //잘 들어가는지 인스팩터에서 확인하려고 [SerializeField]로 만들어놓음
 
     public int CurrentStageIndex { get; private set; } = 0;
     public StageSO CurrentStage => stages[CurrentStageIndex];
 
-    private void Awake()
-    {
-        Debug.Log("스테이지 매니저 실행");
-        if (Instance == null)
-        {
-            Instance = this;
-            DontDestroyOnLoad(gameObject);
-        }
-        else
-        {
-            Destroy(gameObject);
-        }
-        //btn.onClick.AddListener(SetStage);
-
-        //LoadAllStages();
-    }
-
-    private void LoadAllStages()
+    private void LoadAllStages() //왜 호출 안함?
     {
         stages.Clear();
 

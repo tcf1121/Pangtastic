@@ -12,7 +12,7 @@ public class StageStartButton : MonoBehaviour
 
     private void Start()
     {
-        int index = StageManager.Instance.CurrentStageIndex;
+        int index = Manager.Stage.CurrentStageIndex;
         _stageButtonText.text = $"Stage {index + 1}";
 
         //_stageStartButton.onClick.AddListener(OnStageStartButtonClicked);
@@ -20,7 +20,7 @@ public class StageStartButton : MonoBehaviour
 
     public void SetStage()
     {
-        int index = StageManager.Instance.CurrentStageIndex;
+        int index = Manager.Stage.CurrentStageIndex;
         _stageButtonText.text = $"Stage {index + 1}";
     }
 

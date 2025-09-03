@@ -22,7 +22,7 @@ namespace SCR
 
         void Awake()
         {
-            LoadCsv(StageManager.Instance.CurrentStageIndex);
+            LoadCsv(Manager.Stage.CurrentStageIndex);
         }
 
         public void LoadCsv(int num)

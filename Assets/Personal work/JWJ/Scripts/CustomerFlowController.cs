@@ -52,7 +52,7 @@ public class CustomerFlowController : MonoBehaviour
 
     public void SpawnCustomer()
     {
-        StageSO curStage = StageManager.Instance.CurrentStage;
+        StageSO curStage = Manager.Stage.CurrentStage;
 
         _curCustomer = curStage.Customer;
 
@@ -129,7 +129,7 @@ public class CustomerFlowController : MonoBehaviour
 
         Debug.Log($"스테이지 클리어. 보상 기준 인내심{percent}");
 
-        StageManager.Instance.AdvanceStage();
+        Manager.Stage.AdvanceStage();
 
         List<GemType> rewardGive = new();
         int num = 0;

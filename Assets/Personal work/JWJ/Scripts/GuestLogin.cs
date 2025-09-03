@@ -32,55 +32,91 @@ public class GuestLogin : MonoBehaviour
 
         if (auth.CurrentUser != null)
         {
-            if (auth.CurrentUser.IsAnonymous)
+            auth.CurrentUser.ReloadAsync().ContinueWithOnMainThread(task =>
             {
-                Debug.Log($"이미 게스트 로그인 상태: {auth.CurrentUser.UserId}");
-            }
-            else
-            {
-                Debug.Log($"이미 일반 로그인 상태: {auth.CurrentUser.UserId}");
-            }
-            return;
+                if (task.IsFaulted || task.IsCanceled)
+                {
+                    Debug.LogError("유저 정보 리로드 실패 ");
+                    return;
+                }
+
+                if (auth.CurrentUser != null && auth.CurrentUser.IsAnonymous)
+                {
+                    Debug.Log($"게스트 로그인 유지: {auth.CurrentUser.UserId}");
+                }
+                else
+                {
+                    Debug.Log("유저 없음");
+                    auth.SignOut();
+
+                    auth.SignInAnonymouslyAsync().ContinueWithOnMainThread(task =>
+                    {
+                        if (task.IsFaulted || task.IsCanceled)
+                        {
+                            Debug.LogError("새로운 익명 계정로그인 실패");
+                            return;
+                        }
+
+                        FirebaseUser newUser = task.Result.User;
+                        Debug.Log($"새로운 익명 로그인 성공 : {newUser.UserId}");
+                        string uid = newUser.UserId;
+
+                        DatabaseSystem.Instance.GetUserPath(uid)
+                        .Child("heart")
+                        .Child("currentHeart")
+                        .SetValueAsync(HeartSystem.Instance.GetMaxHearts());
+
+                        DatabaseSystem.Instance.GetUserPath(uid)
+                        .Child("heart")
+                        .Child("lastSaveTime")
+                        .SetValueAsync(DateTime.Now.ToString("O"));
+
+                        DatabaseSystem.Instance.GetUserPath(uid)
+                        .Child("heart")
+                        .Child("remainingSeconds")
+                        .SetValueAsync(0);
+
+                        DatabaseSystem.Instance.GetUserPath(uid)
+                        .Child("playerName")
+                        .SetValueAsync("Guest");
+                    });
+                }
+            });
         }
-
-
-        auth.SignInAnonymouslyAsync().ContinueWithOnMainThread(task =>
+        else
         {
-            if (task.IsCanceled)
+            auth.SignInAnonymouslyAsync().ContinueWithOnMainThread(task =>
             {
-                Debug.LogError("익명 로그인 취소");
-                return;
-            }
-            if (task.IsFaulted)
-            {
-                Debug.LogError($"익명 로그인 실패 : {task.Exception}");
-                return;
-            }
+                if (task.IsFaulted || task.IsCanceled)
+                {
+                    Debug.LogError("익명 계정로그인 실패");
+                    return;
+                }
 
-            Firebase.Auth.FirebaseUser newUser = task.Result.User;
-            string uid = newUser.UserId;
+                FirebaseUser newUser = task.Result.User;
+                Debug.Log($"익명 로그인 성공 : {newUser.UserId}");
+                string uid = newUser.UserId;
 
-            Debug.LogFormat($"게스트 로그인 성공 : {newUser.UserId}");
+                DatabaseSystem.Instance.GetUserPath(uid)
+                .Child("heart")
+                .Child("currentHeart")
+                .SetValueAsync(HeartSystem.Instance.GetMaxHearts());
 
-            DatabaseSystem.Instance.GetUserPath(uid)
-            .Child("heart")
-            .Child("currentHeart")
-            .SetValueAsync(HeartSystem.Instance.GetMaxHearts());
+                DatabaseSystem.Instance.GetUserPath(uid)
+                .Child("heart")
+                .Child("lastSaveTime")
+                .SetValueAsync(DateTime.Now.ToString("O"));
 
-            DatabaseSystem.Instance.GetUserPath(uid)
-            .Child("heart")
-            .Child("lastSaveTime")
-            .SetValueAsync(DateTime.Now.ToString("O"));
+                DatabaseSystem.Instance.GetUserPath(uid)
+                .Child("heart")
+                .Child("remainingSeconds")
+                .SetValueAsync(0);
 
-            DatabaseSystem.Instance.GetUserPath(uid)
-            .Child("heart")
-            .Child("remainingSeconds")
-            .SetValueAsync(0);
+                DatabaseSystem.Instance.GetUserPath(uid)
+                .Child("playerName")
+                .SetValueAsync("Guest");
+            });
 
-            DatabaseSystem.Instance.GetUserPath(uid)
-            .Child("playerName")
-            .SetValueAsync("Guest");
-
-        });
+        }
     }
 }
