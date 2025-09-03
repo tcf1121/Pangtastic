@@ -65,7 +65,7 @@ public class GuestLogin : MonoBehaviour
             DatabaseSystem.Instance.GetUserPath(uid)
             .Child("heart")
             .Child("currentHeart")
-            .SetValueAsync(5);
+            .SetValueAsync(HeartSystem.Instance.GetMaxHearts());
 
             DatabaseSystem.Instance.GetUserPath(uid)
             .Child("heart")

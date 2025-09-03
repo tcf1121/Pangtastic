@@ -367,4 +367,9 @@ public class HeartSystem : MonoBehaviour
         UpdateHeartUI();
         UpdateTimerUI();
     }
+
+    public int GetMaxHearts()
+    {
+        return _maxHearts;
+    }
 }
