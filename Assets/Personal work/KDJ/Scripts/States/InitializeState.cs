@@ -36,9 +36,12 @@ namespace KDJ.States
                 yield break;
             }
 
-            // 로드한 데이터로 BlockPlate를 설정하고 타일을 그립니다.Q
+            // 로드한 데이터로 BlockPlate를 설정하고 타일을 그립니다.
             blockPlate.BlockPlateArray = loadedBoardData.BlockPlateArray;
             blockPlate.DrawTile();
+
+            Camera.main.orthographicSize = blockPlate.BlockPlateArray.GetLength(1) + 1;
+            boardManager.SpriteMask.transform.localScale = new Vector3(blockPlate.BlockPlateArray.GetLength(1), blockPlate.BlockPlateArray.GetLength(0), 1);
 
             yield return null; // 타일이 그려질 시간을 줍니다.
 
@@ -46,6 +49,7 @@ namespace KDJ.States
             boardManager.Spawner.Initialize(boardManager, loadedBoardData, blockPlate, boardManager.BlockMover);
 
             Debug.Log($"보드 초기화 완료. 가로: {boardManager.Spawner.GameBoardData.Width}, 세로: {boardManager.Spawner.GameBoardData.Height}");
+            InGameManager.SpawnCustomer();
 
             boardManager.ChangeState(new ReadyState());
         }

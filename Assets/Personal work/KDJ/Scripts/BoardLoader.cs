@@ -85,7 +85,7 @@ namespace KDJ
 
                 if (finalGemType == GemType.Dust)
                 {
-                    boardData.OverlayArray[y, x] = new SCR_O.Dust(x, y);
+                    boardData.OverlayArray[y, x] = new Dust(x, y);
                     int donutNum = UnityEngine.Random.Range(0, 6);
                     boardData.BlockArray[y, x] = new Block()
                     {
@@ -95,19 +95,19 @@ namespace KDJ
                 }
                 else if (finalGemType == GemType.Syrup)
                 {
-                    boardData.OverlayArray[y, x] = new SCR_O.Syrup(x, y);
+                    boardData.OverlayArray[y, x] = new Syrup(x, y);
                     int donutNum = UnityEngine.Random.Range(0, 6);
                     boardData.BlockArray[y, x] = new Block()
                     {
                         GemType = (GemType)donutNum,
                     };
                 }
-                else if (finalGemType == GemType.Ice) boardData.BlockArray[y, x] = new SCR_O.Ice(x, y);
-                else if (finalGemType == GemType.DonutBag) boardData.BlockArray[y, x] = new SCR_O.DonutBag(x, y);
-                else if (finalGemType == GemType.Coin) boardData.BlockArray[y, x] = new SCR_O.Coin(x, y);
-                else if (finalGemType == GemType.GiftBox) boardData.BlockArray[y, x] = new SCR_O.GiftBox(x, y);
-                else if (finalGemType == GemType.Egg) boardData.BlockArray[y, x] = new SCR_O.Egg(x, y);
-                else if (finalGemType == GemType.FlourBag) boardData.BlockArray[y, x] = new SCR_O.FlourBag(boardData, x, y);
+                else if (finalGemType == GemType.Ice) boardData.BlockArray[y, x] = new Ice(x, y);
+                else if (finalGemType == GemType.DonutBag) boardData.BlockArray[y, x] = new DonutBag(x, y);
+                else if (finalGemType == GemType.Coin) boardData.BlockArray[y, x] = new Coin(x, y);
+                else if (finalGemType == GemType.GiftBox) boardData.BlockArray[y, x] = new GiftBox(x, y);
+                else if (finalGemType == GemType.Egg) boardData.BlockArray[y, x] = new Egg(x, y);
+                else if (finalGemType == GemType.FlourBag) boardData.BlockArray[y, x] = new FlourBag(boardData, x, y);
                 else if (finalGemType == GemType.Flour_s) { }
                 else
                 {
