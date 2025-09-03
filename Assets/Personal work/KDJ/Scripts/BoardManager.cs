@@ -1,5 +1,6 @@
 using KDJ.States;
 using LHJ;
+using SCR_B;
 using TMPro;
 using UnityEngine;
 
@@ -15,6 +16,7 @@ namespace KDJ
         public BlockMover BlockMover { get; private set; }
         public MatchCombo MatchCombo { get; set; }
         public BoardLoader BoardLoader { get; set; }
+        public SpriteMask SpriteMask;
         public int Score { get; private set; } = 0;
         public int CurStage;
         public float MatchDelay;
@@ -91,7 +93,7 @@ namespace KDJ
         #region 테스트 코드
         public void UpdateUI(Block block, int x, int y)
         {
-            _blockInfo.text = $"Gem Type: {block.GemType}\nPosition: ({y}, {x})";
+            _blockInfo.text = $"Gem Type: {block.GemType}\nPosition: ({y}, {x})\nIsObstacle: {block.IsObstacle}\nIsNormal: {block.IsNormal}\nCanMove: {block.CanMove}\nObstacleBlock: {block is SCR_O.ObstacleBlock}";
         }
 
         public void UpdateUI(int score)

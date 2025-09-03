@@ -3,6 +3,9 @@ using System.Collections.Generic;
 using UnityEngine;
 using SCR;
 using LHJ;
+using SCR_B;
+using TMPro;
+using SCR_O;
 
 namespace KDJ
 {
@@ -63,17 +66,18 @@ namespace KDJ
                             // 데이터가 있으면 해당 데이터 사용
                             if (loadedBlock.GemType == GemType.Random)
                             {
-                                SpawnRandomBlock(x, y);
+                                SetRandomBlock(x, y);
                             }
                             else
                             {
-                                GameBoardData.SetBlock(x, y, new Block { GemType = loadedBlock.GemType });
+                                // 로드된 블록(ObstacleBlock 등)의 특성을 유지하기 위해 그대로 사용합니다.
+                                GameBoardData.SetBlock(x, y, loadedBlock);
                             }
                         }
                         else
                         {
                             // 데이터가 없으면 랜덤 블록 생성
-                            SpawnRandomBlock(x, y);
+                            SetRandomBlock(x, y);
                         }
                     }
 
@@ -83,7 +87,8 @@ namespace KDJ
                         Block loadedOverlayBlock = loadedBoardData.OverlayArray[y, x];
                         if (loadedOverlayBlock != null)
                         {
-                            GameBoardData.SetOverlayBlock(x, y, new Block { GemType = loadedOverlayBlock.GemType });
+                            // 로드된 오버레이 블록의 특성을 유지하기 위해 그대로 사용합니다.
+                            GameBoardData.SetOverlayBlock(x, y, loadedOverlayBlock);
                         }
                     }
                 }
@@ -106,7 +111,7 @@ namespace KDJ
             {
                 Debug.LogError("Initialize: 1000회 셔플 후에도 보드가 계속 매치된 상태입니다. 다른 해결 방법이 필요합니다.");
             }
-            
+
             // 테스트용 블록 교체 실행
             if (_test_blockOverrides != null && _test_blockOverrides.Count > 0)
             {
@@ -131,7 +136,52 @@ namespace KDJ
                     Destroy(oldBlock.BlockInstance);
                 }
 
-                SpawnBlock(x, y, gemType, blockMover);
+                if (gemType == GemType.Random)
+                {
+                    gemType = (GemType)Random.Range(0, 6); // 0~5 사이의 GemType을 바로 생성
+                    GameBoardData.BlockArray[y, x] = new Block()
+                    {
+                        GemType = gemType,
+                    };
+                }
+                else if (gemType == GemType.Dust)
+                {
+                    GameBoardData.OverlayArray[y, x] = new Dust(x, y);
+                    int donutNum = Random.Range(0, 6);
+                    GameBoardData.BlockArray[y, x] = new Block()
+                    {
+                        GemType = (GemType)donutNum,
+                    };
+                }
+                else if (gemType == GemType.Syrup)
+                {
+                    GameBoardData.OverlayArray[y, x] = new Syrup(x, y);
+                    int donutNum = Random.Range(0, 6);
+                    GameBoardData.BlockArray[y, x] = new Block()
+                    {
+                        GemType = (GemType)donutNum,
+                    };
+                }
+                else if (gemType == GemType.Ice) GameBoardData.BlockArray[y, x] = new Ice(x, y);
+                else if (gemType == GemType.DonutBag) GameBoardData.BlockArray[y, x] = new DonutBag(x, y);
+                else if (gemType == GemType.Coin) GameBoardData.BlockArray[y, x] = new Coin(x, y);
+                else if (gemType == GemType.GiftBox) GameBoardData.BlockArray[y, x] = new GiftBox(x, y);
+                else if (gemType == GemType.Egg) GameBoardData.BlockArray[y, x] = new Egg(x, y);
+                else if (gemType == GemType.Flour_s) { }
+                else
+                {
+                    GameBoardData.BlockArray[y, x] = new Block()
+                    {
+                        GemType = gemType,
+                    };
+                }
+
+                Vector3 position = blockMover.GridToWorld(new Vector2Int(x, y), GameBoardData.Width, GameBoardData.Height);
+                GameObject blockPrefab = GetBlockPrefab((int)gemType);
+                GameBoardData.BlockArray[y, x].BlockInstance = Instantiate(blockPrefab, position, Quaternion.identity);
+
+                GameBoardData.SetBlock(x, y, GameBoardData.BlockArray[y, x]);
+
             }
         }
 
@@ -153,6 +203,28 @@ namespace KDJ
                         {
                             block.BlockInstance = Instantiate(blockPrefab, position, Quaternion.identity);
                         }
+
+                        if (block.GemType > GemType.Oven)
+                        {
+                            // 방해 블록일때 설정
+                            block.IsObstacle = true;
+                            block.IsNormal = false;
+
+                            if (block.GemType == GemType.Coin || block.GemType == GemType.GiftBox)
+                            {
+                                block.CanMove = true;
+                            }
+                            else
+                            {
+                                block.CanMove = false;
+                            }
+                        }
+                        else if (block.GemType < GemType.Dust && block.GemType > GemType.Sugar)
+                        {
+                            // 특수 블록일때 설정
+                            block.IsObstacle = false;
+                            block.IsNormal = false;
+                        }
                     }
                 }
             }
@@ -170,6 +242,9 @@ namespace KDJ
                     Block block = GameBoardData.GetOverlayBlock(x, y);
                     if (block != null && block.BlockInstance == null)
                     {
+                        block.IsObstacle = true;
+                        block.IsNormal = false;
+                        block.CanMove = false;
                         Vector3 position = blockMover.GridToWorld(new Vector2Int(x, y), GameBoardData.Width, GameBoardData.Height);
                         GameObject blockPrefab = GetBlockPrefab((int)block.GemType);
                         if (blockPrefab != null)
@@ -421,9 +496,12 @@ namespace KDJ
                 for (int y = 0; y < GameBoardData.Height; y++)
                 {
                     Block block = GameBoardData.GetBlock(x, y);
+
+                    // 데이터상으론 블록이 있지만, 실제 게임오브젝트는 파괴된 경우
                     if (block != null && block.BlockInstance == null)
                     {
-                        DestroyedBlocks.Add(block.GemType);
+                        // 데이터에서 블록을 제거합니다.
+                        // 재료 추가, 스플래시 데미지 등 매치의 결과는 BoardMatchChecker에서 처리합니다.
                         GameBoardData.SetBlock(x, y, null);
                     }
                 }
@@ -459,7 +537,7 @@ namespace KDJ
                         break;
                 }
             }
-            
+
             return newBlock;
         }
 
@@ -469,10 +547,10 @@ namespace KDJ
             if (blockPrefab == null) return;
             Vector3 position = blockMover.GridToWorld(new Vector2Int(x, y), GameBoardData.Width, GameBoardData.Height);
             GameObject blockInstance = Instantiate(blockPrefab, position, Quaternion.identity);
-            
+
             Block newBlock = CreateNewBlock(gemType);
             newBlock.BlockInstance = blockInstance;
-            
+
             GameBoardData.SetBlock(x, y, newBlock);
         }
 
@@ -587,12 +665,24 @@ namespace KDJ
             DrawAllBlocks(boardManager.BlockMover);
         }
 
-        public Block SpawnRandomBlock(int x, int y)
+        public Block SetRandomBlock(int x, int y)
         {
             GemType gemType = (GemType)Random.Range(0, _spawnRangeMax + 1);
             Block newBlock = CreateNewBlock(gemType);
             GameBoardData.SetBlock(x, y, newBlock);
             return newBlock;
+        }
+
+        public void SpawnRandomBlock(int x, int y)
+        {
+            GemType gemType = (GemType)Random.Range(0, _spawnRangeMax + 1);
+            Block newBlock = CreateNewBlock(gemType);
+            GameObject blockPrefab = GetBlockPrefab((int)gemType);
+            if (blockPrefab == null) return;
+            Vector3 position = BoardManager.Instance.BlockMover.GridToWorld(new Vector2Int(x, y), GameBoardData.Width, GameBoardData.Height);
+            GameObject blockInstance = Instantiate(blockPrefab, position, Quaternion.identity);
+            newBlock.BlockInstance = blockInstance;
+            GameBoardData.SetBlock(x, y, newBlock);
         }
 
         private GameObject GetBlockPrefab(int blockType)
@@ -618,7 +708,7 @@ namespace KDJ
             }
             return false;
         }
-        
+
         public bool HasEmptyBlockObjects()
         {
             for (int x = 0; x < GameBoardData.Width; x++)
@@ -638,9 +728,33 @@ namespace KDJ
         {
             if (GameBoardData == null) return false;
 
-            // RefillBoardCoroutine의 로직을 그대로 따라가며, 실제 이동이 가능한지 여부만 체크합니다.
+            // RefillBoardCoroutine의 새 로직을 정확히 반영하여 이동 가능성을 체크합니다.
 
-            // --- 1순위: 수직/대각선 낙하 확인 ---
+            // --- 1a. 수직 낙하 (가속 낙하) 확인 ---
+            for (int y = 1; y < GameBoardData.BlockArray.GetLength(0); y++)
+            {
+                for (int x = 0; x < GameBoardData.Width; x++)
+                {
+                    Block block = GameBoardData.GetBlock(x, y);
+                    if (block != null && block.CanMove)
+                    {
+                        int lowestPossibleY = y;
+                        for (int k = y - 1; k >= 0; k--)
+                        {
+                            if (GameBoardData.GetBlock(x, k) != null) { lowestPossibleY = k + 1; break; }
+                            lowestPossibleY = k;
+                        }
+                        int destY = y;
+                        for (int k = y - 1; k >= lowestPossibleY; k--)
+                        {
+                            if (k < GameBoardData.Height && GameBoardData.BlockPlate.BlockPlateArray[k, x]) { destY = k; break; }
+                        }
+                        if (destY != y) return true;
+                    }
+                }
+            }
+
+            // --- 1b. 대각선 낙하 (장애물 회피) 확인 ---
             for (int y = 0; y < GameBoardData.Height; y++)
             {
                 for (int x = 0; x < GameBoardData.Width; x++)
@@ -648,21 +762,19 @@ namespace KDJ
                     if (GameBoardData.GetBlock(x, y) == null && GameBoardData.BlockPlate.BlockPlateArray[y, x])
                     {
                         Block blockAbove = GameBoardData.GetBlock(x, y + 1);
-                        if (blockAbove != null)
+                        if (blockAbove != null && !blockAbove.CanMove)
                         {
-                            if (blockAbove.CanMove) return true; // 수직 낙하 가능
-                            else
-                            {
-                                if (x > 0 && GameBoardData.GetBlock(x - 1, y + 1) != null && GameBoardData.GetBlock(x - 1, y + 1).CanMove) return true; // 대각선 낙하 가능
-                                if (x < GameBoardData.Width - 1 && GameBoardData.GetBlock(x + 1, y + 1) != null && GameBoardData.GetBlock(x + 1, y + 1).CanMove) return true; // 대각선 낙하 가능
-                            }
+                            Block leftDiagonalBlock = (x > 0) ? GameBoardData.GetBlock(x - 1, y + 1) : null;
+                            if (leftDiagonalBlock != null && leftDiagonalBlock.CanMove) return true;
+                            Block rightDiagonalBlock = (x < GameBoardData.Width - 1) ? GameBoardData.GetBlock(x + 1, y + 1) : null;
+                            if (rightDiagonalBlock != null && rightDiagonalBlock.CanMove) return true;
                         }
                     }
                 }
             }
 
             // --- 2순위: 모래 흐름 확인 ---
-            for (int y = 1; y < GameBoardData.Height; y++)
+            for (int y = GameBoardData.Height - 1; y >= 1; y--)
             {
                 for (int x = 0; x < GameBoardData.Width; x++)
                 {
@@ -683,7 +795,7 @@ namespace KDJ
             int queueRow = GameBoardData.Height;
             for (int x = 0; x < GameBoardData.Width; x++)
             {
-                if (GameBoardData.GetBlock(x, queueRow) == null && GameBoardData.BlockPlate.BlockPlateArray[queueRow - 1, x])
+                if (GameBoardData.GetBlock(x, queueRow) == null)
                 {
                     return true; // 대기열에 새 블록이 채워질 수 있음
                 }
