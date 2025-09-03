@@ -29,13 +29,46 @@ public class DatabaseSystem : MonoBehaviour
         // firebase 초기화
         dbRef = FirebaseDatabase.DefaultInstance.RootReference;
     }
-   
-   public void UserIntoSave()
-   {
-       // dbRef.Child($"{GPGSManager.Instance.GetPlayerId()}").Child("users").Child("playerName").SetValueAsync($"{GPGSManager.Instance.GetPlayerName()}");
-       dbRef.Child("users")
-           .Child($"{GPGSManager.Instance.GetPlayerId()}")
-           .Child("playerName")
-           .SetValueAsync($"{GPGSManager.Instance.GetPlayerName()}");
-   }
+
+    public string GetUserRoot()
+    {
+        FirebaseAuth auth = FirebaseAuth.DefaultInstance;
+
+        if (auth.CurrentUser != null && auth.CurrentUser.IsAnonymous) // 익명 여부 확인
+        {
+            return "guests"; // 익명
+        }
+        return "users"; // 일반 로그인
+    }
+
+    public DatabaseReference GetUserPath(string uid)
+    {
+        return dbRef.Child(GetUserRoot()).Child(uid);
+    }
+
+    public void UserIntoSave()
+    {
+        string uid = FirebaseAuth.DefaultInstance.CurrentUser.UserId;
+
+        if (string.IsNullOrEmpty(uid))
+        {
+            return;
+        }
+
+        string name;
+
+        if (string.IsNullOrEmpty(GPGSManager.Instance.GetPlayerName())) //닉네임이 비었으면
+        {
+            name = "Guest"; // 게스트로 고정
+        }
+        else
+        {
+            name = GPGSManager.Instance.GetPlayerName(); // 일반 로그인
+        }
+
+        // dbRef.Child($"{GPGSManager.Instance.GetPlayerId()}").Child("users").Child("playerName").SetValueAsync($"{GPGSManager.Instance.GetPlayerName()}");
+        GetUserPath(uid)
+        .Child("playerName")
+        .SetValueAsync(name);
+    }
 }
