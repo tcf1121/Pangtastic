@@ -5845,11 +5845,11 @@ PrefabInstance:
     - target: {fileID: 8579344169084250576, guid: a6c91df400f25084193b8dfb89592778, type: 3}
       propertyPath: _blockPrefabs.Array.data[7]
       value: 
-      objectReference: {fileID: 7732103167370757450, guid: abaa78b1519a0f842a756a4b83a6cf6c, type: 3}
+      objectReference: {fileID: 7732103167370757450, guid: 1433dc6dd0e9bb744af8a254f9109847, type: 3}
     - target: {fileID: 8579344169084250576, guid: a6c91df400f25084193b8dfb89592778, type: 3}
       propertyPath: _blockPrefabs.Array.data[8]
       value: 
-      objectReference: {fileID: 426720338226107974, guid: 75a34cb5470028a4eb0d912416fb3f53, type: 3}
+      objectReference: {fileID: 426720338226107974, guid: 316925a292ffadd41bf9abe161515db3, type: 3}
     - target: {fileID: 8579344169084250576, guid: a6c91df400f25084193b8dfb89592778, type: 3}
       propertyPath: _blockPrefabs.Array.data[9]
       value: 
@@ -15401,12 +15401,9 @@ MonoBehaviour:
   blockList: {fileID: 0}
   orderStateController: {fileID: 1332223598}
   customerFlowController: {fileID: 1334139403}
-  doNotTouch: {fileID: 1725425638}
   clearUI: {fileID: 646638277}
   failUI: {fileID: 749196782}
-  WinScore: {fileID: 2140276972}
   WinCoin: {fileID: 2140276971}
-  LoseScore: {fileID: 1842783627}
 --- !u!4 &1830214190
 Transform:
   m_ObjectHideFlags: 0
@@ -15923,17 +15920,6 @@ RectTransform:
   m_CorrespondingSourceObject: {fileID: 3351496516668224196, guid: 48dabdf6bfccb44dcb8fe7e70b69907f, type: 3}
   m_PrefabInstance: {fileID: 1842783625}
   m_PrefabAsset: {fileID: 0}
---- !u!114 &1842783627 stripped
-MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 2479447739585019864, guid: 48dabdf6bfccb44dcb8fe7e70b69907f, type: 3}
-  m_PrefabInstance: {fileID: 1842783625}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f4688fdb7df04437aeb418b961361dc5, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!1 &1843615211
 GameObject:
   m_ObjectHideFlags: 0
@@ -19176,7 +19162,7 @@ MonoBehaviour:
   _board: {fileID: 347837142}
   _specialTypes: 0700000008000000090000000a000000
   _manhattanDist: 5
-  _useRoller: 0
+  _useRoller: 1
   _useDonut: 0
   _useOven: 0
 --- !u!1001 &2140276968
@@ -19778,17 +19764,6 @@ MonoBehaviour:
 --- !u!114 &2140276971 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 3242180547378055202, guid: c9ff86330aa144f8ab0d4630c142770e, type: 3}
-  m_PrefabInstance: {fileID: 2140276968}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f4688fdb7df04437aeb418b961361dc5, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
---- !u!114 &2140276972 stripped
-MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 6137318589406571838, guid: c9ff86330aa144f8ab0d4630c142770e, type: 3}
   m_PrefabInstance: {fileID: 2140276968}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 0}
