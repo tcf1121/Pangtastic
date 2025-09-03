@@ -25,7 +25,7 @@ namespace SCR
         void Awake()
         {
             _enterBtn.onClick.AddListener(CheckBefore);
-            _googlePlayBtn.onClick.AddListener(GPGSManager.Instance.AuthenticateUser);
+            _googlePlayBtn.onClick.AddListener(Manager.GPGS.AuthenticateUser);
             _guestBtn.onClick.AddListener(LoginAsGuest);
         }
 
@@ -62,7 +62,7 @@ namespace SCR
             // 구글로 로그인 했을 경우
             else
             {
-                GPGSManager.Instance.AuthenticateUser();
+                Manager.GPGS.AuthenticateUser();
             }
         }
 
@@ -87,22 +87,22 @@ namespace SCR
 
                 Debug.LogFormat($"게스트 로그인 성공 : {newUser.UserId}");
 
-                DatabaseSystem.Instance.GetUserPath(uid)
+                Manager.DB.GetUserPath(uid)
                 .Child("heart")
                 .Child("currentHeart")
-                .SetValueAsync(HeartSystem.Instance.GetMaxHearts());
+                .SetValueAsync(Manager.Heart.GetMaxHearts());
 
-                DatabaseSystem.Instance.GetUserPath(uid)
+                Manager.DB.GetUserPath(uid)
                 .Child("heart")
                 .Child("lastSaveTime")
                 .SetValueAsync(DateTime.Now.ToString("O"));
 
-                DatabaseSystem.Instance.GetUserPath(uid)
+                Manager.DB.GetUserPath(uid)
                 .Child("heart")
                 .Child("remainingSeconds")
                 .SetValueAsync(0);
 
-                DatabaseSystem.Instance.GetUserPath(uid)
+                Manager.DB.GetUserPath(uid)
                 .Child("playerName")
                 .SetValueAsync("Guest");
 
