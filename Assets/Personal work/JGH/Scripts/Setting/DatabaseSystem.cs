@@ -49,32 +49,42 @@ public class DatabaseSystem : MonoBehaviour
 
     public void UserIntoSave()
     {
-        string uid = FirebaseAuth.DefaultInstance.CurrentUser.UserId;
-
-        if (string.IsNullOrEmpty(uid))
-        {
-            return;
-        }
-
-        string name;
+        string uid;
+        string type;
+        string nickname;
 
         if (string.IsNullOrEmpty(GPGSManager.Instance.GetPlayerName())) //닉네임이 비었으면
         {
-            name = "Guest"; // 게스트로 고정
+            uid = FirebaseAuth.DefaultInstance.CurrentUser.UserId;
+            if (string.IsNullOrEmpty(uid))
+            {
+                return;
+            }
+
+            type = "guests";
+            nickname = "Guest"; // 게스트로 고정
         }
         else
         {
-            name = GPGSManager.Instance.GetPlayerName(); // 일반 로그인
+            uid = GPGSManager.Instance.GetPlayerId();
+
+            if (string.IsNullOrEmpty(uid))
+            {
+                return;
+            }
+            type = "users";
+            nickname = GPGSManager.Instance.GetPlayerName(); // 일반 로그인
         }
 
         // dbRef.Child($"{GPGSManager.Instance.GetPlayerId()}").Child("users").Child("playerName").SetValueAsync($"{GPGSManager.Instance.GetPlayerName()}");
-        dbRef.Child(name)
-            .Child($"{GPGSManager.Instance.GetPlayerId()}")
+        dbRef.Child($"{name}")
+            .Child($"{type}")
             .Child("playerName")
-            .SetValueAsync($"{GPGSManager.Instance.GetPlayerName()}");
+            .SetValueAsync($"{nickname}");
         // GetUserPath(uid)
-            // .Child("playerName")
-            // .SetValueAsync(name);
+        //     .Child("playerName")
+        //     .SetValueAsync(name);
+        
     }
     
 }
