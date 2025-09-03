@@ -27,10 +27,8 @@ public class GPGSManager : MonoBehaviour
         }
 
         Instance = this;
+
         DontDestroyOnLoad(gameObject);
-        
-        //AuthenticateUser();
-        // PlayGamesPlatform.Instance.Authenticate(OnAuthenticated);
     }
 
 
@@ -53,6 +51,7 @@ public class GPGSManager : MonoBehaviour
         if (status == SignInStatus.Success)
         {
             Debug.Log("GPGS 로그인 성공");
+
             
             PlayGamesPlatform.Instance.RequestServerSideAccess(
                 false,
@@ -69,6 +68,8 @@ public class GPGSManager : MonoBehaviour
                             DatabaseSystem.Instance.UserIntoSave();
                         });
                 });
+
+
         }
         else
         {
@@ -154,23 +155,5 @@ public class GPGSManager : MonoBehaviour
         yield return new WaitForSeconds(retryDelay);
         AuthenticateUser();
     }
-
-    /// <summary>
-    /// UID 
-    /// </summary>
-    /// <returns></returns>
-    // public string GetPlayerId()
-    // {
-    //     return PlayerID;
-    // }
-    //
-    // /// <summary>
-    // /// 닉네임
-    // /// </summary>
-    // /// <returns></returns>
-    // public string GetPlayerName()
-    // {
-    //     return PlayerName;
-    // }
 
 }

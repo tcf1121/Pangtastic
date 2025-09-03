@@ -29,10 +29,12 @@ public class DatabaseSystem : MonoBehaviour
 
         Instance = this;
         DontDestroyOnLoad(gameObject);
+
         
         auth = FirebaseAuth.DefaultInstance; 
         user = FirebaseAuth.DefaultInstance.CurrentUser;
         
+
     }
 
     void Start()
@@ -86,6 +88,7 @@ public class DatabaseSystem : MonoBehaviour
             nickname = nickname
         };
 
+
         return JsonUtility.ToJson(info, true);
         
     }
@@ -103,4 +106,5 @@ public class DatabaseSystem : MonoBehaviour
             .SetValueAsync(info.nickname);
     }
     
+
 }

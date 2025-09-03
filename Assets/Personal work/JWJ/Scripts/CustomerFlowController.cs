@@ -177,6 +177,6 @@ public class CustomerFlowController : MonoBehaviour
     private IEnumerator TmpChangeSceneRoutine() //임시 씬 넘기기 코루틴
     {
         yield return new WaitForSeconds(3);
-        SceneManager.LoadScene("OutGame Test Scene");
+        SceneManager.LoadScene(2/*로비씬*/);
     }
 }

@@ -46,6 +46,11 @@ namespace LHJ
                         if (!_destroySpecial) continue;
                         special.Activate(board);
                     }
+                    if (blk is SCR_O.ObstacleBlock obstacle)
+                    {
+                        obstacle.TakeDamage(board);
+                        continue;
+                    }
 
                     Object.Destroy(blk.BlockInstance);
                     spawner.GameBoardData.BlockArray[y, x].BlockInstance = null;
@@ -56,6 +61,10 @@ namespace LHJ
             {
                 int score = destroyedCount * 10;
                 board.UpdateUI(score);
+            }
+            if (board.MatchCombo != null)
+            {
+                board.MatchCombo.ResetTimer();
             }
         }
     }

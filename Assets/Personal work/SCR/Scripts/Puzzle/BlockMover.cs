@@ -16,7 +16,9 @@ namespace SCR_B
 
         public IEnumerator Move(Vector2Int firstPos, Vector2Int secondPos, bool check = true)
         {
+            if (firstPos.y >= _boardData.GetHeight() || secondPos.y >= _boardData.GetHeight()) yield break;
             if (_boardData.BlockArray[firstPos.y, firstPos.x].GemType > GemType.Oven) yield break;
+            BoardManager.SetCanTouch(false);
             Debug.Log($"{firstPos}{secondPos}");
             var block = _boardData.BlockArray[secondPos.y, secondPos.x].Clone();
             var block2 = _boardData.BlockArray[firstPos.y, firstPos.x].Clone();
@@ -47,6 +49,8 @@ namespace SCR_B
                 StartCoroutine(Move(firstPos, secondPos, false));
             else if (check)
                 StartCoroutine(BoardManager.HandleTurn());
+            else if (!check)
+                BoardManager.SetCanTouch(true);
         }
 
         private IEnumerator MovePosCor(Transform gameObject, Vector3 targetPos, float duration)

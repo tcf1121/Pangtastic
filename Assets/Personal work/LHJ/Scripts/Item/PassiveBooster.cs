@@ -46,7 +46,7 @@ public class PassiveBooster : MonoBehaviour
         if (_board == null) yield break;
 
         var sp = _board.Spawner;
-        while (sp == null || sp.GameBoardData.BlockPlate == null || sp.GameBoardData.BlockArray == null)
+        while (sp == null || sp.GameBoardData == null || sp.GameBoardData.BlockPlate == null || sp.GameBoardData.BlockArray == null)
         {
             sp = _board.Spawner;
             yield return null;
