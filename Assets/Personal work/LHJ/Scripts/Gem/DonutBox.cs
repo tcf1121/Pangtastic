@@ -19,13 +19,13 @@ namespace LHJ
                 return;
             }
             var spawner = board.Spawner;
-            var plate = spawner.BlockPlate;
+            var plate = spawner.GameBoardData.BlockPlate;
             int width = plate.BlockPlateWidth;
             int height = plate.BlockPlateHeight;
             int destroyedCount = 0;
 
             Vector2Int center = board.BlockMover.StartBlockPos;
-            if (spawner.BlockArray[center.y, center.x].BlockInstance != this.gameObject)
+            if (spawner.GameBoardData.BlockArray[center.y, center.x].BlockInstance != this.gameObject)
             {
                 center = board.BlockMover.EndBlockPos;
             }
@@ -37,7 +37,7 @@ namespace LHJ
                     if (y < 0 || y >= height || x < 0 || x >= width)
                         continue;
 
-                    var blk = spawner.BlockArray[y, x];
+                    var blk = spawner.GameBoardData.BlockArray[y, x];
                     if (blk == null || blk.BlockInstance == null) continue;
 
                     var special = blk.BlockInstance.GetComponent<SpecialBlock>();
@@ -48,7 +48,7 @@ namespace LHJ
                     }
 
                     Object.Destroy(blk.BlockInstance);
-                    spawner.BlockArray[y, x].BlockInstance = null;
+                    spawner.GameBoardData.BlockArray[y, x].BlockInstance = null;
                     destroyedCount++;
                 }
             }

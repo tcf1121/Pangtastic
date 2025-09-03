@@ -28,7 +28,7 @@ namespace KDJ.States
 
         private IEnumerator MatchingCoroutine(BoardManager boardManager)
         {
-            yield return new WaitForSeconds(0.2f);
+            yield return new WaitForSeconds(boardManager.MatchDelay);
 
             Vector2Int startPos = boardManager.BlockMover.StartBlockPos;
             Vector2Int endPos = boardManager.BlockMover.EndBlockPos;
@@ -39,8 +39,8 @@ namespace KDJ.States
             Debug.Log($"스왑 여부: {wasSwap}, 시작 위치: {startPos}, 종료 위치: {endPos}");
             if (wasSwap)
             {
-                var startBlock = boardManager.Spawner.BlockArray[startPos.y, startPos.x];
-                var endBlock = boardManager.Spawner.BlockArray[endPos.y, endPos.x];
+                var startBlock = boardManager.Spawner.GameBoardData.GetBlock(startPos.x, startPos.y);
+                var endBlock = boardManager.Spawner.GameBoardData.GetBlock(endPos.x, endPos.y);
 
                 bool startIsSpecial = startBlock != null && startBlock.GemType > GemType.Sugar && startBlock.GemType < GemType.Dust;
                 bool endIsSpecial = endBlock != null && endBlock.GemType > GemType.Sugar && endBlock.GemType < GemType.Dust;

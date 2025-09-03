@@ -125,15 +125,15 @@ namespace LHJ
                 bool horizontal = IsRollerH(a) || IsRollerH(b);
 
                 var spawner = board.Spawner;
-                int w = spawner.BlockPlate.BlockPlateWidth;
-                int h = spawner.BlockPlate.BlockPlateHeight;
+                int w = spawner.GameBoardData.BlockPlate.BlockPlateWidth;
+                int h = spawner.GameBoardData.BlockPlate.BlockPlateHeight;
 
                 // 후보: 재료 계열 & 일반 블록(특수 제외)
                 var candidates = new List<Vector2Int>();
                 for (int y = 0; y < h; y++)
                     for (int x = 0; x < w; x++)
                     {
-                        var cell = spawner.BlockArray[y, x];
+                        var cell = spawner.GameBoardData.BlockArray[y, x];
                         if (cell == null || cell.BlockInstance == null) continue;
                         if (cell.BlockInstance.GetComponent<SpecialBlock>() != null) continue;
                         if (!IsIngredient(cell.GemType)) continue;
@@ -160,8 +160,8 @@ namespace LHJ
             if ((IsRoller(a) && IsPopcorn(b)) || (IsPopcorn(a) && IsRoller(b)))
             {
                 var spawner = board.Spawner;
-                int w = spawner.BlockPlate.BlockPlateWidth;
-                int h = spawner.BlockPlate.BlockPlateHeight;
+                int w = spawner.GameBoardData.BlockPlate.BlockPlateWidth;
+                int h = spawner.GameBoardData.BlockPlate.BlockPlateHeight;
 
                 var targetType = _ingredientTypes[Random.Range(0, _ingredientTypes.Length)];
 
@@ -169,7 +169,7 @@ namespace LHJ
                 for (int y = 0; y < h; y++)
                     for (int x = 0; x < w; x++)
                     {
-                        var cell = spawner.BlockArray[y, x];
+                        var cell = spawner.GameBoardData.BlockArray[y, x];
                         if (cell == null || cell.BlockInstance == null) continue;
                         if (cell.BlockInstance.GetComponent<SpecialBlock>() != null) continue;
                         if (cell.GemType != targetType) continue;
@@ -192,8 +192,8 @@ namespace LHJ
             if (IsMilk(a) && IsMilk(b))
             {
                 var spawner = board.Spawner;
-                int w = spawner.BlockPlate.BlockPlateWidth;
-                int h = spawner.BlockPlate.BlockPlateHeight;
+                int w = spawner.GameBoardData.BlockPlate.BlockPlateWidth;
+                int h = spawner.GameBoardData.BlockPlate.BlockPlateHeight;
 
                 var needTargets = new List<Vector2Int>();
                 var anyIngredient = new List<Vector2Int>();
@@ -201,7 +201,7 @@ namespace LHJ
                 for (int y = 0; y < h; y++)
                     for (int x = 0; x < w; x++)
                     {
-                        var cell = spawner.BlockArray[y, x];
+                        var cell = spawner.GameBoardData.BlockArray[y, x];
                         if (cell == null || cell.BlockInstance == null) continue;
 
                         // 특수 제외, 재료만 취급
@@ -222,13 +222,13 @@ namespace LHJ
                     var p = pool[idx];
                     pool.RemoveAt(idx);
 
-                    var go = spawner.BlockArray[p.y, p.x].BlockInstance;
+                    var go = spawner.GameBoardData.BlockArray[p.y, p.x].BlockInstance;
                     if (go == null) continue;
                     var sb2 = go.GetComponent<SpecialBlock>();
                     if (sb2 != null) sb2.Activate(board);
 
                     Object.Destroy(go);
-                    spawner.BlockArray[p.y, p.x].BlockInstance = null;
+                    spawner.GameBoardData.BlockArray[p.y, p.x].BlockInstance = null;
                     destroyed++;
                 }
 
@@ -241,8 +241,8 @@ namespace LHJ
             if ((IsMilk(a) && IsPopcorn(b)) || (IsPopcorn(a) && IsMilk(b)))
             {
                 var spawner = board.Spawner;
-                int w = spawner.BlockPlate.BlockPlateWidth;
-                int h = spawner.BlockPlate.BlockPlateHeight;
+                int w = spawner.GameBoardData.BlockPlate.BlockPlateWidth;
+                int h = spawner.GameBoardData.BlockPlate.BlockPlateHeight;
 
                 // 보드에 존재하는 재료 타입들
                 var presentTypes = new List<GemType>();
@@ -253,7 +253,7 @@ namespace LHJ
                     for (int y = 0; y < h && !exists; y++)
                         for (int x = 0; x < w && !exists; x++)
                         {
-                            var c = spawner.BlockArray[y, x];
+                            var c = spawner.GameBoardData.BlockArray[y, x];
                             if (c == null || c.BlockInstance == null) continue;
                             if (c.BlockInstance.GetComponent<SpecialBlock>() != null) continue;
                             if (c.GemType == t) exists = true;
@@ -269,13 +269,13 @@ namespace LHJ
                 for (int y = 0; y < h; y++)
                     for (int x = 0; x < w; x++)
                     {
-                        var cell = spawner.BlockArray[y, x];
+                        var cell = spawner.GameBoardData.BlockArray[y, x];
                         if (cell == null || cell.BlockInstance == null) continue;
                         if (cell.BlockInstance.GetComponent<SpecialBlock>() != null) continue;
                         if (cell.GemType != targetType) continue;
 
                         Object.Destroy(cell.BlockInstance);
-                        spawner.BlockArray[y, x].BlockInstance = null;
+                        spawner.GameBoardData.BlockArray[y, x].BlockInstance = null;
                         destroyed++;
                     }
 
@@ -288,8 +288,8 @@ namespace LHJ
             if ((IsMilk(a) && IsDonut(b)) || (IsDonut(a) && IsMilk(b)))
             {
                 var spawner = board.Spawner;
-                int w = spawner.BlockPlate.BlockPlateWidth;
-                int h = spawner.BlockPlate.BlockPlateHeight;
+                int w = spawner.GameBoardData.BlockPlate.BlockPlateWidth;
+                int h = spawner.GameBoardData.BlockPlate.BlockPlateHeight;
 
 
                 var candidates = new List<Vector2Int>();
@@ -297,7 +297,7 @@ namespace LHJ
                 {
                     for (int x = 0; x < w; x++)
                     {
-                        var cell = spawner.BlockArray[y, x];
+                        var cell = spawner.GameBoardData.BlockArray[y, x];
                         if (cell == null || cell.BlockInstance == null) continue;
                         if (cell.BlockInstance.GetComponent<SpecialBlock>() != null) continue; // 특수 제외
                         if (!IsIngredient(cell.GemType)) continue; // 재료만
@@ -325,15 +325,15 @@ namespace LHJ
             if (IsPopcorn(a) && IsPopcorn(b))
             {
                 var spawner = board.Spawner;
-                int w = spawner.BlockPlate.BlockPlateWidth;
-                int h = spawner.BlockPlate.BlockPlateHeight;
+                int w = spawner.GameBoardData.BlockPlate.BlockPlateWidth;
+                int h = spawner.GameBoardData.BlockPlate.BlockPlateHeight;
 
                 int destroyed = 0;
                 for (int y = 0; y < h; y++)
                 {
                     for (int x = 0; x < w; x++)
                     {
-                        var cell = spawner.BlockArray[y, x];
+                        var cell = spawner.GameBoardData.BlockArray[y, x];
                         if (cell == null || cell.BlockInstance == null) continue;
 
                         var go = cell.BlockInstance;
@@ -346,7 +346,7 @@ namespace LHJ
                         }
 
                         Object.Destroy(go);
-                        spawner.BlockArray[y, x].BlockInstance = null;
+                        spawner.GameBoardData.BlockArray[y, x].BlockInstance = null;
                         destroyed++;
                     }
                 }
@@ -359,8 +359,8 @@ namespace LHJ
             if ((IsPopcorn(a) && IsDonut(b)) || (IsDonut(a) && IsPopcorn(b)))
             {
                 var spawner = board.Spawner;
-                int w = spawner.BlockPlate.BlockPlateWidth;
-                int h = spawner.BlockPlate.BlockPlateHeight;
+                int w = spawner.GameBoardData.BlockPlate.BlockPlateWidth;
+                int h = spawner.GameBoardData.BlockPlate.BlockPlateHeight;
 
                 // 보드에 실제로 존재하는 "재료" 타입 수집
                 var presentTypes = new List<GemType>();
@@ -371,7 +371,7 @@ namespace LHJ
                     for (int y = 0; y < h && !exists; y++)
                         for (int x = 0; x < w && !exists; x++)
                         {
-                            var c = spawner.BlockArray[y, x];
+                            var c = spawner.GameBoardData.BlockArray[y, x];
                             if (c == null || c.BlockInstance == null) continue;
                             if (c.BlockInstance.GetComponent<SpecialBlock>() != null) continue;
                             if (c.GemType == t) exists = true;
@@ -388,7 +388,7 @@ namespace LHJ
                 for (int y = 0; y < h; y++)
                     for (int x = 0; x < w; x++)
                     {
-                        var cell = spawner.BlockArray[y, x];
+                        var cell = spawner.GameBoardData.BlockArray[y, x];
                         if (cell == null || cell.BlockInstance == null) continue;
                         if (cell.BlockInstance.GetComponent<SpecialBlock>() != null) continue;
                         if (cell.GemType != targetType) continue;
@@ -415,7 +415,7 @@ namespace LHJ
 
         private GameObject GetGo(BoardManager b, Vector2Int p)
         {
-            var arr = b.Spawner.BlockArray;
+            var arr = b.Spawner.GameBoardData.BlockArray;
             if (p.y < 0 || p.y >= arr.GetLength(0) || p.x < 0 || p.x >= arr.GetLength(1)) return null;
             return arr[p.y, p.x]?.BlockInstance;
         }
@@ -434,18 +434,18 @@ namespace LHJ
         {
             var spawner = board.Spawner;
 
-            var a = spawner.BlockArray[startPos.y, startPos.x];
+            var a = spawner.GameBoardData.BlockArray[startPos.y, startPos.x];
             if (a != null && a.BlockInstance != null)
             {
                 Object.Destroy(a.BlockInstance);
-                spawner.BlockArray[startPos.y, startPos.x].BlockInstance = null;
+                spawner.GameBoardData.BlockArray[startPos.y, startPos.x].BlockInstance = null;
             }
 
-            var b = spawner.BlockArray[endPos.y, endPos.x];
+            var b = spawner.GameBoardData.BlockArray[endPos.y, endPos.x];
             if (b != null && b.BlockInstance != null)
             {
                 Object.Destroy(b.BlockInstance);
-                spawner.BlockArray[endPos.y, endPos.x].BlockInstance = null;
+                spawner.GameBoardData.BlockArray[endPos.y, endPos.x].BlockInstance = null;
             }
         }
 
@@ -458,13 +458,13 @@ namespace LHJ
         private void ClearRow(BoardManager b, int y, GameObject aGo, GameObject bGo, bool chain)
         {
             var sp = b.Spawner;
-            int W = sp.BlockPlate.BlockPlateWidth, H = sp.BlockPlate.BlockPlateHeight;
+            int W = sp.GameBoardData.BlockPlate.BlockPlateWidth, H = sp.GameBoardData.BlockPlate.BlockPlateHeight;
             if (y < 0 || y >= H) return;
 
             int destroyed = 0;
             for (int x = 0; x < W; x++)
             {
-                var blk = sp.BlockArray[y, x];
+                var blk = sp.GameBoardData.BlockArray[y, x];
                 if (blk == null || blk.BlockInstance == null) continue;
 
                 var go = blk.BlockInstance;
@@ -475,7 +475,7 @@ namespace LHJ
                 }
 
                 Object.Destroy(go);
-                sp.BlockArray[y, x].BlockInstance = null;
+                sp.GameBoardData.BlockArray[y, x].BlockInstance = null;
                 destroyed++;
             }
             if (destroyed > 0) b.UpdateUI(destroyed * 10);
@@ -484,13 +484,13 @@ namespace LHJ
         private void ClearCol(BoardManager b, int x, GameObject aGo, GameObject bGo, bool chain)
         {
             var sp = b.Spawner;
-            int W = sp.BlockPlate.BlockPlateWidth, H = sp.BlockPlate.BlockPlateHeight;
+            int W = sp.GameBoardData.BlockPlate.BlockPlateWidth, H = sp.GameBoardData.BlockPlate.BlockPlateHeight;
             if (x < 0 || x >= W) return;
 
             int destroyed = 0;
             for (int y = 0; y < H; y++)
             {
-                var blk = sp.BlockArray[y, x];
+                var blk = sp.GameBoardData.BlockArray[y, x];
                 if (blk == null || blk.BlockInstance == null) continue;
 
                 var go = blk.BlockInstance;
@@ -501,7 +501,7 @@ namespace LHJ
                 }
 
                 Object.Destroy(go);
-                sp.BlockArray[y, x].BlockInstance = null;
+                sp.GameBoardData.BlockArray[y, x].BlockInstance = null;
                 destroyed++;
             }
             if (destroyed > 0) b.UpdateUI(destroyed * 10);
@@ -511,8 +511,8 @@ namespace LHJ
         private void ClearSquare(BoardManager b, Vector2Int center, int r, GameObject aGo, GameObject bGo, bool chain)
         {
             var sp = b.Spawner;
-            int W = sp.BlockPlate.BlockPlateWidth;
-            int H = sp.BlockPlate.BlockPlateHeight;
+            int W = sp.GameBoardData.BlockPlate.BlockPlateWidth;
+            int H = sp.GameBoardData.BlockPlate.BlockPlateHeight;
 
             int destroyed = 0;
             for (int y = center.y - r; y <= center.y + r; y++)
@@ -522,7 +522,7 @@ namespace LHJ
                 {
                     if (x < 0 || x >= W) continue;
 
-                    var blk = sp.BlockArray[y, x];
+                    var blk = sp.GameBoardData.BlockArray[y, x];
                     if (blk == null || blk.BlockInstance == null) continue;
 
                     var go = blk.BlockInstance;
@@ -534,7 +534,7 @@ namespace LHJ
                     }
 
                     Object.Destroy(go);
-                    sp.BlockArray[y, x].BlockInstance = null;
+                    sp.GameBoardData.BlockArray[y, x].BlockInstance = null;
                     destroyed++;
                 }
             }

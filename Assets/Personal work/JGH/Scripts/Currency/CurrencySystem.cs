@@ -1,8 +1,8 @@
-using System;
+using Firebase.Database;
 using System.Collections;
 using UnityEngine;
-using TMPro;
 using System.IO;
+using Unity.VisualScripting;
 using UnityEngine.SceneManagement;
 
 
@@ -10,24 +10,22 @@ public class CurrencySystem : MonoBehaviour
 {
     public static CurrencySystem Instance { get; private set; } // 싱글톤 인스턴스
 
-    [System.Serializable]
-    public class CoinData
-    {
-        public int coins; // 보유 코인 수
-    }
-    [System.Serializable]
-    public class StarData
-    {
-        public int stars; // 보유 코인 수
-    }
+    // [System.Serializable]
+    // public class CoinData
+    // {
+        // public int coins; // 보유 코인 수
+    // }
+    // [System.Serializable]
+    // public class StarData
+    // {
+        // public int stars; // 보유 코인 수
+    // }
 
     public enum SpawnType { None, Continue, Exit }
     public SpawnType pendingSpawnType = SpawnType.None;
 
     [SerializeField] private GameObject _coinPrefab; // 코인 프리팹 
     [SerializeField] private GameObject _starPrefab; // 별 프리팹
-
-
 
     private int _currentCoins = 0; // 현재 보유 코인 수
     private string _saveCoinPath; // JSON 저장 경로
@@ -50,16 +48,10 @@ public class CurrencySystem : MonoBehaviour
         _saveStarPath = Path.Combine(Application.persistentDataPath, "StarData.json");
 
         // 기존 저장된 데이터 불러오기
-        CoinLoad();
-        StarLoad();
+        StartCoroutine(CoinLoad());
+        StartCoroutine(StarLoad());
     }
-
-    private void Start()
-    {
-
-
-    }
-
+    
     private void OnEnable()
     {
         SceneManager.sceneLoaded += OnSceneLoaded;
@@ -95,6 +87,27 @@ public class CurrencySystem : MonoBehaviour
         StarSave();                  // JSON 저장
     }
 
+    //TODO: TEST 제거 해도됨 
+    public void useCoin(int amount)
+    {
+        SpendCoin(amount);
+    }
+    //TODO: TEST 제거 해도됨 
+    public void useStar(int amount)
+    {
+        SpendStar(amount);
+    }
+    //TODO: TEST 제거 해도됨 
+    public void TestShowCoins()
+    {
+        Debug.Log($"GetCoins : {GetCoins()}");
+    }
+    //TODO: TEST 제거 해도됨 
+    public void TestShowStars()
+    {
+        Debug.Log($"GetStars : {GetStars()}");
+    }
+
     /// <summary>
     /// 코인 사용 (부족하면 false 반환)
     /// </summary>
@@ -124,13 +137,14 @@ public class CurrencySystem : MonoBehaviour
         }
         return false; // 코인이 부족하면 실패
     }
+    
 
     /// <summary>
     /// 현재 코인 수 가져오기
     /// </summary>
     public int GetCoins()
     {
-        CoinLoad();
+        StartCoroutine(CoinLoad());
         return _currentCoins;
     }
 
@@ -139,19 +153,32 @@ public class CurrencySystem : MonoBehaviour
     /// </summary>
     public int GetStars()
     {
-        StarLoad();
+        StartCoroutine(StarLoad());
         return _currentStars;
     }
 
+    
 
     /// <summary>
     /// JSON 파일로 저장
     /// </summary>
     private void CoinSave()
     {
-        CoinData data = new CoinData { coins = _currentCoins }; // 데이터 클래스에 값 대입
-        string json = JsonUtility.ToJson(data, true);          // 객체 → JSON 변환
-        File.WriteAllText(_saveCoinPath, json);                     // 파일에 저장
+        string uid = $"{GPGSManager.Instance.GetPlayerId()}";
+
+        if (string.IsNullOrEmpty(uid))
+        {
+            Debug.LogError("UID가 비어있습니다! 로그인 완료 후 호출하세요.");
+            return;
+        }
+
+        DatabaseSystem.Instance.dbRef
+            .Child("users")
+            .Child(uid)
+            .Child("coin")
+            .Child("currentCoin")
+            .SetValueAsync(_currentCoins);
+
     }
 
     /// <summary>
@@ -159,43 +186,105 @@ public class CurrencySystem : MonoBehaviour
     /// </summary>
     private void StarSave()
     {
-        StarData data = new StarData { stars = _currentStars }; // 데이터 클래스에 값 대입
-        string json = JsonUtility.ToJson(data, true);          // 객체 → JSON 변환
-        File.WriteAllText(_saveStarPath, json);                     // 파일에 저장
+        string uid = $"{GPGSManager.Instance.GetPlayerId()}";
+
+        if (string.IsNullOrEmpty(uid))
+        {
+            Debug.LogError("UID가 비어있습니다! 로그인 완료 후 호출하세요.");
+            return;
+        }
+
+        DatabaseSystem.Instance.dbRef
+            .Child("users")
+            .Child(uid)
+            .Child("star")
+            .Child("currentStar")
+            .SetValueAsync(_currentStars);
+
     }
 
     /// <summary>
     /// JSON 파일에서 불러오기
     /// </summary>
-    private void CoinLoad()
+    private IEnumerator CoinLoad()
     {
-        if (File.Exists(_saveCoinPath))
+        string uid = $"{GPGSManager.Instance.GetPlayerId()}";
+
+        var task = DatabaseSystem.Instance.dbRef
+            .Child("users")
+            .Child(uid)
+            .Child("coin")
+            .GetValueAsync();
+
+        yield return new WaitUntil(() => task.IsCompleted);
+
+        if (task.Exception != null)
         {
-            string json = File.ReadAllText(_saveCoinPath);          // JSON 파일 읽기
-            CoinData data = JsonUtility.FromJson<CoinData>(json); // JSON → 객체 변환
-            _currentCoins = data.coins;
+            Debug.LogError("불러오기 실패: " + task.Exception);
+            yield break;
+        }
+
+        DataSnapshot snapshot = task.Result;
+        if (snapshot.Exists && snapshot.Value != null)
+        {
+            _currentCoins = int.Parse(snapshot.Child("currentCoin").Value.ToString());
         }
         else
         {
-            _currentCoins = 0; // 파일이 없으면 기본값 0
+            _currentCoins = 0;
         }
+        // if (File.Exists(_saveCoinPath))
+        // {
+            // string json = File.ReadAllText(_saveCoinPath);          // JSON 파일 읽기
+            // CoinData data = JsonUtility.FromJson<CoinData>(json); // JSON → 객체 변환
+            // _currentCoins = data.coins;
+        // }
+        // else
+        // {
+            // _currentCoins = 0; // 파일이 없으면 기본값 0
+        // }
     }
 
     /// <summary>
     /// JSON 파일에서 불러오기
     /// </summary>
-    private void StarLoad()
+    private IEnumerator StarLoad()
     {
-        if (File.Exists(_saveStarPath))
+        string uid = $"{GPGSManager.Instance.GetPlayerId()}";
+
+        var task = DatabaseSystem.Instance.dbRef
+            .Child("users")
+            .Child(uid)
+            .Child("star")
+            .GetValueAsync();
+
+        yield return new WaitUntil(() => task.IsCompleted);
+
+        if (task.Exception != null)
         {
-            string json = File.ReadAllText(_saveStarPath);          // JSON 파일 읽기
-            StarData data = JsonUtility.FromJson<StarData>(json); // JSON → 객체 변환
-            _currentStars = data.stars;
+            Debug.LogError("불러오기 실패: " + task.Exception);
+            yield break;
+        }
+
+        DataSnapshot snapshot = task.Result;
+        if (snapshot.Exists && snapshot.Value != null)
+        {
+            _currentStars = int.Parse(snapshot.Child("currentStar").Value.ToString());
         }
         else
         {
-            _currentStars = 0; // 파일이 없으면 기본값 0
+            _currentStars = 0;
         }
+        // if (File.Exists(_saveStarPath))
+        // {
+            // string json = File.ReadAllText(_saveStarPath);          // JSON 파일 읽기
+            // StarData data = JsonUtility.FromJson<StarData>(json); // JSON → 객체 변환
+            // _currentStars = data.stars;
+        // }
+        // else
+        // {
+            // _currentStars = 0; // 파일이 없으면 기본값 0
+        // }
     }
 
     private IEnumerator SetupAndPlayEffect()

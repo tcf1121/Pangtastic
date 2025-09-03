@@ -20,7 +20,7 @@ namespace LHJ
             }
 
             var spawner = board.Spawner;
-            var plate = spawner.BlockPlate;
+            var plate = spawner.GameBoardData.BlockPlate;
             int width = plate.BlockPlateWidth;
             int height = plate.BlockPlateHeight;
             int destroyedCount = 0;
@@ -30,7 +30,7 @@ namespace LHJ
 
             for (int y = 0; y < height; y++)
             {
-                var blk = spawner.BlockArray[y, myX];
+                var blk = spawner.GameBoardData.BlockArray[y, myX];
                 if (blk == null || blk.BlockInstance == null) continue;
 
                 var special = blk.BlockInstance.GetComponent<SpecialBlock>();
@@ -41,7 +41,7 @@ namespace LHJ
                 }
 
                 Object.Destroy(blk.BlockInstance);
-                spawner.BlockArray[y, myX].BlockInstance = null;
+                spawner.GameBoardData.BlockArray[y, myX].BlockInstance = null;
                 destroyedCount ++;
             }
             if (destroyedCount > 0)

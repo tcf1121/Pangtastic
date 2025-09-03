@@ -34,6 +34,11 @@ public class MatchCombo : MonoBehaviour
         _comboCount.text = "Combo\n" + CurCombo;
     }
 
+    public void ResetTimer()
+    {
+        _timer = 3f;
+    }
+
     private void ResetCombo()
     {
         CurCombo = 0;

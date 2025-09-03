@@ -12,7 +12,6 @@ namespace SCR_O
             Score = 0;
             CurrentHP = 1;
             GemType = SCR.GemType.Coin;
-            BlockType = (int)GemType + 1;
             IsObstacle = true;
         }
 
@@ -23,7 +22,7 @@ namespace SCR_O
 
         public override void Broken(BoardManager boardManager, int x, int y)
         {
-            Object.Destroy(boardManager.Spawner.BlockArray[y, x].BlockInstance);
+            Object.Destroy(boardManager.Spawner.GameBoardData.BlockArray[y, x].BlockInstance);
             InGameManager.AddCoin(1);
         }
     }

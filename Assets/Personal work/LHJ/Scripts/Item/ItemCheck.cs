@@ -2,6 +2,7 @@ using KDJ;
 using KDJ.States;
 using SCR;
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
@@ -9,7 +10,7 @@ namespace LHJ
 {
     public class ItemCheck : MonoBehaviour
     {
-        [SerializeField] private CopyBoardManager _board;
+        [SerializeField] private BoardManager _board;
 
         private void Update()
         {
@@ -17,17 +18,17 @@ namespace LHJ
 
             if (Input.GetMouseButtonDown(0))
             {
-                if (EventSystem.current != null && EventSystem.current.IsPointerOverGameObject())
-                    return;
+                //if (EventSystem.current != null && EventSystem.current.IsPointerOverGameObject())
+                //    return;
 
                 Vector3 mouse = Input.mousePosition;
                 mouse.z = -Camera.main.transform.position.z;
                 Vector3 world = Camera.main.ScreenToWorldPoint(mouse);
 
-                int w = _board.Spawner.BlockPlate.BlockPlateWidth;
-                int h = _board.Spawner.BlockPlate.BlockPlateHeight;
-                Vector2 target = (Vector2)world + new Vector2(w / 2f, h / 2f);
-                Vector2Int grid = _board.BlockMover.WorldToGrid(target , w, h);
+                int w = _board.Spawner.GameBoardData.BlockPlate.BlockPlateWidth;
+                int h = _board.Spawner.GameBoardData.BlockPlate.BlockPlateHeight;
+                Vector2 target = new Vector2(world.x, world.y);
+                Vector2Int grid = _board.BlockMover.WorldToGrid(target, w, h);
 
                 if (!InBounds(grid))
                 {
@@ -42,7 +43,7 @@ namespace LHJ
                 _board.ClearItemSelection();
             }
         }
-        
+
         // 커피 아이템
         public void UseCoffee(float amount = 30f)
         {
@@ -65,9 +66,12 @@ namespace LHJ
         private bool InBounds(Vector2Int p)
         {
             var sp = _board.Spawner;
-            int w = sp.BlockPlate.BlockPlateWidth;
-            int h = sp.BlockPlate.BlockPlateHeight;
-            return p.x >= 0 && p.x < w && p.y >= 0 && p.y < h;
+            int w = sp.GameBoardData.BlockPlate.BlockPlateWidth;
+            int h = sp.GameBoardData.BlockPlate.BlockPlateHeight;
+            if (p.x < 0 || p.x >= w || p.y < 0 || p.y >= h)
+                return false;
+
+            return sp.GameBoardData.BlockPlate.BlockPlateArray[p.y, p.x];
         }
 
 
@@ -99,35 +103,35 @@ namespace LHJ
         private int ApplyScissor(Vector2Int pos)
         {
             var sp = _board.Spawner;
-            int w = sp.BlockPlate.BlockPlateWidth;
-            int h = sp.BlockPlate.BlockPlateHeight;
+            int w = sp.GameBoardData.BlockPlate.BlockPlateWidth;
+            int h = sp.GameBoardData.BlockPlate.BlockPlateHeight;
             int destroyedCount = 0;
 
             // 가로
             for (int x = 0; x < w; x++)
             {
-                var blk = sp.BlockArray[pos.y, x];
+                var blk = sp.GameBoardData.BlockArray[pos.y, x];
                 if (blk == null || blk.BlockInstance == null) continue;
 
                 var special = blk.BlockInstance.GetComponent<SpecialBlock>();
                 if (special != null) special.Activate(_board);
 
                 Object.Destroy(blk.BlockInstance);
-                sp.BlockArray[pos.y, x].BlockInstance = null;
+                sp.GameBoardData.BlockArray[pos.y, x].BlockInstance = null;
                 destroyedCount++;
             }
 
             // 세로
             for (int y = 0; y < h; y++)
             {
-                var blk = sp.BlockArray[y, pos.x];
+                var blk = sp.GameBoardData.BlockArray[y, pos.x];
                 if (blk == null || blk.BlockInstance == null) continue;
 
                 var special = blk.BlockInstance.GetComponent<SpecialBlock>();
                 if (special != null) special.Activate(_board);
 
                 Object.Destroy(blk.BlockInstance);
-                sp.BlockArray[y, pos.x].BlockInstance = null;
+                sp.GameBoardData.BlockArray[y, pos.x].BlockInstance = null;
                 destroyedCount++;
             }
 
@@ -138,8 +142,8 @@ namespace LHJ
         private int ApplyWhisk(Vector2Int pos)
         {
             var sp = _board.Spawner;
-            int w = sp.BlockPlate.BlockPlateWidth;
-            int h = sp.BlockPlate.BlockPlateHeight;
+            int w = sp.GameBoardData.BlockPlate.BlockPlateWidth;
+            int h = sp.GameBoardData.BlockPlate.BlockPlateHeight;
             int destroyedCount = 0;
 
             int r = 1;
@@ -150,14 +154,14 @@ namespace LHJ
                 {
                     if (x < 0 || x >= w) continue;
 
-                    var blk = sp.BlockArray[y, x];
+                    var blk = sp.GameBoardData.BlockArray[y, x];
                     if (blk == null || blk.BlockInstance == null) continue;
 
                     var special = blk.BlockInstance.GetComponent<SpecialBlock>();
                     if (special != null) special.Activate(_board);
 
                     Object.Destroy(blk.BlockInstance);
-                    sp.BlockArray[y, x].BlockInstance = null;
+                    sp.GameBoardData.BlockArray[y, x].BlockInstance = null;
                     destroyedCount++;
                 }
             }
@@ -174,10 +178,14 @@ namespace LHJ
         // 보드를 초기화 후 특수 블록 하나 생성하는 루틴
         private IEnumerator RegenSpecialBlockRoutine()
         {
-            ClearBoard();
-            _board.ChangeState(new RefillState());
-            while (_board.Spawner.HasEmptyBlockObjects())
-                yield return null;                       
+            var sp = _board.Spawner;
+            sp.Shuffle(_board);
+            yield return null;
+
+            _board.ChangeState(new KDJ.States.RefillState());
+            while (sp.HasEmptyBlockObjects())
+                yield return null;
+
             InjectRandomSpecial();
 
             yield break;
@@ -187,35 +195,39 @@ namespace LHJ
         private void InjectRandomSpecial()
         {
             var sp = _board.Spawner;
+            int w = sp.GameBoardData.BlockPlate.BlockPlateWidth;
+            int h = sp.GameBoardData.BlockPlate.BlockPlateHeight;
 
-            // 매치 로직과 동일한 특수블록 아이디만 사용
-            int[] specialIds = { 7, 8, 9, 10, 11 };
-            int id = specialIds[Random.Range(0, specialIds.Length)];
-
-            sp.RandomPosSpawnSpecialBlock(id);
-        }
-
-        // 보드 전체 클리어
-        private void ClearBoard()
-        {
-            var sp = _board.Spawner;
-            int w = sp.BlockPlate.BlockPlateWidth;
-            int h = sp.BlockPlate.BlockPlateHeight;
-
+            List<Vector2Int> candidates = new List<Vector2Int>();
             for (int y = 0; y < h; y++)
             {
                 for (int x = 0; x < w; x++)
                 {
-                    var cell = sp.BlockArray[y, x];
-                    if (cell == null) continue;
+                    if (!sp.GameBoardData.BlockPlate.BlockPlateArray[y, x]) continue;
+                    var blk = sp.GameBoardData.BlockArray[y, x];
+                    if (blk == null || blk.IsObstacle) continue;
 
-                    if (cell.BlockInstance != null)
-                    {
-                        Destroy(cell.BlockInstance);
-                        cell.BlockInstance = null;
-                    }
+                    bool isSpecial = (blk.GemType > SCR.GemType.Sugar && blk.GemType < SCR.GemType.Dust);
+                    if (!isSpecial) candidates.Add(new Vector2Int(x, y));
                 }
             }
+            if (candidates.Count == 0) return;
+
+            Vector2Int pick = candidates[UnityEngine.Random.Range(0, candidates.Count)];
+
+            var cur = sp.GameBoardData.BlockArray[pick.y, pick.x];
+            if (cur?.BlockInstance != null)
+            {
+                Destroy(cur.BlockInstance);
+                cur.BlockInstance = null;
+            }
+
+            int min = (int)SCR.GemType.Sugar + 1;
+            int max = (int)SCR.GemType.Dust - 1;
+            SCR.GemType special = (SCR.GemType)UnityEngine.Random.Range(min, max + 1);
+
+            // 데이터+프리팹 동시 생성
+            sp.SpawnBlock(pick.x, pick.y, special, _board.BlockMover);
         }
     }
 }

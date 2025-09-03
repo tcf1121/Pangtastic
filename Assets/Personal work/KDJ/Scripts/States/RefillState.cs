@@ -28,7 +28,7 @@ namespace KDJ.States
                 boardManager.Spawner.StopCoroutine(_refillProcessCoroutine);
                 _refillProcessCoroutine = null;
             }
-            boardManager.Spawner.DestroyBlockData.Clear(); // 파괴된 블럭 데이터 초기화
+            boardManager.Spawner.DestroyedBlocks.Clear(); // 파괴된 블럭 데이터 초기화
             boardManager.BlockMover.StartPos = Vector2.zero; // 초기 시작 위치 설정
             boardManager.BlockMover.EndPos = Vector2.zero; // 초기 종료 위치 설정
         }
@@ -36,13 +36,13 @@ namespace KDJ.States
         private IEnumerator RefillAndChangeState(BoardManager boardManager)
         {
             // 배열에서 파괴된 블록 인스턴스를 정리
-            boardManager.Spawner.CheckBlockArray(boardManager);
+            boardManager.Spawner.CheckAndClearDestroyedBlocks();
             
             // 빈 셀의 개수만큼 대기열에 블록을 채움
-            boardManager.Spawner.SpawnBlock();
+            // boardManager.Spawner.SpawnBlock(); // 이 로직은 RefillBoardCoroutine으로 통합되었습니다.
 
             // Spawner에서 새로운 리필 코루틴을 실행하고 끝날 때까지 대기
-            yield return boardManager.Spawner.StartCoroutine(boardManager.Spawner.RefillBoardCoroutine());
+            yield return boardManager.Spawner.StartCoroutine(boardManager.Spawner.RefillBoardCoroutine(boardManager.BlockMover));
 
             // 보드가 안정되고 리필된 후, 잠시 기다렸다가 상태를 변경
             yield return new WaitForSeconds(0.1f);
