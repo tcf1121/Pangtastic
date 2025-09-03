@@ -19,21 +19,21 @@ public class HeartSystem : MonoBehaviour
 
     private float _remainingSeconds;
 
-    protected void Awake()
+    private void Awake()
     {
         if (Instance != null && Instance != this)
         {
             Destroy(gameObject);
             return;
         }
-
+        Debug.Log("하트 시스템");
         Instance = this;
         DontDestroyOnLoad(gameObject);
     }
 
     private void Start()
     {
-        StopAllCoroutines(); // 혹시 중복 실행된 코루틴이 있으면 정리
+        //StopAllCoroutines(); // 혹시 중복 실행된 코루틴이 있으면 정리
         StartCoroutine(CalcHeartData());
     }
 
@@ -41,6 +41,9 @@ public class HeartSystem : MonoBehaviour
     private IEnumerator CalcHeartData()
     {
         string uid = $"{GPGSManager.Instance.GetPlayerId()}";
+        Debug.Log($"{DatabaseSystem.Instance}");
+
+
 
         var task = DatabaseSystem.Instance.dbRef
             .Child("users")
@@ -49,24 +52,23 @@ public class HeartSystem : MonoBehaviour
             .GetValueAsync();
 
         yield return new WaitUntil(() => task.IsCompleted);
-
-        if (task.Exception != null)
-        {
-            Debug.LogError("불러오기 실패: " + task.Exception);
-            yield break;
-        }
+        // if (task.Exception != null)
+        // {
+        //     Debug.LogError("불러오기 실패: " + task.Exception);
+        //     yield break;
+        // }
 
         DataSnapshot snapshot = task.Result;
-        if (snapshot.Exists && snapshot.Value != null)
-        {
-            _currentHearts = int.Parse(snapshot.Value.ToString());
-        }
-        else
-        {
-            _currentHearts = _maxHearts;
-        }
+        // if (snapshot.Exists && snapshot.Value != null)
+        // {
+        //     _currentHearts = int.Parse(snapshot.Value.ToString());
+        // }
+        // else
+        // {
+        //     _currentHearts = _maxHearts;
+        // }
 
-        Debug.Log($"현재 하트: {_currentHearts}");
+        // Debug.Log($"현재 하트: {_currentHearts}");
 
         if (task.IsFaulted)
         {
@@ -81,12 +83,14 @@ public class HeartSystem : MonoBehaviour
             if (snapshot.Exists)
             {
                 string currentHeart = snapshot.Child("currentHeart").Value?.ToString();
+                Debug.Log(currentHeart);
                 string lastSaveTime = snapshot.Child("lastSaveTime").Value?.ToString();
                 string remainingSeconds = snapshot.Child("remainingSeconds").Value?.ToString();
 
+
                 _currentHearts = int.Parse(currentHeart);
                 _remainingSeconds = int.Parse(remainingSeconds);
-
+                Debug.Log(_currentHearts);
                 DateTime lastTime = DateTime.Parse(lastSaveTime);
                 TimeSpan diff = DateTime.Now - lastTime;
 

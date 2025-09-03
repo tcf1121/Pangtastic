@@ -30,7 +30,7 @@ public class StageManager : MonoBehaviour
         }
         //btn.onClick.AddListener(SetStage);
 
-        LoadAllStages();
+        //LoadAllStages();
     }
 
     private void LoadAllStages()
