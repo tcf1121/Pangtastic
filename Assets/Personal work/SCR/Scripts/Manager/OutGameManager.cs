@@ -57,7 +57,7 @@ public class OutGameManager : MonoBehaviour
     private void OnStageStartButtonClicked()
     {
         if (HeartSystem.Instance.TryStartStage())
-            SceneManager.LoadScene("InGameTest Scene");
+            SceneManager.LoadScene(3/*게임씬*/);
     }
 
     public void SetStage()

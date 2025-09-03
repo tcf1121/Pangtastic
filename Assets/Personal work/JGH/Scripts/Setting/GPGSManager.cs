@@ -54,7 +54,7 @@ public class GPGSManager : MonoBehaviour
 
 
             DatabaseSystem.Instance.UserIntoSave();
-            SceneManager.LoadScene("OutGame Test Scene");
+            SceneManager.LoadScene(2/*로비씬*/);
         }
         else
         {
@@ -70,7 +70,7 @@ public class GPGSManager : MonoBehaviour
             else
             {
                 Debug.LogError("GPGS 로그인 재시도 횟수 초과");
-                Application.Quit();
+                //Application.Quit();
             }
         }
     }

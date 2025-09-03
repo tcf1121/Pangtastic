@@ -71,7 +71,7 @@ if(donutPanToggle.isOn)
 if(coffeeToggle.isOn)
 
             */
-            SceneManager.LoadScene("InGameTest Scene");
+            SceneManager.LoadScene(3/*게임씬*/);
         }
 
     }
