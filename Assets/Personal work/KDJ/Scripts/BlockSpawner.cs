@@ -208,46 +208,90 @@ namespace KDJ
                 bool activityThisStep = false;
                 bool[,] movedToThisTick = new bool[GameBoardData.Height, GameBoardData.Width];
 
-                // --- 1순위: 수직/대각선 낙하 ---
+                // --- 1순위: 가속 낙하 (단계별 푸시 방식) ---
+                bool[,] movedFlags = new bool[GameBoardData.BlockArray.GetLength(0), GameBoardData.Width];
+
+                // 1a. 수직 낙하: 모든 블록이 아래로 떨어지려는 힘을 계산합니다.
+                for (int y = 1; y < GameBoardData.BlockArray.GetLength(0); y++)
+                {
+                    for (int x = 0; x < GameBoardData.Width; x++)
+                    {
+                        Block block = GameBoardData.GetBlock(x, y);
+
+                        if (block != null && block.CanMove)
+                        {
+                            // 1. 이 블록이 도달할 수 있는 가장 낮은 빈칸을 찾습니다.
+                            int lowestPossibleY = y;
+                            for (int k = y - 1; k >= 0; k--)
+                            {
+                                if (GameBoardData.GetBlock(x, k) != null)
+                                {
+                                    lowestPossibleY = k + 1;
+                                    break;
+                                }
+                                lowestPossibleY = k;
+                            }
+
+                            // 2. 원래 위치와 가장 낮은 위치 사이에서, 가장 높은 유효 플레이트를 목적지로 설정합니다.
+                            int destY = y;
+                            for (int k = y - 1; k >= lowestPossibleY; k--)
+                            {
+                                if (k < GameBoardData.Height && GameBoardData.BlockPlate.BlockPlateArray[k, x])
+                                {
+                                    destY = k; // 착지할 유효한 플레이트를 찾았습니다.
+                                    break;
+                                }
+                            }
+
+                            if (destY != y)
+                            {
+                                // 목적지가 이미 다른 블록에 의해 채워졌는지 확인
+                                if (movedFlags[destY, x]) continue;
+
+                                GameBoardData.SetBlock(x, destY, block);
+                                GameBoardData.SetBlock(x, y, null);
+                                movedFlags[destY, x] = true; // 이 틱에서 이동했음을 표시
+                                activityThisStep = true;
+                                StartCoroutine(MoveBlockCoroutine(block, blockMover.GridToWorld(new Vector2Int(x, destY), GameBoardData.Width, GameBoardData.Height), _stepDuration));
+                            }
+                        }
+                    }
+                }
+
+                // 1b. 대각선 낙하: 장애물에 의해 경로가 막혔을 때의 원래 로직을 복원합니다.
                 for (int y = 0; y < GameBoardData.Height; y++)
                 {
                     for (int x = 0; x < GameBoardData.Width; x++)
                     {
-                        if (GameBoardData.GetBlock(x, y) == null && GameBoardData.BlockPlate.BlockPlateArray[y, x])
+                        // 이 칸이 비어있고, 이번 틱에 다른 블록이 채워지지 않았는지 확인합니다.
+                        if (GameBoardData.GetBlock(x, y) == null && GameBoardData.BlockPlate.BlockPlateArray[y, x] && !movedFlags[y, x])
                         {
+                            // 바로 위에 움직일 수 없는 블록(장애물)이 있는지 확인합니다.
                             Block blockAbove = GameBoardData.GetBlock(x, y + 1);
-                            if (blockAbove != null)
+                            if (blockAbove != null && !blockAbove.CanMove)
                             {
-                                if (blockAbove.CanMove)
+                                // 왼쪽 대각선 위에서 이동할 블록을 찾습니다.
+                                Block leftDiagonalBlock = (x > 0) ? GameBoardData.GetBlock(x - 1, y + 1) : null;
+                                if (leftDiagonalBlock != null && leftDiagonalBlock.CanMove)
                                 {
-                                    // 바로 위에 움직일 수 있는 블록이 있으면 수직으로 내림
-                                    GameBoardData.SetBlock(x, y, blockAbove);
-                                    GameBoardData.SetBlock(x, y + 1, null);
+                                    // 수직 낙하가 먼저 실행되므로, GetBlock이 null이 아니라는 것은 해당 블록이 아직 움직이지 않았다는 의미입니다.
+                                    GameBoardData.SetBlock(x, y, leftDiagonalBlock);
+                                    GameBoardData.SetBlock(x - 1, y + 1, null);
+                                    movedFlags[y, x] = true;
                                     activityThisStep = true;
-                                    StartCoroutine(MoveBlockCoroutine(blockAbove, blockMover.GridToWorld(new Vector2Int(x, y), GameBoardData.Width, GameBoardData.Height), _stepDuration));
+                                    StartCoroutine(MoveBlockCoroutine(leftDiagonalBlock, blockMover.GridToWorld(new Vector2Int(x, y), GameBoardData.Width, GameBoardData.Height), _stepDuration));
                                 }
+                                // 왼쪽에서 못찾았으면, 오른쪽 대각선 위에서 이동할 블록을 찾습니다.
                                 else
                                 {
-                                    // 바로 위에 움직일 수 없는 블록(장애물)이 있으면 대각선을 확인
-                                    Block diagonalBlock = null;
-                                    Vector2Int fromPos = Vector2Int.zero;
-                                    if (x > 0 && GameBoardData.GetBlock(x - 1, y + 1) != null && GameBoardData.GetBlock(x - 1, y + 1).CanMove)
+                                    Block rightDiagonalBlock = (x < GameBoardData.Width - 1) ? GameBoardData.GetBlock(x + 1, y + 1) : null;
+                                    if (rightDiagonalBlock != null && rightDiagonalBlock.CanMove)
                                     {
-                                        diagonalBlock = GameBoardData.GetBlock(x - 1, y + 1);
-                                        fromPos = new Vector2Int(x - 1, y + 1);
-                                    }
-                                    else if (x < GameBoardData.Width - 1 && GameBoardData.GetBlock(x + 1, y + 1) != null && GameBoardData.GetBlock(x + 1, y + 1).CanMove)
-                                    {
-                                        diagonalBlock = GameBoardData.GetBlock(x + 1, y + 1);
-                                        fromPos = new Vector2Int(x + 1, y + 1);
-                                    }
-
-                                    if (diagonalBlock != null)
-                                    {
-                                        GameBoardData.SetBlock(x, y, diagonalBlock);
-                                        GameBoardData.SetBlock(fromPos.x, fromPos.y, null);
+                                        GameBoardData.SetBlock(x, y, rightDiagonalBlock);
+                                        GameBoardData.SetBlock(x + 1, y + 1, null);
+                                        movedFlags[y, x] = true;
                                         activityThisStep = true;
-                                        StartCoroutine(MoveBlockCoroutine(diagonalBlock, blockMover.GridToWorld(new Vector2Int(x, y), GameBoardData.Width, GameBoardData.Height), _stepDuration));
+                                        StartCoroutine(MoveBlockCoroutine(rightDiagonalBlock, blockMover.GridToWorld(new Vector2Int(x, y), GameBoardData.Width, GameBoardData.Height), _stepDuration));
                                     }
                                 }
                             }

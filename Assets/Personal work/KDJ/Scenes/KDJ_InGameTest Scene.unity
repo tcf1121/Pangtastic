@@ -12017,7 +12017,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &1299568042
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -15394,12 +15394,9 @@ MonoBehaviour:
   blockList: {fileID: 0}
   orderStateController: {fileID: 1332223598}
   customerFlowController: {fileID: 1334139403}
-  doNotTouch: {fileID: 1725425638}
   clearUI: {fileID: 646638277}
   failUI: {fileID: 749196782}
-  WinScore: {fileID: 2140276972}
   WinCoin: {fileID: 2140276971}
-  LoseScore: {fileID: 1842783627}
 --- !u!4 &1830214190
 Transform:
   m_ObjectHideFlags: 0
@@ -15916,17 +15913,6 @@ RectTransform:
   m_CorrespondingSourceObject: {fileID: 3351496516668224196, guid: 48dabdf6bfccb44dcb8fe7e70b69907f, type: 3}
   m_PrefabInstance: {fileID: 1842783625}
   m_PrefabAsset: {fileID: 0}
---- !u!114 &1842783627 stripped
-MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 2479447739585019864, guid: 48dabdf6bfccb44dcb8fe7e70b69907f, type: 3}
-  m_PrefabInstance: {fileID: 1842783625}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f4688fdb7df04437aeb418b961361dc5, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!1 &1843615211
 GameObject:
   m_ObjectHideFlags: 0
@@ -16144,7 +16130,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 3981300310010789011, guid: 285de4924e1fde841a475f6e261a41bf, type: 3}
       propertyPath: CurStage
-      value: 4
+      value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 3981300310010789011, guid: 285de4924e1fde841a475f6e261a41bf, type: 3}
       propertyPath: MatchDelay
@@ -18510,9 +18496,6 @@ MonoBehaviour:
   - {fileID: 11400000, guid: af12b7765192d1e4582bf0d70ad0fc72, type: 2}
   - {fileID: 11400000, guid: df938a3fb304d454ea7d18c3f6fb35e7, type: 2}
   - {fileID: 11400000, guid: f9c08bba87ee6cf4ab04df70b4be39f9, type: 2}
-  startbtn: {fileID: 0}
-  btn: {fileID: 0}
-  tMP_InputField: {fileID: 834291752}
 --- !u!4 &2021889364
 Transform:
   m_ObjectHideFlags: 0
@@ -19170,10 +19153,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _board: {fileID: 347837142}
-  _rollerVId: 7
-  _rollerHId: 8
-  _donutId: 9
-  _ovenId: 10
+  _specialTypes: 0700000008000000090000000a000000
   _manhattanDist: 5
   _useRoller: 0
   _useDonut: 0
@@ -19777,17 +19757,6 @@ MonoBehaviour:
 --- !u!114 &2140276971 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 3242180547378055202, guid: c9ff86330aa144f8ab0d4630c142770e, type: 3}
-  m_PrefabInstance: {fileID: 2140276968}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f4688fdb7df04437aeb418b961361dc5, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
---- !u!114 &2140276972 stripped
-MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 6137318589406571838, guid: c9ff86330aa144f8ab0d4630c142770e, type: 3}
   m_PrefabInstance: {fileID: 2140276968}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 0}

@@ -21,9 +21,11 @@ namespace KDJ.States
         {
             Debug.Log("초기화 상태 진입");
             // TestCode. 스테이지 세팅
-            //StageManager.Instance.SetStage();
+            StageManager.Instance.SetStage(boardManager.CurStage);
 
-            // JWJ의 BoardLoader가 레벨 데이터를 로드하면, 그 데이터를 실제 게임 보드에 적용합니다.
+            yield return new WaitForSeconds(1f);
+
+            // BoardLoader가 레벨 데이터를 로드하면, 그 데이터를 실제 게임 보드에 적용합니다.
             BoardData loadedBoardData = boardManager.BoardLoader.LoadBoard();
             
             // 씬에 있는 실제 BlockPlate 컴포넌트를 찾습니다.
@@ -34,7 +36,7 @@ namespace KDJ.States
                 yield break;
             }
 
-            // 로드한 데이터로 BlockPlate를 설정하고 타일을 그립니다.
+            // 로드한 데이터로 BlockPlate를 설정하고 타일을 그립니다.Q
             blockPlate.BlockPlateArray = loadedBoardData.BlockPlateArray;
             blockPlate.DrawTile();
 
