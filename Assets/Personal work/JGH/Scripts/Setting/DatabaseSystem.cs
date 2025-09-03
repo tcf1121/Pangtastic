@@ -7,25 +7,26 @@ using UnityEngine;
 public class DatabaseSystem : MonoBehaviour
 {
     public static DatabaseSystem Instance { get; private set; }
-    
+
     [HideInInspector] public DatabaseReference dbRef;
-   
-   protected void Awake()
-   {
-       if (Instance != null && Instance != this)
-       {
-           Destroy(gameObject);
-           return;
-       }
 
-       Instance = this;
-       DontDestroyOnLoad(gameObject);
-   }
+    protected void Awake()
+    {
+        if (Instance != null && Instance != this)
+        {
+            Destroy(gameObject);
+            return;
+        }
 
-   void Start()
-   {
-       FirebaseDatabase.DefaultInstance.GoOnline();
-       
+        Instance = this;
+        DontDestroyOnLoad(gameObject);
+        Debug.Log($"파ㅣ배 생성{Instance}");
+    }
+
+    void Start()
+    {
+        FirebaseDatabase.DefaultInstance.GoOnline();
+
         // firebase 초기화
         dbRef = FirebaseDatabase.DefaultInstance.RootReference;
     }
@@ -67,8 +68,13 @@ public class DatabaseSystem : MonoBehaviour
         }
 
         // dbRef.Child($"{GPGSManager.Instance.GetPlayerId()}").Child("users").Child("playerName").SetValueAsync($"{GPGSManager.Instance.GetPlayerName()}");
-        GetUserPath(uid)
-        .Child("playerName")
-        .SetValueAsync(name);
+        dbRef.Child(name)
+            .Child($"{GPGSManager.Instance.GetPlayerId()}")
+            .Child("playerName")
+            .SetValueAsync($"{GPGSManager.Instance.GetPlayerName()}");
+        // GetUserPath(uid)
+            // .Child("playerName")
+            // .SetValueAsync(name);
     }
+    
 }

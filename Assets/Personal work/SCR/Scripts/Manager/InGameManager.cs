@@ -11,12 +11,9 @@ public class InGameManager : MonoBehaviour
     [SerializeField] private PrefabList blockList;
     [SerializeField] OrderStateController orderStateController;
     [SerializeField] CustomerFlowController customerFlowController;
-    [SerializeField] TMP_Text doNotTouch;
     [SerializeField] GameObject clearUI;
     [SerializeField] GameObject failUI;
-    [SerializeField] TMP_Text WinScore;
     [SerializeField] TMP_Text WinCoin;
-    [SerializeField] TMP_Text LoseScore;
 
     private static InGameManager instate;
     private int _score;
@@ -127,7 +124,6 @@ public class InGameManager : MonoBehaviour
         AddCoin(GetScore() / 10);
         BoardManager.SetTouch(false);
         instate.WinCoin.text = $"{GetCoin()}";
-        instate.WinScore.text = $"{GetScore()}";
         instate.clearUI.SetActive(true);
     }
 

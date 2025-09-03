@@ -8,20 +8,20 @@ using UnityEngine.Serialization;
 public class ScriptingSystem : MonoBehaviour
 {
     public static ScriptingSystem Instance { get; private set; }
-    
+
     [SerializeField] private TMP_Text _charName;          // 캐릭터 이름
     [SerializeField] private TMP_Text _dialogueText;          // 내용
     [SerializeField] private GameObject _backImg;          // 부각 이미지
-    
+
     [SerializeField] private string _dialogueTableName; // String Table 이름
     [SerializeField] private string _characterTableName; // 캐릭터 Table 이름
     [SerializeField] private int startId;        // 시작 ID
     [SerializeField] private int endId;          // 끝 ID
-    
+
     [SerializeField] private TMP_FontAsset defaultFont; // 기본 폰트 (예: 한국어)
     [SerializeField] private TMP_FontAsset chineseFont; // 중국어용 폰트
     [SerializeField] private TMP_FontAsset englishFont; // 영어용 폰트
-    
+
     private int currentId;
 
     protected void Awake()
@@ -46,11 +46,11 @@ public class ScriptingSystem : MonoBehaviour
         _characterTableName = getCharacterTableName;
         startId = getStartId;
         endId = getEndId;
-        
+
         currentId = startId;
         ShowDialogue(currentId);
     }
-    
+
     private void Update()
     {
         // 마우스 왼쪽 클릭 시
@@ -62,13 +62,14 @@ public class ScriptingSystem : MonoBehaviour
 
     public void ShowNextDialogue()
     {
-        if (currentId >= endId){
+        if (currentId >= endId)
+        {
             _backImg.SetActive(false);
             _dialogueText.gameObject.SetActive(false);
             _charName.gameObject.SetActive(false);
             return; // 끝에 도달하면 종료
         }
-        
+
         currentId++;
         ShowDialogue(currentId);
     }
@@ -89,8 +90,8 @@ public class ScriptingSystem : MonoBehaviour
             _charName.text = value;
         };
     }
-    
-    
+
+
     private void OnEnable()
     {
         SceneManager.sceneLoaded += OnSceneLoaded; // 씬 로드 이벤트 등록
@@ -115,7 +116,7 @@ public class ScriptingSystem : MonoBehaviour
             targetFont = chineseFont;
         else if (code.StartsWith("en"))
             targetFont = englishFont;
-        
+
         TMP_Text[] texts = Resources.FindObjectsOfTypeAll<TMP_Text>();
         foreach (TMP_Text text in texts)
         {
@@ -132,5 +133,5 @@ public class ScriptingSystem : MonoBehaviour
             }
         }
     }
-    
+
 }
