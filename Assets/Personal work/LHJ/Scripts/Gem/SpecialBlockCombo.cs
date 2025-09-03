@@ -61,6 +61,10 @@ namespace LHJ
                 _lastResolvedFrame = Time.frameCount;
                 _lastStart = startPos;
                 _lastEnd = endPos;
+                if (board.MatchCombo != null)
+                {
+                    board.MatchCombo.ResetTimer();
+                }
             }
             return handled;
         }
