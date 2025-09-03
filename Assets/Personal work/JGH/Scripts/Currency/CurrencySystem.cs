@@ -1,4 +1,5 @@
 using Firebase.Database;
+using System;
 using System.Collections;
 using UnityEngine;
 using System.IO;
@@ -28,10 +29,10 @@ public class CurrencySystem : MonoBehaviour
     [SerializeField] private GameObject _starPrefab; // 별 프리팹
 
     private int _currentCoins = 0; // 현재 보유 코인 수
-    private string _saveCoinPath; // JSON 저장 경로
+    // private string _saveCoinPath; // JSON 저장 경로
 
     private int _currentStars = 0; // 현재 보유 코인 수
-    private string _saveStarPath; // JSON 저장 경로
+    // private string _saveStarPath; // JSON 저장 경로
 
     private void Awake()
     {
@@ -43,15 +44,9 @@ public class CurrencySystem : MonoBehaviour
         }
         Instance = this;
         DontDestroyOnLoad(gameObject); // 씬이 바뀌어도 유지
-        // 플랫폼별 JSON 저장 경로 지정
-        _saveCoinPath = Path.Combine(Application.persistentDataPath, "CoinData.json");
-        _saveStarPath = Path.Combine(Application.persistentDataPath, "StarData.json");
 
-        // 기존 저장된 데이터 불러오기
-        StartCoroutine(CoinLoad());
-        StartCoroutine(StarLoad());
     }
-    
+
     private void OnEnable()
     {
         SceneManager.sceneLoaded += OnSceneLoaded;
@@ -164,17 +159,12 @@ public class CurrencySystem : MonoBehaviour
     /// </summary>
     private void CoinSave()
     {
-        string uid = $"{GPGSManager.Instance.GetPlayerId()}";
-
-        if (string.IsNullOrEmpty(uid))
-        {
-            Debug.LogError("UID가 비어있습니다! 로그인 완료 후 호출하세요.");
-            return;
-        }
+        string authJson = DatabaseSystem.Instance.GetAuthInfo(); 
+        DatabaseSystem.AuthInfo info = JsonUtility.FromJson<DatabaseSystem.AuthInfo>(authJson); 
 
         DatabaseSystem.Instance.dbRef
             .Child("users")
-            .Child(uid)
+            .Child(info.uid)
             .Child("coin")
             .Child("currentCoin")
             .SetValueAsync(_currentCoins);
@@ -186,17 +176,12 @@ public class CurrencySystem : MonoBehaviour
     /// </summary>
     private void StarSave()
     {
-        string uid = $"{GPGSManager.Instance.GetPlayerId()}";
-
-        if (string.IsNullOrEmpty(uid))
-        {
-            Debug.LogError("UID가 비어있습니다! 로그인 완료 후 호출하세요.");
-            return;
-        }
+        string authJson = DatabaseSystem.Instance.GetAuthInfo(); 
+        DatabaseSystem.AuthInfo info = JsonUtility.FromJson<DatabaseSystem.AuthInfo>(authJson); 
 
         DatabaseSystem.Instance.dbRef
             .Child("users")
-            .Child(uid)
+            .Child(info.uid)
             .Child("star")
             .Child("currentStar")
             .SetValueAsync(_currentStars);
@@ -208,11 +193,12 @@ public class CurrencySystem : MonoBehaviour
     /// </summary>
     private IEnumerator CoinLoad()
     {
-        string uid = $"{GPGSManager.Instance.GetPlayerId()}";
+        string authJson = DatabaseSystem.Instance.GetAuthInfo(); 
+        DatabaseSystem.AuthInfo info = JsonUtility.FromJson<DatabaseSystem.AuthInfo>(authJson); 
 
         var task = DatabaseSystem.Instance.dbRef
             .Child("users")
-            .Child(uid)
+            .Child(info.uid)
             .Child("coin")
             .GetValueAsync();
 
@@ -250,11 +236,12 @@ public class CurrencySystem : MonoBehaviour
     /// </summary>
     private IEnumerator StarLoad()
     {
-        string uid = $"{GPGSManager.Instance.GetPlayerId()}";
+        string authJson = DatabaseSystem.Instance.GetAuthInfo(); 
+        DatabaseSystem.AuthInfo info = JsonUtility.FromJson<DatabaseSystem.AuthInfo>(authJson); 
 
         var task = DatabaseSystem.Instance.dbRef
             .Child("users")
-            .Child(uid)
+            .Child(info.uid)
             .Child("star")
             .GetValueAsync();
 

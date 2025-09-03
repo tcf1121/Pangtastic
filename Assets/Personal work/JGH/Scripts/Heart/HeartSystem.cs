@@ -16,9 +16,11 @@ public class HeartSystem : MonoBehaviour
 
     [SerializeField] private int _startSeconds = 1800; // 시작 시간 (기본 30분, 초 단위)
     [SerializeField] private int _maxHearts = 5; // 최대 하트 개수
-    [SerializeField] private int _currentHearts = 0; // 현재 하트 개수
+    [SerializeField] private float _currentHearts = 0; // 현재 하트 개수
 
     private float _remainingSeconds;
+
+    public bool isPlaying = false;
 
     private void Awake()
     {
@@ -27,9 +29,12 @@ public class HeartSystem : MonoBehaviour
             Destroy(gameObject);
             return;
         }
+
         Debug.Log("하트 시스템");
         Instance = this;
         DontDestroyOnLoad(gameObject);
+        
+        
     }
 
     private void Start()
@@ -38,159 +43,155 @@ public class HeartSystem : MonoBehaviour
         StartCoroutine(CalcHeartData());
     }
 
-
     private IEnumerator CalcHeartData()
     {
-        string uid = $"{GPGSManager.Instance.GetPlayerId()}";
-        Debug.Log($"{DatabaseSystem.Instance}");
+        string authJson = DatabaseSystem.Instance.GetAuthInfo();
+        DatabaseSystem.AuthInfo info = JsonUtility.FromJson<DatabaseSystem.AuthInfo>(authJson);
 
-        var task = DatabaseSystem.Instance.GetUserPath(uid)
+        var task = DatabaseSystem.Instance.dbRef.Child(info.type)
+            .Child(info.uid)
             .Child("heart")
             .GetValueAsync();
-
-        yield return new WaitUntil(() => task.IsCompleted);
-        // if (task.Exception != null)
-        // {
-        //     Debug.LogError("불러오기 실패: " + task.Exception);
-        //     yield break;
-        // }
-
-        DataSnapshot snapshot = task.Result;
-        // if (snapshot.Exists && snapshot.Value != null)
-        // {
-        //     _currentHearts = int.Parse(snapshot.Value.ToString());
-        // }
-        // else
-        // {
-        //     _currentHearts = _maxHearts;
-        // }
-
-        // Debug.Log($"현재 하트: {_currentHearts}");
-
-        if (task.IsFaulted)
-        {
-            Debug.LogError("하트 데이터 불러오기 실패: " + task.Exception);
-            // 기본값 세팅
-            _currentHearts = _maxHearts;
-            _remainingSeconds = _startSeconds;
-
-        }
-        else if (task.IsCompleted)
-        {
-            if (snapshot.Exists)
-            {
-                string currentHeart = snapshot.Child("currentHeart").Value?.ToString();
-                Debug.Log(currentHeart);
-                string lastSaveTime = snapshot.Child("lastSaveTime").Value?.ToString();
-                string remainingSeconds = snapshot.Child("remainingSeconds").Value?.ToString();
-
-
-                _currentHearts = int.Parse(currentHeart);
-                _remainingSeconds = int.Parse(remainingSeconds);
-                Debug.Log(_currentHearts);
-                DateTime lastTime = DateTime.Parse(lastSaveTime);
-                TimeSpan diff = DateTime.Now - lastTime;
-
-                // 지난 시간만큼 하트 충전
-                int recoveredHearts = (int)(diff.TotalSeconds / _startSeconds);
-                _currentHearts = Mathf.Min(_currentHearts + recoveredHearts, _maxHearts);
-
-                if (_currentHearts < _maxHearts)
-                {
-                    _remainingSeconds -= (int)diff.TotalSeconds;
-
-                    if (_remainingSeconds <= 0)
-                    {
-                        // 부족하면 추가로 하트 충전
-                        int extraHearts = Mathf.Abs((int)_remainingSeconds) / _startSeconds + 1;
-
-                        _currentHearts = Mathf.Min(_currentHearts + extraHearts, _maxHearts);
-
-                        if (_currentHearts < _maxHearts)
-                            _remainingSeconds =
-                                _startSeconds - (Mathf.Abs(_remainingSeconds) % _startSeconds);
-                        else
-                            _remainingSeconds = 0;
-                    }
-                }
-                else
-                {
-                    _remainingSeconds = 0;
-                }
-
-                Debug.Log($"[Firebase Load] Hearts: {_currentHearts}, RemainSec: {_remainingSeconds}");
-            }
-            else
-            {
-                // 데이터가 아예 없는 경우 → 처음 시작
-                _currentHearts = _maxHearts;
-                _remainingSeconds = _startSeconds;
-
-                Debug.Log("Firebase에 하트 기본값 저장 완료");
-            }
-        }
-
-        UpdateHeartUI();
-        UpdateTimerUI();
-        StartCoroutine(TimerCoroutine());
-        StartCoroutine(HeartSaveData());
-    }
-
-    private IEnumerator HeartSaveData()
-    {
-        string uid = FirebaseAuth.DefaultInstance.CurrentUser.UserId;
-
-        if (string.IsNullOrEmpty(uid))
-        {
-            Debug.LogError("UID가 비어있습니다! 로그인 완료 후 호출하세요.");
-            yield break;
-        }
-
-        var task = DatabaseSystem.Instance.GetUserPath(uid)
-        .Child("heart")
-        .Child("currentHeart")
-        .SetValueAsync(_currentHearts);
 
         yield return new WaitUntil(() => task.IsCompleted);
 
         if (task.Exception != null)
         {
-            Debug.LogError("currentHeart 저장 실패: " + task.Exception);
+            Debug.LogError("heart 불러오기 실패: " + task.Exception);
             yield break;
         }
 
-        if (_currentHearts >= _maxHearts)
-        {
-            // remainingSeconds 저장
-            var taskRemain = DatabaseSystem.Instance.GetUserPath(uid)
-                .Child("heart")
-                .Child("remainingSeconds")
-                .SetValueAsync(0);
-            yield return new WaitUntil(() => taskRemain.IsCompleted);
+        DataSnapshot snapshot = task.Result;
 
-            // lastSaveTime 저장
-            var taskLast = DatabaseSystem.Instance.GetUserPath(uid)
-                .Child("heart")
-                .Child("lastSaveTime")
-                .SetValueAsync("");
-            yield return new WaitUntil(() => taskLast.IsCompleted);
+        if (!snapshot.Exists) // heart 키 자체가 없을 때 → 새로 생성
+        {
+            Debug.Log("heart 데이터 없음 → 새로 생성");
+
+            _currentHearts = _maxHearts;
+            _remainingSeconds = 0;
+
+            var heartRef = DatabaseSystem.Instance.dbRef
+                .Child(info.type)
+                .Child(info.uid)
+                .Child("heart");
+
+            var setTask = heartRef.SetRawJsonValueAsync(JsonUtility.ToJson(new HeartData
+            {
+                currentHeart = _currentHearts,
+                lastSaveTime = DateTime.Now.ToString("O"), // ISO8601
+                remainingSeconds = _remainingSeconds
+            }));
+
+            yield return new WaitUntil(() => setTask.IsCompleted);
+
+            if (setTask.Exception != null)
+                Debug.LogError("heart 초기 생성 실패: " + setTask.Exception);
+            else
+                Debug.Log("heart 데이터 초기화 완료");
+
+            // UI 초기화
+            UpdateHeartUI();
+            UpdateTimerUI();
+            yield break;
+        }
+
+        // --- heart 데이터가 있을 때 불러오기 ---
+        string currentHeart = snapshot.HasChild("currentHeart") ? snapshot.Child("currentHeart").Value?.ToString() : null;
+        string lastSaveTime = snapshot.HasChild("lastSaveTime") ? snapshot.Child("lastSaveTime").Value?.ToString() : null;
+        string remainingSeconds = snapshot.HasChild("remainingSeconds") ? snapshot.Child("remainingSeconds").Value?.ToString() : null;
+
+        _currentHearts = string.IsNullOrEmpty(currentHeart) ? _maxHearts : int.Parse(currentHeart);
+        _remainingSeconds = string.IsNullOrEmpty(remainingSeconds) ? _startSeconds : int.Parse(remainingSeconds);
+
+        DateTime lastTime = DateTime.MinValue;
+        if (!string.IsNullOrEmpty(lastSaveTime))
+            lastTime = DateTime.Parse(lastSaveTime);
+
+        TimeSpan diff = DateTime.Now - lastTime;
+
+        // 지난 시간 동안 회복된 하트 계산
+        int recoveredHearts = (int)(diff.TotalSeconds / _startSeconds);
+        _currentHearts = Mathf.Min(_currentHearts + recoveredHearts, _maxHearts);
+
+        if (_currentHearts < _maxHearts)
+        {
+            _remainingSeconds -= (int)diff.TotalSeconds;
+
+            if (_remainingSeconds <= 0)
+            {
+                float extraHearts = Mathf.Abs(_remainingSeconds) / _startSeconds + 1;
+                _currentHearts = Mathf.Min(_currentHearts + extraHearts, _maxHearts);
+
+                if (_currentHearts < _maxHearts)
+                {
+                    _remainingSeconds = _startSeconds - (Mathf.Abs(_remainingSeconds) % _startSeconds);
+                }
+                else
+                {
+                    _remainingSeconds = 0;
+                }
+            }
         }
         else
         {
-            // remainingSeconds 저장
-            var taskRemain = DatabaseSystem.Instance.GetUserPath(uid)
-                .Child("heart")
-                .Child("remainingSeconds")
-                .SetValueAsync(_remainingSeconds);
-            yield return new WaitUntil(() => taskRemain.IsCompleted);
-
-            // lastSaveTime 저장
-            var taskLast = DatabaseSystem.Instance.GetUserPath(uid)
-                .Child("heart")
-                .Child("lastSaveTime")
-                .SetValueAsync(DateTime.Now.ToString("O")); // ISO 8601 형식
-            yield return new WaitUntil(() => taskLast.IsCompleted);
+            _remainingSeconds = 0;
         }
+
+        // UI 업데이트 및 저장
+        UpdateHeartUI();
+        UpdateTimerUI();
+        StartCoroutine(TimerCoroutine());
+        HeartSaveData();
+    }
+
+    [System.Serializable]
+    public class HeartData
+    {
+        public float currentHeart;
+        public string lastSaveTime;
+        public float remainingSeconds;
+    }
+
+    private void HeartSaveData()
+    {
+        int remainingSeconds;
+        string lastSaveTime;
+        string authJson = DatabaseSystem.Instance.GetAuthInfo();
+        DatabaseSystem.AuthInfo info = JsonUtility.FromJson<DatabaseSystem.AuthInfo>(authJson);
+
+        // 하트 시스템 저장안돼요. 수정 하지 마세요~
+        DatabaseSystem.Instance.dbRef
+            .Child(info.type)
+            .Child(info.uid)
+            .Child("heart")
+            .Child("currentHeart")
+            .SetValueAsync(_currentHearts);
+
+        if (_currentHearts >= _maxHearts)
+        {
+            remainingSeconds = 0;
+            lastSaveTime = "";
+        }
+        else
+        {
+            remainingSeconds = _startSeconds;
+            lastSaveTime = DateTime.Now.ToString();
+        }
+
+        DatabaseSystem.Instance.dbRef
+            .Child(info.type)
+            .Child(info.uid)
+            .Child("heart")
+            .Child("remainingSeconds")
+            .SetValueAsync(remainingSeconds);
+
+        // lastSaveTime 저장
+        DatabaseSystem.Instance.dbRef
+            .Child(info.type)
+            .Child(info.uid)
+            .Child("heart")
+            .Child("lastSaveTime")
+            .SetValueAsync(lastSaveTime);
     }
 
     /// <summary>
@@ -244,11 +245,11 @@ public class HeartSystem : MonoBehaviour
             return;
         }
 
-        int beforeHearts = _currentHearts;
+        float beforeHearts = _currentHearts;
         _currentHearts += amount; // 제한 없이 누적
 
         UpdateHeartUI();
-        StartCoroutine(HeartSaveData());
+        HeartSaveData();
 
         Debug.Log($"하트 {amount}개 회복! ({beforeHearts} → {_currentHearts})");
     }
@@ -298,7 +299,7 @@ public class HeartSystem : MonoBehaviour
                     UpdateTimerUI();
                     // CalcHeartData();
                     StartCoroutine(CalcHeartData());
-                    StartCoroutine(HeartSaveData());
+                    HeartSaveData();
                 }
             }
 
@@ -329,21 +330,29 @@ public class HeartSystem : MonoBehaviour
     /// </summary>
     private void OnApplicationQuit()
     {
-        StartCoroutine(CalcHeartData());
-        StartCoroutine(HeartSaveData());
+        Quit();
     }
 
     /// <summary>
     /// 애플리케이션이 백그라운드로 갔을 때 하트 데이터를 저장합니다.
     /// </summary>
     /// <param name="pause"></param>
-    private void OnApplicationPause(bool pause)
+    // private void OnApplicationPause(bool pause)
+    // {
+        // if (pause)
+        // {
+            // Quit();
+        // }
+    // }
+
+    private void Quit()
     {
-        if (pause)
+        if (isPlaying)
         {
-            StartCoroutine(CalcHeartData());
-            StartCoroutine(HeartSaveData());
+            UseHearts();
         }
+        StartCoroutine(CalcHeartData());
+        HeartSaveData();
     }
 
     private void OnEnable()
