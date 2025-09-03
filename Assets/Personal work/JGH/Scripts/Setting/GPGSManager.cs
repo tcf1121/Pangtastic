@@ -70,7 +70,8 @@ public class GPGSManager : MonoBehaviour
             else
             {
                 Debug.LogError("GPGS 로그인 재시도 횟수 초과");
-                Application.Quit();
+                //Application.Quit();
+                FindObjectOfType<GuestLogin>()?.OnGuestLoginButtonClicked(); //게스트로 로그인 시킴
             }
         }
     }
