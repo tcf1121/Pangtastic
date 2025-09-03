@@ -1,3 +1,4 @@
+using Firebase.Auth;
 using Firebase.Database;
 using Firebase.Extensions;
 using System;
@@ -43,11 +44,7 @@ public class HeartSystem : MonoBehaviour
         string uid = $"{GPGSManager.Instance.GetPlayerId()}";
         Debug.Log($"{DatabaseSystem.Instance}");
 
-
-
-        var task = DatabaseSystem.Instance.dbRef
-            .Child("users")
-            .Child(uid)
+        var task = DatabaseSystem.Instance.GetUserPath(uid)
             .Child("heart")
             .GetValueAsync();
 
@@ -141,7 +138,7 @@ public class HeartSystem : MonoBehaviour
 
     private IEnumerator HeartSaveData()
     {
-        string uid = $"{GPGSManager.Instance.GetPlayerId()}";
+        string uid = FirebaseAuth.DefaultInstance.CurrentUser.UserId;
 
         if (string.IsNullOrEmpty(uid))
         {
@@ -149,12 +146,10 @@ public class HeartSystem : MonoBehaviour
             yield break;
         }
 
-        var task = DatabaseSystem.Instance.dbRef
-            .Child("users")
-            .Child(uid)
-            .Child("heart")
-            .Child("currentHeart")
-            .SetValueAsync(_currentHearts);
+        var task = DatabaseSystem.Instance.GetUserPath(uid)
+        .Child("heart")
+        .Child("currentHeart")
+        .SetValueAsync(_currentHearts);
 
         yield return new WaitUntil(() => task.IsCompleted);
 
@@ -167,18 +162,14 @@ public class HeartSystem : MonoBehaviour
         if (_currentHearts >= _maxHearts)
         {
             // remainingSeconds 저장
-            var taskRemain = DatabaseSystem.Instance.dbRef
-                .Child("users")
-                .Child(uid)
+            var taskRemain = DatabaseSystem.Instance.GetUserPath(uid)
                 .Child("heart")
                 .Child("remainingSeconds")
                 .SetValueAsync(0);
             yield return new WaitUntil(() => taskRemain.IsCompleted);
 
             // lastSaveTime 저장
-            var taskLast = DatabaseSystem.Instance.dbRef
-                .Child("users")
-                .Child(uid)
+            var taskLast = DatabaseSystem.Instance.GetUserPath(uid)
                 .Child("heart")
                 .Child("lastSaveTime")
                 .SetValueAsync("");
@@ -187,18 +178,14 @@ public class HeartSystem : MonoBehaviour
         else
         {
             // remainingSeconds 저장
-            var taskRemain = DatabaseSystem.Instance.dbRef
-                .Child("users")
-                .Child(uid)
+            var taskRemain = DatabaseSystem.Instance.GetUserPath(uid)
                 .Child("heart")
                 .Child("remainingSeconds")
                 .SetValueAsync(_remainingSeconds);
             yield return new WaitUntil(() => taskRemain.IsCompleted);
 
             // lastSaveTime 저장
-            var taskLast = DatabaseSystem.Instance.dbRef
-                .Child("users")
-                .Child(uid)
+            var taskLast = DatabaseSystem.Instance.GetUserPath(uid)
                 .Child("heart")
                 .Child("lastSaveTime")
                 .SetValueAsync(DateTime.Now.ToString("O")); // ISO 8601 형식
@@ -381,5 +368,10 @@ public class HeartSystem : MonoBehaviour
         // UI 즉시 갱신
         UpdateHeartUI();
         UpdateTimerUI();
+    }
+
+    public int GetMaxHearts()
+    {
+        return _maxHearts;
     }
 }
