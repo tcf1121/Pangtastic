@@ -130,35 +130,43 @@ namespace KDJ
                 if (y < 0 || y >= GameBoardData.Height || x < 0 || x >= GameBoardData.Width) continue;
                 if (!GameBoardData.BlockPlate.BlockPlateArray[y, x]) continue;
 
-                if (gemType == GemType.Random)
+                Block oldBlock = GameBoardData.GetBlock(x, y);
+                if (oldBlock != null && oldBlock.BlockInstance != null)
                 {
-                    gemType = (GemType)UnityEngine.Random.Range(0, 6); // 0~5 사이의 GemType을 바로 생성
+                    Destroy(oldBlock.BlockInstance);
                 }
 
-                if (gemType == GemType.Dust)
+                if (gemType == GemType.Random)
                 {
-                    GameBoardData.OverlayArray[y, x] = new SCR_O.Dust(x, y);
-                    int donutNum = UnityEngine.Random.Range(0, 6);
+                    gemType = (GemType)Random.Range(0, 6); // 0~5 사이의 GemType을 바로 생성
+                    GameBoardData.BlockArray[y, x] = new Block()
+                    {
+                        GemType = gemType,
+                    };
+                }
+                else if (gemType == GemType.Dust)
+                {
+                    GameBoardData.OverlayArray[y, x] = new Dust(x, y);
+                    int donutNum = Random.Range(0, 6);
                     GameBoardData.BlockArray[y, x] = new Block()
                     {
                         GemType = (GemType)donutNum,
-
                     };
                 }
                 else if (gemType == GemType.Syrup)
                 {
-                    GameBoardData.OverlayArray[y, x] = new SCR_O.Syrup(x, y);
-                    int donutNum = UnityEngine.Random.Range(0, 6);
+                    GameBoardData.OverlayArray[y, x] = new Syrup(x, y);
+                    int donutNum = Random.Range(0, 6);
                     GameBoardData.BlockArray[y, x] = new Block()
                     {
                         GemType = (GemType)donutNum,
                     };
                 }
-                else if (gemType == GemType.Ice) GameBoardData.BlockArray[y, x] = new SCR_O.Ice(x, y);
-                else if (gemType == GemType.DonutBag) GameBoardData.BlockArray[y, x] = new SCR_O.DonutBag(x, y);
-                else if (gemType == GemType.Coin) GameBoardData.BlockArray[y, x] = new SCR_O.Coin(x, y);
-                else if (gemType == GemType.GiftBox) GameBoardData.BlockArray[y, x] = new SCR_O.GiftBox(x, y);
-                else if (gemType == GemType.Egg) GameBoardData.BlockArray[y, x] = new SCR_O.Egg(x, y);
+                else if (gemType == GemType.Ice) GameBoardData.BlockArray[y, x] = new Ice(x, y);
+                else if (gemType == GemType.DonutBag) GameBoardData.BlockArray[y, x] = new DonutBag(x, y);
+                else if (gemType == GemType.Coin) GameBoardData.BlockArray[y, x] = new Coin(x, y);
+                else if (gemType == GemType.GiftBox) GameBoardData.BlockArray[y, x] = new GiftBox(x, y);
+                else if (gemType == GemType.Egg) GameBoardData.BlockArray[y, x] = new Egg(x, y);
                 else if (gemType == GemType.Flour_s) { }
                 else
                 {
@@ -168,20 +176,12 @@ namespace KDJ
                     };
                 }
 
-                Block oldBlock = GameBoardData.GetBlock(x, y);
-                if (oldBlock != null && oldBlock.BlockInstance != null)
-                {
-                    Destroy(oldBlock.BlockInstance);
-                }
+                Vector3 position = blockMover.GridToWorld(new Vector2Int(x, y), GameBoardData.Width, GameBoardData.Height);
+                GameObject blockPrefab = GetBlockPrefab((int)gemType);
+                GameBoardData.BlockArray[y, x].BlockInstance = Instantiate(blockPrefab, position, Quaternion.identity);
 
-                if (gemType < GemType.Dust)
-                {
-                    SpawnBlock(x, y, gemType, blockMover);
-                }                  
-                else if (gemType > GemType.Oven)
-                {
-                    GameBoardData.SetBlock(x, y, GameBoardData.BlockArray[y, x]);
-                }
+                GameBoardData.SetBlock(x, y, GameBoardData.BlockArray[y, x]);
+
             }
         }
 
