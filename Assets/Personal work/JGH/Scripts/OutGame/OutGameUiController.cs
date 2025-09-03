@@ -21,7 +21,7 @@ public class OutGameUiController : MonoBehaviour
         // 배경음 정지
         // AudioController.Instance.StopBGM();
 
-        AudioSystem.Instance.PlayBGMByName("OutGameMusic");
+        Manager.Audio.PlayBGMByName("OutGameMusic");
 
         // 게임 클리어 후 계속하기 누르면 로비 화면으로 넘어오고 게임 시작 화면 활성화 :: S
         if (InGameUiController.needStartSetting)
@@ -38,7 +38,7 @@ public class OutGameUiController : MonoBehaviour
         }
         // 게임 클리어 후 계속하기 누르면 로비 화면으로 넘어오고 게임 시작 화면 활성화 :: E
 
-        HeartSystem.Instance.isPlaying = false;
+        Manager.Heart.isPlaying = false;
 
         // TODO: TEST
         //ScriptingSystem.Instance.ScriptStart("test1", "test2", 50001, 50010);
@@ -47,7 +47,7 @@ public class OutGameUiController : MonoBehaviour
 
     public void ChangeInGameScene(int num)
     {
-        AudioSystem.Instance.PlaySFXByName("GameInSfx");
+        Manager.Audio.PlaySFXByName("GameInSfx");
         // if (HeartSystem.Instance.TryUseHearts(num))
         // {
         //     SceneManager.LoadScene("JGH_InGameUI");

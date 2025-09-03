@@ -10,7 +10,7 @@ public class AudioClipGroup
 
 public class AudioSystem : Singleton<AudioSystem>
 {
-    public static AudioSystem Instance { get; private set; }
+    //public static AudioSystem Instance { get; private set; }
 
     [Header("BGM 클립들")]
     [SerializeField] private List<AudioClipGroup> _bgmClips = new List<AudioClipGroup>();

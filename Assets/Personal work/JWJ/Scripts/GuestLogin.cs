@@ -128,13 +128,13 @@ public class GuestLogin : MonoBehaviour
     // 게스트 회원탈퇴 :: S
     public void GuestDelete()
     {
-        if (DatabaseSystem.Instance.auth.CurrentUser == null)
+        if (Manager.DB.auth.CurrentUser == null)
         {
             Debug.LogError("로그인된 유저가 없습니다.");
             return;
         }
 
-        DatabaseSystem.Instance.auth.CurrentUser.DeleteAsync().ContinueWith(task =>
+        Manager.DB.auth.CurrentUser.DeleteAsync().ContinueWith(task =>
         {
             if (task.IsCanceled)
             {

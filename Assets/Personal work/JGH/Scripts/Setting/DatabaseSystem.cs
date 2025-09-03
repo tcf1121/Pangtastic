@@ -4,9 +4,9 @@ using Firebase.Database;
 using Firebase.Extensions;
 using UnityEngine;
 
-public class DatabaseSystem : MonoBehaviour
+public class DatabaseSystem : Singleton<DatabaseSystem>
 {
-    [HideInInspector] public static DatabaseSystem Instance { get; private set; }
+    //[HideInInspector] public static DatabaseSystem Instance { get; private set; }
     [HideInInspector] public FirebaseUser user;
     [HideInInspector] public DatabaseReference dbRef;
     [HideInInspector] public FirebaseAuth auth;
@@ -19,22 +19,11 @@ public class DatabaseSystem : MonoBehaviour
         public string nickname;
     }
 
-    protected void Awake()
+    protected override void Awake()
     {
-        if (Instance != null && Instance != this)
-        {
-            Destroy(gameObject);
-            return;
-        }
-
-        Instance = this;
-        DontDestroyOnLoad(gameObject);
-
-        
+        base.Awake();
         auth = FirebaseAuth.DefaultInstance; 
         user = FirebaseAuth.DefaultInstance.CurrentUser;
-        
-
     }
 
     void Start()
