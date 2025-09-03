@@ -14,7 +14,13 @@ public class StageManager : Singleton<StageManager>
     public int CurrentStageIndex { get; private set; } = 0;
     public StageSO CurrentStage => stages[CurrentStageIndex];
 
-    private void LoadAllStages() //왜 호출 안함?
+    protected override void Awake()
+    {
+        base.Awake();
+        Debug.Log($"스테이지 매니저 생성");
+        //LoadAllStages();
+    }
+    private void LoadAllStages()
     {
         stages.Clear();
 

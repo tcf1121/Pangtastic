@@ -6,9 +6,9 @@ using Unity.VisualScripting;
 using UnityEngine.SceneManagement;
 
 
-public class CurrencySystem : MonoBehaviour
+public class CurrencySystem : Singleton<CurrencySystem>
 {
-    public static CurrencySystem Instance { get; private set; } // 싱글톤 인스턴스
+    //public static CurrencySystem Instance { get; private set; } // 싱글톤 인스턴스
 
     // [System.Serializable]
     // public class CoinData
@@ -33,16 +33,9 @@ public class CurrencySystem : MonoBehaviour
     private int _currentStars = 0; // 현재 보유 코인 수
     private string _saveStarPath; // JSON 저장 경로
 
-    private void Awake()
+    protected override void Awake()
     {
-        // 싱글톤 보장
-        if (Instance != null && Instance != this)
-        {
-            Destroy(gameObject);
-            return;
-        }
-        Instance = this;
-        DontDestroyOnLoad(gameObject); // 씬이 바뀌어도 유지
+        base.Awake();
         // 플랫폼별 JSON 저장 경로 지정
         _saveCoinPath = Path.Combine(Application.persistentDataPath, "CoinData.json");
         _saveStarPath = Path.Combine(Application.persistentDataPath, "StarData.json");
@@ -164,7 +157,7 @@ public class CurrencySystem : MonoBehaviour
     /// </summary>
     private void CoinSave()
     {
-        string uid = $"{GPGSManager.Instance.GetPlayerId()}";
+        string uid = $"{Manager.GPGS.GetPlayerId()}";
 
         if (string.IsNullOrEmpty(uid))
         {
@@ -172,7 +165,7 @@ public class CurrencySystem : MonoBehaviour
             return;
         }
 
-        DatabaseSystem.Instance.dbRef
+        Manager.DB.dbRef
             .Child("users")
             .Child(uid)
             .Child("coin")
@@ -186,7 +179,7 @@ public class CurrencySystem : MonoBehaviour
     /// </summary>
     private void StarSave()
     {
-        string uid = $"{GPGSManager.Instance.GetPlayerId()}";
+        string uid = $"{Manager.GPGS.GetPlayerId()}";
 
         if (string.IsNullOrEmpty(uid))
         {
@@ -194,7 +187,7 @@ public class CurrencySystem : MonoBehaviour
             return;
         }
 
-        DatabaseSystem.Instance.dbRef
+        Manager.DB.dbRef
             .Child("users")
             .Child(uid)
             .Child("star")
@@ -208,9 +201,9 @@ public class CurrencySystem : MonoBehaviour
     /// </summary>
     private IEnumerator CoinLoad()
     {
-        string uid = $"{GPGSManager.Instance.GetPlayerId()}";
+        string uid = $"{Manager.GPGS.GetPlayerId()}";
 
-        var task = DatabaseSystem.Instance.dbRef
+        var task = Manager.DB.dbRef
             .Child("users")
             .Child(uid)
             .Child("coin")
@@ -250,9 +243,9 @@ public class CurrencySystem : MonoBehaviour
     /// </summary>
     private IEnumerator StarLoad()
     {
-        string uid = $"{GPGSManager.Instance.GetPlayerId()}";
+        string uid = $"{Manager.GPGS.GetPlayerId()}";
 
-        var task = DatabaseSystem.Instance.dbRef
+        var task = Manager.DB.dbRef
             .Child("users")
             .Child(uid)
             .Child("star")
@@ -326,7 +319,7 @@ public class CurrencySystem : MonoBehaviour
             if (go) spawn = go.GetComponent<RectTransform>();
         }
 
-        EffectSystem.Instance.CurrencyInPlayStartEffect(_coinPrefab, spawn, GameObject.FindWithTag("CoinTargetUI").GetComponent<RectTransform>());
+        Manager.Effect.CurrencyInPlayStartEffect(_coinPrefab, spawn, GameObject.FindWithTag("CoinTargetUI").GetComponent<RectTransform>());
         // 코인 :: E
 
         // 별 :: S
@@ -343,7 +336,7 @@ public class CurrencySystem : MonoBehaviour
             if (go) startspawn = go.GetComponent<RectTransform>();
         }
 
-        EffectSystem.Instance.CurrencyInPlayStartEffect(_starPrefab, startspawn, GameObject.FindWithTag("StarTargetUI").GetComponent<RectTransform>());
+        Manager.Effect.CurrencyInPlayStartEffect(_starPrefab, startspawn, GameObject.FindWithTag("StarTargetUI").GetComponent<RectTransform>());
         // 별 :: E
 
         pendingSpawnType = SpawnType.None;

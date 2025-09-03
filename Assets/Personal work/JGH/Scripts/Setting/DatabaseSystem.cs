@@ -4,23 +4,16 @@ using Firebase.Database;
 using Firebase.Extensions;
 using UnityEngine;
 
-public class DatabaseSystem : MonoBehaviour
+public class DatabaseSystem : Singleton<DatabaseSystem>
 {
-    public static DatabaseSystem Instance { get; private set; }
+    //public static DatabaseSystem Instance { get; private set; }
 
     [HideInInspector] public DatabaseReference dbRef;
 
-    protected void Awake()
+    protected override void Awake()
     {
-        if (Instance != null && Instance != this)
-        {
-            Destroy(gameObject);
-            return;
-        }
-
-        Instance = this;
-        DontDestroyOnLoad(gameObject);
-        Debug.Log($"파ㅣ배 생성{Instance}");
+        base.Awake();
+        Debug.Log($"파ㅣ배 생성");
     }
 
     void Start()
@@ -53,7 +46,7 @@ public class DatabaseSystem : MonoBehaviour
         string type;
         string nickname;
 
-        if (string.IsNullOrEmpty(GPGSManager.Instance.GetPlayerName())) //닉네임이 비었으면
+        if (string.IsNullOrEmpty(Manager.GPGS.GetPlayerName())) //닉네임이 비었으면
         {
             uid = FirebaseAuth.DefaultInstance.CurrentUser.UserId;
             if (string.IsNullOrEmpty(uid))
@@ -66,14 +59,14 @@ public class DatabaseSystem : MonoBehaviour
         }
         else
         {
-            uid = GPGSManager.Instance.GetPlayerId();
+            uid = Manager.GPGS.GetPlayerId();
 
             if (string.IsNullOrEmpty(uid))
             {
                 return;
             }
             type = "users";
-            nickname = GPGSManager.Instance.GetPlayerName(); // 일반 로그인
+            nickname = Manager.GPGS.GetPlayerName(); // 일반 로그인
         }
 
         // dbRef.Child($"{GPGSManager.Instance.GetPlayerId()}").Child("users").Child("playerName").SetValueAsync($"{GPGSManager.Instance.GetPlayerName()}");

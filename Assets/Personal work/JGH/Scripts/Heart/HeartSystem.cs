@@ -7,9 +7,9 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-public class HeartSystem : MonoBehaviour
+public class HeartSystem : Singleton<HeartSystem>
 {
-    public static HeartSystem Instance { get; private set; }
+    //public static HeartSystem Instance { get; private set; }
 
     [SerializeField] private TMP_Text _timerText; // UI Text (MM:SS 표시)
     [SerializeField] private TMP_Text _textHeart; // 0/0 표시
@@ -20,16 +20,10 @@ public class HeartSystem : MonoBehaviour
 
     private float _remainingSeconds;
 
-    private void Awake()
+    protected override void Awake()
     {
-        if (Instance != null && Instance != this)
-        {
-            Destroy(gameObject);
-            return;
-        }
-        Debug.Log("하트 시스템");
-        Instance = this;
-        DontDestroyOnLoad(gameObject);
+        base.Awake();
+        Debug.Log("하트 시스템 시작");
     }
 
     private void Start()
@@ -41,10 +35,10 @@ public class HeartSystem : MonoBehaviour
 
     private IEnumerator CalcHeartData()
     {
-        string uid = $"{GPGSManager.Instance.GetPlayerId()}";
-        Debug.Log($"{DatabaseSystem.Instance}");
+        string uid = $"{Manager.GPGS.GetPlayerId()}";
+        Debug.Log($"{Manager.DB}");
 
-        var task = DatabaseSystem.Instance.GetUserPath(uid)
+        var task = Manager.DB.GetUserPath(uid)
             .Child("heart")
             .GetValueAsync();
 
@@ -146,7 +140,7 @@ public class HeartSystem : MonoBehaviour
             yield break;
         }
 
-        var task = DatabaseSystem.Instance.GetUserPath(uid)
+        var task = Manager.DB.GetUserPath(uid)
         .Child("heart")
         .Child("currentHeart")
         .SetValueAsync(_currentHearts);
@@ -162,14 +156,14 @@ public class HeartSystem : MonoBehaviour
         if (_currentHearts >= _maxHearts)
         {
             // remainingSeconds 저장
-            var taskRemain = DatabaseSystem.Instance.GetUserPath(uid)
+            var taskRemain = Manager.DB.GetUserPath(uid)
                 .Child("heart")
                 .Child("remainingSeconds")
                 .SetValueAsync(0);
             yield return new WaitUntil(() => taskRemain.IsCompleted);
 
             // lastSaveTime 저장
-            var taskLast = DatabaseSystem.Instance.GetUserPath(uid)
+            var taskLast = Manager.DB.GetUserPath(uid)
                 .Child("heart")
                 .Child("lastSaveTime")
                 .SetValueAsync("");
@@ -178,14 +172,14 @@ public class HeartSystem : MonoBehaviour
         else
         {
             // remainingSeconds 저장
-            var taskRemain = DatabaseSystem.Instance.GetUserPath(uid)
+            var taskRemain = Manager.DB.GetUserPath(uid)
                 .Child("heart")
                 .Child("remainingSeconds")
                 .SetValueAsync(_remainingSeconds);
             yield return new WaitUntil(() => taskRemain.IsCompleted);
 
             // lastSaveTime 저장
-            var taskLast = DatabaseSystem.Instance.GetUserPath(uid)
+            var taskLast = Manager.DB.GetUserPath(uid)
                 .Child("heart")
                 .Child("lastSaveTime")
                 .SetValueAsync(DateTime.Now.ToString("O")); // ISO 8601 형식

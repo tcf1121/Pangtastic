@@ -42,7 +42,7 @@ public class OutGameManager : MonoBehaviour
     public static void UpdateCoinUI()
     {
         if (instate._coinText != null)
-            instate._coinText.text = CurrencySystem.Instance.GetCoins().ToString();
+            instate._coinText.text = Manager.Currency.GetCoins().ToString();
     }
 
     /// <summary>
@@ -51,12 +51,12 @@ public class OutGameManager : MonoBehaviour
     public static void UpdateStarUI()
     {
         if (instate._starText != null)
-            instate._starText.text = CurrencySystem.Instance.GetStars().ToString();
+            instate._starText.text = Manager.Currency.GetStars().ToString();
     }
 
     private void OnStageStartButtonClicked()
     {
-        if (HeartSystem.Instance.TryStartStage())
+        if (Manager.Heart.TryStartStage())
             SceneManager.LoadScene("InGameTest Scene");
     }
 

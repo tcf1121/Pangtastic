@@ -18,7 +18,7 @@ public class CurrencyStarBuy : MonoBehaviour
     private void SetupAndPlayEffect()
     {
 
-        if (CurrencySystem.Instance.GetStars() < int.Parse(transform.Find("Amount").GetComponent<TMP_Text>().text))
+        if (Manager.Currency.GetStars() < int.Parse(transform.Find("Amount").GetComponent<TMP_Text>().text))
         {
             Debug.LogWarning("별이 부족합니다.");
             return;
@@ -27,13 +27,13 @@ public class CurrencyStarBuy : MonoBehaviour
         var startText = GameObject.FindWithTag("StarText");
         if (startText)
         {
-            CurrencySystem.Instance.SpendStar(int.Parse(transform.Find("Amount").GetComponent<TMP_Text>().text));
+            Manager.Currency.SpendStar(int.Parse(transform.Find("Amount").GetComponent<TMP_Text>().text));
             var tmp = startText.GetComponent<TMP_Text>();
             //if (tmp) .SetStarText(tmp);
         }
 
         // 이펙트 실행
-        EffectSystem.Instance.CurrencyInPlayStartEffectDown(_prefab, GameObject.FindWithTag("StarTargetUI").GetComponent<RectTransform>(), gameObject.GetComponent<RectTransform>());
+        Manager.Effect.CurrencyInPlayStartEffectDown(_prefab, GameObject.FindWithTag("StarTargetUI").GetComponent<RectTransform>(), gameObject.GetComponent<RectTransform>());
 
         // 도넛 샵 비활성화
         StartCoroutine(CloseDonut());

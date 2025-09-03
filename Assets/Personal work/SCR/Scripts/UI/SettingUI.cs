@@ -9,6 +9,6 @@ public class SettingUI : MonoBehaviour
 
     private void Awake()
     {
-        _userID.text = $"{GPGSManager.Instance.GetPlayerId()}";
+        _userID.text = $"{Manager.GPGS.GetPlayerId()}";
     }
 }

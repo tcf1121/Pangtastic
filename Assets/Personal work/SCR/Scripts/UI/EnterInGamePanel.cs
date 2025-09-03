@@ -60,7 +60,7 @@ public class EnterInGamePanel : MonoBehaviour
 
     void EnterGame()
     {
-        if (HeartSystem.Instance.TryStartStage())
+        if (Manager.Heart.TryStartStage())
         {
 
             // 아이템 사용 구문 추가

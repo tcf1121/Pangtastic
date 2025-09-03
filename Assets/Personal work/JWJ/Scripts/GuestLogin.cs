@@ -61,22 +61,22 @@ public class GuestLogin : MonoBehaviour
                         Debug.Log($"새로운 익명 로그인 성공 : {newUser.UserId}");
                         string uid = newUser.UserId;
 
-                        DatabaseSystem.Instance.GetUserPath(uid)
+                        Manager.DB.GetUserPath(uid)
                         .Child("heart")
                         .Child("currentHeart")
-                        .SetValueAsync(HeartSystem.Instance.GetMaxHearts());
+                        .SetValueAsync(Manager.Heart.GetMaxHearts());
 
-                        DatabaseSystem.Instance.GetUserPath(uid)
+                        Manager.DB.GetUserPath(uid)
                         .Child("heart")
                         .Child("lastSaveTime")
                         .SetValueAsync(DateTime.Now.ToString("O"));
 
-                        DatabaseSystem.Instance.GetUserPath(uid)
+                        Manager.DB.GetUserPath(uid)
                         .Child("heart")
                         .Child("remainingSeconds")
                         .SetValueAsync(0);
 
-                        DatabaseSystem.Instance.GetUserPath(uid)
+                        Manager.DB.GetUserPath(uid)
                         .Child("playerName")
                         .SetValueAsync("Guest");
                     });
@@ -97,22 +97,22 @@ public class GuestLogin : MonoBehaviour
                 Debug.Log($"익명 로그인 성공 : {newUser.UserId}");
                 string uid = newUser.UserId;
 
-                DatabaseSystem.Instance.GetUserPath(uid)
+                Manager.DB.GetUserPath(uid)
                 .Child("heart")
                 .Child("currentHeart")
-                .SetValueAsync(HeartSystem.Instance.GetMaxHearts());
+                .SetValueAsync(Manager.Heart.GetMaxHearts());
 
-                DatabaseSystem.Instance.GetUserPath(uid)
+                Manager.DB.GetUserPath(uid)
                 .Child("heart")
                 .Child("lastSaveTime")
                 .SetValueAsync(DateTime.Now.ToString("O"));
 
-                DatabaseSystem.Instance.GetUserPath(uid)
+                Manager.DB.GetUserPath(uid)
                 .Child("heart")
                 .Child("remainingSeconds")
                 .SetValueAsync(0);
 
-                DatabaseSystem.Instance.GetUserPath(uid)
+                Manager.DB.GetUserPath(uid)
                 .Child("playerName")
                 .SetValueAsync("Guest");
             });

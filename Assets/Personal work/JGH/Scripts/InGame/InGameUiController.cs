@@ -14,10 +14,10 @@ public class InGameUiController : MonoBehaviour
 
     public void ChangeOutGameScene()
     {
-        CurrencySystem.Instance.pendingSpawnType = CurrencySystem.SpawnType.Exit;
+        Manager.Currency.pendingSpawnType = CurrencySystem.SpawnType.Exit;
 
-        CurrencySystem.Instance.AddCoin(InGameManager.GetCoin());
-        CurrencySystem.Instance.AddStar(1);
+        Manager.Currency.AddCoin(InGameManager.GetCoin());
+        Manager.Currency.AddStar(1);
 
         SceneManager.LoadScene("OutGame Test Scene");
 
@@ -26,12 +26,12 @@ public class InGameUiController : MonoBehaviour
 
     public void ChangeContinueOutGameScene()
     {
-        CurrencySystem.Instance.pendingSpawnType = CurrencySystem.SpawnType.Continue;
+        Manager.Currency.pendingSpawnType = CurrencySystem.SpawnType.Continue;
 
         needStartSetting = true;
 
-        CurrencySystem.Instance.AddCoin(InGameManager.GetCoin());
-        CurrencySystem.Instance.AddStar(1);
+        Manager.Currency.AddCoin(InGameManager.GetCoin());
+        Manager.Currency.AddStar(1);
 
         SceneManager.LoadScene("InGameTest Scene");
 
@@ -41,14 +41,14 @@ public class InGameUiController : MonoBehaviour
     public void ChangeQuitGameScene()
     {
         SceneManager.LoadScene("OutGame Test Scene");
-        HeartSystem.Instance.UseHearts();
+        Manager.Heart.UseHearts();
         AudioSystem.Instance.PlaySFXByName("GameToHomeSfx");
     }
 
     public void ChangeRetryGameScene()
     {
         needStartSetting = true;
-        HeartSystem.Instance.UseHearts();
+        Manager.Heart.UseHearts();
         SceneManager.LoadScene("InGameTest Scene");
         AudioSystem.Instance.PlaySFXByName("GameToHomeSfx");
     }

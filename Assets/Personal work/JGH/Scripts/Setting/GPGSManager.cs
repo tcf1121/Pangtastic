@@ -4,9 +4,9 @@ using System.Collections;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-public class GPGSManager : MonoBehaviour
+public class GPGSManager : Singleton<GPGSManager>
 {
-    public static GPGSManager Instance { get; private set; }
+    //public static GPGSManager Instance { get; private set; }
     public static string PlayerID;
     public static string PlayerName;
 
@@ -14,20 +14,9 @@ public class GPGSManager : MonoBehaviour
     private const int maxRetryCount = 3;   // 최대 재시도 횟수
     private const float retryDelay = 2f;   // 재시도 간격 (초 단위)
 
-    protected void Awake()
+    protected override void Awake()
     {
-        if (Instance != null && Instance != this)
-        {
-            Destroy(gameObject);
-            return;
-        }
-
-        Instance = this;
-        DontDestroyOnLoad(gameObject);
-
-        // 로그인 시도
-        //AuthenticateUser();
-        // PlayGamesPlatform.Instance.Authenticate(OnAuthenticated);
+        base.Awake();
     }
 
 
@@ -53,7 +42,7 @@ public class GPGSManager : MonoBehaviour
             PlayerName = PlayGamesPlatform.Instance.localUser.userName;
 
 
-            DatabaseSystem.Instance.UserIntoSave();
+            Manager.DB.UserIntoSave();
             SceneManager.LoadScene("OutGame Test Scene");
         }
         else
