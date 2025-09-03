@@ -4,12 +4,16 @@ using Firebase.Extensions;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 public class GuestLogin : MonoBehaviour
 {
     [SerializeField] private Button _guestLoginButton;
+
+    private bool _deleting;
 
     private void Awake()
     {
@@ -24,6 +28,7 @@ public class GuestLogin : MonoBehaviour
     public void OnGuestLoginButtonClicked()
     {
         LoginAsGuest();
+        SceneManager.LoadScene("OutGame Test Scene");
     }
 
     private void LoginAsGuest()
@@ -83,4 +88,33 @@ public class GuestLogin : MonoBehaviour
 
         });
     }
+    
+    // 게스트 회원탈퇴 :: S
+    public void GuestDelete()
+    {
+        if (DatabaseSystem.Instance.auth.CurrentUser == null)
+        {
+            Debug.LogError("로그인된 유저가 없습니다.");
+            return;
+        }
+
+        DatabaseSystem.Instance.auth.CurrentUser.DeleteAsync().ContinueWith(task =>
+        {
+            if (task.IsCanceled)
+            {
+                Debug.LogError("계정 삭제가 취소됨");
+                return;
+            }
+
+            if (task.IsFaulted)
+            {
+                Debug.LogError("계정 삭제 중 오류: " + task.Exception);
+                return;
+            }
+
+            Debug.Log("계정 삭제 완료");
+
+        });
+    }
+    // 게스트 회원탈퇴 :: E
 }
