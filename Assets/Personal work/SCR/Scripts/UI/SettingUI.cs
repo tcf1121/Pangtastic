@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 
@@ -9,6 +7,9 @@ public class SettingUI : MonoBehaviour
 
     private void Awake()
     {
-        _userID.text = $"{Manager.GPGS.GetPlayerId()}";
+        string authJson = DatabaseSystem.Instance.GetAuthInfo(); 
+        DatabaseSystem.AuthInfo info = JsonUtility.FromJson<DatabaseSystem.AuthInfo>(authJson); 
+        _userID.text = $"{info.uid}";
+        // _userID.text = $"{GPGSManager.Instance.GetPlayerId()}";
     }
 }

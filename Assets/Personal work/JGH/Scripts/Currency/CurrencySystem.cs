@@ -1,4 +1,5 @@
 using Firebase.Database;
+using System;
 using System.Collections;
 using UnityEngine;
 using System.IO;
@@ -6,9 +7,9 @@ using Unity.VisualScripting;
 using UnityEngine.SceneManagement;
 
 
-public class CurrencySystem : Singleton<CurrencySystem>
+public class CurrencySystem : MonoBehaviour
 {
-    //public static CurrencySystem Instance { get; private set; } // 싱글톤 인스턴스
+    public static CurrencySystem Instance { get; private set; } // 싱글톤 인스턴스
 
     // [System.Serializable]
     // public class CoinData
@@ -28,23 +29,24 @@ public class CurrencySystem : Singleton<CurrencySystem>
     [SerializeField] private GameObject _starPrefab; // 별 프리팹
 
     private int _currentCoins = 0; // 현재 보유 코인 수
-    private string _saveCoinPath; // JSON 저장 경로
+    // private string _saveCoinPath; // JSON 저장 경로
 
     private int _currentStars = 0; // 현재 보유 코인 수
-    private string _saveStarPath; // JSON 저장 경로
+    // private string _saveStarPath; // JSON 저장 경로
 
-    protected override void Awake()
+    private void Awake()
     {
-        base.Awake();
-        // 플랫폼별 JSON 저장 경로 지정
-        _saveCoinPath = Path.Combine(Application.persistentDataPath, "CoinData.json");
-        _saveStarPath = Path.Combine(Application.persistentDataPath, "StarData.json");
+        // 싱글톤 보장
+        if (Instance != null && Instance != this)
+        {
+            Destroy(gameObject);
+            return;
+        }
+        Instance = this;
+        DontDestroyOnLoad(gameObject); // 씬이 바뀌어도 유지
 
-        // 기존 저장된 데이터 불러오기
-        StartCoroutine(CoinLoad());
-        StartCoroutine(StarLoad());
     }
-    
+
     private void OnEnable()
     {
         SceneManager.sceneLoaded += OnSceneLoaded;
@@ -157,17 +159,12 @@ public class CurrencySystem : Singleton<CurrencySystem>
     /// </summary>
     private void CoinSave()
     {
-        string uid = $"{Manager.GPGS.GetPlayerId()}";
+        string authJson = DatabaseSystem.Instance.GetAuthInfo(); 
+        DatabaseSystem.AuthInfo info = JsonUtility.FromJson<DatabaseSystem.AuthInfo>(authJson); 
 
-        if (string.IsNullOrEmpty(uid))
-        {
-            Debug.LogError("UID가 비어있습니다! 로그인 완료 후 호출하세요.");
-            return;
-        }
-
-        Manager.DB.dbRef
+        DatabaseSystem.Instance.dbRef
             .Child("users")
-            .Child(uid)
+            .Child(info.uid)
             .Child("coin")
             .Child("currentCoin")
             .SetValueAsync(_currentCoins);
@@ -179,17 +176,12 @@ public class CurrencySystem : Singleton<CurrencySystem>
     /// </summary>
     private void StarSave()
     {
-        string uid = $"{Manager.GPGS.GetPlayerId()}";
+        string authJson = DatabaseSystem.Instance.GetAuthInfo(); 
+        DatabaseSystem.AuthInfo info = JsonUtility.FromJson<DatabaseSystem.AuthInfo>(authJson); 
 
-        if (string.IsNullOrEmpty(uid))
-        {
-            Debug.LogError("UID가 비어있습니다! 로그인 완료 후 호출하세요.");
-            return;
-        }
-
-        Manager.DB.dbRef
+        DatabaseSystem.Instance.dbRef
             .Child("users")
-            .Child(uid)
+            .Child(info.uid)
             .Child("star")
             .Child("currentStar")
             .SetValueAsync(_currentStars);
@@ -201,11 +193,12 @@ public class CurrencySystem : Singleton<CurrencySystem>
     /// </summary>
     private IEnumerator CoinLoad()
     {
-        string uid = $"{Manager.GPGS.GetPlayerId()}";
+        string authJson = DatabaseSystem.Instance.GetAuthInfo(); 
+        DatabaseSystem.AuthInfo info = JsonUtility.FromJson<DatabaseSystem.AuthInfo>(authJson); 
 
-        var task = Manager.DB.dbRef
+        var task = DatabaseSystem.Instance.dbRef
             .Child("users")
-            .Child(uid)
+            .Child(info.uid)
             .Child("coin")
             .GetValueAsync();
 
@@ -243,11 +236,12 @@ public class CurrencySystem : Singleton<CurrencySystem>
     /// </summary>
     private IEnumerator StarLoad()
     {
-        string uid = $"{Manager.GPGS.GetPlayerId()}";
+        string authJson = DatabaseSystem.Instance.GetAuthInfo(); 
+        DatabaseSystem.AuthInfo info = JsonUtility.FromJson<DatabaseSystem.AuthInfo>(authJson); 
 
-        var task = Manager.DB.dbRef
+        var task = DatabaseSystem.Instance.dbRef
             .Child("users")
-            .Child(uid)
+            .Child(info.uid)
             .Child("star")
             .GetValueAsync();
 
@@ -319,7 +313,7 @@ public class CurrencySystem : Singleton<CurrencySystem>
             if (go) spawn = go.GetComponent<RectTransform>();
         }
 
-        Manager.Effect.CurrencyInPlayStartEffect(_coinPrefab, spawn, GameObject.FindWithTag("CoinTargetUI").GetComponent<RectTransform>());
+        EffectSystem.Instance.CurrencyInPlayStartEffect(_coinPrefab, spawn, GameObject.FindWithTag("CoinTargetUI").GetComponent<RectTransform>());
         // 코인 :: E
 
         // 별 :: S
@@ -336,7 +330,7 @@ public class CurrencySystem : Singleton<CurrencySystem>
             if (go) startspawn = go.GetComponent<RectTransform>();
         }
 
-        Manager.Effect.CurrencyInPlayStartEffect(_starPrefab, startspawn, GameObject.FindWithTag("StarTargetUI").GetComponent<RectTransform>());
+        EffectSystem.Instance.CurrencyInPlayStartEffect(_starPrefab, startspawn, GameObject.FindWithTag("StarTargetUI").GetComponent<RectTransform>());
         // 별 :: E
 
         pendingSpawnType = SpawnType.None;
