@@ -23,7 +23,6 @@ public class GPGSManager : MonoBehaviour
         }
 
         Instance = this;
-        DontDestroyOnLoad(gameObject);
 
         // 로그인 시도
         //AuthenticateUser();
@@ -54,7 +53,7 @@ public class GPGSManager : MonoBehaviour
 
 
             DatabaseSystem.Instance.UserIntoSave();
-            SceneManager.LoadScene("OutGame Test Scene");
+            SceneManager.LoadScene(2/*로비씬*/);
         }
         else
         {

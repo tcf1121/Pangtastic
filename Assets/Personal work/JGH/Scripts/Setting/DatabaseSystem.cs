@@ -20,7 +20,6 @@ public class DatabaseSystem : MonoBehaviour
 
         Instance = this;
         DontDestroyOnLoad(gameObject);
-        Debug.Log($"파ㅣ배 생성{Instance}");
     }
 
     void Start()
@@ -84,7 +83,7 @@ public class DatabaseSystem : MonoBehaviour
         // GetUserPath(uid)
         //     .Child("playerName")
         //     .SetValueAsync(name);
-        
+
     }
-    
+
 }

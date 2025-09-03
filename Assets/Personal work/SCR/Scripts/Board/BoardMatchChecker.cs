@@ -480,6 +480,8 @@ namespace SCR_B
         public void UseSpecial(Vector2Int pos, GemType specialType, BoardData boardData = null)
         {
             if (boardData == null) boardData = _boardData;
+
+            // 우유
             if (specialType == GemType.Milk)
             {
                 List<GemType> targetGems = InGameManager.GetTagetGem();
@@ -506,6 +508,8 @@ namespace SCR_B
                 foreach (var targetPos in randomThree)
                     _specialDamage.Add(targetPos);
             }
+
+            // 세로 밀대
             else if (specialType == GemType.Roller_v)
             {// 세로로 없애기
                 for (int y = 0; y < boardData.GetHeight(); y++)
@@ -514,6 +518,8 @@ namespace SCR_B
                 }
 
             }
+
+            // 가로 밀대
             else if (specialType == GemType.Roller_h)
             {
                 // 가로로 없애기
@@ -522,6 +528,8 @@ namespace SCR_B
                     _specialDamage.Add(new Vector2Int(x, pos.y));
                 }
             }
+
+            // 도넛 박스
             else if (specialType == GemType.DonutBox)
             {
                 for (int x = pos.x - 2; x <= pos.x + 2; x++)
@@ -531,8 +539,9 @@ namespace SCR_B
                         {
                             _specialDamage.Add(new Vector2Int(x, y));
                         }
-
             }
+
+            // 오븐
             else if (specialType == GemType.Oven)
             {
                 Vector2Int? movePos;
