@@ -26,10 +26,10 @@ public class EnterInGamePanel : MonoBehaviour
     void OnEnable()
     {
         _level.text = $"{Manager.Stage.CurrentStageIndex + 1}레벨";
-        _whistNum.text = $"거품기 갯수";
-        _scissorsNum.text = $"가위 갯수";
-        _donutPanNum.text = $"도넛팬 갯수";
-        _coffeeNum.text = $"커피 갯수";
+        _whistNum.text = $"거품기 개수";
+        _scissorsNum.text = $"가위 개수";
+        _donutPanNum.text = $"도넛팬 개수";
+        _coffeeNum.text = $"커피 개수";
         SetToggles();
         enterBtn.onClick.AddListener(EnterGame);
     }
@@ -71,7 +71,7 @@ if(donutPanToggle.isOn)
 if(coffeeToggle.isOn)
 
             */
-            SceneManager.LoadScene("InGameTest Scene");
+            LoadingManager.LoadScene(3);
         }
 
     }

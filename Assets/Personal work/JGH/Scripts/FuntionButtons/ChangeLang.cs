@@ -27,6 +27,6 @@ public class ChangeLang : MonoBehaviour
         //     text.font = languageList.Infos[(int)language].Font;
         // }
 
-        SceneManager.LoadScene("OutGame Test Scene");
+        SceneManager.LoadScene(2/*로비씬*/);
     }
 }

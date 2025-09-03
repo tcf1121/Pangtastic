@@ -77,7 +77,7 @@ public class DatabaseSystem : Singleton<DatabaseSystem>
         // GetUserPath(uid)
         //     .Child("playerName")
         //     .SetValueAsync(name);
-        
+
     }
-    
+
 }

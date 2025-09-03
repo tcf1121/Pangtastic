@@ -19,7 +19,7 @@ public class InGameUiController : MonoBehaviour
         Manager.Currency.AddCoin(InGameManager.GetCoin());
         Manager.Currency.AddStar(1);
 
-        SceneManager.LoadScene("OutGame Test Scene");
+        SceneManager.LoadScene(2/*로비씬*/);
 
         AudioSystem.Instance.PlaySFXByName("GameToHomeSfx");
     }
@@ -33,29 +33,29 @@ public class InGameUiController : MonoBehaviour
         Manager.Currency.AddCoin(InGameManager.GetCoin());
         Manager.Currency.AddStar(1);
 
-        SceneManager.LoadScene("InGameTest Scene");
+        SceneManager.LoadScene(3/*게임씬*/);
 
         AudioSystem.Instance.PlaySFXByName("GameToHomeSfx");
     }
 
     public void ChangeQuitGameScene()
     {
-        SceneManager.LoadScene("OutGame Test Scene");
+        SceneManager.LoadScene(2/*로비씬*/);
         Manager.Heart.UseHearts();
-        AudioSystem.Instance.PlaySFXByName("GameToHomeSfx");
+        Manager.Audio.PlaySFXByName("GameToHomeSfx");
     }
 
     public void ChangeRetryGameScene()
     {
         needStartSetting = true;
         Manager.Heart.UseHearts();
-        SceneManager.LoadScene("InGameTest Scene");
-        AudioSystem.Instance.PlaySFXByName("GameToHomeSfx");
+        SceneManager.LoadScene(3/*게임씬*/);
+        Manager.Audio.PlaySFXByName("GameToHomeSfx");
     }
 
     public void SfxGameExit()
     {
-        AudioSystem.Instance.PlaySFXByName("GameExitSfx");
+        Manager.Audio.PlaySFXByName("GameExitSfx");
     }
 
 }

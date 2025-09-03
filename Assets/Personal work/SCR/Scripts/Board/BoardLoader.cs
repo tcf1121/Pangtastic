@@ -59,8 +59,9 @@ namespace SCR_B
 
             foreach (var pos in puzzleBoardSO.SpawnPoints)
             {
-                boardData.RespawnPos.Add(new Vector2Int(pos.x, pos.y) + boardData.ZeroPos + boardData.Size);
+                boardData.RespawnPos.Add(new Vector2Int(pos.x, pos.y) - boardData.ZeroPos);
             }
+            Debug.Log(boardData.ZeroPos);
             int xOffset = -xMin;
             int yOffset = -yMin;
 

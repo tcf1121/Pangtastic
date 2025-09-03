@@ -43,7 +43,7 @@ public class GPGSManager : Singleton<GPGSManager>
 
 
             Manager.DB.UserIntoSave();
-            SceneManager.LoadScene("OutGame Test Scene");
+            SceneManager.LoadScene(2/*로비씬*/);
         }
         else
         {
