@@ -149,7 +149,7 @@ namespace LHJ
         }
 
         // 점수 및 콤보 시간
-        public int ApplyDamageAndScore(KDJ.BoardManager board, List<Vector2Int> hits)
+        public int ApplyDamageAndScore(BoardManager board, List<Vector2Int> hits)
         {
             if (board == null || hits == null) return 0;
 
@@ -172,6 +172,70 @@ namespace LHJ
                 if (!exists) unique.Add(v);
             }
 
+            // 연쇄 발동: unique 안에 '특수블록'이 있으면 다시 UseSpecial로 범위 확장
+            List<Vector2Int> expanded = new List<Vector2Int>();
+            for (int i = 0; i < unique.Count; i++) expanded.Add(unique[i]);
+
+            List<Vector2Int> visited = new List<Vector2Int>();
+            Queue<Vector2Int> q = new Queue<Vector2Int>();
+
+            // 초기 큐 적재: expanded에 포함된 특수블록 좌표
+            for (int i = 0; i < expanded.Count; i++)
+            {
+                Vector2Int p = expanded[i];
+                var blk0 = gameBoard.GetBlock(p.x, p.y);
+                if (blk0 != null && blk0.BlockInstance != null && blk0.GemType >= GemType.Milk)
+                {
+                    bool seen = false;
+                    for (int k = 0; k < visited.Count; k++)
+                        if (visited[k].x == p.x && visited[k].y == p.y) { seen = true; break; }
+                    if (!seen)
+                    {
+                        visited.Add(p);
+                        q.Enqueue(p);
+                    }
+                }
+            }
+
+            while (q.Count > 0)
+            {
+                Vector2Int cur = q.Dequeue();
+                var curBlk = gameBoard.GetBlock(cur.x, cur.y);
+                if (curBlk == null || curBlk.BlockInstance == null) continue;
+
+                // 현재 특수블록의 효과 범위를 임시 리스트로 뽑는다.
+                List<Vector2Int> add = new List<Vector2Int>();
+                UseSpecial(cur, curBlk.GemType, gameBoard, add);
+
+                // 새로 얻은 범위를 expanded에 병합
+                for (int i = 0; i < add.Count; i++)
+                {
+                    Vector2Int v = add[i];
+                    bool exists = false;
+                    for (int j = 0; j < expanded.Count; j++)
+                    {
+                        if (expanded[j].x == v.x && expanded[j].y == v.y) { exists = true; break; }
+                    }
+                    if (!exists) expanded.Add(v);
+
+                    // 그 범위 안에 다른 특수블록이 있으면 큐에 추가 
+                    var b = gameBoard.GetBlock(v.x, v.y);
+                    if (b != null && b.BlockInstance != null && b.GemType >= GemType.Milk)
+                    {
+                        bool seen = false;
+                        for (int k = 0; k < visited.Count; k++)
+                            if (visited[k].x == v.x && visited[k].y == v.y) { seen = true; break; }
+                        if (!seen)
+                        {
+                            visited.Add(v);
+                            q.Enqueue(v);
+                        }
+                    }
+                }
+            }
+
+            // 체인 확장 결과로 대체
+            unique = expanded;
             int destroyedCount = 0;
 
             // 실제 파괴
@@ -190,6 +254,7 @@ namespace LHJ
                         continue;
                     }
                     
+
                     Object.Destroy(b.BlockInstance);
                     gameBoard.SetBlock(c.x, c.y, null);
                     destroyedCount++;
@@ -202,12 +267,302 @@ namespace LHJ
                 int score = destroyedCount * 10;
                 board.UpdateUI(score);
             }
-
-            // 콤보 타이머 유지
             if (board.MatchCombo != null)
                 board.MatchCombo.ResetTimer();
 
             return destroyedCount;
+        }
+        public void UseCombo(Vector2Int firstPos, Vector2Int secondPos, GemType firstType, GemType secondType, GameBoardData gameBoard, List<Vector2Int> outDamage)
+        {
+            if (gameBoard == null || outDamage == null) return;
+
+            // 스왑된 특수블록 자신도 소모
+            AddCell(gameBoard, firstPos.x, firstPos.y, outDamage);
+            AddCell(gameBoard, secondPos.x, secondPos.y, outDamage);
+
+            GemType a = firstType;
+            GemType b = secondType;
+
+
+            // 1) 밀대 + 밀대 
+            if ((a == GemType.Roller_h && b == GemType.Roller_h) ||
+                (a == GemType.Roller_v && b == GemType.Roller_v) ||
+                (a == GemType.Roller_h && b == GemType.Roller_v) ||
+                (a == GemType.Roller_v && b == GemType.Roller_h))
+            {
+                UseSpecial(secondPos, GemType.Roller_h, gameBoard, outDamage);
+                UseSpecial(secondPos, GemType.Roller_v, gameBoard, outDamage);
+                return;
+            }
+
+            // 2) 우유 + 우유
+            if (a == GemType.Milk && b == GemType.Milk)
+            {
+                var targets = InGameManager.GetTagetGem();
+                var candidates = GetTargetPos(gameBoard, targets);
+                Shuffle(candidates);
+
+                List<Vector2Int> picks = new List<Vector2Int>(5);
+                int take = Mathf.Min(5, candidates.Count);
+                for (int i = 0; i < take; i++) picks.Add(candidates[i]);
+
+                while (picks.Count < 5)
+                {
+                    int rx = Random.Range(0, gameBoard.Width);
+                    int ry = Random.Range(0, gameBoard.Height);
+                    Vector2Int v = new Vector2Int(rx, ry);
+                    bool exists = false;
+                    for (int j = 0; j < picks.Count; j++) if (picks[j] == v) { exists = true; break; }
+                    if (!exists) picks.Add(v);
+                }
+
+                for (int i = 0; i < picks.Count; i++) outDamage.Add(picks[i]);
+                return;
+            }
+
+            // 3) 도넛 + 도넛
+            if (a == GemType.DonutBox && b == GemType.DonutBox)
+            {
+                for (int x = secondPos.x - 4; x <= secondPos.x + 4; x++)
+                    for (int y = secondPos.y - 4; y <= secondPos.y + 4; y++)
+                        AddCell(gameBoard, x, y, outDamage);
+                return;
+            }
+
+            // 4) 오븐 + 오븐
+            if (a == GemType.Oven && b == GemType.Oven)
+            {
+                for (int x = 0; x < gameBoard.Width; x++)
+                    for (int y = 0; y < gameBoard.Height; y++)
+                        AddCell(gameBoard, x, y, outDamage);
+                return;
+            }
+
+            // 5) 밀대(세로) + 우유
+            if ((a == GemType.Roller_v && b == GemType.Milk) ||
+                (a == GemType.Milk && b == GemType.Roller_v))
+            {
+                // 우유 선택 로직
+                List<GemType> targets = InGameManager.GetTagetGem();
+                List<Vector2Int> candidates = GetTargetPos(gameBoard, targets);
+                Shuffle(candidates);
+
+                List<Vector2Int> picks = new List<Vector2Int>(3);
+                int take = (candidates.Count < 3) ? candidates.Count : 3;
+                for (int i = 0; i < take; i++) picks.Add(candidates[i]);
+
+                while (picks.Count < 3)
+                {
+                    int rx = Random.Range(0, gameBoard.Width);
+                    int ry = Random.Range(0, gameBoard.Height);
+                    Vector2Int v = new Vector2Int(rx, ry);
+
+                    bool exists = false;
+                    for (int j = 0; j < picks.Count; j++)
+                        if (picks[j].x == v.x && picks[j].y == v.y) { exists = true; break; }
+
+                    if (!exists) picks.Add(v);
+                }
+
+                for (int i = 0; i < picks.Count; i++)
+                    UseSpecial(picks[i], GemType.Roller_v, gameBoard, outDamage);
+
+                return;
+            }
+
+            // 6) 밀대(가로) + 우유 
+            if ((a == GemType.Roller_h && b == GemType.Milk) ||
+                (a == GemType.Milk && b == GemType.Roller_h))
+            {
+                // 우유 선택 로직
+                List<GemType> targets = InGameManager.GetTagetGem();
+                List<Vector2Int> candidates = GetTargetPos(gameBoard, targets);
+                Shuffle(candidates);
+
+                List<Vector2Int> picks = new List<Vector2Int>(3);
+                int take = (candidates.Count < 3) ? candidates.Count : 3;
+                for (int i = 0; i < take; i++) picks.Add(candidates[i]);
+
+                while (picks.Count < 3)
+                {
+                    int rx = Random.Range(0, gameBoard.Width);
+                    int ry = Random.Range(0, gameBoard.Height);
+                    Vector2Int v = new Vector2Int(rx, ry);
+
+                    bool exists = false;
+                    for (int j = 0; j < picks.Count; j++)
+                        if (picks[j].x == v.x && picks[j].y == v.y) { exists = true; break; }
+
+                    if (!exists) picks.Add(v);
+                }
+
+                for (int i = 0; i < picks.Count; i++)
+                    UseSpecial(picks[i], GemType.Roller_h, gameBoard, outDamage);
+
+                return;
+            }
+
+            // 7) 밀대(세로) + 도넛 
+            if ((a == GemType.Roller_v && b == GemType.DonutBox) ||
+                (a == GemType.DonutBox && b == GemType.Roller_v))
+            {
+                for (int dx = -2; dx <= 2; dx++)
+                    UseSpecial(new Vector2Int(secondPos.x + dx, secondPos.y), GemType.Roller_v, gameBoard, outDamage);
+                return;
+            }
+
+            // 8) 밀대(가로) + 도넛 
+            if ((a == GemType.Roller_h && b == GemType.DonutBox) ||
+                (a == GemType.DonutBox && b == GemType.Roller_h))
+            {
+                for (int dy = -2; dy <= 2; dy++)
+                    UseSpecial(new Vector2Int(secondPos.x, secondPos.y + dy), GemType.Roller_h, gameBoard, outDamage);
+                return;
+            }
+
+            // 9) 우유 + 도넛
+            if ((a == GemType.Milk && b == GemType.DonutBox) ||
+                (a == GemType.DonutBox && b == GemType.Milk))
+            {
+                // 우유 선택 로직
+                List<GemType> targets = InGameManager.GetTagetGem();
+                List<Vector2Int> candidates = GetTargetPos(gameBoard, targets);
+                Shuffle(candidates);
+
+                List<Vector2Int> picks = new List<Vector2Int>(3);
+                int take = (candidates.Count < 3) ? candidates.Count : 3;
+                for (int i = 0; i < take; i++) picks.Add(candidates[i]);
+
+                while (picks.Count < 3)
+                {
+                    int rx = Random.Range(0, gameBoard.Width);
+                    int ry = Random.Range(0, gameBoard.Height);
+                    Vector2Int v = new Vector2Int(rx, ry);
+
+                    bool exists = false;
+                    for (int j = 0; j < picks.Count; j++)
+                        if (picks[j].x == v.x && picks[j].y == v.y) { exists = true; break; }
+
+                    if (!exists) picks.Add(v);
+                }
+
+                for (int i = 0; i < picks.Count; i++)
+                    UseSpecial(picks[i], GemType.DonutBox, gameBoard, outDamage);
+
+                return;
+            }
+
+            // 10) 오븐 + 우유
+            if ((a == GemType.Oven && b == GemType.Milk) ||
+                (a == GemType.Milk && b == GemType.Oven))
+            {
+                // 1) 현재 필요한 재료 타입 목록
+                List<GemType> need = InGameManager.GetTagetGem();
+
+                for (int y = 0; y < gameBoard.Height; y++)
+                {
+                    for (int x = 0; x < gameBoard.Width; x++)
+                    {
+                        var bl = gameBoard.GetBlock(x, y);
+                        if (bl == null || bl.BlockInstance == null) continue;
+
+                        // 필요 재료 타입인지 확인
+                        bool isNeeded = false;
+                        for (int k = 0; k < need.Count; k++)
+                        {
+                            if (bl.GemType == need[k]) { isNeeded = true; break; }
+                        }
+                        if (!isNeeded) continue;
+
+                        // 해당 칸에서 '우유' 특수 효과 즉시 발동
+                        UseSpecial(new Vector2Int(x, y), GemType.Milk, gameBoard, outDamage);
+                    }
+                }
+                return;
+            }
+
+            // 11) 오븐 + 밀대(가로/세로) 
+            if ((a == GemType.Oven && (b == GemType.Roller_h || b == GemType.Roller_v)) ||
+               ((a == GemType.Roller_h || a == GemType.Roller_v) && b == GemType.Oven))
+            {
+                GemType lineType = (a == GemType.Oven) ? b : a; 
+
+                List<GemType> normalTypes = new List<GemType>();
+                for (int y = 0; y < gameBoard.Height; y++)
+                {
+                    for (int x = 0; x < gameBoard.Width; x++)
+                    {
+                        var bl = gameBoard.GetBlock(x, y);
+                        if (bl != null && bl.BlockInstance != null && bl.GemType < GemType.Milk)
+                        {
+                            bool exist = false;
+                            for (int k = 0; k < normalTypes.Count; k++)
+                                if (normalTypes[k] == bl.GemType) { exist = true; break; }
+                            if (!exist) normalTypes.Add(bl.GemType);
+                        }
+                    }
+                }
+                if (normalTypes.Count == 0) return;
+
+                // 그 중 랜덤 하나 선택
+                int pickIdx = Random.Range(0, normalTypes.Count);
+                GemType chosenType = normalTypes[pickIdx];
+
+                // 선택된 타입의 모든 좌표에서 '스왑된 밀대' 효과 즉시 발동
+                for (int y = 0; y < gameBoard.Height; y++)
+                {
+                    for (int x = 0; x < gameBoard.Width; x++)
+                    {
+                        var bl = gameBoard.GetBlock(x, y);
+                        if (bl != null && bl.BlockInstance != null && bl.GemType == chosenType)
+                            UseSpecial(new Vector2Int(x, y), lineType, gameBoard, outDamage);
+                    }
+                }
+                return;
+            }
+
+            // 12) 오븐 + 도넛 
+            if ((a == GemType.Oven && b == GemType.DonutBox) ||
+                (a == GemType.DonutBox && b == GemType.Oven))
+            {
+                // 보드에 존재하는 '서로 다른 노말 젬 타입' 목록 만들기
+                List<GemType> normalTypes = new List<GemType>();
+                for (int y = 0; y < gameBoard.Height; y++)
+                {
+                    for (int x = 0; x < gameBoard.Width; x++)
+                    {
+                        var bl = gameBoard.GetBlock(x, y);
+                        if (bl != null && bl.BlockInstance != null && bl.GemType < GemType.Milk)
+                        {
+                            bool exist = false;
+                            for (int k = 0; k < normalTypes.Count; k++)
+                                if (normalTypes[k] == bl.GemType) { exist = true; break; }
+                            if (!exist) normalTypes.Add(bl.GemType);
+                        }
+                    }
+                }
+                if (normalTypes.Count == 0) return;
+
+                // 그 중 랜덤 하나 선택
+                int pickIdx = Random.Range(0, normalTypes.Count);
+                GemType chosenType = normalTypes[pickIdx];
+
+                // 선택된 타입의 모든 좌표에서 '도넛' 효과 즉시 발동
+                for (int y = 0; y < gameBoard.Height; y++)
+                {
+                    for (int x = 0; x < gameBoard.Width; x++)
+                    {
+                        var bl = gameBoard.GetBlock(x, y);
+                        if (bl != null && bl.BlockInstance != null && bl.GemType == chosenType)
+                            UseSpecial(new Vector2Int(x, y), GemType.DonutBox, gameBoard, outDamage);
+                    }
+                }
+                return;
+            }
+
+            // 안전망: 각각 단일 특수로 처리
+            UseSpecial(firstPos, firstType, gameBoard, outDamage);
+            UseSpecial(secondPos, secondType, gameBoard, outDamage);
         }
 
         private void Shuffle(List<Vector2Int> list)
@@ -231,10 +586,9 @@ namespace LHJ
         private void AddCell(GameBoardData gb, int x, int y, List<Vector2Int> outDamage, bool includeWaitingRow = false)
         {
             if (x < 0 || x >= gb.Width) return;
-            int hLimit = includeWaitingRow ? gb.Height + 1 : gb.Height; // 대기열 포함 여부
+            int hLimit = includeWaitingRow ? gb.Height + 1 : gb.Height;
             if (y < 0 || y >= hLimit) return;
 
-            // 플레이 영역(y < Height)에서는 플레이트가 true인 칸만
             if (y < gb.Height && !gb.BlockPlate.BlockPlateArray[y, x]) return;
 
             outDamage.Add(new Vector2Int(x, y));
