@@ -2,6 +2,8 @@ using SCR;
 using SCR_O;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Rendering;
+using UnityEngine.SocialPlatforms.Impl;
 
 namespace KDJ
 {
@@ -230,7 +232,9 @@ namespace KDJ
                         ApplyDamageToOverlayBlock(boardManager, coord.x, coord.y, damagedObstaclesThisMatch);
                     }
                 }
-                boardManager.UpdateUI(score);
+
+                int finalScore = CalculateScore(score);
+                boardManager.UpdateUI(finalScore);
 
                 if (specialToCreate.HasValue)
                 {
@@ -417,6 +421,12 @@ namespace KDJ
         public bool CheckBlockIsAllValid(BoardManager boardManager, int x, int y)
         {
             return CheckInOfArray(boardManager, x, y) && CheckBlockIsValue(boardManager, x, y);
+        }
+
+        public int CalculateScore(int score)
+        {
+            int finalScore = (int)(score + BoardManager.Instance.MatchCombo.CurCombo * 0.5f * score);
+            return finalScore;
         }
 
         #endregion

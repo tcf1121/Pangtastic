@@ -116,6 +116,7 @@ namespace KDJ
 
         public void UpdateUI(int score)
         {
+            InGameManager.AddScore(score);
             Score += score;
             _scoreInfo.text = $"Score\n{Score}";
         }

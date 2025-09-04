@@ -183,6 +183,13 @@ namespace LHJ
                 {
                     if (b.GemType < GemType.Milk)
                         InGameManager.AddIngredientSta(b.GemType);
+
+                    if (b is ObstacleBlock ob)
+                    {
+                        ob.TakeDamage();
+                        continue;
+                    }
+                    
                     Object.Destroy(b.BlockInstance);
                     gameBoard.SetBlock(c.x, c.y, null);
                     destroyedCount++;
