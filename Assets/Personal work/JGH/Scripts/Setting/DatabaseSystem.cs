@@ -6,9 +6,18 @@ using UnityEngine;
 
 public class DatabaseSystem : MonoBehaviour
 {
-    public static DatabaseSystem Instance { get; private set; }
-
+    [HideInInspector] public static DatabaseSystem Instance { get; private set; }
+    [HideInInspector] public FirebaseUser user;
     [HideInInspector] public DatabaseReference dbRef;
+    [HideInInspector] public FirebaseAuth auth;
+    
+    [System.Serializable]
+    public class AuthInfo
+    {
+        public string uid;
+        public string type;
+        public string nickname;
+    }
 
     protected void Awake()
     {
@@ -20,6 +29,12 @@ public class DatabaseSystem : MonoBehaviour
 
         Instance = this;
         DontDestroyOnLoad(gameObject);
+
+        
+        auth = FirebaseAuth.DefaultInstance; 
+        user = FirebaseAuth.DefaultInstance.CurrentUser;
+        
+
     }
 
     void Start()
@@ -32,8 +47,6 @@ public class DatabaseSystem : MonoBehaviour
 
     public string GetUserRoot()
     {
-        FirebaseAuth auth = FirebaseAuth.DefaultInstance;
-
         if (auth.CurrentUser != null && auth.CurrentUser.IsAnonymous) // 익명 여부 확인
         {
             return "guests"; // 익명
@@ -46,44 +59,52 @@ public class DatabaseSystem : MonoBehaviour
         return dbRef.Child(GetUserRoot()).Child(uid);
     }
 
-    public void UserIntoSave()
+    public string GetAuthInfo()
     {
-        string uid;
+        string uid = user.UserId;
         string type;
         string nickname;
-
-        if (string.IsNullOrEmpty(GPGSManager.Instance.GetPlayerName())) //닉네임이 비었으면
+        
+        if (user == null || string.IsNullOrEmpty(user.UserId))
         {
-            uid = FirebaseAuth.DefaultInstance.CurrentUser.UserId;
-            if (string.IsNullOrEmpty(uid))
-            {
-                return;
-            }
+            return "{}"; // 로그인 안 된 경우 빈 JSON
+        }
 
+        if (user.IsAnonymous) // 게스트
+        {
             type = "guests";
-            nickname = "Guest"; // 게스트로 고정
+            nickname = "Guest";
         }
         else
         {
-            uid = GPGSManager.Instance.GetPlayerId();
-
-            if (string.IsNullOrEmpty(uid))
-            {
-                return;
-            }
             type = "users";
-            nickname = GPGSManager.Instance.GetPlayerName(); // 일반 로그인
+            nickname = string.IsNullOrEmpty(user.DisplayName) ? "Unknown" : user.DisplayName;
         }
+        
+        AuthInfo info = new AuthInfo
+        {
+            uid = uid,
+            type = type,
+            nickname = nickname
+        };
 
-        // dbRef.Child($"{GPGSManager.Instance.GetPlayerId()}").Child("users").Child("playerName").SetValueAsync($"{GPGSManager.Instance.GetPlayerName()}");
-        dbRef.Child($"{name}")
-            .Child($"{type}")
-            .Child("playerName")
-            .SetValueAsync($"{nickname}");
-        // GetUserPath(uid)
-        //     .Child("playerName")
-        //     .SetValueAsync(name);
 
+        return JsonUtility.ToJson(info, true);
+        
     }
+
+    public void UserIntoSave()
+    {
+        string authJson = GetAuthInfo(); 
+        AuthInfo info = JsonUtility.FromJson<AuthInfo>(authJson); 
+        
+        Debug.Log($"info.type : {info.type}, info.nickname : {info.nickname}, info.uid : {info.uid}");
+
+        dbRef.Child(info.type)
+            .Child(info.uid)
+            .Child("playerName")
+            .SetValueAsync(info.nickname);
+    }
+    
 
 }

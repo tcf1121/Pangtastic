@@ -104,6 +104,10 @@ namespace LHJ
                 int score = destroyedCount * 10;
                 board.UpdateUI(score);
             }
+            if (board.MatchCombo != null)
+            {
+                board.MatchCombo.ResetTimer();
+            }
         }
     }
 }
