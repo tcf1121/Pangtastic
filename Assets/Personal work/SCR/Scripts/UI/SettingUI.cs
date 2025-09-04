@@ -7,8 +7,8 @@ public class SettingUI : MonoBehaviour
 
     private void Awake()
     {
-        string authJson = Manager.DB.GetAuthInfo(); 
-        DatabaseSystem.AuthInfo info = JsonUtility.FromJson<DatabaseSystem.AuthInfo>(authJson); 
+        string authJson = Manager.DB.GetAuthInfo();
+        DatabaseSystem.AuthInfo info = JsonUtility.FromJson<DatabaseSystem.AuthInfo>(authJson);
         _userID.text = $"{info.uid}";
         // _userID.text = $"{GPGSManager.Instance.GetPlayerId()}";
     }

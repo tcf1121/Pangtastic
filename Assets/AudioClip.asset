@@ -1,0 +1,26 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9e1f9ecfadfbf7341870739fd74c7e6c, type: 3}
+  m_Name: AudioClip
+  m_EditorClassIdentifier: 
+  _bgmClips:
+  - name: InGameMusic
+    audioClip: {fileID: 8300000, guid: 3a13ea34c92f59f4dad171c7d306c42f, type: 3}
+  - name: OutGameMusic
+    audioClip: {fileID: 8300000, guid: f3ab59330f8892545b08cd9b7fdc8a02, type: 3}
+  _sfxClips:
+  - name: GameInSfx
+    audioClip: {fileID: 8300000, guid: 6d2c92f0182a7964c918b09845029f19, type: 3}
+  - name: GameExitSfx
+    audioClip: {fileID: 8300000, guid: 5f21b9f78b4ba174987a91a963e121d6, type: 3}
+  - name: GameToHomeSfx
+    audioClip: {fileID: 8300000, guid: 0c8b2e95b5236cb4bb243ff759d889c8, type: 3}

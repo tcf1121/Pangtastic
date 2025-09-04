@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using TMPro;
+using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
@@ -60,7 +61,7 @@ public class EnterInGamePanel : MonoBehaviour
 
     void EnterGame()
     {
-        if (Manager.Heart.TryStartStage())
+        if (Manager.User.CheckHeart())
         {
 
             // 아이템 사용 구문 추가
@@ -71,6 +72,8 @@ if(donutPanToggle.isOn)
 if(coffeeToggle.isOn)
 
             */
+            Manager.User.UseHeart();
+
             LoadingManager.LoadScene(3);
         }
 

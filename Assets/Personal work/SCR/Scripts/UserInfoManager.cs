@@ -1,12 +1,46 @@
 using Firebase.Database;
+using Newtonsoft.Json;
+using System;
 using System.Threading.Tasks;
 using UnityEngine;
 
 public class UserInfoManager : Singleton<UserInfoManager>
 {
     private UserData currentData;
+    public Action<int> OnChangedHeart;
+    public Action<int> OnChangedHeartTime;
+    public Action<int> OnChangedStage;
+    public Action<int> OnChangedStar;
+    public Action<int> OnChangedCoin;
+    public Action<int> OnChangedProfile;
+    public Action OnUseHeart;
 
-    public async void SetUser(string uid)
+    public void SetUser(UserData user)
+    {
+        currentData = user;
+    }
+
+    // 새로운 유저가 접속할 때 새로운 정보를 만듦
+    public async void NewUser(string uid, string now)
+    {
+        var newUserData = new UserData();
+        newUserData.UserInfo.Heart.currentHeart = 5;
+        newUserData.UserInfo.Heart.lastSaveTime = now;
+
+        string json = JsonConvert.SerializeObject(newUserData);
+        try
+        {
+            await Manager.DB.GetUserPath(uid).SetRawJsonValueAsync(json);
+        }
+        catch (Exception ex)
+        {
+            Debug.LogError("유저 데이터 생성 실패: " + ex.Message);
+        }
+        currentData = newUserData;
+    }
+
+    // 기존 유저가 접속할 때 기존 데이터를 가져와서 CurrentData에 넣음
+    public async Task SetUser(string uid)
     {
         currentData = await GetUserData(uid);
         if (currentData != null)
@@ -42,6 +76,7 @@ public class UserInfoManager : Singleton<UserInfoManager>
     public void AddStar(int value)
     {
         currentData.UserInfo.Star += value;
+        OnChangedStar?.Invoke(currentData.UserInfo.Star);
     }
 
     public bool CanUseStar(int value)
@@ -53,6 +88,30 @@ public class UserInfoManager : Singleton<UserInfoManager>
     public void UseStar(int value)
     {
         currentData.UserInfo.Star -= value;
+        OnChangedStar?.Invoke(currentData.UserInfo.Star);
+    }
+
+    public int GetCoin()
+    {
+        return currentData.UserInfo.Coin;
+    }
+
+    public void AddCoin(int value)
+    {
+        currentData.UserInfo.Coin += value;
+        OnChangedCoin?.Invoke(currentData.UserInfo.Coin);
+    }
+
+    public bool CanUseCoin(int value)
+    {
+        if (currentData.UserInfo.Coin - value > 0) return true;
+        else return false;
+    }
+
+    public void UseCoin(int value)
+    {
+        currentData.UserInfo.Coin -= value;
+        OnChangedCoin?.Invoke(currentData.UserInfo.Coin);
     }
 
 
@@ -70,13 +129,22 @@ public class UserInfoManager : Singleton<UserInfoManager>
     public void AddHeart()
     {
         if (currentData.UserInfo.Heart.currentHeart < 5)
+        {
             currentData.UserInfo.Heart.currentHeart++;
+
+        }
+        OnChangedHeart?.Invoke(currentData.UserInfo.Heart.currentHeart);
     }
 
     public void UseHeart()
     {
         if (currentData.UserInfo.Heart.currentHeart > 0)
+        {
             currentData.UserInfo.Heart.currentHeart--;
+            OnChangedHeart?.Invoke(currentData.UserInfo.Heart.currentHeart);
+            OnUseHeart?.Invoke();
+        }
+
     }
 
     public void SetLeaveTime(string value)
@@ -84,7 +152,7 @@ public class UserInfoManager : Singleton<UserInfoManager>
         currentData.UserInfo.Heart.lastSaveTime = value;
     }
 
-    public string GetLeaveTime(string value)
+    public string GetLeaveTime()
     {
         return currentData.UserInfo.Heart.lastSaveTime;
     }
@@ -92,6 +160,7 @@ public class UserInfoManager : Singleton<UserInfoManager>
     public void SetHeartTime(int value)
     {
         currentData.UserInfo.Heart.remainingSeconds = value;
+        OnChangedHeartTime?.Invoke(currentData.UserInfo.Heart.remainingSeconds);
     }
 
     public int GetHeartTime()
@@ -155,7 +224,7 @@ public class UserInfoManager : Singleton<UserInfoManager>
 public class UserData
 {
     public UserInfo UserInfo { get; set; } = new UserInfo();
-    public int Stage { get; set; } = 1;
+    public int Stage { get; set; } = 0;
     public string PlayerName { get; set; } = "";
     public ItemInfo ItemInfo { get; set; } = new ItemInfo();
 }
