@@ -1,42 +1,187 @@
-using System.Collections;
-using System.Collections.Generic;
-using TMPro;
+using Firebase.Database;
+using System.Threading.Tasks;
 using UnityEngine;
-using UnityEngine.UI;
 
-public class UserInfoManager : MonoBehaviour
+public class UserInfoManager : Singleton<UserInfoManager>
 {
-    [SerializeField] Image profileImage;
-    [SerializeField] TMP_Text _coinText;
-    [SerializeField] TMP_Text _heartText;
-    [SerializeField] TMP_Text _leftTime;
-    [SerializeField] TMP_Text _sartText;
+    private UserData currentData;
 
-    [SerializeField] private int _startSeconds = 1800; // 시작 시간 (기본 30분, 초 단위)
-    [SerializeField] private int _curStage;
-    [SerializeField] private int _maxHearts = 5; // 최대 하트 개수
-    [SerializeField] private float _currentHearts = 0; // 현재 하트 개수
-
-
-
-    private IEnumerator GetUserInfo()
+    public async void SetUser(string uid)
     {
-        string authJson = Manager.DB.GetAuthInfo();
-        DatabaseSystem.AuthInfo info = JsonUtility.FromJson<DatabaseSystem.AuthInfo>(authJson);
-
-        var task = Manager.DB.dbRef.Child(info.type)
-            .Child(info.uid)
-            .Child("UserInfo")
-            .GetValueAsync();
-
-        yield return new WaitUntil(() => task.IsCompleted);
-
-
-        if (task.Exception != null)
+        currentData = await GetUserData(uid);
+        if (currentData != null)
         {
-            Debug.LogError("유저 정보 불러오기 실패: " + task.Exception);
-            yield break;
+            Debug.Log("사용자 데이터 로드 및 할당 성공!");
+        }
+        else
+        {
+            Debug.LogError("사용자 데이터 로드 실패. currentData가 null입니다.");
+        }
+    }
+
+    public int GetStage()
+    {
+        return currentData.Stage;
+    }
+
+    public void ClearStage()
+    {
+        currentData.Stage++;
+    }
+
+    public void SetStage(int value)
+    {
+        currentData.Stage = value;
+    }
+
+    public int GetStar()
+    {
+        return currentData.UserInfo.Star;
+    }
+
+    public void AddStar(int value)
+    {
+        currentData.UserInfo.Star += value;
+    }
+
+    public bool CanUseStar(int value)
+    {
+        if (currentData.UserInfo.Star - value > 0) return true;
+        else return false;
+    }
+
+    public void UseStar(int value)
+    {
+        currentData.UserInfo.Star -= value;
+    }
+
+
+
+    public void SetHeart(int value)
+    {
+        currentData.UserInfo.Heart.currentHeart = value;
+    }
+
+    public int GetHeart()
+    {
+        return currentData.UserInfo.Heart.currentHeart;
+    }
+
+    public void AddHeart()
+    {
+        if (currentData.UserInfo.Heart.currentHeart < 5)
+            currentData.UserInfo.Heart.currentHeart++;
+    }
+
+    public void UseHeart()
+    {
+        if (currentData.UserInfo.Heart.currentHeart > 0)
+            currentData.UserInfo.Heart.currentHeart--;
+    }
+
+    public void SetLeaveTime(string value)
+    {
+        currentData.UserInfo.Heart.lastSaveTime = value;
+    }
+
+    public string GetLeaveTime(string value)
+    {
+        return currentData.UserInfo.Heart.lastSaveTime;
+    }
+
+    public void SetHeartTime(int value)
+    {
+        currentData.UserInfo.Heart.remainingSeconds = value;
+    }
+
+    public int GetHeartTime()
+    {
+        return currentData.UserInfo.Heart.remainingSeconds;
+    }
+
+    public bool CheckHeart()
+    {
+        if (currentData.UserInfo.Heart.currentHeart > 0) return true;
+        else return false;
+    }
+
+    public void SetItem(ItemInfo itemInfo)
+    {
+        currentData.ItemInfo = itemInfo;
+    }
+
+    public ItemInfo GetItem()
+    {
+        return currentData.ItemInfo;
+    }
+
+
+
+    public async Task<UserData> GetUserData(string uid)
+    {
+        var task = Manager.DB.GetUserPath(uid).GetValueAsync();
+
+        await task;
+
+        if (task.IsFaulted)
+        {
+            Debug.LogError("데이터 로드 실패: " + task.Exception);
+            return null;
         }
 
+        DataSnapshot snapshot = task.Result;
+
+        if (!snapshot.Exists)
+        {
+            Debug.LogWarning("해당 uid에 대한 사용자 데이터가 없습니다.");
+            return null;
+        }
+
+        if (snapshot.Exists)
+        {
+            string json = snapshot.GetRawJsonValue();
+            UserData userData = JsonUtility.FromJson<UserData>(json);
+
+            return userData;
+        }
+        return null;
     }
+}
+
+[System.Serializable]
+public class UserData
+{
+    public UserInfo UserInfo { get; set; } = new UserInfo();
+    public int Stage { get; set; } = 1;
+    public string PlayerName { get; set; } = "";
+    public ItemInfo ItemInfo { get; set; } = new ItemInfo();
+}
+
+[System.Serializable]
+public class UserInfo
+{
+    public HeartInfo Heart { get; set; } = new HeartInfo();
+    public int Coin { get; set; } = 0;
+    public int Star { get; set; } = 0;
+    public int Profile { get; set; } = 0;
+}
+
+[System.Serializable]
+public class HeartInfo
+{
+    public int currentHeart { get; set; } = 0;
+    public string lastSaveTime { get; set; } = "";
+    public int remainingSeconds { get; set; } = 0;
+}
+
+[System.Serializable]
+public class ItemInfo
+{
+    public int Roller { get; set; } = 0;
+    public int DonutBox { get; set; } = 0;
+    public int Oven { get; set; } = 0;
+    public int Whisk { get; set; } = 0;
+    public int Scissors { get; set; } = 0;
+    public int DonutPan { get; set; } = 0;
+    public int Coffee { get; set; } = 0;
 }

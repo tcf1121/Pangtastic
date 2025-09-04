@@ -5,7 +5,7 @@ using UnityEngine.Localization.Settings;
 using UnityEngine.SceneManagement;
 using UnityEngine.Serialization;
 
-public class ScriptingSystem : Singleton<ScriptingSystem>
+public class ScriptingSystem : MonoBehaviour
 {
     //public static ScriptingSystem Instance { get; private set; }
 
