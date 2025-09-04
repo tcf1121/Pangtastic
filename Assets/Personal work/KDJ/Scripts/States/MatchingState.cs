@@ -1,6 +1,7 @@
 using LHJ;
 using SCR;
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace KDJ.States
@@ -47,11 +48,19 @@ namespace KDJ.States
 
                 if (startIsSpecial || endIsSpecial)
                 {
-                    // 특수 블록 로직 실행 (이 부분은 SpecialBlock의 Activate에서 처리 필요)
-                    startBlock.BlockInstance?.GetComponent<SpecialBlock>()?.Activate(boardManager);
-                    endBlock.BlockInstance?.GetComponent<SpecialBlock>()?.Activate(boardManager);
-                    usedSpecial = true;
-                    // 특수 블록 사용 후에는 매치 체크로 넘어가서 추가 매치를 확인
+                    var effect = boardManager.GetComponent<SpecialBlockEffect>(); // BoardManager 오브젝트에 붙어있음
+                    var gameBoard = boardManager.Spawner.GameBoardData;              // 보드 데이터 접근
+                    var hits = new List<Vector2Int>();
+
+                    if (effect != null && gameBoard != null)
+                    {
+                        if (startIsSpecial) effect.UseSpecial(startPos, startBlock.GemType, gameBoard, hits);
+                        if (endIsSpecial) effect.UseSpecial(endPos, endBlock.GemType, gameBoard, hits);
+
+                        // 한방에 파괴 + 점수 (+콤보타이머)
+                        int destroyed = effect.ApplyDamageAndScore(boardManager, hits);
+                        usedSpecial = destroyed > 0;
+                    }
                 }
             }
 
