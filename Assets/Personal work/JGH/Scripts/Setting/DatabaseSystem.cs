@@ -94,6 +94,4 @@ public class DatabaseSystem : Singleton<DatabaseSystem>
             .Child("playerName")
             .SetValueAsync(info.nickname);
     }
-    
-
 }

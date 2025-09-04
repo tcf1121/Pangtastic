@@ -35,17 +35,22 @@ namespace SCR
             FirebaseAuth auth = FirebaseAuth.DefaultInstance;
             if (auth.CurrentUser != null)
             {
-                if (auth.CurrentUser.IsAnonymous)
+                if (auth.CurrentUser.IsAnonymous)  //JWJ 수정함
                 {
                     Debug.Log($"이미 게스트 로그인 상태: {auth.CurrentUser.UserId}");
-                    DontDSystem.StatGame();
+                    Manager.DB.user = auth.CurrentUser;
+                    Manager.Stage.LoadStage();
+                    //DontDSystem.StatGame();
                     SceneManager.LoadScene(2/*로비씬*/);
                 }
-                // else
-                // {
-                //     Debug.Log($"이미 일반 로그인 상태: {auth.CurrentUser.UserId}");
-                //     SceneManager.LoadScene(2/*로비씬*/);
-                // }
+                else
+                {
+                    Debug.Log($"이미 일반 로그인 상태: {auth.CurrentUser.UserId}");
+                    Manager.DB.user = auth.CurrentUser;
+                    Manager.Stage.LoadStage();
+                    //DontDSystem.StatGame();
+                    SceneManager.LoadScene(2/*로비씬*/);
+                }
                 return;
             }
             // else
@@ -68,6 +73,7 @@ namespace SCR
 
         private void LoginAsGuest()
         {
+            Debug.Log("버튼눌림");
             FirebaseAuth auth = FirebaseAuth.DefaultInstance;
             auth.SignInAnonymouslyAsync().ContinueWithOnMainThread(task =>
             {
@@ -106,11 +112,12 @@ namespace SCR
                 .Child("playerName")
                 .SetValueAsync("Guest");
 
-
+                Manager.Stage.LoadStage();
+                //DontDSystem.StatGame();
+                SceneManager.LoadScene(2/*로비씬*/);
 
             });
-            DontDSystem.StatGame();
-            SceneManager.LoadScene(2/*로비씬*/);
+            
         }
     }
 }

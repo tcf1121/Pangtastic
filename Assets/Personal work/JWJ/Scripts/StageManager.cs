@@ -1,3 +1,4 @@
+using Firebase.Database;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -17,7 +18,7 @@ public class StageManager : Singleton<StageManager>
     protected override void Awake()
     {
         base.Awake();
-        Debug.Log($"스테이지 매니저 생성");
+        Debug.Log($"스테이지 매니저 준비");
         //LoadAllStages();
     }
     private void LoadAllStages()
@@ -53,6 +54,7 @@ public class StageManager : Singleton<StageManager>
         if (CurrentStageIndex < stages.Count - 1)
         {
             CurrentStageIndex++;
+            SaveStage();
         }
     }
 
@@ -61,8 +63,6 @@ public class StageManager : Singleton<StageManager>
         CurrentStageIndex = num;
     }
 
-
-
     public void ResetStage()
     {
         CurrentStageIndex = 0;
@@ -70,13 +70,130 @@ public class StageManager : Singleton<StageManager>
 
     public void SaveStage()
     {
+        StartCoroutine(SaveStageRoutine());
         Debug.Log("스테이지 세이브");
     }
 
     public void LoadStage()
     {
+        StartCoroutine(LoadStageRoutine());
         Debug.Log("스테이지 로드");
     }
+    private IEnumerator SaveStageRoutine()   
+    {
+        if (Manager.DB == null)
+        {
+            Debug.LogError("DB 매니저가 없음");
+            yield break;
+        }
 
+        string authJson = Manager.DB.GetAuthInfo();
+        if (string.IsNullOrEmpty(authJson) == true)
+        {
+            Debug.LogError("로그인 정보 없음");
+            yield break;
+        }
 
+        DatabaseSystem.AuthInfo info = JsonUtility.FromJson<DatabaseSystem.AuthInfo>(authJson); //제이슨 to 구조체
+
+        if (string.IsNullOrEmpty(info.uid) == true || string.IsNullOrEmpty(info.type) == true)
+        {
+            Debug.LogError("AuthInfo가 비었음");
+            yield break;
+        }
+
+        string curStageValue = (CurrentStageIndex + 1).ToString();
+        var path = Manager.DB.dbRef
+            .Child(info.type)
+            .Child(info.uid)
+            .Child("curStage")
+            .Child("stage");
+
+        var setTask = path.SetValueAsync(curStageValue);
+        yield return new WaitUntil(IsSetDone);
+
+        bool IsSetDone()
+        {
+            return setTask.IsCompleted;
+        }
+
+        if (setTask.Exception != null)
+        {
+            Debug.LogError($"스테이지 저장 실패: {setTask.Exception}");
+            yield break;
+        }
+
+        Debug.Log($"스테이지 저장 완료:{curStageValue}");
+        yield break;
+
+    }
+
+    private IEnumerator LoadStageRoutine()
+    {
+        if (Manager.DB == null)
+        {
+            Debug.LogError("DB 매니저가 없음");
+            yield break;
+        }
+
+        string authJson = Manager.DB.GetAuthInfo();
+        if (string.IsNullOrEmpty(authJson) == true)
+        {
+            Debug.LogError("로그인 정보가 없음");
+            yield break;
+        }
+
+        DatabaseSystem.AuthInfo info = JsonUtility.FromJson<DatabaseSystem.AuthInfo>(authJson); // 제이슨 > 구조체 변환
+
+        if (string.IsNullOrEmpty(info.uid) == true || string.IsNullOrEmpty(info.type) == true)
+        {
+            Debug.LogError("AuthInfo가 비었음");
+            yield break;
+        }
+
+        var path = Manager.DB.dbRef
+            .Child(info.type)
+            .Child(info.uid)
+            .Child("curStage")
+            .Child("stage");
+
+        var getTask = path.GetValueAsync();
+        yield return new WaitUntil(IsGetDone);
+
+        bool IsGetDone()
+        {
+            return getTask.IsCompleted;
+        }
+
+        if (getTask.Exception != null)
+        {
+            Debug.LogError($"스테이지 로드 실패: {getTask.Exception}");
+            yield break;
+        }
+
+        var snapshot = getTask.Result;
+        if (snapshot != null && snapshot.Exists == true)
+        {
+            string value = snapshot.Value != null ? snapshot.Value.ToString() : "0"; //값있으면 넣고 없으면 0
+            int loadedIndex = 0;
+            bool parsed = int.TryParse(value, out loadedIndex); //정수 변환
+
+            if (parsed == true)
+            {
+                CurrentStageIndex = loadedIndex - 1;
+                Debug.Log($"스테이지 로드 완료: {CurrentStageIndex + 1}");
+            }
+            else
+            {
+                Debug.LogWarning($"Stage 값이 정수가 아님: {value}");
+            }
+        }
+        else
+        {
+            Debug.Log("Stage 값이 없음");
+        }
+
+        yield break;
+
+    }
 }

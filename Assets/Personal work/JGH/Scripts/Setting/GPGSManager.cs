@@ -30,7 +30,7 @@ public class GPGSManager : Singleton<GPGSManager>
         
         PlayGamesPlatform.Instance.Authenticate(OnPlayAuthenticated);
 
-        SceneManager.LoadScene("OutGame Test Scene");
+        //SceneManager.LoadScene("OutGame Test Scene"); //JWJ 주석처리함
     }
 
 
@@ -58,6 +58,15 @@ public class GPGSManager : Singleton<GPGSManager>
                         {
                             // DB 저장 호출
                             Manager.DB.UserIntoSave();
+
+                            //JWJ 추가
+                            Manager.DB.user = Manager.DB.auth.CurrentUser;
+                            if (Manager.Stage != null)
+                            {
+                                Manager.Stage.LoadStage();
+                            }
+                            //SceneManager.LoadScene("OutGame Test Scene");
+                            SceneManager.LoadScene(2/*로비씬*/);
                         });
                 });
 
