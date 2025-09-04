@@ -31,7 +31,7 @@ namespace SCR
 
         private void CheckBefore()
         {
-            _enterPanel.SetActive(false);
+
             FirebaseAuth auth = FirebaseAuth.DefaultInstance;
             if (auth.CurrentUser != null)
             {
@@ -49,6 +49,7 @@ namespace SCR
                 return;
             }
             // else
+            _enterPanel.SetActive(false);
             _loginPanel.SetActive(true);
         }
 
