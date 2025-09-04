@@ -140,13 +140,13 @@ namespace SCR
             }
             instance.ArrangeSpawn();
             instance.InitObject();
-            instance._turnCor = instance.StartCoroutine(instance.StartPuzzle());
+            //instance._turnCor = instance.StartCoroutine(instance.StartPuzzle());
             foreach (var data in SpawnPoint)
             {
                 AddSpawner(data);
             }
 
-            InGameManager.SpawnCustomer();
+            //InGameManager.SpawnCustomer();
         }
 
         public void InitObject()
@@ -221,7 +221,7 @@ namespace SCR
         {
             if (instance == null)
             {
-                instance = GameObject.Find("Grid").GetComponent<Board>();
+                instance = GameObject.Find("Puzzle").GetComponent<Board>();
             }
             instance.SpawnPoint.Add(pos);
         }
@@ -231,7 +231,7 @@ namespace SCR
         {
             if (instance == null)
             {
-                instance = GameObject.Find("Grid").GetComponent<Board>();
+                instance = GameObject.Find("Puzzle").GetComponent<Board>();
             }
             if (!instance.CellContent.ContainsKey(pos))
             {

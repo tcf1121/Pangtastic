@@ -18,7 +18,7 @@ namespace KDJ
 
         public BoardData LoadBoard()
         {
-            puzzleBoardSO = StageManager.Instance.CurrentStage.PuzzleBoard;
+            puzzleBoardSO = Manager.Stage.CurrentStage.PuzzleBoard;
             if (puzzleBoardSO == null)
             {
                 Debug.LogError("PuzzleBoardSO 없음");
@@ -107,7 +107,7 @@ namespace KDJ
                 else if (finalGemType == GemType.Coin) boardData.BlockArray[y, x] = new Coin(x, y);
                 else if (finalGemType == GemType.GiftBox) boardData.BlockArray[y, x] = new GiftBox(x, y);
                 else if (finalGemType == GemType.Egg) boardData.BlockArray[y, x] = new Egg(x, y);
-                else if (finalGemType == GemType.FlourBag) boardData.BlockArray[y, x] = new FlourBag(boardData, x, y);
+                else if (finalGemType == GemType.FlourBag) boardData.BlockArray[y, x] = new FlourBag(boardData.BlockArray, x, y);
                 else if (finalGemType == GemType.Flour_s) { }
                 else
                 {

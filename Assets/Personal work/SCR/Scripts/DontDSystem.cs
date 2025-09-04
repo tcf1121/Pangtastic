@@ -23,10 +23,10 @@ public class DontDSystem : MonoBehaviour
         DontDestroyOnLoad(gameObject);
     }
 
-    public static void StatGame()
-    {
-        Instance._gameSystem.SetActive(true);
-        //Instance.heartSystem = new();
-    }
+    //public static void StatGame()  //JWJ 주석처리함
+    //{
+    //    Instance._gameSystem.SetActive(true);
+    //    //Instance.heartSystem = new();
+    //}
 
 }

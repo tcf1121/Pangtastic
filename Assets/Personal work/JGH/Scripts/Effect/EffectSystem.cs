@@ -5,25 +5,17 @@ using UnityEngine.SceneManagement;
 using DG.Tweening;
 using UnityEngine.Serialization;
 
-public class EffectSystem : MonoBehaviour
+public class EffectSystem : Singleton<EffectSystem>
 {
-    public static EffectSystem Instance { get; private set; } // 싱글톤 인스턴스
+    //public static EffectSystem Instance { get; private set; } // 싱글톤 인스턴스
     
     [SerializeField] private float _spawnInterval = 0.05f; // 생성 간격
     [SerializeField] private float _moveTime = 0.8f;       // 이동 시간
     [SerializeField] public float _fadeTime = 1.3f; // 투명도 시간
 
-    private void Awake()
+    protected override void Awake()
     {
-        // 싱글톤 보장
-        if (Instance != null && Instance != this)
-        {
-            Destroy(gameObject);
-            return;
-        }
-
-        Instance = this;
-        DontDestroyOnLoad(gameObject); // 씬이 바뀌어도 유지
+        base.Awake();
     }
     
     public void CurrencyInPlayStartEffect(GameObject prefab, RectTransform spawnArea, RectTransform targetUI)

@@ -2,6 +2,8 @@ using SCR;
 using SCR_O;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Rendering;
+using UnityEngine.SocialPlatforms.Impl;
 
 namespace KDJ
 {
@@ -124,17 +126,20 @@ namespace KDJ
         /// <param name="boardManager">게임 보드 관리자</param>
         /// <param name="swapPosition">플레이어 스왑이 발생한 경우, 해당 위치</param>
         /// <returns>매치가 발생하여 블록이 파괴되었으면 true, 아니면 false</returns>
-        public bool ProcessMatches(BoardManager boardManager, Vector2Int? swapPosition = null)
+        public (HashSet<Vector2Int> coordsToDestroy, (Vector2Int pos, int type)? specialToCreate, Vector2Int? specialSpawnPos) ProcessMatches(BoardManager boardManager, Vector2Int? swapPosition = null)
         {
             var gameBoard = boardManager.Spawner.GameBoardData;
-            if (gameBoard == null) return false;
+            var coordsToDestroy = new HashSet<Vector2Int>();
+            (Vector2Int pos, int type)? specialToCreate = null;
+            Vector2Int? specialSpawnPos = null;
+
+            if (gameBoard == null) return (coordsToDestroy, specialToCreate, specialSpawnPos);
 
             int height = gameBoard.Height;
             int width = gameBoard.Width;
+            bool[,] visited = new bool[height, width];
 
-            HashSet<Vector2Int> coordsToDestroy = new HashSet<Vector2Int>();
-            (Vector2Int pos, int type)? specialToCreate = null;
-            bool[,] visited = new bool[height, width]; // 이미 처리된 블록인지 확인
+            // ... (매치 탐색 로직은 동일) ...
 
             // 우선순위 1: 5개짜리 직선 매치 (가로/세로)
             for (int y = 0; y < height; y++)
@@ -211,7 +216,6 @@ namespace KDJ
                 int score = 0;
                 var damagedObstaclesThisMatch = new HashSet<Block>();
 
-                // 1. 매치 결과 처리 (재료 추가, 스플래시 데미지)
                 foreach (var coord in coordsToDestroy)
                 {
                     Block block = gameBoard.GetBlock(coord.x, coord.y);
@@ -221,16 +225,17 @@ namespace KDJ
                         {
                             InGameManager.AddIngredientSta(block.GemType);
                         }
-                        
+
                         score += 10;
 
                         ApplySplashDamageToNeighbors(boardManager, coord.x, coord.y, damagedObstaclesThisMatch);
+                        ApplyDamageToOverlayBlock(boardManager, coord.x, coord.y, damagedObstaclesThisMatch);
                     }
                 }
-                boardManager.UpdateUI(score);
 
-                // 2. 특수 블록 생성 위치 결정
-                Vector2Int? specialSpawnPos = null;
+                int finalScore = CalculateScore(score);
+                boardManager.UpdateUI(finalScore);
+
                 if (specialToCreate.HasValue)
                 {
                     var creation = specialToCreate.Value;
@@ -246,30 +251,18 @@ namespace KDJ
                         if (!coordsToDestroy.Contains(specialSpawnPos.Value)) specialSpawnPos = creation.pos;
                     }
                 }
-
-                // 3. 매치된 모든 블록의 게임오브젝트 파괴
-                foreach (var coord in coordsToDestroy)
-                {
-                    Block block = gameBoard.GetBlock(coord.x, coord.y);
-                    if (block != null && block.BlockInstance != null)
-                    {
-                        Destroy(block.BlockInstance);
-                        block.BlockInstance = null;
-                    }
-                }
-
-                // 4. 특수 블록 생성
-                if (specialToCreate.HasValue && specialSpawnPos.HasValue)
-                {
-                    var creation = specialToCreate.Value;
-                    boardManager.Spawner.SpawnBlock(specialSpawnPos.Value.x, specialSpawnPos.Value.y, (GemType)creation.type, boardManager.BlockMover);
-                }
-
-                return true;
             }
-            return false;
+
+            return (coordsToDestroy, specialToCreate, specialSpawnPos);
         }
 
+        /// <summary>
+        /// 지정된 좌표의 블록이 파괴될 때, 인접한 방해 블록에 스플래시 데미지를 적용합니다.
+        /// </summary>
+        /// <param name="boardManager"></param>
+        /// <param name="x"></param>
+        /// <param name="y"></param>
+        /// <param name="damagedObstacles"></param>
         private void ApplySplashDamageToNeighbors(BoardManager boardManager, int x, int y, HashSet<Block> damagedObstacles)
         {
             var gameBoard = boardManager.Spawner.GameBoardData;
@@ -280,12 +273,36 @@ namespace KDJ
                 if (coord.x >= 0 && coord.x < gameBoard.Width && coord.y >= 0 && coord.y < gameBoard.Height)
                 {
                     Block neighbor = gameBoard.GetBlock(coord.x, coord.y);
-                    if (neighbor is SCR_O.ObstacleBlock targetObstacle && !damagedObstacles.Contains(targetObstacle))
+                    if (neighbor == null) continue;
+
+                    ObstacleBlock obstacleToDamage = null;
+
+                    if (neighbor is FlourBag_s flourBagS)
                     {
-                        targetObstacle.SplashDamage(boardManager);
-                        damagedObstacles.Add(targetObstacle);
+                        obstacleToDamage = flourBagS.Owner;
+                    }
+                    else if (neighbor is ObstacleBlock)
+                    {
+                        obstacleToDamage = neighbor as ObstacleBlock;
+                    }
+
+                    if (obstacleToDamage != null && !damagedObstacles.Contains(obstacleToDamage))
+                    {
+                        obstacleToDamage.SplashDamage();
+                        damagedObstacles.Add(obstacleToDamage);
                     }
                 }
+            }
+        }
+
+        private void ApplyDamageToOverlayBlock(BoardManager boardManager, int x, int y, HashSet<Block> damagedObstacles)
+        {
+            var gameBoard = boardManager.Spawner.GameBoardData;
+            Block overlayBlock = gameBoard.GetOverlayBlock(x, y);
+            if (overlayBlock is ObstacleBlock obstacle && !damagedObstacles.Contains(obstacle))
+            {
+                obstacle.TakeDamage();
+                damagedObstacles.Add(obstacle);
             }
         }
         #endregion
@@ -404,6 +421,12 @@ namespace KDJ
         public bool CheckBlockIsAllValid(BoardManager boardManager, int x, int y)
         {
             return CheckInOfArray(boardManager, x, y) && CheckBlockIsValue(boardManager, x, y);
+        }
+
+        public int CalculateScore(int score)
+        {
+            int finalScore = (int)(score + BoardManager.Instance.MatchCombo.CurCombo * 0.5f * score);
+            return finalScore;
         }
 
         #endregion

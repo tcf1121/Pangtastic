@@ -2,7 +2,6 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
 using UnityEngine.ResourceManagement.AsyncOperations;
-using UnityEngine.UI;
 
 namespace KDJ
 {
@@ -10,7 +9,7 @@ namespace KDJ
     {
         [SerializeField] private Sprite _currentImage;
         private List<Vector2Int> fourPos = new();
-        public FlourBag(BoardData boardData, int xpos, int ypos)
+        public FlourBag(Block[,] array, int xpos, int ypos)
         {
             X = xpos;
             Y = ypos;
@@ -19,7 +18,7 @@ namespace KDJ
             GemType = SCR.GemType.FlourBag;
             IsObstacle = true;
             CanMove = false;
-            SetFourPos(boardData);
+            SetFourPos(array);
             string path = $"Assets/Imports/Image/Obstacle/FlourBag_Damage.png";
             AsyncOperationHandle<Sprite> handle = Addressables.LoadAssetAsync<Sprite>(path);
             handle.Completed += OnSpriteLoadCompleted;
@@ -33,15 +32,18 @@ namespace KDJ
             }
         }
 
-        private void SetFourPos(BoardData boardData)
+        private void SetFourPos(Block[,] array)
         {
             fourPos.Add(new Vector2Int(X, Y + 1));
             fourPos.Add(new Vector2Int(X + 1, Y));
             fourPos.Add(new Vector2Int(X + 1, Y + 1));
             foreach (var pos in fourPos)
             {
-                boardData.BlockPlateArray[pos.y, pos.x] = true;
-                boardData.BlockArray[pos.y, pos.x] = new FlourBag_s(this);
+                if (array[pos.y, pos.x].BlockInstance != null)
+                {
+                    GameObject.Destroy(array[pos.y, pos.x].BlockInstance);
+                }
+                array[pos.y, pos.x] = new FlourBag_s(this);
             }
 
         }
@@ -57,7 +59,7 @@ namespace KDJ
             }
             else
             {
-                BlockInstance.GetComponent<GemPrefab>().SetSprite(_currentImage);
+                BlockInstance.GetComponent<SpriteRenderer>().sprite = _currentImage;
             }
         }
 

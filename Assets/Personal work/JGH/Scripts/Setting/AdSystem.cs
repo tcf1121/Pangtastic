@@ -2,21 +2,15 @@ using GoogleMobileAds.Api;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class AdSystem : MonoBehaviour
+public class AdSystem : Singleton<AdSystem>
 {
-    public static AdSystem Instance { get; private set; }
+    //public static AdSystem Instance { get; private set; }
     
     private RewardedInterstitialAd _rewardedInterstitialAd;
     
-    protected void Awake()
+    protected override void Awake()
     {
-        if (Instance != null && Instance != this)
-        {
-            Destroy(gameObject);
-            return;
-        }
-        Instance = this;
-        DontDestroyOnLoad(gameObject);
+        base.Awake();
     }
 
     private void Start()

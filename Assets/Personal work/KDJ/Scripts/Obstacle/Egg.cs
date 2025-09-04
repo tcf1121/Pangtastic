@@ -26,6 +26,7 @@ namespace KDJ
         {
             if (handle.Status == AsyncOperationStatus.Succeeded)
             {
+                Debug.Log("가져오기 완료");
                 _currentImage = handle.Result;
             }
         }
@@ -41,7 +42,7 @@ namespace KDJ
             }
             else
             {
-                BlockInstance.GetComponent<GemPrefab>().SetSprite(_currentImage);
+                BlockInstance.GetComponent<SpriteRenderer>().sprite = _currentImage;
             }
 
         }
