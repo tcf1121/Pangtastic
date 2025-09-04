@@ -19,7 +19,7 @@ namespace SCR
         private List<Vector3Int> _spawnPoint = new();
 
         private int _stage;
-        string path = "StageInfo.csv";
+        string path = "Assets/PuzzleEditor/StageInfo.csv";
 
         void Awake()
         {
