@@ -221,10 +221,11 @@ namespace KDJ
                         {
                             InGameManager.AddIngredientSta(block.GemType);
                         }
-                        
+
                         score += 10;
 
                         ApplySplashDamageToNeighbors(boardManager, coord.x, coord.y, damagedObstaclesThisMatch);
+                        ApplyDamageToOverlayBlock(boardManager, coord.x, coord.y, damagedObstaclesThisMatch);
                     }
                 }
                 boardManager.UpdateUI(score);
@@ -270,6 +271,13 @@ namespace KDJ
             return false;
         }
 
+        /// <summary>
+        /// 지정된 좌표의 블록이 파괴될 때, 인접한 방해 블록에 스플래시 데미지를 적용합니다.
+        /// </summary>
+        /// <param name="boardManager"></param>
+        /// <param name="x"></param>
+        /// <param name="y"></param>
+        /// <param name="damagedObstacles"></param>
         private void ApplySplashDamageToNeighbors(BoardManager boardManager, int x, int y, HashSet<Block> damagedObstacles)
         {
             var gameBoard = boardManager.Spawner.GameBoardData;
@@ -280,12 +288,36 @@ namespace KDJ
                 if (coord.x >= 0 && coord.x < gameBoard.Width && coord.y >= 0 && coord.y < gameBoard.Height)
                 {
                     Block neighbor = gameBoard.GetBlock(coord.x, coord.y);
-                    if (neighbor is SCR_O.ObstacleBlock targetObstacle && !damagedObstacles.Contains(targetObstacle))
+                    if (neighbor == null) continue;
+
+                    ObstacleBlock obstacleToDamage = null;
+
+                    if (neighbor is FlourBag_s flourBagS)
                     {
-                        targetObstacle.SplashDamage(boardManager);
-                        damagedObstacles.Add(targetObstacle);
+                        obstacleToDamage = flourBagS.Owner;
+                    }
+                    else if (neighbor is ObstacleBlock)
+                    {
+                        obstacleToDamage = neighbor as ObstacleBlock;
+                    }
+
+                    if (obstacleToDamage != null && !damagedObstacles.Contains(obstacleToDamage))
+                    {
+                        obstacleToDamage.SplashDamage();
+                        damagedObstacles.Add(obstacleToDamage);
                     }
                 }
+            }
+        }
+
+        private void ApplyDamageToOverlayBlock(BoardManager boardManager, int x, int y, HashSet<Block> damagedObstacles)
+        {
+            var gameBoard = boardManager.Spawner.GameBoardData;
+            Block overlayBlock = gameBoard.GetOverlayBlock(x, y);
+            if (overlayBlock is ObstacleBlock obstacle && !damagedObstacles.Contains(obstacle))
+            {
+                obstacle.TakeDamage();
+                damagedObstacles.Add(obstacle);
             }
         }
         #endregion

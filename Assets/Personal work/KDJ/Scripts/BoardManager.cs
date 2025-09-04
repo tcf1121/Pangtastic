@@ -16,9 +16,9 @@ namespace KDJ
         public BlockMover BlockMover { get; private set; }
         public MatchCombo MatchCombo { get; set; }
         public BoardLoader BoardLoader { get; set; }
-        public SpriteMask SpriteMask;
         public int Score { get; private set; } = 0;
         public int CurStage;
+        public static bool CanTouch { get;  private set; }
         public float MatchDelay;
         public static BoardManager Instance { get; private set; }
         public bool IsItemSelected { get; private set; } = false;
@@ -89,11 +89,16 @@ namespace KDJ
             IsItemSelected = false;
         }
 
+        public static void SetTouch(bool canTouch)
+        {
+            CanTouch = canTouch;
+        }
+
 
         #region 테스트 코드
         public void UpdateUI(Block block, int x, int y)
         {
-            _blockInfo.text = $"Gem Type: {block.GemType}\nPosition: ({y}, {x})\nIsObstacle: {block.IsObstacle}\nIsNormal: {block.IsNormal}\nCanMove: {block.CanMove}\nObstacleBlock: {block is SCR_O.ObstacleBlock}";
+            _blockInfo.text = $"Gem Type: {block.GemType}\nPosition: ({y}, {x})\nIsObstacle: {block.IsObstacle}\nIsNormal: {block.IsNormal}\nCanMove: {block.CanMove}\nObstacleBlock: {block is ObstacleBlock}";
         }
 
         public void UpdateUI(int score)

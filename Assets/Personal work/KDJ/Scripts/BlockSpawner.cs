@@ -25,6 +25,8 @@ namespace KDJ
         [SerializeField] private int _spawnRangeMax = 6;
         [Header("테스트용 블록 교체 설정")]
         [SerializeField] private List<BlockOverride> _test_blockOverrides;
+        [Header("블록 마스크")]
+        [SerializeField] private GameObject _blockMaskPrefab;
 
 
         public GameBoardData GameBoardData { get; private set; }
@@ -131,7 +133,7 @@ namespace KDJ
                 if (!GameBoardData.BlockPlate.BlockPlateArray[y, x]) continue;
 
                 Block oldBlock = GameBoardData.GetBlock(x, y);
-                if (oldBlock != null && oldBlock.BlockInstance != null)
+                if (gemType != GemType.Dust && gemType != GemType.Syrup && oldBlock != null && oldBlock.BlockInstance != null)
                 {
                     Destroy(oldBlock.BlockInstance);
                 }
@@ -147,26 +149,17 @@ namespace KDJ
                 else if (gemType == GemType.Dust)
                 {
                     GameBoardData.OverlayArray[y, x] = new Dust(x, y);
-                    int donutNum = Random.Range(0, 6);
-                    GameBoardData.BlockArray[y, x] = new Block()
-                    {
-                        GemType = (GemType)donutNum,
-                    };
                 }
                 else if (gemType == GemType.Syrup)
                 {
                     GameBoardData.OverlayArray[y, x] = new Syrup(x, y);
-                    int donutNum = Random.Range(0, 6);
-                    GameBoardData.BlockArray[y, x] = new Block()
-                    {
-                        GemType = (GemType)donutNum,
-                    };
                 }
                 else if (gemType == GemType.Ice) GameBoardData.BlockArray[y, x] = new Ice(x, y);
                 else if (gemType == GemType.DonutBag) GameBoardData.BlockArray[y, x] = new DonutBag(x, y);
                 else if (gemType == GemType.Coin) GameBoardData.BlockArray[y, x] = new Coin(x, y);
                 else if (gemType == GemType.GiftBox) GameBoardData.BlockArray[y, x] = new GiftBox(x, y);
                 else if (gemType == GemType.Egg) GameBoardData.BlockArray[y, x] = new Egg(x, y);
+                else if (gemType == GemType.FlourBag) GameBoardData.BlockArray[y, x] = new FlourBag(GameBoardData.BlockArray, x, y);
                 else if (gemType == GemType.Flour_s) { }
                 else
                 {
@@ -178,7 +171,25 @@ namespace KDJ
 
                 Vector3 position = blockMover.GridToWorld(new Vector2Int(x, y), GameBoardData.Width, GameBoardData.Height);
                 GameObject blockPrefab = GetBlockPrefab((int)gemType);
-                GameBoardData.BlockArray[y, x].BlockInstance = Instantiate(blockPrefab, position, Quaternion.identity);
+
+                if (gemType == GemType.Dust || gemType == GemType.Syrup && blockPrefab != null)
+                {
+                    GameBoardData.OverlayArray[y, x].BlockInstance = Instantiate(blockPrefab, position, Quaternion.identity);
+                }
+                else
+                {
+                    GameBoardData.BlockArray[y, x].BlockInstance = Instantiate(blockPrefab, position, Quaternion.identity);
+                }
+
+                if (GameBoardData.BlockArray[y, x].GemType == GemType.Ice)
+                {
+                    Debug.Log("Ice블럭인가?" + (GameBoardData.BlockArray[y, x] is Ice));
+                    if (GameBoardData.BlockArray[y, x] is Ice iceBlock && iceBlock.BlockInstance != null)
+                    {
+                        iceBlock.IceObject = iceBlock.BlockInstance;
+                        Debug.Log("IceObject 설정됨:" + (iceBlock.IceObject != null));
+                    }
+                }
 
                 GameBoardData.SetBlock(x, y, GameBoardData.BlockArray[y, x]);
 
@@ -218,12 +229,32 @@ namespace KDJ
                             {
                                 block.CanMove = false;
                             }
+
+                            if (block.GemType == GemType.Ice)
+                            {
+                                Debug.Log("Ice블럭인가?" + (block is Ice));
+                                if (block is Ice iceBlock && iceBlock.BlockInstance != null)
+                                {
+                                    iceBlock.IceObject = iceBlock.BlockInstance;
+                                    Debug.Log("IceObject 설정됨:" + (iceBlock.IceObject != null));
+                                }
+                            }
                         }
                         else if (block.GemType < GemType.Dust && block.GemType > GemType.Sugar)
                         {
                             // 특수 블록일때 설정
                             block.IsObstacle = false;
                             block.IsNormal = false;
+                        }
+
+                        // 블록 마스크 그리기
+                        if (_blockMaskPrefab != null)
+                        {
+                            if (y < GameBoardData.Height && GameBoardData.BlockPlate.BlockPlateArray[y, x])
+                            {
+                                GameObject maskInstance = Instantiate(_blockMaskPrefab, position, Quaternion.identity, transform);
+                                GameBoardData.BlockMask[y, x] = maskInstance;
+                            }
                         }
                     }
                 }
@@ -500,8 +531,12 @@ namespace KDJ
                     // 데이터상으론 블록이 있지만, 실제 게임오브젝트는 파괴된 경우
                     if (block != null && block.BlockInstance == null)
                     {
-                        // 데이터에서 블록을 제거합니다.
-                        // 재료 추가, 스플래시 데미지 등 매치의 결과는 BoardMatchChecker에서 처리합니다.
+                        if (block is FlourBag_s bag_S && bag_S.Owner.CurrentHP > 0)
+                        {
+                            // FlourBag_s 블록이 남아있고, 주인인 FlourBag의 HP가 0보다 크면 무시
+                            continue;
+                        }
+
                         GameBoardData.SetBlock(x, y, null);
                     }
                 }
