@@ -182,6 +182,7 @@ public class StageManager : Singleton<StageManager>
             {
                 CurrentStageIndex = loadedIndex - 1;
                 Debug.Log($"스테이지 로드 완료: {CurrentStageIndex + 1}");
+                OutGameManager.UpdateStageStartButton(); // 버튼 업데이트
             }
             else
             {

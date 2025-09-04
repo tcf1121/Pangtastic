@@ -33,6 +33,12 @@ public class OutGameManager : MonoBehaviour
         _stageButtonText.text = $"Stage {index + 1}";
     }
 
+    public static void UpdateStageStartButton()
+    {
+        int index = Manager.Stage.CurrentStageIndex;
+        instate._stageButtonText.text = $"Stage {index + 1}";
+    }
+
     /// <summary>
     /// UI(TextMeshPro) 업데이트
     /// </summary>
