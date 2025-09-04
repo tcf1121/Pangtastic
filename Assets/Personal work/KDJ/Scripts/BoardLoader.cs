@@ -18,7 +18,7 @@ namespace KDJ
 
         public BoardData LoadBoard()
         {
-            puzzleBoardSO = StageManager.Instance.CurrentStage.PuzzleBoard;
+            puzzleBoardSO = Manager.Stage.CurrentStage.PuzzleBoard;
             if (puzzleBoardSO == null)
             {
                 Debug.LogError("PuzzleBoardSO 없음");

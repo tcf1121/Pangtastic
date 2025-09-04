@@ -25,7 +25,7 @@ public class EnterInGamePanel : MonoBehaviour
 
     void OnEnable()
     {
-        _level.text = $"{StageManager.Instance.CurrentStageIndex + 1}레벨";
+        _level.text = $"{Manager.Stage.CurrentStageIndex + 1}레벨";
         _whistNum.text = $"거품기 개수";
         _scissorsNum.text = $"가위 개수";
         _donutPanNum.text = $"도넛팬 개수";
@@ -60,7 +60,7 @@ public class EnterInGamePanel : MonoBehaviour
 
     void EnterGame()
     {
-        if (HeartSystem.Instance.TryStartStage())
+        if (Manager.Heart.TryStartStage())
         {
 
             // 아이템 사용 구문 추가

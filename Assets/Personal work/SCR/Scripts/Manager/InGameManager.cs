@@ -133,7 +133,7 @@ public class InGameManager : MonoBehaviour
         BoardManager.SetTouch(false);
         //instate.LoseCoin.text = $"{GetCoin()}";
         //instate.LoseScore.text = $"{GetScore()}";
-        HeartSystem.Instance.UseHearts();
+        Manager.Heart.UseHearts();
         instate.failUI.SetActive(true);
     }
 

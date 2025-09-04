@@ -9,54 +9,54 @@ public class InGameUiController : MonoBehaviour
 
     private void Start()
     {
-        AudioSystem.Instance.PlayBGMByName("InGameMusic");
-        HeartSystem.Instance.isPlaying = true;
+        Manager.Audio.PlayBGMByName("InGameMusic");
+        Manager.Heart.isPlaying = true;
     }
 
     public void ChangeOutGameScene()
     {
-        CurrencySystem.Instance.pendingSpawnType = CurrencySystem.SpawnType.Exit;
+        Manager.Currency.pendingSpawnType = CurrencySystem.SpawnType.Exit;
 
-        CurrencySystem.Instance.AddCoin(InGameManager.GetCoin());
-        CurrencySystem.Instance.AddStar(1);
+        Manager.Currency.AddCoin(InGameManager.GetCoin());
+        Manager.Currency.AddStar(1);
 
         SceneManager.LoadScene(2/*로비씬*/);
 
-        AudioSystem.Instance.PlaySFXByName("GameToHomeSfx");
+        Manager.Audio.PlaySFXByName("GameToHomeSfx");
     }
 
     public void ChangeContinueOutGameScene()
     {
-        CurrencySystem.Instance.pendingSpawnType = CurrencySystem.SpawnType.Continue;
+        Manager.Currency.pendingSpawnType = CurrencySystem.SpawnType.Continue;
 
         needStartSetting = true;
 
-        CurrencySystem.Instance.AddCoin(InGameManager.GetCoin());
-        CurrencySystem.Instance.AddStar(1);
+        Manager.Currency.AddCoin(InGameManager.GetCoin());
+        Manager.Currency.AddStar(1);
 
         SceneManager.LoadScene(3/*게임씬*/);
 
-        AudioSystem.Instance.PlaySFXByName("GameToHomeSfx");
+        Manager.Audio.PlaySFXByName("GameToHomeSfx");
     }
 
     public void ChangeQuitGameScene()
     {
         SceneManager.LoadScene(2/*로비씬*/);
-        HeartSystem.Instance.UseHearts();
-        AudioSystem.Instance.PlaySFXByName("GameToHomeSfx");
+        Manager.Heart.UseHearts();
+        Manager.Audio.PlaySFXByName("GameToHomeSfx");
     }
 
     public void ChangeRetryGameScene()
     {
         needStartSetting = true;
-        HeartSystem.Instance.UseHearts();
+        Manager.Heart.UseHearts();
         SceneManager.LoadScene(3/*게임씬*/);
-        AudioSystem.Instance.PlaySFXByName("GameToHomeSfx");
+        Manager.Audio.PlaySFXByName("GameToHomeSfx");
     }
 
     public void SfxGameExit()
     {
-        AudioSystem.Instance.PlaySFXByName("GameExitSfx");
+        Manager.Audio.PlaySFXByName("GameExitSfx");
     }
 
 }

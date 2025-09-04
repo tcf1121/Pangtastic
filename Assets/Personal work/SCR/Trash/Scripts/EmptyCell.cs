@@ -7,10 +7,12 @@ namespace SCR
     public class EmptyCell : TileBase
     {
         public Sprite PreviewEditorSprite;
+        public GameObject gameObject;
 
         public override void GetTileData(Vector3Int position, ITilemap tilemap, ref TileData tileData)
         {
             tileData.sprite = PreviewEditorSprite;
+
             //tileData.colliderType = Tile.ColliderType.Grid;
         }
 
@@ -21,10 +23,16 @@ namespace SCR
                 return false;
 #endif
 
-            // if (GameObject.Find("Puzzle").GetComponent<PuzzelEditBoard>())
-            //     PuzzelEditBoard.AddCell(position);
-            // else
-            //     Board.AddCell(position);
+
+            GameObject root = GameObject.Find("Puzzle").transform.GetChild(0).gameObject;
+            if (root != null)
+            {
+                GameObject prefab = Instantiate(gameObject, root.transform);
+                prefab.transform.position = position;
+            }
+
+
+
             return base.StartUp(position, tilemap, go);
         }
     }
