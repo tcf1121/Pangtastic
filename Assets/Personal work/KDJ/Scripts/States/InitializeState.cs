@@ -48,7 +48,7 @@ namespace KDJ.States
             boardManager.Spawner.Initialize(boardManager, loadedBoardData, blockPlate, boardManager.BlockMover);
 
             Debug.Log($"보드 초기화 완료. 가로: {boardManager.Spawner.GameBoardData.Width}, 세로: {boardManager.Spawner.GameBoardData.Height}");
-            InGameManager.SpawnCustomer();
+            //InGameManager.SpawnCustomer();
 
             BoardManager.SetTouch(true);
 

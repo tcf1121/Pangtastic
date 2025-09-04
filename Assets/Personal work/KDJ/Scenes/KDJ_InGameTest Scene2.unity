@@ -10084,6 +10084,10 @@ PrefabInstance:
       value: 8
       objectReference: {fileID: 0}
     - target: {fileID: 3981300310010789011, guid: 285de4924e1fde841a475f6e261a41bf, type: 3}
+      propertyPath: _duration
+      value: 0.2
+      objectReference: {fileID: 0}
+    - target: {fileID: 3981300310010789011, guid: 285de4924e1fde841a475f6e261a41bf, type: 3}
       propertyPath: MatchDelay
       value: 0.15
       objectReference: {fileID: 0}
@@ -10464,9 +10468,37 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 11400000, guid: 521f39fe0c4c3984ea4ffb934dcb1120, type: 2}
     - target: {fileID: 5266263310930390250, guid: 7bbc72687f4523646ad4978aac87d61b, type: 3}
+      propertyPath: _emptyTile
+      value: 
+      objectReference: {fileID: 11400000, guid: fa1c4a984f1da8d42b18e5fe4fa4aba5, type: 2}
+    - target: {fileID: 5266263310930390250, guid: 7bbc72687f4523646ad4978aac87d61b, type: 3}
       propertyPath: BlockPlateSize
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 5266263310930390250, guid: 7bbc72687f4523646ad4978aac87d61b, type: 3}
+      propertyPath: _blockTiles.Array.size
+      value: 5
+      objectReference: {fileID: 0}
+    - target: {fileID: 5266263310930390250, guid: 7bbc72687f4523646ad4978aac87d61b, type: 3}
+      propertyPath: _blockTiles.Array.data[0]
+      value: 
+      objectReference: {fileID: 11400000, guid: 7952b5bd6e0b3c040a6cd365b7d26471, type: 2}
+    - target: {fileID: 5266263310930390250, guid: 7bbc72687f4523646ad4978aac87d61b, type: 3}
+      propertyPath: _blockTiles.Array.data[1]
+      value: 
+      objectReference: {fileID: 11400000, guid: 340c6f97f4c39d94e921053bf48b894a, type: 2}
+    - target: {fileID: 5266263310930390250, guid: 7bbc72687f4523646ad4978aac87d61b, type: 3}
+      propertyPath: _blockTiles.Array.data[2]
+      value: 
+      objectReference: {fileID: 11400000, guid: f8f4fb3aa5d41aa4fa68b99c76ed46b8, type: 2}
+    - target: {fileID: 5266263310930390250, guid: 7bbc72687f4523646ad4978aac87d61b, type: 3}
+      propertyPath: _blockTiles.Array.data[3]
+      value: 
+      objectReference: {fileID: 11400000, guid: 134d434b6f49ff14c863e966d8faea07, type: 2}
+    - target: {fileID: 5266263310930390250, guid: 7bbc72687f4523646ad4978aac87d61b, type: 3}
+      propertyPath: _blockTiles.Array.data[4]
+      value: 
+      objectReference: {fileID: 11400000, guid: cbebdf3a0a6383d4da194a248dbcfe0e, type: 2}
     - target: {fileID: 7101584776311492427, guid: 7bbc72687f4523646ad4978aac87d61b, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0
@@ -16874,7 +16906,7 @@ PrefabInstance:
       objectReference: {fileID: 1959876101150019757, guid: 0355b369e148e8a4580e5e05edbacef9, type: 3}
     - target: {fileID: 8579344169084250576, guid: a6c91df400f25084193b8dfb89592778, type: 3}
       propertyPath: _test_blockOverrides.Array.size
-      value: 1
+      value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 8579344169084250576, guid: a6c91df400f25084193b8dfb89592778, type: 3}
       propertyPath: _test_blockOverrides.Array.data[0].x
@@ -16886,11 +16918,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8579344169084250576, guid: a6c91df400f25084193b8dfb89592778, type: 3}
       propertyPath: _test_blockOverrides.Array.data[1].x
-      value: 3
+      value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 8579344169084250576, guid: a6c91df400f25084193b8dfb89592778, type: 3}
       propertyPath: _test_blockOverrides.Array.data[1].y
-      value: 4
+      value: 5
       objectReference: {fileID: 0}
     - target: {fileID: 8579344169084250576, guid: a6c91df400f25084193b8dfb89592778, type: 3}
       propertyPath: _test_blockOverrides.Array.data[2].x
@@ -16910,11 +16942,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8579344169084250576, guid: a6c91df400f25084193b8dfb89592778, type: 3}
       propertyPath: _test_blockOverrides.Array.data[0].gemType
-      value: 13
+      value: 7
       objectReference: {fileID: 0}
     - target: {fileID: 8579344169084250576, guid: a6c91df400f25084193b8dfb89592778, type: 3}
       propertyPath: _test_blockOverrides.Array.data[1].gemType
-      value: 12
+      value: 13
       objectReference: {fileID: 0}
     - target: {fileID: 8579344169084250576, guid: a6c91df400f25084193b8dfb89592778, type: 3}
       propertyPath: _test_blockOverrides.Array.data[2].gemType
@@ -19415,6 +19447,7 @@ GameObject:
   - component: {fileID: 1784433386}
   - component: {fileID: 1784433385}
   - component: {fileID: 1784433384}
+  - component: {fileID: 1784433387}
   m_Layer: 0
   m_Name: Main Camera
   m_TagString: MainCamera
@@ -19497,6 +19530,18 @@ Transform:
   - {fileID: 1688877715}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1784433387
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1784433383}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4146232147abe8f4a9ee0b511f1159f7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1786383823
 GameObject:
   m_ObjectHideFlags: 0

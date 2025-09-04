@@ -124,17 +124,20 @@ namespace KDJ
         /// <param name="boardManager">게임 보드 관리자</param>
         /// <param name="swapPosition">플레이어 스왑이 발생한 경우, 해당 위치</param>
         /// <returns>매치가 발생하여 블록이 파괴되었으면 true, 아니면 false</returns>
-        public bool ProcessMatches(BoardManager boardManager, Vector2Int? swapPosition = null)
+        public (HashSet<Vector2Int> coordsToDestroy, (Vector2Int pos, int type)? specialToCreate, Vector2Int? specialSpawnPos) ProcessMatches(BoardManager boardManager, Vector2Int? swapPosition = null)
         {
             var gameBoard = boardManager.Spawner.GameBoardData;
-            if (gameBoard == null) return false;
+            var coordsToDestroy = new HashSet<Vector2Int>();
+            (Vector2Int pos, int type)? specialToCreate = null;
+            Vector2Int? specialSpawnPos = null;
+
+            if (gameBoard == null) return (coordsToDestroy, specialToCreate, specialSpawnPos);
 
             int height = gameBoard.Height;
             int width = gameBoard.Width;
+            bool[,] visited = new bool[height, width];
 
-            HashSet<Vector2Int> coordsToDestroy = new HashSet<Vector2Int>();
-            (Vector2Int pos, int type)? specialToCreate = null;
-            bool[,] visited = new bool[height, width]; // 이미 처리된 블록인지 확인
+            // ... (매치 탐색 로직은 동일) ...
 
             // 우선순위 1: 5개짜리 직선 매치 (가로/세로)
             for (int y = 0; y < height; y++)
@@ -211,7 +214,6 @@ namespace KDJ
                 int score = 0;
                 var damagedObstaclesThisMatch = new HashSet<Block>();
 
-                // 1. 매치 결과 처리 (재료 추가, 스플래시 데미지)
                 foreach (var coord in coordsToDestroy)
                 {
                     Block block = gameBoard.GetBlock(coord.x, coord.y);
@@ -230,8 +232,6 @@ namespace KDJ
                 }
                 boardManager.UpdateUI(score);
 
-                // 2. 특수 블록 생성 위치 결정
-                Vector2Int? specialSpawnPos = null;
                 if (specialToCreate.HasValue)
                 {
                     var creation = specialToCreate.Value;
@@ -247,28 +247,9 @@ namespace KDJ
                         if (!coordsToDestroy.Contains(specialSpawnPos.Value)) specialSpawnPos = creation.pos;
                     }
                 }
-
-                // 3. 매치된 모든 블록의 게임오브젝트 파괴
-                foreach (var coord in coordsToDestroy)
-                {
-                    Block block = gameBoard.GetBlock(coord.x, coord.y);
-                    if (block != null && block.BlockInstance != null)
-                    {
-                        Destroy(block.BlockInstance);
-                        block.BlockInstance = null;
-                    }
-                }
-
-                // 4. 특수 블록 생성
-                if (specialToCreate.HasValue && specialSpawnPos.HasValue)
-                {
-                    var creation = specialToCreate.Value;
-                    boardManager.Spawner.SpawnBlock(specialSpawnPos.Value.x, specialSpawnPos.Value.y, (GemType)creation.type, boardManager.BlockMover);
-                }
-
-                return true;
             }
-            return false;
+
+            return (coordsToDestroy, specialToCreate, specialSpawnPos);
         }
 
         /// <summary>
