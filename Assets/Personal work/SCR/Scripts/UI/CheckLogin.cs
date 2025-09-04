@@ -1,8 +1,11 @@
 using Firebase.Auth;
+using Firebase.Database;
 using Firebase.Extensions;
+using Newtonsoft.Json;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
@@ -19,17 +22,19 @@ namespace SCR
         [SerializeField] Button _enterBtn;
         [SerializeField] Button _googlePlayBtn;
         [SerializeField] Button _guestBtn;
+        [SerializeField] Button _logoutBtn;
         [SerializeField] GameObject _enterPanel;
         [SerializeField] GameObject _loginPanel;
 
         void Awake()
         {
+            _logoutBtn.onClick.AddListener(Logout);
             _enterBtn.onClick.AddListener(CheckBefore);
             _googlePlayBtn.onClick.AddListener(Manager.GPGS.AuthenticateUser);
             _guestBtn.onClick.AddListener(LoginAsGuest);
         }
 
-        private void CheckBefore()
+        private async void CheckBefore()
         {
 
             FirebaseAuth auth = FirebaseAuth.DefaultInstance;
@@ -39,7 +44,8 @@ namespace SCR
                 {
                     Debug.Log($"이미 게스트 로그인 상태: {auth.CurrentUser.UserId}");
                     Manager.DB.user = auth.CurrentUser;
-                    Manager.Stage.LoadStage();
+                    //Manager.Stage.LoadStage();
+                    await Manager.User.SetUser(auth.CurrentUser.UserId);
                     //DontDSystem.StatGame();
                     SceneManager.LoadScene(2/*로비씬*/);
                 }
@@ -47,7 +53,7 @@ namespace SCR
                 {
                     Debug.Log($"이미 일반 로그인 상태: {auth.CurrentUser.UserId}");
                     Manager.DB.user = auth.CurrentUser;
-                    Manager.Stage.LoadStage();
+                    //Manager.Stage.LoadStage();
                     //DontDSystem.StatGame();
                     SceneManager.LoadScene(2/*로비씬*/);
                 }
@@ -56,6 +62,29 @@ namespace SCR
             // else
             _enterPanel.SetActive(false);
             _loginPanel.SetActive(true);
+        }
+
+        private void Logout()
+        {
+            FirebaseAuth auth = FirebaseAuth.DefaultInstance;
+            if (auth.CurrentUser != null)
+            {
+                DatabaseReference dataToRemove = Manager.DB.GetUserPath(auth.CurrentUser.UserId);
+                dataToRemove.RemoveValueAsync().ContinueWith(task =>
+                {
+                    if (task.IsCompleted)
+                    {
+                        Debug.Log("데이터 삭제 성공!");
+                    }
+                    else if (task.IsFaulted)
+                    {
+                        Debug.LogError("데이터 삭제 실패: " + task.Exception);
+                    }
+                });
+                auth.SignOut();
+
+            }
+
         }
 
         private void HowToLogin(LoginType loginType)
@@ -76,7 +105,7 @@ namespace SCR
         {
             Debug.Log("버튼눌림");
             FirebaseAuth auth = FirebaseAuth.DefaultInstance;
-            auth.SignInAnonymouslyAsync().ContinueWithOnMainThread(task =>
+            auth.SignInAnonymouslyAsync().ContinueWithOnMainThread(async task =>
             {
                 if (task.IsCanceled)
                 {
@@ -89,37 +118,16 @@ namespace SCR
                     return;
                 }
 
-                Firebase.Auth.FirebaseUser newUser = task.Result.User;
+                FirebaseUser newUser = task.Result.User;
                 string uid = newUser.UserId;
 
                 Debug.LogFormat($"게스트 로그인 성공 : {newUser.UserId}");
 
-                Manager.DB.GetUserPath(uid)
-                .Child("UserInfo")
-                .Child("Heart")
-                .Child("currentHeart")
-                .SetValueAsync(Manager.Heart.GetMaxHearts());
+                Manager.User.NewUser(uid, DateTime.Now.ToString("O"));
 
-                Manager.DB.GetUserPath(uid)
-                .Child("UserInfo")
-                .Child("Heart")
-                .Child("lastSaveTime")
-                .SetValueAsync(DateTime.Now.ToString("O"));
+                //Manager.Stage.LoadStage();
 
-                Manager.DB.GetUserPath(uid)
-                .Child("UserInfo")
-                .Child("Heart")
-                .Child("remainingSeconds")
-                .SetValueAsync(0);
-
-                Manager.DB.GetUserPath(uid)
-                .Child("playerName")
-                .SetValueAsync("Guest");
-
-                Manager.Stage.LoadStage();
-                //DontDSystem.StatGame();
-                SceneManager.LoadScene(2/*로비씬*/);
-
+                SceneManager.LoadScene("Lobby Scene");
             });
 
         }

@@ -59,7 +59,7 @@ public abstract class Singleton<T> : MonoBehaviour where T : MonoBehaviour
         return instance;
     }
 
-    protected virtual void OnDestroy() 
+    protected virtual void OnDestroy()
     {
         if (instance == this as T)
         {

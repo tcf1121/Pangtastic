@@ -8,7 +8,7 @@ using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-public class HeartSystem : Singleton<HeartSystem>
+public class HeartSystem : MonoBehaviour
 {
     //public static HeartSystem Instance { get; private set; }
 
@@ -23,11 +23,11 @@ public class HeartSystem : Singleton<HeartSystem>
 
     public bool isPlaying = false;
 
-    protected override void Awake()
-    {
-        base.Awake();
-        Debug.Log("하트 시스템");
-    }
+    // protected override void Awake()
+    // {
+    //     base.Awake();
+    //     Debug.Log("하트 시스템");
+    // }
 
     private void Start()
     {
@@ -331,10 +331,10 @@ public class HeartSystem : Singleton<HeartSystem>
     /// <param name="pause"></param>
     // private void OnApplicationPause(bool pause)
     // {
-        // if (pause)
-        // {
-            // Quit();
-        // }
+    // if (pause)
+    // {
+    // Quit();
+    // }
     // }
 
     private void Quit()
