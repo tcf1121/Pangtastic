@@ -115,7 +115,10 @@ public class UserInfoManager : Singleton<UserInfoManager>
         return currentData.ItemInfo;
     }
 
-
+    public UserData GetCurrentUserData()
+    {
+        return currentData;
+    }
 
     public async Task<UserData> GetUserData(string uid)
     {
