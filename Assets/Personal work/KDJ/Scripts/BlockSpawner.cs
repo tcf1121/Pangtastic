@@ -356,6 +356,13 @@ namespace KDJ
 
                                 GameBoardData.SetBlock(x, destY, block);
                                 GameBoardData.SetBlock(x, y, null);
+
+                                if (GameBoardData.BlockArray[destY, x] is ObstacleBlock ob)
+                                {
+                                    ob.X = x;
+                                    ob.Y = destY;
+                                }
+
                                 movedFlags[destY, x] = true; // 이 틱에서 이동했음을 표시
                                 activityThisStep = true;
                                 StartCoroutine(MoveBlockCoroutine(block, blockMover.GridToWorld(new Vector2Int(x, destY), GameBoardData.Width, GameBoardData.Height), _stepDuration));
@@ -383,6 +390,11 @@ namespace KDJ
                                     // 수직 낙하가 먼저 실행되므로, GetBlock이 null이 아니라는 것은 해당 블록이 아직 움직이지 않았다는 의미입니다.
                                     GameBoardData.SetBlock(x, y, leftDiagonalBlock);
                                     GameBoardData.SetBlock(x - 1, y + 1, null);
+                                    if (GameBoardData.BlockArray[y + 1, x - 1] is ObstacleBlock ob)
+                                    {
+                                        ob.X = x - 1;
+                                        ob.Y = y + 1;
+                                    }
                                     movedFlags[y, x] = true;
                                     activityThisStep = true;
                                     StartCoroutine(MoveBlockCoroutine(leftDiagonalBlock, blockMover.GridToWorld(new Vector2Int(x, y), GameBoardData.Width, GameBoardData.Height), _stepDuration));
@@ -395,6 +407,11 @@ namespace KDJ
                                     {
                                         GameBoardData.SetBlock(x, y, rightDiagonalBlock);
                                         GameBoardData.SetBlock(x + 1, y + 1, null);
+                                        if (GameBoardData.BlockArray[y + 1, x + 1] is ObstacleBlock ob)
+                                        {
+                                            ob.X = x + 1;
+                                            ob.Y = y + 1;
+                                        }
                                         movedFlags[y, x] = true;
                                         activityThisStep = true;
                                         StartCoroutine(MoveBlockCoroutine(rightDiagonalBlock, blockMover.GridToWorld(new Vector2Int(x, y), GameBoardData.Width, GameBoardData.Height), _stepDuration));
@@ -422,6 +439,11 @@ namespace KDJ
                                     {
                                         GameBoardData.SetBlock(x - 1, y - 1, currentBlock);
                                         GameBoardData.SetBlock(x, y, null);
+                                        if (GameBoardData.BlockArray[y - 1, x - 1] is ObstacleBlock ob)
+                                        {
+                                            ob.X = x - 1;
+                                            ob.Y = y - 1;
+                                        }
                                         movedToThisTick[y - 1, x - 1] = true;
                                         activityThisStep = true;
                                         StartCoroutine(MoveBlockCoroutine(currentBlock, blockMover.GridToWorld(new Vector2Int(x - 1, y - 1), GameBoardData.Width, GameBoardData.Height), _stepDuration));
@@ -431,6 +453,11 @@ namespace KDJ
                                     {
                                         GameBoardData.SetBlock(x + 1, y - 1, currentBlock);
                                         GameBoardData.SetBlock(x, y, null);
+                                        if (GameBoardData.BlockArray[y - 1, x + 1] is ObstacleBlock ob)
+                                        {
+                                            ob.X = x + 1;
+                                            ob.Y = y - 1;
+                                        }
                                         movedToThisTick[y - 1, x + 1] = true;
                                         activityThisStep = true;
                                         StartCoroutine(MoveBlockCoroutine(currentBlock, blockMover.GridToWorld(new Vector2Int(x + 1, y - 1), GameBoardData.Width, GameBoardData.Height), _stepDuration));
