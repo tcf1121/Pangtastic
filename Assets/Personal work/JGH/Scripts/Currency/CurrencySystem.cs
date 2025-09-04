@@ -156,7 +156,7 @@ public class CurrencySystem : Singleton<CurrencySystem>
         DatabaseSystem.AuthInfo info = JsonUtility.FromJson<DatabaseSystem.AuthInfo>(authJson); 
 
         Manager.DB.dbRef
-            .Child("users")
+            .Child(info.type)
             .Child(info.uid)
             .Child("coin")
             .Child("currentCoin")
@@ -173,7 +173,7 @@ public class CurrencySystem : Singleton<CurrencySystem>
         DatabaseSystem.AuthInfo info = JsonUtility.FromJson<DatabaseSystem.AuthInfo>(authJson); 
 
         Manager.DB.dbRef
-            .Child("users")
+            .Child(info.type)
             .Child(info.uid)
             .Child("star")
             .Child("currentStar")
@@ -190,7 +190,7 @@ public class CurrencySystem : Singleton<CurrencySystem>
         DatabaseSystem.AuthInfo info = JsonUtility.FromJson<DatabaseSystem.AuthInfo>(authJson); 
 
         var task = Manager.DB.dbRef
-            .Child("users")
+            .Child(info.type)
             .Child(info.uid)
             .Child("coin")
             .GetValueAsync();
@@ -233,7 +233,7 @@ public class CurrencySystem : Singleton<CurrencySystem>
         DatabaseSystem.AuthInfo info = JsonUtility.FromJson<DatabaseSystem.AuthInfo>(authJson); 
 
         var task = Manager.DB.dbRef
-            .Child("users")
+            .Child(info.type)
             .Child(info.uid)
             .Child("star")
             .GetValueAsync();

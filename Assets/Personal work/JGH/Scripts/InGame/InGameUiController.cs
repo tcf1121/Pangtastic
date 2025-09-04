@@ -10,7 +10,7 @@ public class InGameUiController : MonoBehaviour
     private void Start()
     {
         Manager.Audio.PlayBGMByName("InGameMusic");
-        Manager.Heart.isPlaying = true;
+        // Manager.Heart.isPlaying = true;
     }
 
     public void ChangeOutGameScene()
@@ -41,8 +41,8 @@ public class InGameUiController : MonoBehaviour
 
     public void ChangeQuitGameScene()
     {
-        SceneManager.LoadScene(2/*로비씬*/);
         Manager.Heart.UseHearts();
+        SceneManager.LoadScene(2/*로비씬*/);
         Manager.Audio.PlaySFXByName("GameToHomeSfx");
     }
 

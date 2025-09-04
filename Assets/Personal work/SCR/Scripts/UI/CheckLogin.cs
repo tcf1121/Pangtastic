@@ -114,7 +114,8 @@ namespace SCR
 
                 Manager.Stage.LoadStage();
                 //DontDSystem.StatGame();
-                SceneManager.LoadScene(2/*로비씬*/);
+                // SceneManager.LoadScene(2/*로비씬*/);
+                SceneManager.LoadScene("Lobby Scene");
 
             });
             

@@ -86,10 +86,8 @@ public class DatabaseSystem : Singleton<DatabaseSystem>
     {
         string authJson = GetAuthInfo(); 
         AuthInfo info = JsonUtility.FromJson<AuthInfo>(authJson); 
-        
-        Debug.Log($"info.type : {info.type}, info.nickname : {info.nickname}, info.uid : {info.uid}");
-
-        dbRef.Child(info.type)
+        dbRef
+            .Child(info.type)
             .Child(info.uid)
             .Child("playerName")
             .SetValueAsync(info.nickname);

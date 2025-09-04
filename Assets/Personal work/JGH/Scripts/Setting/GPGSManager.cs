@@ -69,8 +69,6 @@ public class GPGSManager : Singleton<GPGSManager>
                             SceneManager.LoadScene(2/*로비씬*/);
                         });
                 });
-
-
         }
         else
         {
