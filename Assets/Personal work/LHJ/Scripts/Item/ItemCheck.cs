@@ -115,9 +115,9 @@ namespace LHJ
 
                 var special = blk.BlockInstance.GetComponent<SpecialBlock>();
                 if (special != null) special.Activate(_board);
-                if (blk is SCR_O.ObstacleBlock obstacle)
+                if (blk is ObstacleBlock obstacle)
                 {
-                    obstacle.TakeDamage(_board);
+                    obstacle.TakeDamage();
                     continue;
                 }
 
