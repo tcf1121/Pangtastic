@@ -29,7 +29,7 @@ public class OutGameManager : MonoBehaviour
         Time.timeScale = 1f;
         UpdateCoinUI();
         UpdateStarUI();
-        int index = StageManager.Instance.CurrentStageIndex;
+        int index = Manager.Stage.CurrentStageIndex;
         _stageButtonText.text = $"Stage {index + 1}";
     }
 
@@ -39,7 +39,7 @@ public class OutGameManager : MonoBehaviour
     public static void UpdateCoinUI()
     {
         if (instate._coinText != null)
-            instate._coinText.text = CurrencySystem.Instance.GetCoins().ToString();
+            instate._coinText.text = Manager.Currency.GetCoins().ToString();
     }
 
     /// <summary>
@@ -48,13 +48,13 @@ public class OutGameManager : MonoBehaviour
     public static void UpdateStarUI()
     {
         if (instate._starText != null)
-            instate._starText.text = CurrencySystem.Instance.GetStars().ToString();
+            instate._starText.text = Manager.Currency.GetStars().ToString();
     }
 
     public void SetStage()
     {
-        StageManager.Instance.SetStage(int.Parse(_settingInputField.text.ToString()) - 1);
-        int index = StageManager.Instance.CurrentStageIndex;
+        Manager.Stage.SetStage(int.Parse(_settingInputField.text.ToString()) - 1);
+        int index = Manager.Stage.CurrentStageIndex;
         _stageButtonText.text = $"Stage {index + 1}";
     }
 }

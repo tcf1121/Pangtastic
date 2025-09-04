@@ -6,9 +6,9 @@ using System.Collections;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-public class GPGSManager : MonoBehaviour
+public class GPGSManager : Singleton<GPGSManager>
 {
-    public static GPGSManager Instance { get; private set; }
+    //public static GPGSManager Instance { get; private set; }
     // public static string PlayerID;
     // public static string PlayerName;
 
@@ -18,17 +18,9 @@ public class GPGSManager : MonoBehaviour
     
     private bool _deleting;
 
-    protected void Awake()
+    protected override void Awake()
     {
-        if (Instance != null && Instance != this)
-        {
-            Destroy(gameObject);
-            return;
-        }
-
-        Instance = this;
-
-        DontDestroyOnLoad(gameObject);
+       base.Awake();
     }
 
 
@@ -38,7 +30,7 @@ public class GPGSManager : MonoBehaviour
         
         PlayGamesPlatform.Instance.Authenticate(OnPlayAuthenticated);
 
-        SceneManager.LoadScene("OutGame Test Scene");
+        //SceneManager.LoadScene("OutGame Test Scene"); //JWJ 주석처리함
     }
 
 
@@ -61,11 +53,20 @@ public class GPGSManager : MonoBehaviour
                     
                     Debug.Log($"credential : {credential}");
 
-                    DatabaseSystem.Instance.auth.SignInAndRetrieveDataWithCredentialAsync(credential)
+                    Manager.DB.auth.SignInAndRetrieveDataWithCredentialAsync(credential)
                         .ContinueWithOnMainThread(task =>
                         {
                             // DB 저장 호출
-                            DatabaseSystem.Instance.UserIntoSave();
+                            Manager.DB.UserIntoSave();
+
+                            //JWJ 추가
+                            Manager.DB.user = Manager.DB.auth.CurrentUser;
+                            if (Manager.Stage != null)
+                            {
+                                Manager.Stage.LoadStage();
+                            }
+                            //SceneManager.LoadScene("OutGame Test Scene");
+                            SceneManager.LoadScene(2/*로비씬*/);
                         });
                 });
 
@@ -100,10 +101,10 @@ public class GPGSManager : MonoBehaviour
         if (_deleting) { Debug.LogWarning("삭제 진행 중입니다."); return; }
         _deleting = true;
         
-        string authJson = DatabaseSystem.Instance.GetAuthInfo();
+        string authJson = Manager.DB.GetAuthInfo();
         DatabaseSystem.AuthInfo info = JsonUtility.FromJson<DatabaseSystem.AuthInfo>(authJson);
         
-        if (DatabaseSystem.Instance.user == null) { Fail("로그인 안됨"); return; }
+        if (Manager.DB.user == null) { Fail("로그인 안됨"); return; }
 
         // 재인증
         PlayGamesPlatform.Instance.RequestServerSideAccess(true, authCode =>
@@ -111,7 +112,7 @@ public class GPGSManager : MonoBehaviour
             if (string.IsNullOrEmpty(authCode)) { Fail("authCode 없음"); return; }
 
             var cred = PlayGamesAuthProvider.GetCredential(authCode);
-            DatabaseSystem.Instance.user.ReauthenticateAsync(cred).ContinueWithOnMainThread(reauthTask =>
+            Manager.DB.user.ReauthenticateAsync(cred).ContinueWithOnMainThread(reauthTask =>
             {
                 if (reauthTask.IsFaulted || reauthTask.IsCanceled) { Fail("재인증 실패: " + reauthTask.Exception); return; }
 
@@ -123,12 +124,12 @@ public class GPGSManager : MonoBehaviour
                     // if (dbTask.IsFaulted) { Fail("DB 삭제 실패: " + dbTask.Exception); return; }
 
                     // 3) Firebase 계정 삭제
-                    DatabaseSystem.Instance.user.DeleteAsync().ContinueWithOnMainThread(delTask =>
+                    Manager.DB.user.DeleteAsync().ContinueWithOnMainThread(delTask =>
                     {
                         if (delTask.IsFaulted || delTask.IsCanceled) { Fail("계정 삭제 실패: " + delTask.Exception); return; }
 
                         // 4) 로그아웃 + 자동로그인 차단 플래그
-                        try {DatabaseSystem.Instance.auth.SignOut(); } catch { }
+                        try {Manager.DB.auth.SignOut(); } catch { }
                         PlayerPrefs.SetInt("SkipPGS", 1);  // 다음 실행에서 PGS 자동 인증 막기
                         PlayerPrefs.Save();
 

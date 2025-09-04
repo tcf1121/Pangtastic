@@ -14,7 +14,7 @@ public class CurrencyCoinBuy : MonoBehaviour
         var RewardSystem = FindObjectOfType<CurrencySystem>();
         if (RewardSystem != null)
         {
-            _button.onClick.AddListener(() => CurrencySystem.Instance.SpendCoin(_spendAmount));
+            _button.onClick.AddListener(() => Manager.Currency.SpendCoin(_spendAmount));
         }
     }
 }

@@ -4,12 +4,13 @@ using Firebase.Extensions;
 using System;
 using System.Collections;
 using TMPro;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-public class HeartSystem : MonoBehaviour
+public class HeartSystem : Singleton<HeartSystem>
 {
-    public static HeartSystem Instance { get; private set; }
+    //public static HeartSystem Instance { get; private set; }
 
     [SerializeField] private TMP_Text _timerText; // UI Text (MM:SS 표시)
     [SerializeField] private TMP_Text _textHeart; // 0/0 표시
@@ -22,19 +23,10 @@ public class HeartSystem : MonoBehaviour
 
     public bool isPlaying = false;
 
-    private void Awake()
+    protected override void Awake()
     {
-        if (Instance != null && Instance != this)
-        {
-            Destroy(gameObject);
-            return;
-        }
-
+        base.Awake();
         Debug.Log("하트 시스템");
-        Instance = this;
-        DontDestroyOnLoad(gameObject);
-        
-        
     }
 
     private void Start()
@@ -45,10 +37,10 @@ public class HeartSystem : MonoBehaviour
 
     private IEnumerator CalcHeartData()
     {
-        string authJson = DatabaseSystem.Instance.GetAuthInfo();
+        string authJson = Manager.DB.GetAuthInfo();
         DatabaseSystem.AuthInfo info = JsonUtility.FromJson<DatabaseSystem.AuthInfo>(authJson);
 
-        var task = DatabaseSystem.Instance.dbRef.Child(info.type)
+        var task = Manager.DB.dbRef.Child(info.type)
             .Child(info.uid)
             .Child("heart")
             .GetValueAsync();
@@ -70,7 +62,7 @@ public class HeartSystem : MonoBehaviour
             _currentHearts = _maxHearts;
             _remainingSeconds = 0;
 
-            var heartRef = DatabaseSystem.Instance.dbRef
+            var heartRef = Manager.DB.dbRef
                 .Child(info.type)
                 .Child(info.uid)
                 .Child("heart");
@@ -156,11 +148,11 @@ public class HeartSystem : MonoBehaviour
     {
         int remainingSeconds;
         string lastSaveTime;
-        string authJson = DatabaseSystem.Instance.GetAuthInfo();
+        string authJson = Manager.DB.GetAuthInfo();
         DatabaseSystem.AuthInfo info = JsonUtility.FromJson<DatabaseSystem.AuthInfo>(authJson);
 
         // 하트 시스템 저장안돼요. 수정 하지 마세요~
-        DatabaseSystem.Instance.dbRef
+        Manager.DB.dbRef
             .Child(info.type)
             .Child(info.uid)
             .Child("heart")
@@ -178,7 +170,7 @@ public class HeartSystem : MonoBehaviour
             lastSaveTime = DateTime.Now.ToString();
         }
 
-        DatabaseSystem.Instance.dbRef
+        Manager.DB.dbRef
             .Child(info.type)
             .Child(info.uid)
             .Child("heart")
@@ -186,7 +178,7 @@ public class HeartSystem : MonoBehaviour
             .SetValueAsync(remainingSeconds);
 
         // lastSaveTime 저장
-        DatabaseSystem.Instance.dbRef
+        Manager.DB.dbRef
             .Child(info.type)
             .Child(info.uid)
             .Child("heart")

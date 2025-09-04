@@ -8,9 +8,9 @@ public class AudioClipGroup
     public AudioClip audioClip;
 }
 
-public class AudioSystem : MonoBehaviour
+public class AudioSystem : Singleton<AudioSystem>
 {
-    public static AudioSystem Instance { get; private set; }
+    //public static AudioSystem Instance { get; private set; }
 
     [Header("BGM 클립들")]
     [SerializeField] private List<AudioClipGroup> _bgmClips = new List<AudioClipGroup>();
@@ -22,15 +22,9 @@ public class AudioSystem : MonoBehaviour
     [HideInInspector] public AudioSource BgmAudioSource;
     [HideInInspector] public AudioSource SfxAudioSource;
 
-    protected void Awake()
+    protected override void Awake()
     {
-        if (Instance != null && Instance != this)
-        {
-            Destroy(gameObject);
-            return;
-        }
-        Instance = this;
-        DontDestroyOnLoad(gameObject);
+        base.Awake();
 
         // AudioSource 컴포넌트 생성
         BgmAudioSource = gameObject.AddComponent<AudioSource>();

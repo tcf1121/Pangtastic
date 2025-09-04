@@ -7,8 +7,8 @@ public class CoinAdLoadButton : MonoBehaviour
 
     private void Start()
     {
-        if (AdSystem.Instance == null) return;
+        if (Manager.Ad == null) return;
 
-        bmxButton.onClick.AddListener(() => AdSystem.Instance.LoadAD());
+        bmxButton.onClick.AddListener(() => Manager.Ad.LoadAD());
     }
 }
