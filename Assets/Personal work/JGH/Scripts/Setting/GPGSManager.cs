@@ -1,8 +1,11 @@
 using Firebase.Auth;
+using Firebase.Database;
 using Firebase.Extensions;
 using GooglePlayGames;
 using GooglePlayGames.BasicApi;
 using System.Collections;
+using System.Globalization;
+using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -15,19 +18,19 @@ public class GPGSManager : Singleton<GPGSManager>
     private int retryCount = 0;
     private const int maxRetryCount = 3;   // 최대 재시도 횟수
     private const float retryDelay = 2f;   // 재시도 간격 (초 단위)
-    
+
     private bool _deleting;
 
     protected override void Awake()
     {
-       base.Awake();
+        base.Awake();
     }
 
 
     public void AuthenticateUser()
     {
         Debug.Log("GPGS 로그인 시도...");
-        
+
         PlayGamesPlatform.Instance.Authenticate(OnPlayAuthenticated);
 
         //SceneManager.LoadScene("OutGame Test Scene"); //JWJ 주석처리함
@@ -44,13 +47,13 @@ public class GPGSManager : Singleton<GPGSManager>
         {
             Debug.Log("GPGS 로그인 성공");
 
-            
+
             PlayGamesPlatform.Instance.RequestServerSideAccess(
                 false,
                 authCode =>
                 {
                     var credential = PlayGamesAuthProvider.GetCredential(authCode);
-                    
+
                     Debug.Log($"credential : {credential}");
 
                     Manager.DB.auth.SignInAndRetrieveDataWithCredentialAsync(credential)
@@ -96,14 +99,14 @@ public class GPGSManager : Singleton<GPGSManager>
     /// 구글 로그인 회원탈퇴
     /// </summary>
     /// <returns></returns>
-     public void UserDelete()
+    public void UserDelete()
     {
         if (_deleting) { Debug.LogWarning("삭제 진행 중입니다."); return; }
         _deleting = true;
-        
+
         string authJson = Manager.DB.GetAuthInfo();
         DatabaseSystem.AuthInfo info = JsonUtility.FromJson<DatabaseSystem.AuthInfo>(authJson);
-        
+
         if (Manager.DB.user == null) { Fail("로그인 안됨"); return; }
 
         // 재인증
@@ -121,24 +124,24 @@ public class GPGSManager : Singleton<GPGSManager>
 
                 // DatabaseSystem.Instance.dbRef.Child("users").Child(info.uid).RemoveValueAsync().ContinueWithOnMainThread(dbTask =>
                 // {
-                    // if (dbTask.IsFaulted) { Fail("DB 삭제 실패: " + dbTask.Exception); return; }
+                // if (dbTask.IsFaulted) { Fail("DB 삭제 실패: " + dbTask.Exception); return; }
 
-                    // 3) Firebase 계정 삭제
-                    Manager.DB.user.DeleteAsync().ContinueWithOnMainThread(delTask =>
-                    {
-                        if (delTask.IsFaulted || delTask.IsCanceled) { Fail("계정 삭제 실패: " + delTask.Exception); return; }
+                // 3) Firebase 계정 삭제
+                Manager.DB.user.DeleteAsync().ContinueWithOnMainThread(delTask =>
+                {
+                    if (delTask.IsFaulted || delTask.IsCanceled) { Fail("계정 삭제 실패: " + delTask.Exception); return; }
 
-                        // 4) 로그아웃 + 자동로그인 차단 플래그
-                        try {Manager.DB.auth.SignOut(); } catch { }
-                        PlayerPrefs.SetInt("SkipPGS", 1);  // 다음 실행에서 PGS 자동 인증 막기
-                        PlayerPrefs.Save();
+                    // 4) 로그아웃 + 자동로그인 차단 플래그
+                    try { Manager.DB.auth.SignOut(); } catch { }
+                    PlayerPrefs.SetInt("SkipPGS", 1);  // 다음 실행에서 PGS 자동 인증 막기
+                    PlayerPrefs.Save();
 
-                        _deleting = false;
-                        Debug.Log("회원 탈퇴 완료");
-                        
-                        // Application.Quit();
-                        // onDone?.Invoke();
-                    });
+                    _deleting = false;
+                    Debug.Log("회원 탈퇴 완료");
+
+                    // Application.Quit();
+                    // onDone?.Invoke();
+                });
                 // });
             });
         });
@@ -157,4 +160,47 @@ public class GPGSManager : Singleton<GPGSManager>
         AuthenticateUser();
     }
 
+    public void LinkGuestToGoogle(System.Action onSuccess) // 게스트 > 구글 전환
+    {
+        PlayGamesPlatform.Instance.RequestServerSideAccess(true, authCode =>
+        {
+            if (string.IsNullOrEmpty(authCode) == true)
+            {
+                Debug.LogError("Link 실패: authCode 없음");
+                return;
+            }
+
+            Credential cred = PlayGamesAuthProvider.GetCredential(authCode);
+            FirebaseUser curUser = Manager.DB.auth.CurrentUser;
+
+            if (curUser == null)
+            {
+                Debug.LogError("Link 실패: 유저 없음");
+                return;
+            }
+
+            if (!curUser.IsAnonymous)
+            {
+                Debug.Log("이미 영구 계정임");
+                return;
+            }
+
+            curUser.LinkWithCredentialAsync(cred).ContinueWithOnMainThread(task =>
+            {
+                if (task.IsCanceled || task.IsFaulted)
+                {
+                    Debug.LogError($"Link 실패: {task.Exception}");
+                    return;
+                }
+
+                Debug.Log("게스트 > 구글 링크 성공. ");
+                Manager.DB.user = Manager.DB.auth.CurrentUser;
+
+                string uid = Manager.DB.auth.CurrentUser.UserId;
+                Manager.DB.MigrateGuestDataToUser(uid);
+
+                onSuccess?.Invoke();
+            });
+        });
+    }
 }

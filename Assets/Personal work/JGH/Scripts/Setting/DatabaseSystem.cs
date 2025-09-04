@@ -94,4 +94,51 @@ public class DatabaseSystem : Singleton<DatabaseSystem>
             .Child("playerName")
             .SetValueAsync(info.nickname);
     }
+
+    public void MigrateGuestDataToUser(string uid)
+    {
+        Debug.Log("데이터 마이그레이션 시작");
+
+        var guestRef = Manager.DB.dbRef.Child("guests").Child(uid);
+        var userRef = Manager.DB.dbRef.Child("users").Child(uid);
+
+        guestRef.GetValueAsync().ContinueWithOnMainThread(readTask =>
+        {
+            if (readTask.IsFaulted || readTask.IsCanceled)
+            {
+                Debug.LogError($"게스트 데이터 읽기 실패:{readTask.Exception}");
+                return;
+            }
+
+            DataSnapshot snapshot = readTask.Result;
+            if (!snapshot.Exists)
+            {
+                Debug.Log("옮길 게스트 데이터 없음");
+                return;
+            }
+
+            userRef.SetValueAsync(snapshot.Value).ContinueWithOnMainThread(writeTask =>
+            {
+                if (writeTask.IsFaulted || writeTask.IsCanceled)
+                {
+                    Debug.LogError($"유저 데이터 저장 실패: {writeTask.Exception}");
+                    return;
+                }
+
+                Debug.Log("데이터 users 경로로 복사 완료");
+
+                guestRef.RemoveValueAsync().ContinueWithOnMainThread(removeTask =>
+                {
+                    if (removeTask.IsFaulted || removeTask.IsCanceled)
+                    {
+                        Debug.LogError($"게스트 데이터 삭제 실패:{removeTask.Exception}");
+                        return;
+                    }
+
+                    Debug.Log("게스트 데이터 삭제 완료, 마이그레이션 성공");
+                    Manager.DB.UserIntoSave();
+                });
+            });
+        });
+    }
 }
