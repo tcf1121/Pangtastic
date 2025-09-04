@@ -136,7 +136,7 @@ public class DatabaseSystem : Singleton<DatabaseSystem>
                     }
 
                     Debug.Log("게스트 데이터 삭제 완료, 마이그레이션 성공");
-                    Manager.DB.UserIntoSave();
+                    UserIntoSave();
                 });
             });
         });
