@@ -95,17 +95,20 @@ namespace SCR
                 Debug.LogFormat($"게스트 로그인 성공 : {newUser.UserId}");
 
                 Manager.DB.GetUserPath(uid)
-                .Child("heart")
+                .Child("UserInfo")
+                .Child("Heart")
                 .Child("currentHeart")
                 .SetValueAsync(Manager.Heart.GetMaxHearts());
 
                 Manager.DB.GetUserPath(uid)
-                .Child("heart")
+                .Child("UserInfo")
+                .Child("Heart")
                 .Child("lastSaveTime")
                 .SetValueAsync(DateTime.Now.ToString("O"));
 
                 Manager.DB.GetUserPath(uid)
-                .Child("heart")
+                .Child("UserInfo")
+                .Child("Heart")
                 .Child("remainingSeconds")
                 .SetValueAsync(0);
 
@@ -118,7 +121,7 @@ namespace SCR
                 SceneManager.LoadScene(2/*로비씬*/);
 
             });
-            
+
         }
     }
 }

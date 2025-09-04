@@ -24,8 +24,6 @@ namespace SCR
         void Awake()
         {
             loadBtn.onClick.AddListener(LoadPuzzle);
-
-
         }
 
         private void LoadPuzzle()
