@@ -5,18 +5,23 @@ namespace KDJ
 {
     public class FlourBag_s : ObstacleBlock
     {
-        private FlourBag _owner;
+        public FlourBag Owner { get; private set; }
         public FlourBag_s(FlourBag owner)
         {
             GemType = GemType.Flour_s;
-            _owner = owner;
+            Owner = owner;
             IsObstacle = true;
             CanMove = false;
         }
 
         public Vector2Int OwnerPos()
         {
-            return new Vector2Int(_owner.X, _owner.Y);
+            return new Vector2Int(Owner.X, Owner.Y);
+        }
+
+        public override void SplashDamage()
+        {
+            Owner.TakeDamage();
         }
     }
 }

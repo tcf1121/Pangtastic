@@ -9,7 +9,7 @@ namespace KDJ
             X = xpos;
             Y = ypos;
             Score = 0;
-            CurrentHP = 1;
+            CurrentHP = 2;
             GemType = SCR.GemType.Dust;
             IsObstacle = true;
             CanMove = false;

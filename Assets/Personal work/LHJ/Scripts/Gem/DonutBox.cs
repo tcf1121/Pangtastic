@@ -46,9 +46,9 @@ namespace LHJ
                         if (!_destroySpecial) continue;
                         special.Activate(board);
                     }
-                    if (blk is SCR_O.ObstacleBlock obstacle)
+                    if (blk is ObstacleBlock obstacle)
                     {
-                        obstacle.TakeDamage(board);
+                        obstacle.TakeDamage();
                         continue;
                     }
 
