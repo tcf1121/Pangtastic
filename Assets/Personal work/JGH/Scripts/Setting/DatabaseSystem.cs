@@ -3,6 +3,7 @@ using Firebase.Auth;
 using Firebase.Database;
 using Firebase.Extensions;
 using UnityEngine;
+using UnityEngine.AI;
 
 public class DatabaseSystem : Singleton<DatabaseSystem>
 {
@@ -10,7 +11,7 @@ public class DatabaseSystem : Singleton<DatabaseSystem>
     [HideInInspector] public FirebaseUser user;
     [HideInInspector] public DatabaseReference dbRef;
     [HideInInspector] public FirebaseAuth auth;
-    
+
     [System.Serializable]
     public class AuthInfo
     {
@@ -22,7 +23,7 @@ public class DatabaseSystem : Singleton<DatabaseSystem>
     protected override void Awake()
     {
         base.Awake();
-        auth = FirebaseAuth.DefaultInstance; 
+        auth = FirebaseAuth.DefaultInstance;
         user = FirebaseAuth.DefaultInstance.CurrentUser;
     }
 
@@ -53,7 +54,7 @@ public class DatabaseSystem : Singleton<DatabaseSystem>
         string uid = user.UserId;
         string type;
         string nickname;
-        
+
         if (user == null || string.IsNullOrEmpty(user.UserId))
         {
             return "{}"; // 로그인 안 된 경우 빈 JSON
@@ -69,7 +70,7 @@ public class DatabaseSystem : Singleton<DatabaseSystem>
             type = "users";
             nickname = string.IsNullOrEmpty(user.DisplayName) ? "Unknown" : user.DisplayName;
         }
-        
+
         AuthInfo info = new AuthInfo
         {
             uid = uid,
@@ -79,15 +80,17 @@ public class DatabaseSystem : Singleton<DatabaseSystem>
 
 
         return JsonUtility.ToJson(info, true);
-        
+
     }
 
     public void UserIntoSave()
     {
-        string authJson = GetAuthInfo(); 
-        AuthInfo info = JsonUtility.FromJson<AuthInfo>(authJson); 
-        dbRef
-            .Child(info.type)
+        string authJson = GetAuthInfo();
+        AuthInfo info = JsonUtility.FromJson<AuthInfo>(authJson);
+
+        Debug.Log($"info.type : {info.type}, info.nickname : {info.nickname}, info.uid : {info.uid}");
+
+        dbRef.Child(info.type)
             .Child(info.uid)
             .Child("playerName")
             .SetValueAsync(info.nickname);

@@ -16,7 +16,7 @@ namespace SCR
         private Dictionary<Vector3Int, GemType> _mapInfo = new();
         private List<Vector3Int> _spawnPoint = new();
 
-        string path = "Personal work/SCR/StageInfo.csv";
+        string path = "PuzzleEditor/StageInfo.csv";
 
         public void SaveMapInfo()
         {
