@@ -26,18 +26,18 @@ namespace SCR_B
 
         private void Awake()
         {
-            instance = this;
-            Spawner = GetComponent<BlockSpawner>();
-            MatchChecker = GetComponent<BoardMatchChecker>();
-            BlockMover = GetComponent<BlockMover>();
-            MatchCombo = GetComponent<MatchCombo>();
-            BoardLoader = GetComponent<BoardLoader>();
-            CanTouch = false;
+            // instance = this;
+            // Spawner = GetComponent<BlockSpawner>();
+            // MatchChecker = GetComponent<BoardMatchChecker>();
+            // BlockMover = GetComponent<BlockMover>();
+            // MatchCombo = GetComponent<MatchCombo>();
+            // BoardLoader = GetComponent<BoardLoader>();
+            // CanTouch = false;
         }
 
         private void Start()
         {
-            StartCoroutine(StageInit());
+            // StartCoroutine(StageInit());
         }
 
         void Update()
@@ -68,13 +68,13 @@ namespace SCR_B
 
         public IEnumerator StageInit(Image progress)
         {
-            // instance = this;
-            // Spawner = GetComponent<BlockSpawner>();
-            // MatchChecker = GetComponent<BoardMatchChecker>();
-            // BlockMover = GetComponent<BlockMover>();
-            // MatchCombo = GetComponent<MatchCombo>();
-            // BoardLoader = GetComponent<BoardLoader>();
-            // CanTouch = false;
+            instance = this;
+            Spawner = GetComponent<BlockSpawner>();
+            MatchChecker = GetComponent<BoardMatchChecker>();
+            BlockMover = GetComponent<BlockMover>();
+            MatchCombo = GetComponent<MatchCombo>();
+            BoardLoader = GetComponent<BoardLoader>();
+            CanTouch = false;
             progress.fillAmount = 0.25f;
             yield return new WaitForSeconds(0.1f);
             Debug.Log("초기화 상태");
