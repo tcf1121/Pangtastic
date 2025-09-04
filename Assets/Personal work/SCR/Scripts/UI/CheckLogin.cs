@@ -25,7 +25,7 @@ namespace SCR
         void Awake()
         {
             _enterBtn.onClick.AddListener(CheckBefore);
-            _googlePlayBtn.onClick.AddListener(GPGSManager.Instance.AuthenticateUser);
+            _googlePlayBtn.onClick.AddListener(Manager.GPGS.AuthenticateUser);
             _guestBtn.onClick.AddListener(LoginAsGuest);
         }
 
@@ -35,17 +35,22 @@ namespace SCR
             FirebaseAuth auth = FirebaseAuth.DefaultInstance;
             if (auth.CurrentUser != null)
             {
-                if (auth.CurrentUser.IsAnonymous)
+                if (auth.CurrentUser.IsAnonymous)  //JWJ 수정함
                 {
                     Debug.Log($"이미 게스트 로그인 상태: {auth.CurrentUser.UserId}");
-                    DontDSystem.StatGame();
+                    Manager.DB.user = auth.CurrentUser;
+                    Manager.Stage.LoadStage();
+                    //DontDSystem.StatGame();
                     SceneManager.LoadScene(2/*로비씬*/);
                 }
-                // else
-                // {
-                //     Debug.Log($"이미 일반 로그인 상태: {auth.CurrentUser.UserId}");
-                //     SceneManager.LoadScene(2/*로비씬*/);
-                // }
+                else
+                {
+                    Debug.Log($"이미 일반 로그인 상태: {auth.CurrentUser.UserId}");
+                    Manager.DB.user = auth.CurrentUser;
+                    Manager.Stage.LoadStage();
+                    //DontDSystem.StatGame();
+                    SceneManager.LoadScene(2/*로비씬*/);
+                }
                 return;
             }
             // else
@@ -63,12 +68,13 @@ namespace SCR
             // 구글로 로그인 했을 경우
             else
             {
-                GPGSManager.Instance.AuthenticateUser();
+                Manager.GPGS.AuthenticateUser();
             }
         }
 
         private void LoginAsGuest()
         {
+            Debug.Log("버튼눌림");
             FirebaseAuth auth = FirebaseAuth.DefaultInstance;
             auth.SignInAnonymouslyAsync().ContinueWithOnMainThread(task =>
             {
@@ -88,30 +94,31 @@ namespace SCR
 
                 Debug.LogFormat($"게스트 로그인 성공 : {newUser.UserId}");
 
-                DatabaseSystem.Instance.GetUserPath(uid)
+                Manager.DB.GetUserPath(uid)
                 .Child("heart")
                 .Child("currentHeart")
-                .SetValueAsync(HeartSystem.Instance.GetMaxHearts());
+                .SetValueAsync(Manager.Heart.GetMaxHearts());
 
-                DatabaseSystem.Instance.GetUserPath(uid)
+                Manager.DB.GetUserPath(uid)
                 .Child("heart")
                 .Child("lastSaveTime")
                 .SetValueAsync(DateTime.Now.ToString("O"));
 
-                DatabaseSystem.Instance.GetUserPath(uid)
+                Manager.DB.GetUserPath(uid)
                 .Child("heart")
                 .Child("remainingSeconds")
                 .SetValueAsync(0);
 
-                DatabaseSystem.Instance.GetUserPath(uid)
+                Manager.DB.GetUserPath(uid)
                 .Child("playerName")
                 .SetValueAsync("Guest");
 
-
+                Manager.Stage.LoadStage();
+                //DontDSystem.StatGame();
+                SceneManager.LoadScene(2/*로비씬*/);
 
             });
-            DontDSystem.StatGame();
-            SceneManager.LoadScene(2/*로비씬*/);
+            
         }
     }
 }

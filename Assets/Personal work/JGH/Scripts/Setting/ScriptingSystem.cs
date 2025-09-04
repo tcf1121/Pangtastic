@@ -5,9 +5,9 @@ using UnityEngine.Localization.Settings;
 using UnityEngine.SceneManagement;
 using UnityEngine.Serialization;
 
-public class ScriptingSystem : MonoBehaviour
+public class ScriptingSystem : Singleton<ScriptingSystem>
 {
-    public static ScriptingSystem Instance { get; private set; }
+    //public static ScriptingSystem Instance { get; private set; }
 
     [SerializeField] private TMP_Text _charName;          // 캐릭터 이름
     [SerializeField] private TMP_Text _dialogueText;          // 내용
@@ -23,18 +23,6 @@ public class ScriptingSystem : MonoBehaviour
     [SerializeField] private TMP_FontAsset englishFont; // 영어용 폰트
 
     private int currentId;
-
-    protected void Awake()
-    {
-        if (Instance != null && Instance != this)
-        {
-            Destroy(gameObject);
-            return;
-        }
-
-        Instance = this;
-        DontDestroyOnLoad(gameObject);
-    }
 
     public void ScriptStart(string getDialogueTableName, string getCharacterTableName, int getStartId, int getEndId)
     {

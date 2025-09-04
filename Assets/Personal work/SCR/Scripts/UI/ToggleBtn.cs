@@ -26,9 +26,9 @@ public class ToggleBtn : MonoBehaviour
     void OnEnable()
     {
         if (_type == ToggleType.BGM)
-            SetToggleBtn(!AudioSystem.Instance.BgmAudioSource.mute);
+            SetToggleBtn(!Manager.Audio.BgmAudioSource.mute);
         else if (_type == ToggleType.SFX)
-            SetToggleBtn(!AudioSystem.Instance.SfxAudioSource.mute);
+            SetToggleBtn(!Manager.Audio.SfxAudioSource.mute);
     }
 
     private void SetToggleBtn(bool value)
@@ -41,8 +41,8 @@ public class ToggleBtn : MonoBehaviour
     {
         SetToggleBtn(value);
         if (_type == ToggleType.BGM)
-            AudioSystem.Instance.SetBGM(value);
+            Manager.Audio.SetBGM(value);
         else if (_type == ToggleType.SFX)
-            AudioSystem.Instance.SetSFX(value);
+            Manager.Audio.SetSFX(value);
     }
 }

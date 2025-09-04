@@ -42,12 +42,12 @@ public class SettingToggleSystem : MonoBehaviour
 
             if (gameObject.name == "BackgroundMusicOnOff")
             {
-                AudioSystem.Instance.BgmAudioSource.volume = 1f;
+                Manager.Audio.BgmAudioSource.volume = 1f;
             }
             
             if (gameObject.name == "SfxMusicOnOff")
             {
-                AudioSystem.Instance.SfxAudioSource.volume = 1f;
+                Manager.Audio.SfxAudioSource.volume = 1f;
             }
         }
         else
@@ -56,12 +56,12 @@ public class SettingToggleSystem : MonoBehaviour
 
             if (gameObject.name == "BackgroundMusicOnOff")
             {
-                AudioSystem.Instance.BgmAudioSource.volume = 0f;
+                Manager.Audio.BgmAudioSource.volume = 0f;
             }
             
             if (gameObject.name == "SfxMusicOnOff")
             {
-                AudioSystem.Instance.SfxAudioSource.volume = 0f;
+                Manager.Audio.SfxAudioSource.volume = 0f;
             }
         }
     }
