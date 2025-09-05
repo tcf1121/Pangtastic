@@ -121,7 +121,14 @@ namespace LHJ
                     continue;
                 }
 
-                Object.Destroy(blk.BlockInstance);
+                if (blk.BlockInstance.TryGetComponent<PooledObject>(out var pooledObject))
+                {
+                    pooledObject.ReturnToPool();
+                }
+                else
+                {
+                    Destroy(blk.BlockInstance);
+                }
                 sp.GameBoardData.BlockArray[pos.y, x].BlockInstance = null;
                 destroyedCount++;
             }
@@ -135,7 +142,14 @@ namespace LHJ
                 var special = blk.BlockInstance.GetComponent<SpecialBlock>();
                 if (special != null) special.Activate(_board);
 
-                Object.Destroy(blk.BlockInstance);
+                if (blk.BlockInstance.TryGetComponent<PooledObject>(out var pooledObject))
+                {
+                    pooledObject.ReturnToPool();
+                }
+                else
+                {
+                    Destroy(blk.BlockInstance);
+                }
                 sp.GameBoardData.BlockArray[y, pos.x].BlockInstance = null;
                 destroyedCount++;
             }
@@ -171,7 +185,14 @@ namespace LHJ
                         continue;
                     }
 
-                    Object.Destroy(blk.BlockInstance);
+                    if (blk.BlockInstance.TryGetComponent<PooledObject>(out var pooledObject))
+                    {
+                        pooledObject.ReturnToPool();
+                    }
+                    else
+                    {
+                        Destroy(blk.BlockInstance);
+                    }
                     sp.GameBoardData.BlockArray[y, x].BlockInstance = null;
                     destroyedCount++;
                 }

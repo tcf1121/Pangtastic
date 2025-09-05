@@ -213,7 +213,6 @@ namespace KDJ
             if (coordsToDestroy.Count > 0)
             {
                 boardManager.MatchCombo.UpCombo();
-                int score = 0;
                 var damagedObstaclesThisMatch = new HashSet<Block>();
 
                 foreach (var coord in coordsToDestroy)
@@ -221,20 +220,10 @@ namespace KDJ
                     Block block = gameBoard.GetBlock(coord.x, coord.y);
                     if (block != null)
                     {
-                        if (block.GemType < GemType.Milk)
-                        {
-                            InGameManager.AddIngredientSta(block.GemType);
-                        }
-
-                        score += 10;
-
                         ApplySplashDamageToNeighbors(boardManager, coord.x, coord.y, damagedObstaclesThisMatch);
                         ApplyDamageToOverlayBlock(boardManager, coord.x, coord.y, damagedObstaclesThisMatch);
                     }
                 }
-
-                int finalScore = CalculateScore(score);
-                boardManager.UpdateUI(finalScore);
 
                 if (specialToCreate.HasValue)
                 {
