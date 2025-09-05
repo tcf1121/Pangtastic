@@ -18,7 +18,7 @@ public class CurrencyStarBuy : MonoBehaviour
     private void SetupAndPlayEffect()
     {
 
-        if (Manager.Currency.GetStars() < int.Parse(transform.Find("Amount").GetComponent<TMP_Text>().text))
+        if (CurrencySystem.Instance.GetStars() < int.Parse(transform.Find("Amount").GetComponent<TMP_Text>().text))
         {
             Debug.LogWarning("별이 부족합니다.");
             return;
@@ -27,7 +27,7 @@ public class CurrencyStarBuy : MonoBehaviour
         var startText = GameObject.FindWithTag("StarText");
         if (startText)
         {
-            Manager.Currency.SpendStar(int.Parse(transform.Find("Amount").GetComponent<TMP_Text>().text));
+            CurrencySystem.Instance.SpendStar(int.Parse(transform.Find("Amount").GetComponent<TMP_Text>().text));
             var tmp = startText.GetComponent<TMP_Text>();
             //if (tmp) .SetStarText(tmp);
         }

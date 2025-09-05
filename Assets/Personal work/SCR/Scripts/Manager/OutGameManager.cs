@@ -39,24 +39,6 @@ public class OutGameManager : MonoBehaviour
         instate._stageButtonText.text = $"Stage {index + 1}";
     }
 
-    /// <summary>
-    /// UI(TextMeshPro) 업데이트
-    /// </summary>
-    public static void UpdateCoinUI()
-    {
-        if (instate._coinText != null)
-            instate._coinText.text = Manager.Currency.GetCoins().ToString();
-    }
-
-    /// <summary>
-    /// UI(TextMeshPro) 업데이트
-    /// </summary>
-    public static void UpdateStarUI()
-    {
-        if (instate._starText != null)
-            instate._starText.text = Manager.Currency.GetStars().ToString();
-    }
-
     public void SetStage()
     {
         Manager.Stage.SetStage(int.Parse(_settingInputField.text.ToString()) - 1);
