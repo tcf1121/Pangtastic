@@ -23,7 +23,7 @@ public static class Manager
     {
         StageManager.CreateManager();
         UserInfoManager.CreateManager();
-        //AudioSystem.CreateManager();
+        AudioSystem.CreateManager();
         //ScriptingSystem.CreateManager();
         DatabaseSystem.CreateManager();
         GPGSManager.CreateManager();
