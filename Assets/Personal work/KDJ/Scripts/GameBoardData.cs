@@ -8,6 +8,7 @@ namespace KDJ
     {
         public Block[,] BlockArray { get; private set; }
         public Block[,] OverlayArray { get; set; }
+        public GameObject[,] BlockMask { get; set; }
         public BlockPlate BlockPlate { get; private set; }
 
         public int Width => BlockPlate.BlockPlateWidth;
@@ -22,6 +23,7 @@ namespace KDJ
             this.OverlayArray = new Block[Height, Width];
             // 보이지 않는 생성 행을 위해 높이에 +1을 합니다.
             this.BlockArray = new Block[Height + 1, Width];
+            this.BlockMask = new GameObject[Height, Width];
         }
 
         /// <summary>

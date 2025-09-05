@@ -12,19 +12,21 @@ public static class Manager
 
     public static EffectSystem Effect => EffectSystem.GetInstance();
     public static CurrencySystem Currency => CurrencySystem.GetInstance();
-    public static HeartSystem Heart => HeartSystem.GetInstance();
+    public static TimerManager Timer => TimerManager.GetInstance();
 
 
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
     private static void Init()  //인스펙터 세팅해야하는건 전부 첫씬으로 배치 (일단 주석처리 했음. 오브젝트 있는 씬부터 돈디스트로이 걸림)
     {
         StageManager.CreateManager();
-        //AudioSystem.CreateManager();
+        UserInfoManager.CreateManager();
+        AudioSystem.CreateManager();
         //ScriptingSystem.CreateManager();
         DatabaseSystem.CreateManager();
         GPGSManager.CreateManager();
         AdSystem.CreateManager();
         EffectSystem.CreateManager();
+        TimerManager.CreateManager();
         //CurrencySystem.CreateManager();
         //HeartSystem.CreateManager();
     }

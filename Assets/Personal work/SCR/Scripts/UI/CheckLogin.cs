@@ -1,10 +1,7 @@
 using Firebase.Auth;
 using Firebase.Database;
 using Firebase.Extensions;
-using Newtonsoft.Json;
 using System;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
@@ -16,6 +13,7 @@ namespace SCR
         Guest,
         Google
     }
+    
     public class CheckLogin : MonoBehaviour
     {
         [SerializeField] Button _enterBtn;
@@ -33,7 +31,7 @@ namespace SCR
             _guestBtn.onClick.AddListener(LoginAsGuest);
         }
 
-        private void CheckBefore()
+        private async void CheckBefore()
         {
 
             FirebaseAuth auth = FirebaseAuth.DefaultInstance;
@@ -43,7 +41,8 @@ namespace SCR
                 {
                     Debug.Log($"이미 게스트 로그인 상태: {auth.CurrentUser.UserId}");
                     Manager.DB.user = auth.CurrentUser;
-                    Manager.Stage.LoadStage();
+                    //Manager.Stage.LoadStage();
+                    await Manager.User.SetUser(auth.CurrentUser.UserId);
                     //DontDSystem.StatGame();
                     SceneManager.LoadScene(2/*로비씬*/);
                 }
@@ -51,7 +50,7 @@ namespace SCR
                 {
                     Debug.Log($"이미 일반 로그인 상태: {auth.CurrentUser.UserId}");
                     Manager.DB.user = auth.CurrentUser;
-                    Manager.Stage.LoadStage();
+                    //Manager.Stage.LoadStage();
                     //DontDSystem.StatGame();
                     SceneManager.LoadScene(2/*로비씬*/);
                 }
@@ -103,7 +102,7 @@ namespace SCR
         {
             Debug.Log("버튼눌림");
             FirebaseAuth auth = FirebaseAuth.DefaultInstance;
-            auth.SignInAnonymouslyAsync().ContinueWithOnMainThread(task =>
+            auth.SignInAnonymouslyAsync().ContinueWithOnMainThread(async task =>
             {
                 if (task.IsCanceled)
                 {
@@ -121,42 +120,11 @@ namespace SCR
 
                 Debug.LogFormat($"게스트 로그인 성공 : {newUser.UserId}");
 
-                NewUser(uid, DateTime.Now.ToString("O"));
+                Manager.User.NewUser(uid, DateTime.Now.ToString("O"));
 
-                Manager.Stage.LoadStage();
-                //DontDSystem.StatGame();
-// <<<<<<< HEAD
-                // SceneManager.LoadScene(2/*로비씬*/);
-                // SceneManager.LoadScene("Lobby Scene");
-// =======
-                //SceneManager.LoadScene("Lobby Scene");
-// >>>>>>> origin/UI/SCR
-
+                SceneManager.LoadScene("Lobby Scene");
             });
 
-        }
-
-        public async void NewUser(string uid, string now)
-        {
-            // 1. 단일 데이터 모델 객체 생성 및 값 설정
-            var newUserData = new UserData();
-            newUserData.UserInfo.Heart.currentHeart = 5;
-            newUserData.UserInfo.Heart.lastSaveTime = now;
-            // 나머지 속성들은 기본값으로 자동 초기화됩니다.
-            // 2. 단일 쓰기 작업을 실행하고 완료를 기다림
-
-            string json = JsonConvert.SerializeObject(newUserData);
-            try
-            {
-                Debug.Log("유저 생성 시작3");
-                await Manager.DB.GetUserPath(uid).SetRawJsonValueAsync(json);
-                Debug.Log("새로운 유저 데이터가 성공적으로 생성되었습니다.");
-            }
-            catch (Exception ex)
-            {
-                // 3. 오류 발생 시 예외 처리
-                Debug.LogError("유저 데이터 생성 실패: " + ex.Message);
-            }
         }
     }
 }

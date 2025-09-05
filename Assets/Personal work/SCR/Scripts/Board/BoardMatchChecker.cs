@@ -481,7 +481,7 @@ namespace SCR_B
         {
             if (boardData == null) boardData = _boardData;
 
-            // 우유
+            //우유
             if (specialType == GemType.Milk)
             {
                 List<GemType> targetGems = InGameManager.GetTagetGem();

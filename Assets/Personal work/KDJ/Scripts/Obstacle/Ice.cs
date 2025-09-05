@@ -9,6 +9,7 @@ namespace KDJ
     {
         public GemType DountType;
         private Sprite iceSprite;
+        public GameObject IceObject { get; set; }
         public Ice(int xpos, int ypos, BoardData boardData = null)
         {
             X = xpos;
@@ -32,7 +33,16 @@ namespace KDJ
             {
                 Debug.Log("가져오기 완료");
                 iceSprite = handle.Result;
+                SetSprite();
                 Debug.Log(iceSprite);
+            }
+        }
+
+        public void SetSprite()
+        {
+            if (IceObject != null && iceSprite != null)
+            {
+                IceObject.GetComponent<SpriteRenderer>().sprite = iceSprite;
             }
         }
 
@@ -44,6 +54,7 @@ namespace KDJ
 
         public override void SplashDamage()
         {
+            TakeDamage();
         }
 
         public override void Broken()

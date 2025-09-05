@@ -9,7 +9,8 @@ namespace KDJ
     public class BlockPlate : MonoBehaviour
     {
         [SerializeField] private Tilemap _blockPlate;
-        [SerializeField] private TileBase _blockTile;
+        [SerializeField] private List<TileBase> _blockTiles;
+        [SerializeField] private TileBase _emptyTile;
         [SerializeField] private GameObject _backPlate;
 
         public bool[,] BlockPlateArray;
@@ -36,22 +37,27 @@ namespace KDJ
             {
                 for (int y = 0; y < BlockPlateArray.GetLength(0); y++)
                 {
+                    TileBase tile;
+
+                    if (!BlockPlateArray[y, x])
+                        tile = _emptyTile;
+                    else
+                        tile = GetRandomBlockTile();
+
                     // 블록판 가로칸이 짝수일때 생성
                     if (BlockPlateArray.GetLength(1) % 2 == 0)
                     {
-                        if (BlockPlateArray[y, x])
-                        {
-                            _blockPlate.SetTile(new Vector3Int(x - BlockPlateWidth / 2, y - BlockPlateHeight / 2, 0), _blockTile);
-                            _blockPlate.transform.position = new Vector3(0, 0, 0);
-                        }
+
+                        _blockPlate.SetTile(new Vector3Int(x - BlockPlateWidth / 2, y - BlockPlateHeight / 2, 0), tile);
+                        _blockPlate.transform.position = new Vector3(0, 0, 0);
+
                     }
                     else
                     {
-                        if (BlockPlateArray[y, x])
-                        {
-                            _blockPlate.SetTile(new Vector3Int(x - BlockPlateWidth / 2, y - BlockPlateHeight / 2, 0), _blockTile);
-                            _blockPlate.transform.position = new Vector3(-0.5f, -0.5f, 0);
-                        }
+
+                        _blockPlate.SetTile(new Vector3Int(x - BlockPlateWidth / 2, y - BlockPlateHeight / 2, 0), tile);
+                        _blockPlate.transform.position = new Vector3(-0.5f, -0.5f, 0);
+
                     }
                 }
             }
@@ -116,6 +122,18 @@ namespace KDJ
 
             BlockPlateWidth = BlockPlateArray.GetLength(1);
             BlockPlateHeight = BlockPlateArray.GetLength(0);
+        }
+
+        public TileBase GetRandomBlockTile()
+        {
+            if (_blockTiles == null || _blockTiles.Count == 0)
+            {
+                Debug.LogWarning("블록 타일 리스트가 비어 있습니다.");
+                return null;
+            }
+
+            int randomIndex = Random.Range(0, _blockTiles.Count);
+            return _blockTiles[randomIndex];
         }
 
         public bool IsBlockTile(int x, int y)

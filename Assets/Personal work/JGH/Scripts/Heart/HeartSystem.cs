@@ -9,7 +9,7 @@ using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-public class HeartSystem : Singleton<HeartSystem>
+public class HeartSystem : MonoBehaviour
 {
     public static HeartSystem Instance { get; private set; }
 
@@ -24,20 +24,6 @@ public class HeartSystem : Singleton<HeartSystem>
     
     private DateTime? _pauseStartTime; 
 
-
-    protected void Awake()
-    {
-        base.Awake();
-        
-        if (Instance != null && Instance != this)
-        {
-            Destroy(gameObject);
-            return;
-        }
-
-        Instance = this;
-        DontDestroyOnLoad(gameObject);
-    }
 
     private void Start()
     {
@@ -290,7 +276,16 @@ public class HeartSystem : Singleton<HeartSystem>
     /// 애플리케이션이 백그라운드로 갔을 때 하트 데이터를 저장합니다.
     /// </summary>
     /// <param name="pause"></param>
-    private void OnApplicationPause(bool pause)
+    // private void OnApplicationPause(bool pause)
+    // {
+    // if (pause)
+    // {
+    // Quit();
+    // }
+    // }
+
+    private void Quit(bool pause)
+// >>>>>>> Develop
     {
         if (pause)
         {

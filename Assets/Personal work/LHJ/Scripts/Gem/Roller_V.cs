@@ -40,9 +40,9 @@ namespace LHJ
                     special.Activate(board);
                 }
 
-                if(blk is SCR_O.ObstacleBlock obstacle)
+                if(blk is ObstacleBlock obstacle)
                 {
-                    obstacle.TakeDamage(board);
+                    obstacle.TakeDamage();
                     continue;
                 }
                  // 일반/특수 블록 처리

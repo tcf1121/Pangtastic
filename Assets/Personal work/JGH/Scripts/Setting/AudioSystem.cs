@@ -1,5 +1,7 @@
 using UnityEngine;
 using System.Collections.Generic;
+using UnityEngine.ResourceManagement.AsyncOperations;
+using UnityEngine.AddressableAssets;
 
 [System.Serializable]
 public class AudioClipGroup
@@ -12,11 +14,13 @@ public class AudioSystem : Singleton<AudioSystem>
 {
     //public static AudioSystem Instance { get; private set; }
 
-    [Header("BGM 클립들")]
-    [SerializeField] private List<AudioClipGroup> _bgmClips = new List<AudioClipGroup>();
+    // [Header("BGM 클립들")]
+    // [SerializeField] private List<AudioClipGroup> _bgmClips = new List<AudioClipGroup>();
 
-    [Header("SFX 클립들")]
-    [SerializeField] private List<AudioClipGroup> _sfxClips = new List<AudioClipGroup>();
+    // [Header("SFX 클립들")]
+    // [SerializeField] private List<AudioClipGroup> _sfxClips = new List<AudioClipGroup>();
+
+    [SerializeField] private AudioClips audioClips;
 
     // AudioSource 컴포넌트들
     [HideInInspector] public AudioSource BgmAudioSource;
@@ -36,8 +40,30 @@ public class AudioSystem : Singleton<AudioSystem>
         SfxAudioSource.loop = false;
         SfxAudioSource.volume = 1;
         SfxAudioSource.playOnAwake = false;
+
+        LoadAudioClips();
     }
 
+    private void LoadAudioClips()
+    {
+
+        AsyncOperationHandle<AudioClips> handle = Addressables.LoadAssetAsync<AudioClips>("AudioSO");
+        handle.Completed += OnAudioClipsLoaded;
+    }
+
+    private void OnAudioClipsLoaded(AsyncOperationHandle<AudioClips> handle)
+    {
+        if (handle.Status == AsyncOperationStatus.Succeeded)
+        {
+            audioClips = handle.Result;
+
+            Debug.Log($"AudioClips 로드 완료.");
+        }
+        else
+        {
+            Debug.LogError($"StageSO 로드 실패:{handle.OperationException}");
+        }
+    }
 
 
     /// <summary>
@@ -46,9 +72,9 @@ public class AudioSystem : Singleton<AudioSystem>
     /// <param name="clipIndex"></param>
     public void PlayBGM(int clipIndex)
     {
-        if (clipIndex >= 0 && clipIndex < _bgmClips.Count)
+        if (clipIndex >= 0 && clipIndex < audioClips._bgmClips.Count)
         {
-            var clip = _bgmClips[clipIndex].audioClip;
+            var clip = audioClips._bgmClips[clipIndex].audioClip;
             if (clip != null && BgmAudioSource != null)
             {
                 BgmAudioSource.clip = clip;
@@ -63,9 +89,9 @@ public class AudioSystem : Singleton<AudioSystem>
     /// <param name="clipIndex"></param>
     public void PlaySFX(int clipIndex)
     {
-        if (clipIndex >= 0 && clipIndex < _sfxClips.Count)
+        if (clipIndex >= 0 && clipIndex < audioClips._sfxClips.Count)
         {
-            var clip = _sfxClips[clipIndex].audioClip;
+            var clip = audioClips._sfxClips[clipIndex].audioClip;
             if (clip != null && SfxAudioSource != null)
             {
                 SfxAudioSource.PlayOneShot(clip);
@@ -117,7 +143,7 @@ public class AudioSystem : Singleton<AudioSystem>
     /// <param name="clipName"></param>
     public void PlayBGMByName(string clipName)
     {
-        var clipGroup = _bgmClips.Find(g => g.name == clipName);
+        var clipGroup = audioClips._bgmClips.Find(g => g.name == clipName);
         if (clipGroup != null && clipGroup.audioClip != null && BgmAudioSource != null)
         {
             BgmAudioSource.clip = clipGroup.audioClip;
@@ -135,7 +161,7 @@ public class AudioSystem : Singleton<AudioSystem>
     /// <param name="clipName"></param>
     public void PlaySFXByName(string clipName)
     {
-        var clipGroup = _sfxClips.Find(g => g.name == clipName);
+        var clipGroup = audioClips._sfxClips.Find(g => g.name == clipName);
         if (clipGroup != null && clipGroup.audioClip != null && SfxAudioSource != null)
         {
             SfxAudioSource.PlayOneShot(clipGroup.audioClip);
