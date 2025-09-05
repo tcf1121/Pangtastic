@@ -225,6 +225,8 @@ public class GPGSManager : Singleton<GPGSManager>
                 string gpgsName = PlayGamesPlatform.Instance.localUser.userName;
                 Debug.Log($"GPGS 이름 : {gpgsName}");
 
+               
+
                 if (string.IsNullOrEmpty(gpgsName))
                 {
                     Debug.Log("GPGS 이름이 공백임");
@@ -243,12 +245,19 @@ public class GPGSManager : Singleton<GPGSManager>
                     }
 
                     Debug.Log("프로필 업데이트 성공");
+
+                    UserData cur = Manager.User.GetCurrentUserData();
+                    cur.PlayerName = string.IsNullOrEmpty(gpgsName) ? "Player" : gpgsName; //이름 있으면 이름, 없으면 Player
+
+                    Manager.User.SetUser(cur); //저장
+
                     Debug.Log($"DB.DisplayName : {Manager.DB.user.DisplayName}");
                     Debug.Log($"profile.DisplayName : {profile.DisplayName}");
+                    
 
                     string uid = Manager.DB.auth.CurrentUser.UserId;
                     Manager.DB.MigrateGuestDataToUser(uid); //마이그레이션
-                    Manager.DB.UserIntoSave(); //이름 설정
+                    //Manager.DB.UserIntoSave(); //이름 설정
                     onDone?.Invoke(true);
                 });
             });

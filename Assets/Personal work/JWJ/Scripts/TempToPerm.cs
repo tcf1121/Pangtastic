@@ -53,6 +53,7 @@ public class TempToPerm : MonoBehaviour
             if (success) //성공하면
             {
                 _tempToPermButton.gameObject.SetActive(false); //버튼 숨김
+                
             }
             else // 실패하면
             {
