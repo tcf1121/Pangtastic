@@ -13,12 +13,13 @@ namespace LHJ
         {
             if (gameBoard == null || outDamage == null) return;
 
-            // Milk
+            // 우유
             if (specialType == GemType.Milk)
             {
                 AddCell(gameBoard, pos.x, pos.y, outDamage);
-                var targetGems = InGameManager.GetTagetGem();
-                var candidates = GetTargetPos(gameBoard, targetGems);
+                // var targetGems = InGameManager.GetTagetGem();
+                // var candidates = GetTargetPos(gameBoard, targetGems);
+                List<Vector2Int> candidates = new List<Vector2Int>();
                 Shuffle(candidates);
 
                 // 최대 3개 선택, 부족하면 랜덤 보충
@@ -53,6 +54,7 @@ namespace LHJ
                 for (int x = 0; x < gameBoard.Width; x++)
                     AddCell(gameBoard, x, pos.y, outDamage);
                 return;
+
             }
 
             // 도넛 박스 (5x5)
@@ -71,7 +73,7 @@ namespace LHJ
                 AddCell(gameBoard, pos.x, pos.y, outDamage);
                 Vector2Int? other = null;
                 // 1) BoardManager의 스왑 좌표 사용
-                var bm = KDJ.BoardManager.Instance; // 싱글턴 사용
+                var bm = BoardManager.Instance; // 싱글턴 사용
                 if (bm != null && bm.BlockMover != null)
                 {
                     Vector2Int start = bm.BlockMover.StartBlockPos;
@@ -131,7 +133,7 @@ namespace LHJ
                 return;
             }
         }
-
+   
         // 요구재료 좌표 목록 
         private List<Vector2Int> GetTargetPos(GameBoardData gameBoard, List<GemType> gemTypes)
         {
@@ -178,6 +180,9 @@ namespace LHJ
 
             List<Vector2Int> visited = new List<Vector2Int>();
             Queue<Vector2Int> q = new Queue<Vector2Int>();
+            var mover = board.BlockMover;
+            Vector2Int startSwap = (mover != null) ? mover.StartBlockPos : new Vector2Int(int.MinValue, int.MinValue);
+            Vector2Int endSwap = (mover != null) ? mover.EndBlockPos : new Vector2Int(int.MinValue, int.MinValue);
 
             // 초기 큐 적재: expanded에 포함된 특수블록 좌표
             for (int i = 0; i < expanded.Count; i++)
@@ -186,6 +191,7 @@ namespace LHJ
                 var blk0 = gameBoard.GetBlock(p.x, p.y);
                 if (blk0 != null && blk0.BlockInstance != null && blk0.GemType >= GemType.Milk)
                 {
+                    if (p == startSwap || p == endSwap) continue;
                     bool seen = false;
                     for (int k = 0; k < visited.Count; k++)
                         if (visited[k].x == p.x && visited[k].y == p.y) { seen = true; break; }
@@ -245,16 +251,14 @@ namespace LHJ
                 var b = gameBoard.GetBlock(c.x, c.y);
                 if (b != null && b.BlockInstance != null)
                 {
-                    if (b.GemType < GemType.Milk)
-                        InGameManager.AddIngredientSta(b.GemType);
+                    //if (b.GemType < GemType.Milk)
+                    //    InGameManager.AddIngredientSta(b.GemType);
 
                     if (b is ObstacleBlock ob)
                     {
                         ob.TakeDamage();
                         continue;
                     }
-                    
-
                     Object.Destroy(b.BlockInstance);
                     gameBoard.SetBlock(c.x, c.y, null);
                     destroyedCount++;
@@ -298,8 +302,9 @@ namespace LHJ
             // 2) 우유 + 우유
             if (a == GemType.Milk && b == GemType.Milk)
             {
-                var targets = InGameManager.GetTagetGem();
-                var candidates = GetTargetPos(gameBoard, targets);
+                // var targets = InGameManager.GetTagetGem();
+                // var candidates = GetTargetPos(gameBoard, targets);
+                List<Vector2Int> candidates = new List<Vector2Int>();
                 Shuffle(candidates);
 
                 List<Vector2Int> picks = new List<Vector2Int>(5);
@@ -343,8 +348,9 @@ namespace LHJ
                 (a == GemType.Milk && b == GemType.Roller_v))
             {
                 // 우유 선택 로직
-                List<GemType> targets = InGameManager.GetTagetGem();
-                List<Vector2Int> candidates = GetTargetPos(gameBoard, targets);
+                // List<GemType> targets = InGameManager.GetTagetGem();
+                // List<Vector2Int> candidates = GetTargetPos(gameBoard, targets);
+                List<Vector2Int> candidates = new List<Vector2Int>();
                 Shuffle(candidates);
 
                 List<Vector2Int> picks = new List<Vector2Int>(3);
@@ -375,8 +381,9 @@ namespace LHJ
                 (a == GemType.Milk && b == GemType.Roller_h))
             {
                 // 우유 선택 로직
-                List<GemType> targets = InGameManager.GetTagetGem();
-                List<Vector2Int> candidates = GetTargetPos(gameBoard, targets);
+                // List<GemType> targets = InGameManager.GetTagetGem();
+                // List<Vector2Int> candidates = GetTargetPos(gameBoard, targets);
+                List<Vector2Int> candidates = new List<Vector2Int>();
                 Shuffle(candidates);
 
                 List<Vector2Int> picks = new List<Vector2Int>(3);
@@ -406,7 +413,7 @@ namespace LHJ
             if ((a == GemType.Roller_v && b == GemType.DonutBox) ||
                 (a == GemType.DonutBox && b == GemType.Roller_v))
             {
-                for (int dx = -2; dx <= 2; dx++)
+                for (int dx = -1; dx <= 1; dx++)
                     UseSpecial(new Vector2Int(secondPos.x + dx, secondPos.y), GemType.Roller_v, gameBoard, outDamage);
                 return;
             }
@@ -415,7 +422,7 @@ namespace LHJ
             if ((a == GemType.Roller_h && b == GemType.DonutBox) ||
                 (a == GemType.DonutBox && b == GemType.Roller_h))
             {
-                for (int dy = -2; dy <= 2; dy++)
+                for (int dy = -1; dy <= 1; dy++) 
                     UseSpecial(new Vector2Int(secondPos.x, secondPos.y + dy), GemType.Roller_h, gameBoard, outDamage);
                 return;
             }
@@ -425,8 +432,9 @@ namespace LHJ
                 (a == GemType.DonutBox && b == GemType.Milk))
             {
                 // 우유 선택 로직
-                List<GemType> targets = InGameManager.GetTagetGem();
-                List<Vector2Int> candidates = GetTargetPos(gameBoard, targets);
+                // List<GemType> targets = InGameManager.GetTagetGem();
+                // List<Vector2Int> candidates = GetTargetPos(gameBoard, targets);
+                List<Vector2Int> candidates = new List<Vector2Int>();
                 Shuffle(candidates);
 
                 List<Vector2Int> picks = new List<Vector2Int>(3);
@@ -457,7 +465,8 @@ namespace LHJ
                 (a == GemType.Milk && b == GemType.Oven))
             {
                 // 1) 현재 필요한 재료 타입 목록
-                List<GemType> need = InGameManager.GetTagetGem();
+                // List<GemType> need = InGameManager.GetTagetGem();
+                List<GemType> need = new List<GemType>();
 
                 for (int y = 0; y < gameBoard.Height; y++)
                 {
@@ -559,8 +568,6 @@ namespace LHJ
                 }
                 return;
             }
-
-            // 안전망: 각각 단일 특수로 처리
             UseSpecial(firstPos, firstType, gameBoard, outDamage);
             UseSpecial(secondPos, secondType, gameBoard, outDamage);
         }

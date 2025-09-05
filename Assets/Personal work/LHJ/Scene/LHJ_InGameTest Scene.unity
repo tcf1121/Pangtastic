@@ -6406,6 +6406,70 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 555386617}
   m_CullTransparentMesh: 1
+--- !u!1 &563848710
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 563848712}
+  - component: {fileID: 563848711}
+  m_Layer: 0
+  m_Name: GameObject
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &563848711
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 563848710}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 56d392d21161ceb45b12667abb32ed82, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  testBoards:
+  - {fileID: 11400000, guid: 3848d72bf01cc52438c820bd9398bda2, type: 2}
+  - {fileID: 11400000, guid: 4e17c2c3208c47f4c88bfda525dad910, type: 2}
+  - {fileID: 11400000, guid: 4e17c2c3208c47f4c88bfda525dad910, type: 2}
+  - {fileID: 11400000, guid: 4e17c2c3208c47f4c88bfda525dad910, type: 2}
+  - {fileID: 11400000, guid: 4e17c2c3208c47f4c88bfda525dad910, type: 2}
+  - {fileID: 11400000, guid: 4e17c2c3208c47f4c88bfda525dad910, type: 2}
+  - {fileID: 11400000, guid: 4e17c2c3208c47f4c88bfda525dad910, type: 2}
+  - {fileID: 11400000, guid: 4e17c2c3208c47f4c88bfda525dad910, type: 2}
+  - {fileID: 11400000, guid: 4e17c2c3208c47f4c88bfda525dad910, type: 2}
+  - {fileID: 11400000, guid: 4e17c2c3208c47f4c88bfda525dad910, type: 2}
+  - {fileID: 11400000, guid: 4e17c2c3208c47f4c88bfda525dad910, type: 2}
+  - {fileID: 11400000, guid: 4e17c2c3208c47f4c88bfda525dad910, type: 2}
+  - {fileID: 11400000, guid: 4e17c2c3208c47f4c88bfda525dad910, type: 2}
+  - {fileID: 11400000, guid: 4e17c2c3208c47f4c88bfda525dad910, type: 2}
+  - {fileID: 11400000, guid: 4e17c2c3208c47f4c88bfda525dad910, type: 2}
+  - {fileID: 11400000, guid: 4e17c2c3208c47f4c88bfda525dad910, type: 2}
+  - {fileID: 11400000, guid: 4e17c2c3208c47f4c88bfda525dad910, type: 2}
+  - {fileID: 11400000, guid: 4e17c2c3208c47f4c88bfda525dad910, type: 2}
+  - {fileID: 11400000, guid: 83eeabbececb1074faced23360d56278, type: 2}
+--- !u!4 &563848712
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 563848710}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 488.63776, y: 1313.3271, z: -15.009735}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &595034427
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -12860,6 +12924,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fa712b3cd88529845b07eb3dc28e230d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  testStageManager: {fileID: 0}
 --- !u!114 &1127540875
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -16915,7 +16980,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8579344169084250576, guid: a6c91df400f25084193b8dfb89592778, type: 3}
       propertyPath: _test_blockOverrides.Array.data[0].x
-      value: 2
+      value: 3
       objectReference: {fileID: 0}
     - target: {fileID: 8579344169084250576, guid: a6c91df400f25084193b8dfb89592778, type: 3}
       propertyPath: _test_blockOverrides.Array.data[0].y
@@ -16923,7 +16988,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8579344169084250576, guid: a6c91df400f25084193b8dfb89592778, type: 3}
       propertyPath: _test_blockOverrides.Array.data[1].x
-      value: 5
+      value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 8579344169084250576, guid: a6c91df400f25084193b8dfb89592778, type: 3}
       propertyPath: _test_blockOverrides.Array.data[1].y
@@ -16951,7 +17016,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8579344169084250576, guid: a6c91df400f25084193b8dfb89592778, type: 3}
       propertyPath: _test_blockOverrides.Array.data[1].gemType
-      value: 7
+      value: 8
       objectReference: {fileID: 0}
     - target: {fileID: 8579344169084250576, guid: a6c91df400f25084193b8dfb89592778, type: 3}
       propertyPath: _test_blockOverrides.Array.data[2].gemType
@@ -23580,3 +23645,4 @@ SceneRoots:
   - {fileID: 1732992823}
   - {fileID: 515561727}
   - {fileID: 2011959134}
+  - {fileID: 563848712}
