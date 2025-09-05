@@ -101,27 +101,6 @@ namespace SCR
 
         public static void SetPuzzleInfo(Dictionary<Vector3Int, GemType> PuzzleInfo, List<Vector3Int> SpawnPoint)
         {
-            // do
-            // {
-            //     instance.CellList.Clear();
-            //     instance.CellGemType.Clear();
-            //     instance.CellContent.Clear();
-            //     foreach (var data in PuzzleInfo)
-            //     {
-            //         AddCell(data.Key);
-            //         AddObject(data.Key, data.Value);
-            //         if (data.Value <= GemType.Sugar ||
-            //             data.Value == GemType.Egg ||
-            //             data.Value == GemType.Coin ||
-            //             data.Value == GemType.Random)
-            //             if (!instance._spawnType.Contains(data.Value))
-            //             {
-            //                 instance._spawnType.Add(data.Value);
-            //             }
-            //     }
-
-            // } while (instance.IsStartMatch());
-
             instance.CellList.Clear();
             instance.CellGemType.Clear();
             instance.CellContent.Clear();
@@ -303,7 +282,7 @@ namespace SCR
             {
                 instance = GameObject.Find("Grid").GetComponent<Board>();
             }
-            var newDonut = Instantiate(Board.GetPrefab(obstacle), instance.gem.transform);
+            var newDonut = Instantiate(GetPrefab(obstacle), instance.gem.transform);
             newDonut.transform.position = pos;
             return newDonut.GetComponent<Obstacle>();
         }
