@@ -186,7 +186,15 @@ namespace KDJ
                 {
                     if (block.BlockInstance != null)
                     {
-                        Destroy(block.BlockInstance);
+                        // Destroy(block.BlockInstance);
+                        if (block.BlockInstance.TryGetComponent<PooledObject>(out var pooledObj))
+                        {
+                            pooledObj.ReturnToPool();
+                        }
+                        else
+                        {
+                            Destroy(block.BlockInstance);
+                        }
                     }
                     Spawner.GameBoardData.BlockArray[coord.y, coord.x] = null; // 좌표를 사용하여 데이터 정리
                 }
