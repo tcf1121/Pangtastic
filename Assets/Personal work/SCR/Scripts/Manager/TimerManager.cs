@@ -7,7 +7,7 @@ public class TimerManager : Singleton<TimerManager>
 {
 
     public IEnumerator StartTimer(Coroutine cor, float CycleTime, float currnetTime = 0,
-     Action<float> onTimerFinished = null)
+     Action<float> onCorTimer = null, Action onTimerFinished = null)
     {
         float _cycle = CycleTime;
         while (true)
@@ -15,14 +15,13 @@ public class TimerManager : Singleton<TimerManager>
             if (currnetTime < _cycle)
             {
                 currnetTime += Time.unscaledDeltaTime;
-                onTimerFinished?.Invoke(currnetTime);
+                onCorTimer?.Invoke(currnetTime);
                 yield return null;
             }
             else
                 break;
         }
-        StopCoroutine(cor);
-        cor = null;
+        onTimerFinished?.Invoke();
     }
 
 }

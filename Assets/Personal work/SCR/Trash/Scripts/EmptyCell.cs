@@ -25,7 +25,7 @@ namespace SCR
 
 
             GameObject root = GameObject.Find("Puzzle").transform.GetChild(0).gameObject;
-            if (root != null)
+            if (gameObject != null && root != null)
             {
                 GameObject prefab = Instantiate(gameObject, root.transform);
                 prefab.transform.position = position;

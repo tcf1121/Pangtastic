@@ -42,7 +42,6 @@ public class InGameUiController : MonoBehaviour
     public void ChangeQuitGameScene()
     {
         SceneManager.LoadScene(2/*로비씬*/);
-
         Manager.Audio.PlaySFXByName("GameToHomeSfx");
     }
 
