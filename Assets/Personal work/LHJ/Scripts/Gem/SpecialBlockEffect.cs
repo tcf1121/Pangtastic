@@ -259,7 +259,16 @@ namespace LHJ
                         ob.TakeDamage();
                         continue;
                     }
-                    Object.Destroy(b.BlockInstance);
+
+                    if (b.BlockInstance.TryGetComponent<PooledObject>(out var pooledObject))
+                    {
+                        pooledObject.ReturnToPool();
+                    }
+                    else
+                    {
+                        Destroy(b.BlockInstance);
+                    }
+                    
                     gameBoard.SetBlock(c.x, c.y, null);
                     destroyedCount++;
                 }
