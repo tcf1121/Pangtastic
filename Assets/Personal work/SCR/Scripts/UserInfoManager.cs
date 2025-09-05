@@ -42,7 +42,7 @@ public class UserInfoManager : Singleton<UserInfoManager>
     // 기존 유저가 접속할 때 기존 데이터를 가져와서 CurrentData에 넣음
     public async Task SetUser(string uid)
     {
-        currentData = await GetUserData(uid);
+        currentData = await DownloadUserData(uid);
         if (currentData != null)
         {
             Debug.Log("사용자 데이터 로드 및 할당 성공!");
@@ -115,7 +115,6 @@ public class UserInfoManager : Singleton<UserInfoManager>
     }
 
 
-
     public void SetHeart(int value)
     {
         currentData.UserInfo.Heart.currentHeart = value;
@@ -179,6 +178,11 @@ public class UserInfoManager : Singleton<UserInfoManager>
         currentData.ItemInfo = itemInfo;
     }
 
+    public void SetName(string name)
+    {
+        currentData.PlayerName = name;
+    }
+
     public ItemInfo GetItem()
     {
         return currentData.ItemInfo;
@@ -189,7 +193,7 @@ public class UserInfoManager : Singleton<UserInfoManager>
         return currentData;
     }
 
-    public async Task<UserData> GetUserData(string uid)
+    public async Task<UserData> DownloadUserData(string uid)
     {
         var task = Manager.DB.GetUserPath(uid).GetValueAsync();
 
@@ -218,9 +222,26 @@ public class UserInfoManager : Singleton<UserInfoManager>
         }
         return null;
     }
+
+    private void OnApplicationQuit()
+    {
+
+    }
+
+    // 기기에 JSON 파일로 저장
+    public void SaveUserData()
+    {
+
+    }
+
+    // 파이어베이스에 업로드
+    public void UploadUserData()
+    {
+
+    }
 }
 
-[System.Serializable]
+[Serializable]
 public class UserData
 {
     public UserInfo UserInfo { get; set; } = new UserInfo();
@@ -229,7 +250,7 @@ public class UserData
     public ItemInfo ItemInfo { get; set; } = new ItemInfo();
 }
 
-[System.Serializable]
+[Serializable]
 public class UserInfo
 {
     public HeartInfo Heart { get; set; } = new HeartInfo();
@@ -238,7 +259,7 @@ public class UserInfo
     public int Profile { get; set; } = 0;
 }
 
-[System.Serializable]
+[Serializable]
 public class HeartInfo
 {
     public int currentHeart { get; set; } = 0;
@@ -246,7 +267,7 @@ public class HeartInfo
     public int remainingSeconds { get; set; } = 0;
 }
 
-[System.Serializable]
+[Serializable]
 public class ItemInfo
 {
     public int Roller { get; set; } = 0;

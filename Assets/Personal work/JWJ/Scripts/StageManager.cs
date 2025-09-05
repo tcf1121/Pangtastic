@@ -78,54 +78,54 @@ public class StageManager : Singleton<StageManager>
     //     StartCoroutine(LoadStageRoutine());
     //     Debug.Log("스테이지 로드");
     // }
-    // private IEnumerator SaveStageRoutine()
-    // {
-    //     if (Manager.DB == null)
-    //     {
-    //         Debug.LogError("DB 매니저가 없음");
-    //         yield break;
-    //     }
+    private IEnumerator SaveStageRoutine()
+    {
+        if (Manager.DB == null)
+        {
+            Debug.LogError("DB 매니저가 없음");
+            yield break;
+        }
 
-    //     string authJson = Manager.DB.GetAuthInfo();
-    //     if (string.IsNullOrEmpty(authJson) == true)
-    //     {
-    //         Debug.LogError("로그인 정보 없음");
-    //         yield break;
-    //     }
+        string authJson = Manager.DB.GetAuthInfo();
+        if (string.IsNullOrEmpty(authJson) == true)
+        {
+            Debug.LogError("로그인 정보 없음");
+            yield break;
+        }
 
-    //     DatabaseSystem.AuthInfo info = JsonUtility.FromJson<DatabaseSystem.AuthInfo>(authJson); //제이슨 to 구조체
+        DatabaseSystem.AuthInfo info = JsonUtility.FromJson<DatabaseSystem.AuthInfo>(authJson); //제이슨 to 구조체
 
-    //     if (string.IsNullOrEmpty(info.uid) == true || string.IsNullOrEmpty(info.type) == true)
-    //     {
-    //         Debug.LogError("AuthInfo가 비었음");
-    //         yield break;
-    //     }
+        if (string.IsNullOrEmpty(info.uid) == true || string.IsNullOrEmpty(info.type) == true)
+        {
+            Debug.LogError("AuthInfo가 비었음");
+            yield break;
+        }
 
-    //     string curStageValue = (CurrentStageIndex + 1).ToString();
-    //     var path = Manager.DB.dbRef
-    //         .Child(info.type)
-    //         .Child(info.uid)
-    //         .Child("curStage")
-    //         .Child("stage");
+        string curStageValue = (CurrentStageIndex + 1).ToString();
+        var path = Manager.DB.dbRef
+            .Child(info.type)
+            .Child(info.uid)
+            .Child("curStage")
+            .Child("stage");
 
-    //     var setTask = path.SetValueAsync(curStageValue);
-    //     yield return new WaitUntil(IsSetDone);
+        var setTask = path.SetValueAsync(curStageValue);
+        yield return new WaitUntil(IsSetDone);
 
-    //     bool IsSetDone()
-    //     {
-    //         return setTask.IsCompleted;
-    //     }
+        bool IsSetDone()
+        {
+            return setTask.IsCompleted;
+        }
 
-    //     if (setTask.Exception != null)
-    //     {
-    //         Debug.LogError($"스테이지 저장 실패: {setTask.Exception}");
-    //         yield break;
-    //     }
+        if (setTask.Exception != null)
+        {
+            Debug.LogError($"스테이지 저장 실패: {setTask.Exception}");
+            yield break;
+        }
 
-    //     Debug.Log($"스테이지 저장 완료:{curStageValue}");
-    //     yield break;
+        Debug.Log($"스테이지 저장 완료:{curStageValue}");
+        yield break;
 
-    // }
+    }
 
     // private IEnumerator LoadStageRoutine()
     // {
