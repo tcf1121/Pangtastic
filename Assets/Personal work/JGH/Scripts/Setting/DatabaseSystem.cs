@@ -67,7 +67,9 @@ public class DatabaseSystem : Singleton<DatabaseSystem>
         else
         {
             type = "users";
+            Debug.Log($"유저 네임: {user.DisplayName}");
             nickname = string.IsNullOrEmpty(user.DisplayName) ? "Unknown" : user.DisplayName;
+            Debug.Log($"최종 유저 네임: {nickname}");
         }
         
         AuthInfo info = new AuthInfo

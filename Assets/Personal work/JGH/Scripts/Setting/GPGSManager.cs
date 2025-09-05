@@ -223,13 +223,19 @@ public class GPGSManager : Singleton<GPGSManager>
                 Manager.DB.user = Manager.DB.auth.CurrentUser;
 
                 string gpgsName = PlayGamesPlatform.Instance.localUser.userName;
+                Debug.Log($"GPGS 이름 : {gpgsName}");
 
                 if (string.IsNullOrEmpty(gpgsName))
                 {
+                    Debug.Log("GPGS 이름이 공백임");
                     gpgsName = string.IsNullOrEmpty(Manager.DB.user.DisplayName) ? "Player" : Manager.DB.user.DisplayName;
+                    Debug.Log($"대체 이름: {gpgsName}");
                 }
 
+                Debug.Log($"DisplayName : {Manager.DB.user.DisplayName}");
+
                 var profile = new UserProfile { DisplayName = gpgsName };
+                
 
                 Manager.DB.user.UpdateUserProfileAsync(profile).ContinueWithOnMainThread(task =>
                 {
@@ -237,9 +243,13 @@ public class GPGSManager : Singleton<GPGSManager>
                     {
                         Debug.LogError($"프로필 업데이트 실패: {task.Exception}");
                     }
+
+                    Debug.Log($"DB.DisplayName : {Manager.DB.user.DisplayName}");
+                    Debug.Log($"profile.DisplayName : {profile.DisplayName}");
+
                     string uid = Manager.DB.auth.CurrentUser.UserId;
-                    Manager.DB.MigrateGuestDataToUser(uid);
-                    Manager.DB.UserIntoSave();
+                    Manager.DB.MigrateGuestDataToUser(uid); //마이그레이션
+                    Manager.DB.UserIntoSave(); //이름 설정
                     onDone?.Invoke(true);
                 });
             });
