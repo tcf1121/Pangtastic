@@ -1,3 +1,4 @@
+using Firebase.Auth;
 using Firebase.Database;
 using Newtonsoft.Json;
 using System;
@@ -24,6 +25,7 @@ public class UserInfoManager : Singleton<UserInfoManager>
     public async void NewUser(string uid, string now)
     {
         var newUserData = new UserData();
+        newUserData.PlayerName = "guest";
         newUserData.UserInfo.Heart.currentHeart = 5;
         newUserData.UserInfo.Heart.lastSaveTime = now;
 
@@ -45,6 +47,7 @@ public class UserInfoManager : Singleton<UserInfoManager>
         currentData = await DownloadUserData(uid);
         if (currentData != null)
         {
+            Debug.Log(currentData.Stage);
             Debug.Log("사용자 데이터 로드 및 할당 성공!");
         }
         else
@@ -216,16 +219,19 @@ public class UserInfoManager : Singleton<UserInfoManager>
         if (snapshot.Exists)
         {
             string json = snapshot.GetRawJsonValue();
-            UserData userData = JsonUtility.FromJson<UserData>(json);
+
+            Debug.Log(json);
+            UserData userData = JsonConvert.DeserializeObject<UserData>(json);
+            Debug.Log(userData.Stage);
 
             return userData;
         }
         return null;
     }
 
-    private void OnApplicationQuit()
+    private async void OnApplicationQuit()
     {
-
+        await UploadUserDataAsync();
     }
 
     // 기기에 JSON 파일로 저장
@@ -235,9 +241,19 @@ public class UserInfoManager : Singleton<UserInfoManager>
     }
 
     // 파이어베이스에 업로드
-    public void UploadUserData()
+    public async Task UploadUserDataAsync()
     {
-
+        string json = JsonConvert.SerializeObject(currentData);
+        try
+        {
+            FirebaseAuth auth = FirebaseAuth.DefaultInstance;
+            string uid = auth.CurrentUser.UserId;
+            await Manager.DB.GetUserPath(uid).SetRawJsonValueAsync(json);
+        }
+        catch (Exception ex)
+        {
+            Debug.LogError("유저 데이터 생성 실패: " + ex.Message);
+        }
     }
 }
 
