@@ -24,7 +24,7 @@ namespace SCR
             _mapInfo = PuzzelEditBoard.GetPuzzleInfo();
             _spawnPoint.Clear();
             _spawnPoint = PuzzelEditBoard.GetSpawnPoint();
-            int num = int.Parse(inputField.text);
+            int num = int.Parse(inputField.text) - 4000;
             string directoryPath = Path.GetDirectoryName(Application.dataPath + "/" + path);
             if (!Directory.Exists(directoryPath))
             {
@@ -52,7 +52,7 @@ namespace SCR
                 StringBuilder csvBuilder = new StringBuilder();
 
                 // 배열의 각 행을 순회
-                csvBuilder.Append(4000 + num);
+                csvBuilder.Append(num + 4000);
                 csvBuilder.Append(",");
                 foreach (var data in _mapInfo)
                 {
@@ -81,7 +81,7 @@ namespace SCR
                 // 5. 수정된 모든 줄을 다시 파일에 저장 (기존 파일 내용 덮어씀)
                 File.WriteAllLines(Application.dataPath + "/" + path, lines.ToArray(), Encoding.UTF8);
 
-                Debug.Log("CSV 파일의 " + (num - 4000) + "번째 줄에 데이터 저장 완료: " + Application.dataPath + "/" + path);
+                Debug.Log("CSV 파일의 " + (num) + "번째 줄에 데이터 저장 완료: " + Application.dataPath + "/" + path);
             }
             catch (IOException e)
             {
