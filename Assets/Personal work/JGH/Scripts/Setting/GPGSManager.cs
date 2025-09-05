@@ -232,18 +232,17 @@ public class GPGSManager : Singleton<GPGSManager>
                     Debug.Log($"대체 이름: {gpgsName}");
                 }
 
-                Debug.Log($"DisplayName : {Manager.DB.user.DisplayName}");
-
                 var profile = new UserProfile { DisplayName = gpgsName };
                 
-
                 Manager.DB.user.UpdateUserProfileAsync(profile).ContinueWithOnMainThread(task =>
                 {
                     if (task.IsCanceled || task.IsFaulted)
                     {
                         Debug.LogError($"프로필 업데이트 실패: {task.Exception}");
+                        return;
                     }
 
+                    Debug.Log("프로필 업데이트 성공");
                     Debug.Log($"DB.DisplayName : {Manager.DB.user.DisplayName}");
                     Debug.Log($"profile.DisplayName : {profile.DisplayName}");
 

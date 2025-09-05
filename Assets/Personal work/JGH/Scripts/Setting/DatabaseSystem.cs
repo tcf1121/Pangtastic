@@ -50,16 +50,18 @@ public class DatabaseSystem : Singleton<DatabaseSystem>
 
     public string GetAuthInfo()
     {
-        string uid = user.UserId;
-        string type;
-        string nickname;
-        
-        if (user == null || string.IsNullOrEmpty(user.UserId))
+        FirebaseUser curUser = auth.CurrentUser;
+
+        if (curUser == null || string.IsNullOrEmpty(curUser.UserId))
         {
             return "{}"; // 로그인 안 된 경우 빈 JSON
         }
 
-        if (user.IsAnonymous) // 게스트
+        string uid = curUser.UserId;
+        string type;
+        string nickname;
+
+        if (curUser.IsAnonymous) // 게스트
         {
             type = "guests";
             nickname = "Guest";
@@ -67,8 +69,8 @@ public class DatabaseSystem : Singleton<DatabaseSystem>
         else
         {
             type = "users";
-            Debug.Log($"유저 네임: {user.DisplayName}");
-            nickname = string.IsNullOrEmpty(user.DisplayName) ? "Unknown" : user.DisplayName;
+            Debug.Log($"유저 네임: {curUser.DisplayName}");
+            nickname = string.IsNullOrEmpty(curUser.DisplayName) ? "Unknown" : curUser.DisplayName;
             Debug.Log($"최종 유저 네임: {nickname}");
         }
         
