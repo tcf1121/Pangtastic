@@ -1,5 +1,7 @@
 using UnityEngine;
 using System.Collections.Generic;
+using UnityEngine.ResourceManagement.AsyncOperations;
+using UnityEngine.AddressableAssets;
 
 [System.Serializable]
 public class AudioClipGroup
@@ -38,8 +40,30 @@ public class AudioSystem : Singleton<AudioSystem>
         SfxAudioSource.loop = false;
         SfxAudioSource.volume = 1;
         SfxAudioSource.playOnAwake = false;
+
+        LoadAudioClips();
     }
 
+    private void LoadAudioClips()
+    {
+
+        AsyncOperationHandle<AudioClips> handle = Addressables.LoadAssetAsync<AudioClips>("AudioSO");
+        handle.Completed += OnAudioClipsLoaded;
+    }
+
+    private void OnAudioClipsLoaded(AsyncOperationHandle<AudioClips> handle)
+    {
+        if (handle.Status == AsyncOperationStatus.Succeeded)
+        {
+            audioClips = handle.Result;
+
+            Debug.Log($"AudioClips 로드 완료.");
+        }
+        else
+        {
+            Debug.LogError($"StageSO 로드 실패:{handle.OperationException}");
+        }
+    }
 
 
     /// <summary>
