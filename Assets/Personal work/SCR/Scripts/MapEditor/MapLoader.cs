@@ -33,7 +33,7 @@ namespace SCR
 
         public void LoadCsv(int num)
         {
-            _stage = num + 1 - 4000;
+            _stage = num + 2;
             AsyncOperationHandle<TextAsset> handle = Addressables.LoadAssetAsync<TextAsset>(path);
             handle.Completed += ReadCSV;
         }
