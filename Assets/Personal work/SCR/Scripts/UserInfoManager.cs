@@ -3,6 +3,7 @@ using Firebase.Database;
 using Newtonsoft.Json;
 using System;
 using System.Threading.Tasks;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class UserInfoManager : Singleton<UserInfoManager>
@@ -133,7 +134,7 @@ public class UserInfoManager : Singleton<UserInfoManager>
         if (currentData.UserInfo.Heart.currentHeart < 5)
         {
             currentData.UserInfo.Heart.currentHeart++;
-
+            if (GetHeart() == 5) SetHeartTime(0);
         }
         OnChangedHeart?.Invoke(currentData.UserInfo.Heart.currentHeart);
     }
@@ -207,6 +208,11 @@ public class UserInfoManager : Singleton<UserInfoManager>
             Debug.LogError("데이터 로드 실패: " + task.Exception);
             return null;
         }
+        if (task.IsCanceled)
+        {
+            Debug.LogError("데이터 로드 취소: " + task.Exception);
+            return null;
+        }
 
         DataSnapshot snapshot = task.Result;
 
@@ -215,8 +221,7 @@ public class UserInfoManager : Singleton<UserInfoManager>
             Debug.LogWarning("해당 uid에 대한 사용자 데이터가 없습니다.");
             return null;
         }
-
-        if (snapshot.Exists)
+        else if (snapshot.Exists)
         {
             string json = snapshot.GetRawJsonValue();
 
@@ -243,6 +248,7 @@ public class UserInfoManager : Singleton<UserInfoManager>
     // 파이어베이스에 업로드
     public async Task UploadUserDataAsync()
     {
+        SetLeaveTime(DateTime.Now.ToString("O"));
         string json = JsonConvert.SerializeObject(currentData);
         try
         {
