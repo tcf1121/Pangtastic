@@ -52,7 +52,7 @@ namespace SCR
                 StringBuilder csvBuilder = new StringBuilder();
 
                 // 배열의 각 행을 순회
-                csvBuilder.Append(num);
+                csvBuilder.Append(4000 + num);
                 csvBuilder.Append(",");
                 foreach (var data in _mapInfo)
                 {
@@ -77,11 +77,11 @@ namespace SCR
                 }
 
                 // 4. 특정 인덱스의 줄을 새 데이터로 덮어쓰기
-                lines[num] = csvBuilder.ToString();
+                lines[num + 1] = csvBuilder.ToString();
                 // 5. 수정된 모든 줄을 다시 파일에 저장 (기존 파일 내용 덮어씀)
                 File.WriteAllLines(Application.dataPath + "/" + path, lines.ToArray(), Encoding.UTF8);
 
-                Debug.Log("CSV 파일의 " + num + "번째 줄에 데이터 저장 완료: " + Application.dataPath + "/" + path);
+                Debug.Log("CSV 파일의 " + (num - 4000) + "번째 줄에 데이터 저장 완료: " + Application.dataPath + "/" + path);
             }
             catch (IOException e)
             {
