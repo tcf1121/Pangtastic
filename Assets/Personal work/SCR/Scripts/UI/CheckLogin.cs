@@ -51,7 +51,7 @@ namespace SCR
                 }
                 else
                 {
-                    Debug.Log($"이미 일반 로그인 상태: {auth.CurrentUser.UserId}");
+                    Debug.Log($"이미 구글 플레이 로그인 상태: {auth.CurrentUser.UserId}");
                     Manager.DB.user = auth.CurrentUser;
                     //Manager.Stage.LoadStage();
                     //DontDSystem.StatGame();
@@ -60,8 +60,7 @@ namespace SCR
                 return;
             }
             // else
-            _enterPanel.SetActive(false);
-            _loginPanel.SetActive(true);
+            LoginAsGuest();
         }
 
         private void Logout()
