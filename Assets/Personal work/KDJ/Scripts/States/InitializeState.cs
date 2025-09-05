@@ -7,7 +7,10 @@ namespace KDJ.States
     {
         public void OnEnter(BoardManager boardManager)
         {
-            CoroutineManager.StartGlobalCoroutine(StageInit(boardManager));
+            // 테스트 코드
+            boardManager.StartCoroutine(boardManager.StageInit());
+
+            // InGameManager.SpawnCustomer();
         }
 
         public void OnUpdate(BoardManager boardManager) { }
@@ -17,6 +20,7 @@ namespace KDJ.States
             Debug.Log("초기화 상태 종료");
         }
 
+        /*
         public IEnumerator StageInit(BoardManager boardManager)
         {
             Debug.Log("초기화 상태 진입");
@@ -29,7 +33,7 @@ namespace KDJ.States
 
             // BoardLoader가 레벨 데이터를 로드하면, 그 데이터를 실제 게임 보드에 적용합니다.
             BoardData loadedBoardData = boardManager.BoardLoader.LoadBoard();
-            
+
             // 씬에 있는 실제 BlockPlate 컴포넌트를 찾습니다.
             BlockPlate blockPlate = Object.FindObjectOfType<BlockPlate>();
             if (blockPlate == null)
@@ -50,11 +54,12 @@ namespace KDJ.States
             boardManager.Spawner.Initialize(boardManager, loadedBoardData, blockPlate, boardManager.BlockMover);
 
             Debug.Log($"보드 초기화 완료. 가로: {boardManager.Spawner.GameBoardData.Width}, 세로: {boardManager.Spawner.GameBoardData.Height}");
-            //InGameManager.SpawnCustomer();
+
 
             BoardManager.SetTouch(true);
 
             boardManager.ChangeState(new ReadyState());
         }
+        */
     }
 }
