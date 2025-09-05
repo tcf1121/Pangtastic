@@ -23,21 +23,27 @@ namespace SCR_B
         private Vector2Int? firstPos;
         private Vector2Int? secondPos;
         [SerializeField] int _leftTurn;
+        [SerializeField] bool isTest;
 
         private void Awake()
         {
-            // instance = this;
-            // Spawner = GetComponent<BlockSpawner>();
-            // MatchChecker = GetComponent<BoardMatchChecker>();
-            // BlockMover = GetComponent<BlockMover>();
-            // MatchCombo = GetComponent<MatchCombo>();
-            // BoardLoader = GetComponent<BoardLoader>();
-            // CanTouch = false;
+            if (isTest)
+            {
+                instance = this;
+                Spawner = GetComponent<BlockSpawner>();
+                MatchChecker = GetComponent<BoardMatchChecker>();
+                BlockMover = GetComponent<BlockMover>();
+                MatchCombo = GetComponent<MatchCombo>();
+                BoardLoader = GetComponent<BoardLoader>();
+                CanTouch = false;
+            }
+
         }
 
         private void Start()
         {
-            // StartCoroutine(StageInit());
+            if (isTest)
+                StartCoroutine(StageInit());
         }
 
         void Update()

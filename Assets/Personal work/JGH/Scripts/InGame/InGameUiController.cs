@@ -10,29 +10,29 @@ public class InGameUiController : MonoBehaviour
     private void Start()
     {
         Manager.Audio.PlayBGMByName("InGameMusic");
-        Manager.Heart.isPlaying = true;
+        //Manager.Heart.isPlaying = true;
     }
 
     public void ChangeOutGameScene()
     {
-        Manager.Currency.pendingSpawnType = CurrencySystem.SpawnType.Exit;
+        //Manager.Currency.pendingSpawnType = CurrencySystem.SpawnType.Exit;
 
-        Manager.Currency.AddCoin(InGameManager.GetCoin());
-        Manager.Currency.AddStar(1);
+        Manager.User.AddCoin(InGameManager.GetCoin());
+        Manager.User.AddStar(1);
+        Manager.User.AddHeart();
 
         SceneManager.LoadScene(2/*로비씬*/);
-
         Manager.Audio.PlaySFXByName("GameToHomeSfx");
     }
 
     public void ChangeContinueOutGameScene()
     {
-        Manager.Currency.pendingSpawnType = CurrencySystem.SpawnType.Continue;
+        //Manager.Currency.pendingSpawnType = CurrencySystem.SpawnType.Continue;
 
         needStartSetting = true;
 
-        Manager.Currency.AddCoin(InGameManager.GetCoin());
-        Manager.Currency.AddStar(1);
+        Manager.User.AddCoin(InGameManager.GetCoin());
+        Manager.User.AddStar(1);
 
         SceneManager.LoadScene(3/*게임씬*/);
 
@@ -42,14 +42,14 @@ public class InGameUiController : MonoBehaviour
     public void ChangeQuitGameScene()
     {
         SceneManager.LoadScene(2/*로비씬*/);
-        Manager.Heart.UseHearts();
+
         Manager.Audio.PlaySFXByName("GameToHomeSfx");
     }
 
     public void ChangeRetryGameScene()
     {
         needStartSetting = true;
-        Manager.Heart.UseHearts();
+        Manager.User.UseHeart();
         SceneManager.LoadScene(3/*게임씬*/);
         Manager.Audio.PlaySFXByName("GameToHomeSfx");
     }

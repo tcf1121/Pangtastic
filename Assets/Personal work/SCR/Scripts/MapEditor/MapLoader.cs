@@ -13,16 +13,22 @@ namespace SCR
     {
         [SerializeField] GameObject canvas;
         private BoardCell[] sortedItemsArray;
-        [SerializeField] private int _stageNum;
+        [SerializeField] private InputField inputField;
+        [SerializeField] Button loadBtn;
         private Dictionary<Vector3Int, GemType> _mapInfo = new();
         private List<Vector3Int> _spawnPoint = new();
 
         private int _stage;
-        string path = "Assets/CSV/Puzzle Board.csv";
+        string path = "Assets/PuzzleEditor/StageInfo.csv";
 
         void Awake()
         {
-            LoadCsv(Manager.Stage.CurrentStageIndex);
+            loadBtn.onClick.AddListener(LoadPuzzle);
+        }
+
+        private void LoadPuzzle()
+        {
+            LoadCsv(int.Parse(inputField.text));
         }
 
         public void LoadCsv(int num)
@@ -39,11 +45,9 @@ namespace SCR
                 string csvData = handle.Result.text;
                 string[] lines = csvData.Split('\n');
                 if (lines.Count() < _stage) return;
-
                 string[] values = lines[_stage].Split(',');
                 GetPuzzle(values[1]);
                 GetSpawnPoint(values[2]);
-
                 Board.SetPuzzleInfo(_mapInfo, _spawnPoint);
 
                 Addressables.Release(handle);
@@ -74,7 +78,8 @@ namespace SCR
 
             int xLength = maxX - minX + 1;
             int yLength = maxY - minY + 1;
-            InGameManager.SetPuzzleSize(minX, minY, xLength, yLength);
+            Debug.Log(_mapInfo);
+            //InGameManager.SetPuzzleSize(minX, minY, xLength, yLength);
         }
 
         private void GetSpawnPoint(string value)
@@ -87,6 +92,7 @@ namespace SCR
                 string[] info = cellInfo.Split(':');
                 _spawnPoint.Add(GetVec3Int(info[0], info[1], info[2]));
             }
+            Debug.Log(_spawnPoint);
         }
 
         private Vector3Int GetVec3Int(string stringX, string stringY, string stringZ)

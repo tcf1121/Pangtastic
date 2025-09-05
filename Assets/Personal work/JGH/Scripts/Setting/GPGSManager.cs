@@ -66,7 +66,7 @@ public class GPGSManager : Singleton<GPGSManager>
                             Manager.DB.user = Manager.DB.auth.CurrentUser;
                             if (Manager.Stage != null)
                             {
-                                Manager.Stage.LoadStage();
+                                //Manager.Stage.LoadStage();
                             }
                             //SceneManager.LoadScene("OutGame Test Scene");
                             SceneManager.LoadScene(2/*로비씬*/);

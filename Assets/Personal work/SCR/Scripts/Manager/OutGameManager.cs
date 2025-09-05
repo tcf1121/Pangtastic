@@ -21,14 +21,14 @@ public class OutGameManager : MonoBehaviour
     void Awake()
     {
         instate = this;
+
         _settingBtn.onClick.AddListener(SetStage);
     }
 
     void Start()
     {
         Time.timeScale = 1f;
-        UpdateCoinUI();
-        UpdateStarUI();
+        UserInfoUI.Instance.SetActive(true);
         int index = Manager.Stage.CurrentStageIndex;
         _stageButtonText.text = $"Stage {index + 1}";
     }

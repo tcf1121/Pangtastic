@@ -66,10 +66,10 @@ public class GuestLogin : MonoBehaviour
                         Debug.Log($"새로운 익명 로그인 성공 : {newUser.UserId}");
                         string uid = newUser.UserId;
 
-                        Manager.DB.GetUserPath(uid)
-                        .Child("heart")
-                        .Child("currentHeart")
-                        .SetValueAsync(Manager.Heart.GetMaxHearts());
+                        // Manager.DB.GetUserPath(uid)
+                        // .Child("heart")
+                        // .Child("currentHeart")
+                        // .SetValueAsync(Manager.Heart.GetMaxHearts());
 
                         Manager.DB.GetUserPath(uid)
                         .Child("heart")
@@ -102,10 +102,10 @@ public class GuestLogin : MonoBehaviour
                 Debug.Log($"익명 로그인 성공 : {newUser.UserId}");
                 string uid = newUser.UserId;
 
-                Manager.DB.GetUserPath(uid)
-                .Child("heart")
-                .Child("currentHeart")
-                .SetValueAsync(Manager.Heart.GetMaxHearts());
+                // Manager.DB.GetUserPath(uid)
+                // .Child("heart")
+                // .Child("currentHeart")
+                // .SetValueAsync(Manager.Heart.GetMaxHearts());
 
                 Manager.DB.GetUserPath(uid)
                 .Child("heart")
@@ -124,7 +124,7 @@ public class GuestLogin : MonoBehaviour
 
         }
     }
-    
+
     // 게스트 회원탈퇴 :: S
     public void GuestDelete()
     {

@@ -21,6 +21,7 @@ public class InGameManager : MonoBehaviour
 
     void Awake()
     {
+        UserInfoUI.Instance.SetActive(false);
         instate = this;
         customerFlowController.OnStageCleared += StageClear;
         customerFlowController.OnStageFailed += StageFail;
@@ -133,7 +134,7 @@ public class InGameManager : MonoBehaviour
         BoardManager.SetTouch(false);
         //instate.LoseCoin.text = $"{GetCoin()}";
         //instate.LoseScore.text = $"{GetScore()}";
-        Manager.Heart.UseHearts();
+        //Manager.Heart.UseHearts();
         instate.failUI.SetActive(true);
     }
 
