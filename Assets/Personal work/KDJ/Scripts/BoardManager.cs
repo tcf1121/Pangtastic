@@ -29,6 +29,7 @@ namespace KDJ
         public BlockMover BlockMover { get; private set; }
         public MatchCombo MatchCombo { get; set; }
         public BoardLoader BoardLoader { get; set; }
+        public TestStageManager TestStageManager { get; set; }
         public int Score { get; private set; } = 0;
         public int CurStage;
         public static bool CanTouch { get;  private set; }
@@ -53,6 +54,7 @@ namespace KDJ
             BlockMover = GetComponent<BlockMover>();
             MatchCombo = GetComponent<MatchCombo>();
             BoardLoader = GetComponent<BoardLoader>();
+            TestStageManager = FindObjectOfType<TestStageManager>();
         }
 
         private void OnDestroy()
@@ -116,7 +118,7 @@ namespace KDJ
 
         public void UpdateUI(int score)
         {
-            InGameManager.AddScore(score);
+            //InGameManager.AddScore(score);
             Score += score;
             _scoreInfo.text = $"Score\n{Score}";
         }

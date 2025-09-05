@@ -223,7 +223,7 @@ namespace KDJ
                     {
                         if (block.GemType < GemType.Milk)
                         {
-                            InGameManager.AddIngredientSta(block.GemType);
+                            //InGameManager.AddIngredientSta(block.GemType);
                         }
 
                         score += 10;

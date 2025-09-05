@@ -21,7 +21,9 @@ namespace KDJ.States
         {
             Debug.Log("초기화 상태 진입");
             // TestCode. 스테이지 세팅
-            Manager.Stage.SetStage(boardManager.CurStage);
+            boardManager.TestStageManager.SetStage(boardManager.CurStage);
+
+            //Manager.Stage.SetStage(boardManager.CurStage);
 
             yield return new WaitForSeconds(1f);
 

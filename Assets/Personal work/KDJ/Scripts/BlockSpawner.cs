@@ -36,9 +36,6 @@ namespace KDJ
 
         private bool _isRefilling = false;
 
-        /// <summary>
-        /// 로드된 보드 데이터를 기반으로 Spawner를 초기화하고, 모든 블록을 생성합니다.
-        /// </summary>
         public void Initialize(BoardManager boardManager, BoardData loadedBoardData, BlockPlate blockPlate, BlockMover blockMover)
         {
             GameBoardData = new GameBoardData(blockPlate);
@@ -96,23 +93,12 @@ namespace KDJ
                 }
             }
 
+            // 데이터 셔플을 먼저 수행하여 매치되지 않는 상태를 만듭니다.
+            DataShuffle(boardManager);
+
             // 3. 모든 블록 GameObject 생성
             DrawAllBlocks(blockMover);
             DrawAllOverlayBlocks(blockMover);
-
-            // 4. 초기 보드가 이미 매치된 상태이면, 매치되지 않은 상태가 될 때까지 셔플합니다. (최대 1000회)
-            int shuffleTries = 0;
-            int maxShuffleTries = 1000;
-            while (boardManager.MatchChecker.AllBlockMatchCheck(boardManager) && shuffleTries < maxShuffleTries)
-            {
-                Shuffle(boardManager);
-                shuffleTries++;
-            }
-
-            if (shuffleTries >= maxShuffleTries)
-            {
-                Debug.LogError("Initialize: 1000회 셔플 후에도 보드가 계속 매치된 상태입니다. 다른 해결 방법이 필요합니다.");
-            }
 
             // 테스트용 블록 교체 실행
             if (_test_blockOverrides != null && _test_blockOverrides.Count > 0)
@@ -725,6 +711,76 @@ namespace KDJ
             }
 
             DrawAllBlocks(boardManager.BlockMover);
+        }
+
+        /// <summary>
+        /// 로드된 보드 데이터를 기반으로 Spawner를 초기화하고, 모든 블록을 생성합니다.
+        /// </summary>
+        private void DataShuffle(BoardManager boardManager)
+        {
+            List<Block> normalBlocks = new List<Block>();
+            List<Vector2Int> normalBlockPositions = new List<Vector2Int>();
+            int maxTries = 1000;
+            int tries = 0;
+
+            while (tries < maxTries)
+            {
+                normalBlocks.Clear();
+                normalBlockPositions.Clear();
+
+                // 1. 셔플할 일반 블록만 수집합니다.
+                for (int y = 0; y < GameBoardData.Height; y++)
+                {
+                    for (int x = 0; x < GameBoardData.Width; x++)
+                    {
+                        // 초기화 단계에서는 IsObstacle 체크가 필요 없을 수 있지만, 안전을 위해 유지합니다.
+                        // 또한, 플레이트가 없는 곳의 블록은 셔플 대상이 아닙니다.
+                        if (GameBoardData.BlockPlate.BlockPlateArray[y, x])
+                        {
+                            Block block = GameBoardData.GetBlock(x, y);
+                            if (block != null && !block.IsObstacle)
+                            {
+                                normalBlocks.Add(block);
+                                normalBlockPositions.Add(new Vector2Int(x, y));
+                            }
+                        }
+                    }
+                }
+
+                // 2. 수집한 일반 블록 리스트를 섞습니다.
+                for (int i = 0; i < normalBlocks.Count; i++)
+                {
+                    int randomIndex = Random.Range(i, normalBlocks.Count);
+                    Block temp = normalBlocks[i];
+                    normalBlocks[i] = normalBlocks[randomIndex];
+                    normalBlocks[randomIndex] = temp;
+                }
+
+                // 3. 섞인 블록을 원래 위치에 다시 배치합니다.
+                for (int i = 0; i < normalBlockPositions.Count; i++)
+                {
+                    Vector2Int pos = normalBlockPositions[i];
+                    GameBoardData.SetBlock(pos.x, pos.y, normalBlocks[i]);
+                }
+
+                // 4. 즉시 매치되는 블록이 있는지 확인합니다.
+                if (!boardManager.MatchChecker.AllBlockMatchCheck(boardManager))
+                {
+                    // 매치되는 것이 없으면, 이제 매치 가능한 조합이 있는지 확인합니다.
+                    if (boardManager.MatchChecker.AllBlockMatchPossibilityCheck(boardManager, out _))
+                    {
+                        break; // 매치도 없고, 매치 가능한 조합이 있으면 루프 탈출
+                    }
+                }
+
+                tries++;
+                if (tries >= maxTries)
+                {
+                    Debug.LogError("DataShuffle: 1000회 셔플 후에도 보드가 계속 매치된 상태이거나, 매치 가능한 조합을 찾지 못했습니다.");
+                    break;
+                }
+            }
+            Debug.Log($"DataShuffle: {tries}회 시도");
         }
 
         public Block SetRandomBlock(int x, int y)
