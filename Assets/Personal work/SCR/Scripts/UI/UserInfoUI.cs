@@ -14,6 +14,7 @@ public class UserInfoUI : MonoBehaviour
     [SerializeField] float _respwanTime;
     [SerializeField] GameObject _ui;
     Action<float> _heartTimer;
+    Action _OnTimerFinished;
     Coroutine _heartCor;
 
     void Awake()
@@ -27,17 +28,22 @@ public class UserInfoUI : MonoBehaviour
         {
             Destroy(gameObject);
         }
-        Manager.User.OnChangedCoin += SetCoin;
-        Manager.User.OnChangedHeart += SetHeart;
-        Manager.User.OnChangedHeartTime += SetHeartTimer;
-        Manager.User.OnChangedStar += SetStar;
-        Manager.User.OnChangedProfile += SetProfile;
-        Manager.User.OnUseHeart += StartHeartTimer;
+    }
+
+    void Start()
+    {
+        Manager.User.OnChangedCoin += Instance.SetCoin;
+        Manager.User.OnChangedHeart += Instance.SetHeart;
+        Manager.User.OnChangedHeartTime += Instance.SetHeartTimer;
+        Manager.User.OnChangedStar += Instance.SetStar;
+        Manager.User.OnChangedProfile += Instance.SetProfile;
+        Manager.User.OnUseHeart += Instance.StartHeartTimer;
         Debug.Log(Manager.User.GetCurrentUserData());
         _coin.text = $"{Manager.User.GetCoin()}";
         _heart.text = $"{Manager.User.GetHeart()}";
         _star.text = $"{Manager.User.GetStar()}";
-        _heartTimer += HeartTimer;
+        _heartTimer += Instance.HeartTimer;
+        _OnTimerFinished += Instance.FinishHeartTimeCor;
         if (Manager.User.GetHeart() == 5)
             _heartTime.text = $"가득 참";
         else
@@ -60,7 +66,8 @@ public class UserInfoUI : MonoBehaviour
                 lastTime = DateTime.Parse(Manager.User.GetLeaveTime());
 
             TimeSpan diff = DateTime.Now - lastTime;
-            int recoveredHearts = (int)(diff.TotalSeconds / _respwanTime);
+            int TotalSeconds = (int)(_respwanTime - Manager.User.GetHeartTime()) + (int)diff.TotalSeconds;
+            int recoveredHearts = TotalSeconds / (int)_respwanTime;
             while (Manager.User.GetHeart() < 5 && recoveredHearts > 0)
             {
                 recoveredHearts--;
@@ -68,18 +75,30 @@ public class UserInfoUI : MonoBehaviour
             }
             if (Manager.User.GetHeart() < 5)
             {
-                float leftTime = (int)diff.TotalSeconds % (int)_respwanTime;
-                _heartCor = StartCoroutine(Manager.Timer.StartTimer(_heartCor, _respwanTime, leftTime, _heartTimer));
+                float leftTime = TotalSeconds % (int)_respwanTime;
+                Instance._heartCor = StartCoroutine(Manager.Timer.StartTimer(Instance._heartCor,
+                _respwanTime, leftTime, Instance._heartTimer, Instance._OnTimerFinished));
             }
 
         }
     }
 
+    private void FinishHeartTimeCor()
+    {
+        if (Instance == null) Instance = FindObjectOfType<UserInfoUI>();
+        Manager.User.AddHeart();
+        if (Manager.User.GetHeart() < 5)
+            StartHeartTimer();
+    }
+
+
     private void StartHeartTimer()
     {
-        if (_heartCor == null)
+        if (Instance == null) Instance = FindObjectOfType<UserInfoUI>();
+        if (Instance._heartCor == null)
         {
-            _heartCor = StartCoroutine(Manager.Timer.StartTimer(_heartCor, _respwanTime, 0, _heartTimer));
+            Instance._heartCor = StartCoroutine(Manager.Timer.StartTimer(Instance._heartCor,
+             _respwanTime, 0, Instance._heartTimer, Instance._OnTimerFinished));
         }
     }
 
@@ -90,16 +109,12 @@ public class UserInfoUI : MonoBehaviour
 
     private void SetHeart(int value)
     {
-        if (value == 5)
-        {
-            if (_heartCor != null)
-            {
-                StopCoroutine(_heartCor);
-                _heartCor = null;
-            }
-            _heartTime.text = $"가득 참";
-        }
         _heart.text = $"{value}";
+        if (Instance._heartCor != null)
+        {
+            StopCoroutine(Instance._heartCor);
+            Instance._heartCor = null;
+        }
     }
 
     private void SetHeartTimer(int value)

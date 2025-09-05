@@ -8,6 +8,7 @@ public static class Manager
     public static UserInfoManager User => UserInfoManager.GetInstance();
     public static AudioSystem Audio => AudioSystem.GetInstance();
     //public static ScriptingSystem Scripting => ScriptingSystem.GetInstance();
+    public static DataManager Data => DataManager.GetInstance();
     public static DatabaseSystem DB => DatabaseSystem.GetInstance();
     public static GPGSManager GPGS => GPGSManager.GetInstance();
     public static AdSystem Ad => AdSystem.GetInstance();
@@ -24,6 +25,7 @@ public static class Manager
         UserInfoManager.CreateManager();
         AudioSystem.CreateManager();
         //ScriptingSystem.CreateManager();
+        DataManager.CreateManager();
         DatabaseSystem.CreateManager();
         GPGSManager.CreateManager();
         AdSystem.CreateManager();
