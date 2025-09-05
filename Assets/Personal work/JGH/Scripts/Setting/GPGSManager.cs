@@ -1,8 +1,11 @@
 using Firebase.Auth;
+using Firebase.Database;
 using Firebase.Extensions;
 using GooglePlayGames;
 using GooglePlayGames.BasicApi;
 using System.Collections;
+using System.Globalization;
+using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -157,4 +160,107 @@ public class GPGSManager : Singleton<GPGSManager>
         AuthenticateUser();
     }
 
+    public void LinkGuestToGoogle(System.Action<bool> onDone) // 게스트 > 구글 전환
+    {
+        if (PlayGamesPlatform.Instance.localUser.authenticated == false)
+        {
+            PlayGamesPlatform.Instance.Authenticate(status =>
+            {
+                if (status != SignInStatus.Success)
+                {
+                    Debug.LogError("GPGS 로그인 실패");
+                    onDone?.Invoke(false);
+                    return;
+                }
+                Debug.Log("GPGS로그인 성공");
+                RequestAndLink(onDone);
+            });
+            return;
+        }
+        Debug.Log("GPGS 로그인 이미 되어있음");
+        RequestAndLink(onDone);
+    }
+
+    private void RequestAndLink(System.Action<bool> onDone)
+    {
+        Debug.Log("게스트 > 구글 전환 시작");
+        PlayGamesPlatform.Instance.RequestServerSideAccess(true, authCode =>
+        {
+            if (string.IsNullOrEmpty(authCode) == true)
+            {
+                Debug.LogError("Link 실패: authCode 없음");
+                onDone?.Invoke(false);
+                return;
+            }
+
+            Credential cred = PlayGamesAuthProvider.GetCredential(authCode);
+            FirebaseUser curUser = Manager.DB.auth.CurrentUser;
+
+            if (curUser == null)
+            {
+                Debug.LogError("Link 실패: 유저 없음");
+                onDone?.Invoke(false);
+                return;
+            }
+
+            if (!curUser.IsAnonymous)
+            {
+                Debug.Log("이미 영구 계정임");
+                onDone?.Invoke(true);
+                return;
+            }
+
+            curUser.LinkWithCredentialAsync(cred).ContinueWithOnMainThread(task =>
+            {
+                if (task.IsCanceled || task.IsFaulted)
+                {
+                    Debug.LogError($"Link 실패: {task.Exception}");
+                    onDone?.Invoke(false);
+                    return;
+                }
+
+                Debug.Log("게스트 > 구글 링크 성공. ");
+                Manager.DB.user = Manager.DB.auth.CurrentUser;
+
+                string gpgsName = PlayGamesPlatform.Instance.localUser.userName;
+                Debug.Log($"GPGS 이름 : {gpgsName}");
+
+               
+
+                if (string.IsNullOrEmpty(gpgsName))
+                {
+                    Debug.Log("GPGS 이름이 공백임");
+                    gpgsName = string.IsNullOrEmpty(Manager.DB.user.DisplayName) ? "Player" : Manager.DB.user.DisplayName;
+                    Debug.Log($"대체 이름: {gpgsName}");
+                }
+
+                var profile = new UserProfile { DisplayName = gpgsName };
+                
+                Manager.DB.user.UpdateUserProfileAsync(profile).ContinueWithOnMainThread(task =>
+                {
+                    if (task.IsCanceled || task.IsFaulted)
+                    {
+                        Debug.LogError($"프로필 업데이트 실패: {task.Exception}");
+                        return;
+                    }
+
+                    Debug.Log("프로필 업데이트 성공");
+
+                    UserData cur = Manager.User.GetCurrentUserData();
+                    cur.PlayerName = string.IsNullOrEmpty(gpgsName) ? "Player" : gpgsName; //이름 있으면 이름, 없으면 Player
+
+                    Manager.User.SetUser(cur); //저장
+
+                    Debug.Log($"DB.DisplayName : {Manager.DB.user.DisplayName}");
+                    Debug.Log($"profile.DisplayName : {profile.DisplayName}");
+                    
+
+                    string uid = Manager.DB.auth.CurrentUser.UserId;
+                    Manager.DB.MigrateGuestDataToUser(uid); //마이그레이션
+                    //Manager.DB.UserIntoSave(); //이름 설정
+                    onDone?.Invoke(true);
+                });
+            });
+        });
+    }
 }
