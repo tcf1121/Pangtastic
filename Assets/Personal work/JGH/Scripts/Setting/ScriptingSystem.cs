@@ -384,19 +384,24 @@ public class ScriptingSystem : Singleton<ScriptingSystem>
     
         var img = child.GetComponent<UnityEngine.UI.Image>();
         if (img == null) return;
-    
+        
         if (string.IsNullOrEmpty(state))
         {
             child.gameObject.SetActive(false);
             return;
         }
-    
-        child.gameObject.SetActive(true);
-    
+
+        // 일단 비활성화
+        child.gameObject.SetActive(false);
+        
         // Addressables 로드
         LoadSprite(spritePath, sprite =>
         {
-            if (sprite != null) img.sprite = sprite;
+            if (sprite != null)
+            {
+                img.sprite = sprite;
+                child.gameObject.SetActive(true); // 스프라이트 적용된 후에 보이게
+            }
         });
     
         if (state == "on")
@@ -406,7 +411,7 @@ public class ScriptingSystem : Singleton<ScriptingSystem>
         }
         else if (state == "off")
         {
-            img.color = new Color(0.5f, 0.5f, 0.5f, 0.5f); // 검은 알파
+            img.color = new Color(0.7f, 0.7f, 0.7f, 0.7f); // 검은 알파
         }
         else
         {
@@ -422,18 +427,29 @@ public class ScriptingSystem : Singleton<ScriptingSystem>
             return;
         }
 
-        AsyncOperationHandle<Sprite> handle = Addressables.LoadAssetAsync<Sprite>(path);
+        var handle = Addressables.LoadAssetAsync<SO_SpriteData>(path);
         handle.Completed += op =>
         {
             if (op.Status == AsyncOperationStatus.Succeeded)
             {
-                onLoaded?.Invoke(op.Result);
+                SO_SpriteData so = op.Result;
+                if (so != null && so.loadedSprite != null)
+                {
+                    onLoaded?.Invoke(so.loadedSprite);
+                }
+                else
+                {
+                    Debug.LogError($"[LoadSprite] SpriteSO는 로드됐지만 Sprite가 비어있음: {path}");
+                    onLoaded?.Invoke(null);
+                }
             }
             else
             {
-                Debug.LogError($"Sprite 로드 실패: {path}");
+                Debug.LogError($"[LoadSprite] SpriteSO 로드 실패: {path}");
                 onLoaded?.Invoke(null);
             }
+
+            Addressables.Release(op);
         };
     }
     
