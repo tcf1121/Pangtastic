@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text;
 using TMPro;
 using Unity.VisualScripting;
 using UnityEngine;
@@ -114,10 +115,10 @@ public class ScriptingSystem : Singleton<ScriptingSystem>
     private List<StringData> stringAllDialogs = new List<StringData>();
     private List<SpeakerData> speakerAllDialogs = new List<SpeakerData>();
     private List<SoundData> soundAllDialogs = new List<SoundData>();
-    private string dialogName = "dialog.csv";
-    private string stringName = "string.csv";
-    private string speakerName = "speaker.csv";
-    private string soundName = "sound.csv";
+    private string dialogName = "dialog.bytes";
+    private string stringName = "string.bytes";
+    private string speakerName = "speaker.bytes";
+    private string soundName = "sound.bytes";
     
     // void Start()
     // {
@@ -155,16 +156,16 @@ public class ScriptingSystem : Singleton<ScriptingSystem>
                     soundWww.result == UnityWebRequest.Result.Success &&
                     speakerWww.result == UnityWebRequest.Result.Success)
                 {
-                    dialogCsvText = dialogWww.downloadHandler.text;
+                    dialogCsvText = CryptoUtility.DecryptTextFromBytes(dialogWww.downloadHandler.data);
                     dialogAllDialogs = DialogParseCSV(dialogCsvText);
 
-                    stringCsvText = stringWww.downloadHandler.text;
+                    stringCsvText = CryptoUtility.DecryptTextFromBytes(stringWww.downloadHandler.data);
                     stringAllDialogs = StringParseCSV(stringCsvText);
 
-                    speakerCsvText = speakerWww.downloadHandler.text;
+                    speakerCsvText = CryptoUtility.DecryptTextFromBytes(speakerWww.downloadHandler.data);
                     speakerAllDialogs = SpeakerParseCSV(speakerCsvText);
 
-                    soundCsvText = soundWww.downloadHandler.text;
+                    soundCsvText = CryptoUtility.DecryptTextFromBytes(soundWww.downloadHandler.data);
                     soundAllDialogs = SoundParseCSV(soundCsvText);
                 }
                 else
@@ -174,16 +175,16 @@ public class ScriptingSystem : Singleton<ScriptingSystem>
                 }
        #else
                // PC, iOS, 에디터
-               dialogCsvText = File.ReadAllText(dialogPath);
+               dialogCsvText = CryptoUtility.DecryptTextFromFile(File.ReadAllText(dialogPath));
                dialogAllDialogs = DialogParseCSV(dialogCsvText);
                
-               stringCsvText = File.ReadAllText(stringPath);
+               stringCsvText = CryptoUtility.DecryptTextFromFile(File.ReadAllText(stringPath));
                stringAllDialogs = StringParseCSV(stringCsvText);
                
-               speakerCsvText = File.ReadAllText(speakerPath);
+               speakerCsvText = CryptoUtility.DecryptTextFromFile(File.ReadAllText(speakerPath));
                speakerAllDialogs = SpeakerParseCSV(speakerCsvText);
                
-               soundCsvText = File.ReadAllText(soundPath);
+               soundCsvText = CryptoUtility.DecryptTextFromFile(File.ReadAllText(soundPath));
                soundAllDialogs = SoundParseCSV(soundCsvText);
                
                yield return null;
@@ -418,6 +419,7 @@ public class ScriptingSystem : Singleton<ScriptingSystem>
             child.gameObject.SetActive(false);
         }
     }
+    
 
     private void LoadSprite(string path, System.Action<Sprite> onLoaded)
     {
