@@ -1,11 +1,8 @@
 using Firebase.Auth;
-using Firebase.Database;
 using Firebase.Extensions;
 using GooglePlayGames;
 using GooglePlayGames.BasicApi;
 using System.Collections;
-using System.Globalization;
-using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 

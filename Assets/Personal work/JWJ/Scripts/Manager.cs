@@ -5,7 +5,7 @@ public static class Manager
     public static StageManager Stage => StageManager.GetInstance();
     public static UserInfoManager User => UserInfoManager.GetInstance();
     public static AudioSystem Audio => AudioSystem.GetInstance();
-    //public static ScriptingSystem Scripting => ScriptingSystem.GetInstance();
+    public static ScriptingSystem Scripting => ScriptingSystem.GetInstance();
     public static DatabaseSystem DB => DatabaseSystem.GetInstance();
     public static GPGSManager GPGS => GPGSManager.GetInstance();
     public static AdSystem Ad => AdSystem.GetInstance();
@@ -21,7 +21,7 @@ public static class Manager
         StageManager.CreateManager();
         UserInfoManager.CreateManager();
         AudioSystem.CreateManager();
-        //ScriptingSystem.CreateManager();
+        ScriptingSystem.CreateManager();
         DatabaseSystem.CreateManager();
         GPGSManager.CreateManager();
         AdSystem.CreateManager();
