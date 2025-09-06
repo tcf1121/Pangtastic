@@ -31,6 +31,9 @@ public class OutGameManager : MonoBehaviour
         UserInfoUI.Instance.SetActive(true);
         int index = Manager.Stage.CurrentStageIndex;
         _stageButtonText.text = $"Stage {index + 1}";
+        
+        // TODO: SCRIPT TEST
+        // StartCoroutine(Manager.Scripting.DialogLoadCSV(6002));
     }
 
     public static void UpdateStageStartButton()
