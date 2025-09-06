@@ -68,8 +68,12 @@ public class ScriptingSystem : Singleton<ScriptingSystem>
         public string centerCharacter;
         public string leftCharacter;
         public string rightCharacter;
-        public string sfx;
         public string bgm;
+        public bool bgmLoop;
+        public float bgmVolume;
+        public string sfx;
+        public bool sfxLoop;
+        public float sfxVolume;
         public string backgroundIgm;
         public string centerSpeakerImgPath;
         public string leftSpeakerImgPath;
@@ -77,6 +81,17 @@ public class ScriptingSystem : Singleton<ScriptingSystem>
         public string rightSpeakerOnOff;
         public string centerSpeakerOnOff;
         public string leftSpeakerOnOff;
+    }
+
+    [System.Serializable]
+    public class SoundData
+    {
+        public string soundId;
+        public string name;
+        public string filePath;
+        public float volume;
+        public bool loopCheck;
+        public string description;
     }
 
     protected override void Awake()
@@ -96,38 +111,46 @@ public class ScriptingSystem : Singleton<ScriptingSystem>
     private List<DialogData> dialogAllDialogs = new List<DialogData>();
     private List<StringData> stringAllDialogs = new List<StringData>();
     private List<SpeakerData> speakerAllDialogs = new List<SpeakerData>();
+    private List<SoundData> soundAllDialogs = new List<SoundData>();
     private string dialogName = "dialog.csv";
     private string stringName = "string.csv";
     private string speakerName = "speaker.csv";
+    private string soundName = "sound.csv";
     
-    void Start()
-    {
-        StartCoroutine(DialogLoadCSV(6002));
-    }
+    // void Start()
+    // {
+    //     StartCoroutine(DialogLoadCSV(6002));
+    // }
 
     public IEnumerator DialogLoadCSV(int id)
     {
+        
         string dialogPath = Path.Combine(Application.streamingAssetsPath, dialogName);
         string stringPath = Path.Combine(Application.streamingAssetsPath, stringName);
         string speakerPath = Path.Combine(Application.streamingAssetsPath, speakerName);
+        string soundPath = Path.Combine(Application.streamingAssetsPath, soundName);
         
         string langCode = LocalizationSettings.SelectedLocale.Identifier.Code;
         
         string dialogCsvText;
         string stringCsvText;
         string speakerCsvText;
+        string soundCsvText;
 
         #if UNITY_ANDROID && !UNITY_EDITOR
                 UnityWebRequest dialogWww = UnityWebRequest.Get(dialogPath);
                 UnityWebRequest stringWww = UnityWebRequest.Get(stringPath);
                 UnityWebRequest speakerWww = UnityWebRequest.Get(speakerPath);
+                UnityWebRequest soundWww = UnityWebRequest.Get(soundPath);
                 
                 yield return dialogWww.SendWebRequest();
                 yield return stringWww.SendWebRequest();
                 yield return speakerWww.SendWebRequest();
+                yield return soundWww.SendWebRequest();
 
                if (dialogWww.result == UnityWebRequest.Result.Success &&
                     stringWww.result == UnityWebRequest.Result.Success &&
+                    soundWww.result == UnityWebRequest.Result.Success &&
                     speakerWww.result == UnityWebRequest.Result.Success)
                 {
                     dialogCsvText = dialogWww.downloadHandler.text;
@@ -138,6 +161,9 @@ public class ScriptingSystem : Singleton<ScriptingSystem>
 
                     speakerCsvText = speakerWww.downloadHandler.text;
                     speakerAllDialogs = SpeakerParseCSV(speakerCsvText);
+
+                    soundCsvText = soundWww.downloadHandler.text;
+                    soundAllDialogs = SoundParseCSV(soundCsvText);
                 }
                 else
                 {
@@ -155,6 +181,9 @@ public class ScriptingSystem : Singleton<ScriptingSystem>
                speakerCsvText = File.ReadAllText(speakerPath);
                speakerAllDialogs = SpeakerParseCSV(speakerCsvText);
                
+               soundCsvText = File.ReadAllText(soundPath);
+               soundAllDialogs = SoundParseCSV(soundCsvText);
+               
                yield return null;
         #endif
         
@@ -165,6 +194,7 @@ public class ScriptingSystem : Singleton<ScriptingSystem>
         // 빠른 검색을 위해 Dictionary 생성
         var stringDict = stringAllDialogs.ToDictionary(x => x.stringId, x => x);
         var speakerDict = speakerAllDialogs.ToDictionary(x => x.speakerId, x => x);
+        var soundDict = soundAllDialogs.ToDictionary(x => x.soundId, x => x);
 
         foreach (var dialog_d in result)
         {
@@ -178,6 +208,13 @@ public class ScriptingSystem : Singleton<ScriptingSystem>
             string leftSpeakerOnOff= "";
             string centerSpeakerOnOff  = "";
             string rightSpeakerOnOff = "";
+            
+            string bgm= "";
+            bool bgmLoop= false;
+            float bgmVolume= 1;
+            string sfx= "";
+            bool sfxLoop = false;
+            float sfxVolume= 1;
 
             if (!string.IsNullOrEmpty(dialog_d.centerSpeakerId) &&
                 speakerDict.TryGetValue(dialog_d.centerSpeakerId, out var centerSpeaker))
@@ -205,6 +242,22 @@ public class ScriptingSystem : Singleton<ScriptingSystem>
                 rightSpeakerOnOff = rightSpeaker.speakerId.Split('_').Last();
             }
 
+            if (!string.IsNullOrEmpty(dialog_d.bgmSoundId) &&
+                soundDict.TryGetValue(dialog_d.bgmSoundId, out var bgmSound))
+            {
+                bgm = bgmSound.name;
+                bgmLoop = bgmSound.loopCheck;
+                bgmVolume = bgmSound.volume;
+            }
+            
+            if (!string.IsNullOrEmpty(dialog_d.sfxSoundId) &&
+                soundDict.TryGetValue(dialog_d.sfxSoundId, out var sfxSound))
+            {
+                sfx = sfxSound.name;
+                sfxLoop = sfxSound.loopCheck;
+                sfxVolume = sfxSound.volume;
+            }
+
                 dialogList.Add(new DialogLine 
                 {
                     script = ResolveString(dialog_d.dialogStringId, langCode),
@@ -212,8 +265,12 @@ public class ScriptingSystem : Singleton<ScriptingSystem>
                     leftCharacter = leftCharacter,
                     rightCharacter = rightCharacter,
                     backgroundIgm = dialog_d.spritePath,
-                    bgm = dialog_d.bgmSoundId,
-                    sfx = dialog_d.sfxSoundId,
+                    bgm = bgm,
+                    bgmLoop = bgmLoop,
+                    bgmVolume = bgmVolume,
+                    sfx = sfx,
+                    sfxLoop = sfxLoop,
+                    sfxVolume = sfxVolume,
                     leftSpeakerImgPath= leftSpeakerImgPath,
                     centerSpeakerImgPath= centerSpeakerImgPath,
                     rightSpeakerImgPath= rightSpeakerImgPath,
@@ -231,26 +288,6 @@ public class ScriptingSystem : Singleton<ScriptingSystem>
         {
             ShowNextDialogue();
         }
-
-        // 확인용 로그
-        foreach (var line in dialogList)
-        {
-            Debug.Log(
-                $"script: {line.script}, " +
-                $"center: {line.centerCharacter}, " +
-                $"left: {line.leftCharacter}, " +
-                $"right: {line.rightCharacter}, " +
-                $"backgroundImg: {line.backgroundIgm}, " +
-                $"bgm: {line.bgm}, " +
-                $"sfx: {line.sfx}, " +
-                $"centerSpeakerImgPath: {line.centerSpeakerImgPath}, " +
-                $"leftSpeakerImgPath: {line.leftSpeakerImgPath}, " +
-                $"rightSpeakerImgPath: {line.rightSpeakerImgPath}, " +
-                $"centerSpeakerOnOff: {line.centerSpeakerOnOff}, " +
-                $"leftSpeakerOnOff: {line.leftSpeakerOnOff}, " +
-                $"rightSpeakerOnOff: {line.rightSpeakerOnOff}"
-            );
-        }
     }
 
     public void TotalDialogShow(bool val)
@@ -265,17 +302,47 @@ public class ScriptingSystem : Singleton<ScriptingSystem>
 
     public void ShowNextDialogue()
     {
+       // 리스트가 없거나 마지막 대사면 대사창 숨기기
        if (currentDialogList == null || currentDialogList.Count == 0) return;
        if (currentIndex >= currentDialogList.Count)
        {
            TotalDialogShow(false);
            return;
        }
-       TotalDialogShow(true);
+        // 대사창 활성화
+        TotalDialogShow(true);
 
         DialogLine line = currentDialogList[currentIndex];
+        
+        // ===== 이미지 교체  =====
+        
+        
+        
+        // ===== SFX 실행 =====
+        if (!string.IsNullOrEmpty(line.sfx))
+        {
+            Manager.Audio.SfxAudioSource.loop = line.sfxLoop;
+            Manager.Audio.SfxAudioSource.volume = line.sfxVolume;
+            Manager.Audio.PlaySFXByName(line.sfx);
+            
+            // 기본값 초기화
+            // Manager.Audio.SfxAudioSource.loop = true; 
+            // Manager.Audio.SfxAudioSource.volume = 1f;
+        }
+        
+        // ===== BGM 실행 =====
+        if (!string.IsNullOrEmpty(line.bgm))
+        {
+            Manager.Audio.BgmAudioSource.loop = line.bgmLoop;
+            Manager.Audio.BgmAudioSource.volume = line.bgmVolume;
+            Manager.Audio.PlayBGMByName(line.bgm);
+            
+            // 기본값 초기화
+            // Manager.Audio.BgmAudioSource.loop = false;
+            // Manager.Audio.BgmAudioSource.volume = 1f;
+        }
 
-        // ===== 여러 화자가 동시에 on일 때 처리 =====
+        // ===== 화자가 on일 때 처리 =====
         List<string> activeSpeakers = new List<string>();
         if (line.centerSpeakerOnOff == "on")
         {
@@ -308,19 +375,24 @@ public class ScriptingSystem : Singleton<ScriptingSystem>
 
         string activeSpeakerNames = string.Join(", ", activeSpeakers);
         
-        Manager.Audio.PlayBGMByName(line.bgm);
-        Manager.Audio.PlaySFXByName(line.sfx);
-
         // UI 표시
         dialogueText.text = line.script;
         speakerNameText.text = activeSpeakerNames;
 
         // 로그 출력
         Debug.Log(
+            "sssssssssssssssssssssssssssss" +
             $"화자: {activeSpeakerNames}, " +
             $"script: {line.script}, " +
             $"bgm: {line.bgm}, " +
+            $"bgmLoop: {line.bgmLoop}, " +
+            $"bgmVolume: {line.bgmVolume}, " +
             $"sfx: {line.sfx}, " +
+            $"sfxLoop: {line.sfxLoop}, " +
+            $"sfxVolume: {line.sfxVolume}, " +
+            $"centerSpeakerImgPath: {line.centerSpeakerImgPath}, " +
+            $"leftSpeakerImgPath: {line.leftSpeakerImgPath}, " +
+            $"rightSpeakerImgPath: {line.rightSpeakerImgPath}, " +
             $"backgroundImg: {line.backgroundIgm}"
         );
 
@@ -429,6 +501,33 @@ public class ScriptingSystem : Singleton<ScriptingSystem>
                 nameStringId = cols.Length > 1 ? cols[1] : "",
                 spritePath = cols.Length > 2 ? cols[2] : "",
                 description = cols.Length > 3 ? cols[3] : ""
+            };
+
+            list.Add(data);
+        }
+
+        return list;
+    }
+    
+    List<SoundData> SoundParseCSV(string csvText)
+    {
+        var rows = csvText.Split('\n');
+        var list = new List<SoundData>();
+
+        for (int i = 3; i < rows.Length; i++) // 4번째 라인부터
+        {
+            if (string.IsNullOrWhiteSpace(rows[i])) continue;
+
+            var cols = rows[i].Trim().Split(',');
+
+            SoundData data = new SoundData()
+            {
+                soundId=  cols.Length > 0 ? cols[0] : "",
+                name = cols.Length > 1 ? cols[1] : "",
+                filePath = cols.Length > 2 ? cols[2] : "",
+                volume = cols.Length > 3 && float.TryParse(cols[3], out var vol) ? vol : 1f,
+                loopCheck = cols.Length > 4 && bool.TryParse(cols[4], out var loop) ? loop : false,
+                description = cols.Length > 5 ? cols[5] : ""
             };
 
             list.Add(data);
