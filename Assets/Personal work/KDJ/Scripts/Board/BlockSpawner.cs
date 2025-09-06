@@ -23,6 +23,12 @@ namespace KDJ
         [SerializeField] private List<GameObject> _blockPrefabs = new List<GameObject>();
         [SerializeField] private float _stepDuration = 0.08f; // 한 스텝(한 칸 낙하)에 걸리는 시간
         [SerializeField] private int _spawnRangeMax = 6;
+
+        [Header("오브젝트 풀링")]
+        public ObjectPool BlockPool;
+
+        [SerializeField] private List<Sprite> normalBlockSprites = new List<Sprite>();
+
         [Header("테스트용 블록 교체 설정")]
         [SerializeField] private List<BlockOverride> _test_blockOverrides;
         [Header("블록 마스크")]
@@ -33,7 +39,6 @@ namespace KDJ
         public List<GemType> DestroyedBlocks { get; private set; } = new List<GemType>();
 
         private Queue<Block>[] _blockWaitingQueue;
-
         private bool _isRefilling = false;
 
         /// <summary>
@@ -96,23 +101,12 @@ namespace KDJ
                 }
             }
 
+            // 데이터 셔플을 먼저 수행하여 매치되지 않는 상태를 만듭니다.
+            DataShuffle(boardManager, 1000);
+
             // 3. 모든 블록 GameObject 생성
             DrawAllBlocks(blockMover);
             DrawAllOverlayBlocks(blockMover);
-
-            // 4. 초기 보드가 이미 매치된 상태이면, 매치되지 않은 상태가 될 때까지 셔플합니다. (최대 1000회)
-            int shuffleTries = 0;
-            int maxShuffleTries = 1000;
-            while (boardManager.MatchChecker.AllBlockMatchCheck(boardManager) && shuffleTries < maxShuffleTries)
-            {
-                Shuffle(boardManager);
-                shuffleTries++;
-            }
-
-            if (shuffleTries >= maxShuffleTries)
-            {
-                Debug.LogError("Initialize: 1000회 셔플 후에도 보드가 계속 매치된 상태입니다. 다른 해결 방법이 필요합니다.");
-            }
 
             // 테스트용 블록 교체 실행
             if (_test_blockOverrides != null && _test_blockOverrides.Count > 0)
@@ -135,7 +129,17 @@ namespace KDJ
                 Block oldBlock = GameBoardData.GetBlock(x, y);
                 if (gemType != GemType.Dust && gemType != GemType.Syrup && oldBlock != null && oldBlock.BlockInstance != null)
                 {
-                    Destroy(oldBlock.BlockInstance);
+                    PooledObject pooledObject = oldBlock.BlockInstance.GetComponent<PooledObject>();
+
+                    if (pooledObject != null)
+                    {
+                        pooledObject.ReturnToPool();
+                    }
+
+                    else
+                    {
+                        Destroy(oldBlock.BlockInstance);
+                    }
                 }
 
                 if (gemType == GemType.Random)
@@ -170,15 +174,35 @@ namespace KDJ
                 }
 
                 Vector3 position = blockMover.GridToWorld(new Vector2Int(x, y), GameBoardData.Width, GameBoardData.Height);
-                GameObject blockPrefab = GetBlockPrefab((int)gemType);
 
-                if (gemType == GemType.Dust || gemType == GemType.Syrup && blockPrefab != null)
+                if (gemType == GemType.Dust || gemType == GemType.Syrup)
                 {
-                    GameBoardData.OverlayArray[y, x].BlockInstance = Instantiate(blockPrefab, position, Quaternion.identity);
+                    GameObject blockPrefab = GetBlockPrefab((int)gemType);
+                    if (blockPrefab != null)
+                        GameBoardData.OverlayArray[y, x].BlockInstance = Instantiate(blockPrefab, position, Quaternion.identity);
                 }
                 else
                 {
-                    GameBoardData.BlockArray[y, x].BlockInstance = Instantiate(blockPrefab, position, Quaternion.identity);
+                    if (gemType < GemType.Milk)
+                    {
+                        PooledObject pooledObject = BlockPool.GetObject();
+                        SpriteRenderer spriteRenderer = pooledObject.GetComponent<SpriteRenderer>();
+
+                        if (spriteRenderer != null && (int)gemType < normalBlockSprites.Count)
+                        {
+                            spriteRenderer.sprite = normalBlockSprites[(int)gemType];
+                        }
+
+                        pooledObject.transform.position = position;
+                        pooledObject.gameObject.SetActive(true);
+                        GameBoardData.BlockArray[y, x].BlockInstance = pooledObject.gameObject;
+                    }
+                    else
+                    {
+                        GameObject blockPrefab = GetBlockPrefab((int)gemType);
+                        if (blockPrefab != null)
+                            GameBoardData.BlockArray[y, x].BlockInstance = Instantiate(blockPrefab, position, Quaternion.identity);
+                    }
                 }
 
                 if (GameBoardData.BlockArray[y, x].GemType == GemType.Ice)
@@ -209,11 +233,28 @@ namespace KDJ
                     if (block != null && block.BlockInstance == null)
                     {
                         Vector3 position = blockMover.GridToWorld(new Vector2Int(x, y), GameBoardData.Width, GameBoardData.Height);
-                        GameObject blockPrefab = GetBlockPrefab((int)block.GemType);
-                        if (blockPrefab != null)
+
+                        if (block.GemType < GemType.Milk)
                         {
-                            block.BlockInstance = Instantiate(blockPrefab, position, Quaternion.identity);
+                            PooledObject pooledObject = BlockPool.GetObject();
+                            SpriteRenderer spriteRenderer = pooledObject.GetComponent<SpriteRenderer>();
+
+                            if (spriteRenderer != null && (int)block.GemType < normalBlockSprites.Count)
+                            {
+                                spriteRenderer.sprite = normalBlockSprites[(int)block.GemType];
+                            }
+
+                            pooledObject.transform.position = position;
+                            pooledObject.gameObject.SetActive(true);
+                            block.BlockInstance = pooledObject.gameObject;
                         }
+                        else
+                        {
+                            GameObject blockPrefabSpecial = GetBlockPrefab((int)block.GemType);
+                            if (blockPrefabSpecial != null)
+                                block.BlockInstance = Instantiate(blockPrefabSpecial, position, Quaternion.identity);
+                        }
+
 
                         if (block.GemType > GemType.Oven)
                         {
@@ -468,6 +509,8 @@ namespace KDJ
                     }
                 }
 
+                // ... (낙하 로직은 그대로) ...
+
                 // --- 3순위: 새 블록 생성 (대기열 채우기) ---
                 if (RefillWaitingQueue(blockMover))
                 {
@@ -481,7 +524,6 @@ namespace KDJ
                 }
                 else
                 {
-                    // 어떤 활동도 없었으면 보드가 안정된 상태이므로 루프를 종료합니다.
                     break;
                 }
             }
@@ -495,29 +537,44 @@ namespace KDJ
             int queueRow = GameBoardData.Height;
             for (int x = 0; x < GameBoardData.Width; x++)
             {
-                // 대기열 칸이 비어있으면 무조건 채웁니다.
                 if (GameBoardData.GetBlock(x, queueRow) == null)
                 {
-                    // 백업 큐가 비어있으면 새로 채웁니다.
                     if (_blockWaitingQueue[x].Count == 0)
                     {
-                        for (int i = 0; i < 5; i++) // 임의로 5개를 미리 생성
+                        for (int i = 0; i < 5; i++)
                         {
                             _blockWaitingQueue[x].Enqueue(new Block { GemType = (GemType)Random.Range(0, _spawnRangeMax + 1) });
                         }
                     }
 
-                    // 백업 큐에서 블록을 꺼내 대기열에 배치
                     Block newBlock = _blockWaitingQueue[x].Dequeue();
                     GameBoardData.SetBlock(x, queueRow, newBlock);
 
-                    // 게임 오브젝트 생성
                     Vector3 position = blockMover.GridToWorld(new Vector2Int(x, queueRow), GameBoardData.Width, GameBoardData.Height);
-                    GameObject blockPrefab = GetBlockPrefab((int)newBlock.GemType);
-                    if (blockPrefab != null)
+
+                    if (newBlock.GemType < GemType.Milk)
                     {
-                        newBlock.BlockInstance = Instantiate(blockPrefab, position, Quaternion.identity);
+                        PooledObject pooledObject = BlockPool.GetObject();
+
+                        SpriteRenderer spriteRenderer = pooledObject.GetComponent<SpriteRenderer>();
+                        if (spriteRenderer != null && (int)newBlock.GemType < normalBlockSprites.Count)
+                        {
+                            spriteRenderer.sprite = normalBlockSprites[(int)newBlock.GemType];
+                        }
+                        newBlock.BlockInstance = pooledObject.gameObject;
+                        pooledObject.gameObject.SetActive(true);
+                        newBlock.BlockInstance.transform.position = position;
                     }
+                    else
+                    {
+                        GameObject blockPrefab = GetBlockPrefab((int)newBlock.GemType);
+                        if (blockPrefab != null)
+                        {
+                            newBlock.BlockInstance = Instantiate(blockPrefab, position, Quaternion.identity);
+                        }
+                    }
+
+
                     refilled = true;
                 }
             }
@@ -555,12 +612,10 @@ namespace KDJ
                 {
                     Block block = GameBoardData.GetBlock(x, y);
 
-                    // 데이터상으론 블록이 있지만, 실제 게임오브젝트는 파괴된 경우
                     if (block != null && block.BlockInstance == null)
                     {
                         if (block is FlourBag_s bag_S && bag_S.Owner.CurrentHP > 0)
                         {
-                            // FlourBag_s 블록이 남아있고, 주인인 FlourBag의 HP가 0보다 크면 무시
                             continue;
                         }
 
@@ -574,13 +629,12 @@ namespace KDJ
         {
             var newBlock = new Block { GemType = gemType };
 
-            // GemType에 따라 IsObstacle, CanMove 속성 설정
-            if (gemType > GemType.Sugar && gemType < GemType.Dust) // 특수 블록
+            if (gemType > GemType.Sugar && gemType < GemType.Dust)
             {
                 newBlock.IsNormal = false;
                 newBlock.CanMove = true;
             }
-            else if (gemType >= GemType.Dust) // 기타 방해물
+            else if (gemType >= GemType.Dust)
             {
                 newBlock.IsNormal = false;
                 newBlock.IsObstacle = true;
@@ -592,10 +646,10 @@ namespace KDJ
                     case GemType.DonutBag:
                     case GemType.FlourBag:
                     case GemType.Flour_s:
-                        newBlock.CanMove = false; // 움직일 수 없는 방해물
+                        newBlock.CanMove = false;
                         break;
                     default:
-                        newBlock.CanMove = true; // 기본적으로 움직일 수 있는 방해물
+                        newBlock.CanMove = true;
                         break;
                 }
             }
@@ -605,13 +659,28 @@ namespace KDJ
 
         public void SpawnBlock(int x, int y, GemType gemType, BlockMover blockMover)
         {
-            GameObject blockPrefab = GetBlockPrefab((int)gemType);
-            if (blockPrefab == null) return;
             Vector3 position = blockMover.GridToWorld(new Vector2Int(x, y), GameBoardData.Width, GameBoardData.Height);
-            GameObject blockInstance = Instantiate(blockPrefab, position, Quaternion.identity);
-
             Block newBlock = CreateNewBlock(gemType);
-            newBlock.BlockInstance = blockInstance;
+
+            if (gemType < GemType.Milk)
+            {
+                PooledObject pooledObject = BlockPool.GetObject();
+                SpriteRenderer spriteRenderer = pooledObject.GetComponent<SpriteRenderer>();
+                if (spriteRenderer != null && (int)gemType < normalBlockSprites.Count)
+                {
+                    spriteRenderer.sprite = normalBlockSprites[(int)gemType];
+                }
+                pooledObject.transform.position = position;
+                pooledObject.gameObject.SetActive(true);
+                newBlock.BlockInstance = pooledObject.gameObject;
+            }
+            else
+            {
+                GameObject blockPrefabSpecial = GetBlockPrefab((int)gemType);
+                if (blockPrefabSpecial == null) return;
+                GameObject blockInstanceSpecial = Instantiate(blockPrefabSpecial, position, Quaternion.identity);
+                newBlock.BlockInstance = blockInstanceSpecial;
+            }
 
             GameBoardData.SetBlock(x, y, newBlock);
         }
@@ -622,7 +691,6 @@ namespace KDJ
             int height = GameBoardData.Height;
             int width = GameBoardData.Width;
 
-            // 1. 일반 블록(장애물 제외)이 있는 모든 위치를 찾습니다.
             for (int y = 0; y < height; y++)
             {
                 for (int x = 0; x < width; x++)
@@ -635,20 +703,22 @@ namespace KDJ
                 }
             }
 
-            // 2. 유효한 위치가 있으면, 그 중 하나를 골라 기존 블록을 파괴하고 새 특수 블록을 생성합니다.
             if (validPositions.Count > 0)
             {
                 int randomIndex = Random.Range(0, validPositions.Count);
                 Vector2Int spawnPos = validPositions[randomIndex];
 
-                // 기존 블록의 게임 오브젝트를 파괴합니다.
                 Block oldBlock = GameBoardData.GetBlock(spawnPos.x, spawnPos.y);
                 if (oldBlock != null && oldBlock.BlockInstance != null)
                 {
-                    Destroy(oldBlock.BlockInstance);
+                    PooledObject pooledObject = oldBlock.BlockInstance.GetComponent<PooledObject>();
+
+                    if (pooledObject != null)
+                    {
+                        pooledObject.ReturnToPool();
+                    }
                 }
 
-                // 새로운 특수 블록을 생성합니다.
                 SpawnBlock(spawnPos.x, spawnPos.y, gemType, BoardManager.Instance.BlockMover);
             }
             else
@@ -657,34 +727,66 @@ namespace KDJ
             }
         }
 
+
+        /// <summary>
+        /// 보드의 모든 일반 블록을 셔플합니다.
+        /// 데이터 셔플이 끝나면 기존 블록 오브젝트를 모두 풀에 반환하고, 새로 그립니다.
+        /// </summary>
+        /// <param name="boardManager"></param>
         public void Shuffle(BoardManager boardManager)
         {
-            int maxTries = 100;
-            int tries = 0;
+            DataShuffle(boardManager, 100);
 
+            foreach (Block block in boardManager.Spawner.GameBoardData.BlockArray)
+            {
+                if (block != null && block.BlockInstance != null && block.IsNormal)
+                {
+                    PooledObject pooledObject = block.BlockInstance.GetComponent<PooledObject>();
+                    if (pooledObject != null)
+                    {
+                        pooledObject.ReturnToPool();
+                    }
+                    block.BlockInstance = null;
+                }
+            }
+
+            DrawAllBlocks(boardManager.BlockMover);
+        }
+
+        /// <summary>
+        /// 보드의 모든 일반 블록을 셔플합니다. 매치가 없고, 매치 가능성이 있는 상태가 될 때까지 최대 maxAttempts 횟수만큼 시도합니다.
+        /// 데이터만 셔플을 진행합니다.
+        /// </summary>
+        /// <param name="boardManager"></param>
+        /// <param name="maxAttempts"></param>
+        private void DataShuffle(BoardManager boardManager, int maxAttempts)
+        {
             List<Block> normalBlocks = new List<Block>();
             List<Vector2Int> normalBlockPositions = new List<Vector2Int>();
+            int maxTries = maxAttempts;
+            int tries = 0;
 
             while (tries < maxTries)
             {
                 normalBlocks.Clear();
                 normalBlockPositions.Clear();
 
-                // 1. 셔플할 일반 블록만 수집합니다.
                 for (int y = 0; y < GameBoardData.Height; y++)
                 {
                     for (int x = 0; x < GameBoardData.Width; x++)
                     {
-                        Block block = GameBoardData.GetBlock(x, y);
-                        if (block != null && !block.IsObstacle)
+                        if (GameBoardData.BlockPlate.BlockPlateArray[y, x])
                         {
-                            normalBlocks.Add(block);
-                            normalBlockPositions.Add(new Vector2Int(x, y));
+                            Block block = GameBoardData.GetBlock(x, y);
+                            if (block != null && block.IsNormal)
+                            {
+                                normalBlocks.Add(block);
+                                normalBlockPositions.Add(new Vector2Int(x, y));
+                            }
                         }
                     }
                 }
 
-                // 2. 수집한 일반 블록 리스트를 섞습니다.
                 for (int i = 0; i < normalBlocks.Count; i++)
                 {
                     int randomIndex = Random.Range(i, normalBlocks.Count);
@@ -693,38 +795,27 @@ namespace KDJ
                     normalBlocks[randomIndex] = temp;
                 }
 
-                // 3. 섞인 블록을 원래 위치에 다시 배치합니다.
                 for (int i = 0; i < normalBlockPositions.Count; i++)
                 {
                     Vector2Int pos = normalBlockPositions[i];
                     GameBoardData.SetBlock(pos.x, pos.y, normalBlocks[i]);
                 }
 
-                // 4. 매치 가능한 블록이 있는지 확인합니다.
-                if (boardManager.MatchChecker.AllBlockMatchPossibilityCheck(boardManager, out _))
+                if (!boardManager.MatchChecker.AllBlockMatchCheck(boardManager))
                 {
-                    break; // 매치 가능하면 루프 탈출
+                    if (boardManager.MatchChecker.AllBlockMatchPossibilityCheck(boardManager, out _))
+                    {
+                        break;
+                    }
                 }
 
                 tries++;
-            }
-
-            if (tries >= maxTries)
-            {
-                Debug.LogWarning("Shuffle: 100회 시도 후에도 매치 가능한 조합을 찾지 못했습니다.");
-            }
-
-            // 5. 화면을 갱신합니다: 셔플된 블록들의 기존 오브젝트를 파괴하고 다시 그립니다.
-            foreach (Block block in normalBlocks)
-            {
-                if (block != null && block.BlockInstance != null)
+                if (tries >= maxTries)
                 {
-                    Destroy(block.BlockInstance);
-                    block.BlockInstance = null; // 다시 그려지도록 인스턴스를 null로 설정
+                    Debug.LogWarning($"DataShuffle: {maxTries}회 셔플 후에도 보드가 계속 매치된 상태이거나, 매치 가능한 조합을 찾지 못했습니다.");
+                    break;
                 }
             }
-
-            DrawAllBlocks(boardManager.BlockMover);
         }
 
         public Block SetRandomBlock(int x, int y)
@@ -737,6 +828,8 @@ namespace KDJ
 
         public void SpawnRandomBlock(int x, int y)
         {
+            // 가이드라인: 이 함수는 현재 사용되지 않는 것으로 보이지만, 만약 사용된다면
+            // 여기의 Instantiate도 풀링으로 교체해야 합니다.
             GemType gemType = (GemType)Random.Range(0, _spawnRangeMax + 1);
             Block newBlock = CreateNewBlock(gemType);
             GameObject blockPrefab = GetBlockPrefab((int)gemType);
@@ -789,8 +882,6 @@ namespace KDJ
         public bool CanBlockMoveInArray()
         {
             if (GameBoardData == null) return false;
-
-            // RefillBoardCoroutine의 새 로직을 정확히 반영하여 이동 가능성을 체크합니다.
 
             // --- 1a. 수직 낙하 (가속 낙하) 확인 ---
             for (int y = 1; y < GameBoardData.BlockArray.GetLength(0); y++)
@@ -865,6 +956,7 @@ namespace KDJ
 
             return false; // 어떤 활동도 불가능
         }
+
 
         #endregion
     }

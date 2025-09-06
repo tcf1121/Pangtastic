@@ -27,7 +27,7 @@ namespace KDJ.States
         public void OnUpdate(BoardManager boardManager)
         {
             // 아이템이 선택되었거나 터치 불가능 상태면 입력 무시
-            if (boardManager.IsItemSelected || !BoardManager.CanTouch) return;
+            if (boardManager.IsItemSelected) return;
 
             // 스왑 중에는 다른 입력 및 로직을 처리하지 않음
             if (_isSwapping) return;

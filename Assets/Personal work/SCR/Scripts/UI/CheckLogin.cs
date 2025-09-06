@@ -8,12 +8,7 @@ using UnityEngine.UI;
 
 namespace SCR
 {
-    public enum LoginType
-    {
-        Guest,
-        Google
-    }
-    
+
     public class CheckLogin : MonoBehaviour
     {
         [SerializeField] Button _enterBtn;
@@ -31,34 +26,16 @@ namespace SCR
             _guestBtn.onClick.AddListener(LoginAsGuest);
         }
 
-        private async void CheckBefore()
+        private void CheckBefore()
         {
 
             FirebaseAuth auth = FirebaseAuth.DefaultInstance;
             if (auth.CurrentUser != null)
             {
-                if (auth.CurrentUser.IsAnonymous)  //JWJ 수정함
-                {
-                    Debug.Log($"이미 게스트 로그인 상태: {auth.CurrentUser.UserId}");
-                    Manager.DB.user = auth.CurrentUser;
-                    //Manager.Stage.LoadStage();
-                    await Manager.User.SetUser(auth.CurrentUser.UserId);
-                    //DontDSystem.StatGame();
-                    SceneManager.LoadScene(2/*로비씬*/);
-                }
-                else
-                {
-                    Debug.Log($"이미 일반 로그인 상태: {auth.CurrentUser.UserId}");
-                    Manager.DB.user = auth.CurrentUser;
-                    //Manager.Stage.LoadStage();
-                    //DontDSystem.StatGame();
-                    SceneManager.LoadScene(2/*로비씬*/);
-                }
-                return;
+                HowToLoginAsync(auth.CurrentUser.IsAnonymous);
             }
-            // else
-            _enterPanel.SetActive(false);
-            _loginPanel.SetActive(true);
+            else
+                LoginAsGuest();
         }
 
         private void Logout()
@@ -84,18 +61,22 @@ namespace SCR
 
         }
 
-        private void HowToLogin(LoginType loginType)
+        private async void HowToLoginAsync(bool isGuest)
         {
+            FirebaseAuth auth = FirebaseAuth.DefaultInstance;
             // 게스트로 로그인 했을 경우
-            if (loginType == LoginType.Guest)
+            if (isGuest)
             {
-
+                Debug.Log($"이미 게스트 로그인 상태: {auth.CurrentUser.UserId}");
             }
             // 구글로 로그인 했을 경우
             else
             {
-                Manager.GPGS.AuthenticateUser();
+                Debug.Log($"이미 구글 플레이 로그인 상태: {auth.CurrentUser.UserId}");
             }
+            Manager.DB.user = auth.CurrentUser;
+            await Manager.Data.SetUser(auth.CurrentUser.UserId);
+            SceneManager.LoadScene(2/*로비씬*/);
         }
 
         private void LoginAsGuest()
@@ -114,10 +95,8 @@ namespace SCR
                     Debug.LogError($"익명 로그인 실패 : {task.Exception}");
                     return;
                 }
-
                 FirebaseUser newUser = task.Result.User;
                 string uid = newUser.UserId;
-
                 Debug.LogFormat($"게스트 로그인 성공 : {newUser.UserId}");
 
                 Manager.User.NewUser(uid, DateTime.Now.ToString("O"));

@@ -7,19 +7,19 @@ using Unity.VisualScripting;
 using UnityEngine.SceneManagement;
 
 
-public class CurrencySystem : Singleton<CurrencySystem>
+public class CurrencySystem : MonoBehaviour
 {
-    //public static CurrencySystem Instance { get; private set; } // 싱글톤 인스턴스
+    public static CurrencySystem Instance { get; private set; } // 싱글톤 인스턴스
 
     // [System.Serializable]
     // public class CoinData
     // {
-        // public int coins; // 보유 코인 수
+    // public int coins; // 보유 코인 수
     // }
     // [System.Serializable]
     // public class StarData
     // {
-        // public int stars; // 보유 코인 수
+    // public int stars; // 보유 코인 수
     // }
 
     public enum SpawnType { None, Continue, Exit }
@@ -34,10 +34,18 @@ public class CurrencySystem : Singleton<CurrencySystem>
     private int _currentStars = 0; // 현재 보유 코인 수
     // private string _saveStarPath; // JSON 저장 경로
 
-    protected override void Awake()
+    protected void Awake()
     {
-        base.Awake();
-
+        //base.Awake();
+        if (Instance == null)
+        {
+            Instance = this;
+            DontDestroyOnLoad(gameObject);
+        }
+        else if (Instance != this)
+        {
+            Destroy(gameObject);
+        }
     }
 
     private void OnEnable()
@@ -105,7 +113,6 @@ public class CurrencySystem : Singleton<CurrencySystem>
         {
             _currentCoins -= amount; // 코인 차감
             CoinSave();                 // JSON 저장
-            OutGameManager.UpdateCoinUI();
             return true;
         }
         return false; // 코인이 부족하면 실패
@@ -120,12 +127,11 @@ public class CurrencySystem : Singleton<CurrencySystem>
         {
             _currentStars -= amount; // 코인 차감
             StarSave();                 // JSON 저장
-            OutGameManager.UpdateStarUI();
             return true;
         }
         return false; // 코인이 부족하면 실패
     }
-    
+
 
     /// <summary>
     /// 현재 코인 수 가져오기
@@ -145,15 +151,15 @@ public class CurrencySystem : Singleton<CurrencySystem>
         return _currentStars;
     }
 
-    
+
 
     /// <summary>
     /// JSON 파일로 저장
     /// </summary>
     private void CoinSave()
     {
-        string authJson = Manager.DB.GetAuthInfo(); 
-        DatabaseSystem.AuthInfo info = JsonUtility.FromJson<DatabaseSystem.AuthInfo>(authJson); 
+        string authJson = Manager.DB.GetAuthInfo();
+        DatabaseSystem.AuthInfo info = JsonUtility.FromJson<DatabaseSystem.AuthInfo>(authJson);
 
         Manager.DB.dbRef
             .Child(info.type)
@@ -169,8 +175,8 @@ public class CurrencySystem : Singleton<CurrencySystem>
     /// </summary>
     private void StarSave()
     {
-        string authJson = Manager.DB.GetAuthInfo(); 
-        DatabaseSystem.AuthInfo info = JsonUtility.FromJson<DatabaseSystem.AuthInfo>(authJson); 
+        string authJson = Manager.DB.GetAuthInfo();
+        DatabaseSystem.AuthInfo info = JsonUtility.FromJson<DatabaseSystem.AuthInfo>(authJson);
 
         Manager.DB.dbRef
             .Child(info.type)
@@ -186,8 +192,8 @@ public class CurrencySystem : Singleton<CurrencySystem>
     /// </summary>
     private IEnumerator CoinLoad()
     {
-        string authJson = Manager.DB.GetAuthInfo(); 
-        DatabaseSystem.AuthInfo info = JsonUtility.FromJson<DatabaseSystem.AuthInfo>(authJson); 
+        string authJson = Manager.DB.GetAuthInfo();
+        DatabaseSystem.AuthInfo info = JsonUtility.FromJson<DatabaseSystem.AuthInfo>(authJson);
 
         var task = Manager.DB.dbRef
             .Child(info.type)
@@ -214,13 +220,13 @@ public class CurrencySystem : Singleton<CurrencySystem>
         }
         // if (File.Exists(_saveCoinPath))
         // {
-            // string json = File.ReadAllText(_saveCoinPath);          // JSON 파일 읽기
-            // CoinData data = JsonUtility.FromJson<CoinData>(json); // JSON → 객체 변환
-            // _currentCoins = data.coins;
+        // string json = File.ReadAllText(_saveCoinPath);          // JSON 파일 읽기
+        // CoinData data = JsonUtility.FromJson<CoinData>(json); // JSON → 객체 변환
+        // _currentCoins = data.coins;
         // }
         // else
         // {
-            // _currentCoins = 0; // 파일이 없으면 기본값 0
+        // _currentCoins = 0; // 파일이 없으면 기본값 0
         // }
     }
 
@@ -229,8 +235,8 @@ public class CurrencySystem : Singleton<CurrencySystem>
     /// </summary>
     private IEnumerator StarLoad()
     {
-        string authJson = Manager.DB.GetAuthInfo(); 
-        DatabaseSystem.AuthInfo info = JsonUtility.FromJson<DatabaseSystem.AuthInfo>(authJson); 
+        string authJson = Manager.DB.GetAuthInfo();
+        DatabaseSystem.AuthInfo info = JsonUtility.FromJson<DatabaseSystem.AuthInfo>(authJson);
 
         var task = Manager.DB.dbRef
             .Child(info.type)
@@ -257,13 +263,13 @@ public class CurrencySystem : Singleton<CurrencySystem>
         }
         // if (File.Exists(_saveStarPath))
         // {
-            // string json = File.ReadAllText(_saveStarPath);          // JSON 파일 읽기
-            // StarData data = JsonUtility.FromJson<StarData>(json); // JSON → 객체 변환
-            // _currentStars = data.stars;
+        // string json = File.ReadAllText(_saveStarPath);          // JSON 파일 읽기
+        // StarData data = JsonUtility.FromJson<StarData>(json); // JSON → 객체 변환
+        // _currentStars = data.stars;
         // }
         // else
         // {
-            // _currentStars = 0; // 파일이 없으면 기본값 0
+        // _currentStars = 0; // 파일이 없으면 기본값 0
         // }
     }
 

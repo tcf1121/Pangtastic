@@ -1,8 +1,4 @@
-using Firebase.Database;
-using Newtonsoft.Json;
 using System;
-using System.Threading.Tasks;
-using UnityEngine;
 
 public class UserInfoManager : Singleton<UserInfoManager>
 {
@@ -18,39 +14,6 @@ public class UserInfoManager : Singleton<UserInfoManager>
     public void SetUser(UserData user)
     {
         currentData = user;
-    }
-
-    // 새로운 유저가 접속할 때 새로운 정보를 만듦
-    public async void NewUser(string uid, string now)
-    {
-        var newUserData = new UserData();
-        newUserData.UserInfo.Heart.currentHeart = 5;
-        newUserData.UserInfo.Heart.lastSaveTime = now;
-
-        string json = JsonConvert.SerializeObject(newUserData);
-        try
-        {
-            await Manager.DB.GetUserPath(uid).SetRawJsonValueAsync(json);
-        }
-        catch (Exception ex)
-        {
-            Debug.LogError("유저 데이터 생성 실패: " + ex.Message);
-        }
-        currentData = newUserData;
-    }
-
-    // 기존 유저가 접속할 때 기존 데이터를 가져와서 CurrentData에 넣음
-    public async Task SetUser(string uid)
-    {
-        currentData = await GetUserData(uid);
-        if (currentData != null)
-        {
-            Debug.Log("사용자 데이터 로드 및 할당 성공!");
-        }
-        else
-        {
-            Debug.LogError("사용자 데이터 로드 실패. currentData가 null입니다.");
-        }
     }
 
     public int GetStage()
@@ -115,7 +78,6 @@ public class UserInfoManager : Singleton<UserInfoManager>
     }
 
 
-
     public void SetHeart(int value)
     {
         currentData.UserInfo.Heart.currentHeart = value;
@@ -131,7 +93,7 @@ public class UserInfoManager : Singleton<UserInfoManager>
         if (currentData.UserInfo.Heart.currentHeart < 5)
         {
             currentData.UserInfo.Heart.currentHeart++;
-
+            if (GetHeart() == 5) SetHeartTime(0);
         }
         OnChangedHeart?.Invoke(currentData.UserInfo.Heart.currentHeart);
     }
@@ -179,6 +141,11 @@ public class UserInfoManager : Singleton<UserInfoManager>
         currentData.ItemInfo = itemInfo;
     }
 
+    public void SetName(string name)
+    {
+        currentData.PlayerName = name;
+    }
+
     public ItemInfo GetItem()
     {
         return currentData.ItemInfo;
@@ -189,38 +156,12 @@ public class UserInfoManager : Singleton<UserInfoManager>
         return currentData;
     }
 
-    public async Task<UserData> GetUserData(string uid)
-    {
-        var task = Manager.DB.GetUserPath(uid).GetValueAsync();
 
-        await task;
 
-        if (task.IsFaulted)
-        {
-            Debug.LogError("데이터 로드 실패: " + task.Exception);
-            return null;
-        }
 
-        DataSnapshot snapshot = task.Result;
-
-        if (!snapshot.Exists)
-        {
-            Debug.LogWarning("해당 uid에 대한 사용자 데이터가 없습니다.");
-            return null;
-        }
-
-        if (snapshot.Exists)
-        {
-            string json = snapshot.GetRawJsonValue();
-            UserData userData = JsonUtility.FromJson<UserData>(json);
-
-            return userData;
-        }
-        return null;
-    }
 }
 
-[System.Serializable]
+[Serializable]
 public class UserData
 {
     public UserInfo UserInfo { get; set; } = new UserInfo();
@@ -229,7 +170,7 @@ public class UserData
     public ItemInfo ItemInfo { get; set; } = new ItemInfo();
 }
 
-[System.Serializable]
+[Serializable]
 public class UserInfo
 {
     public HeartInfo Heart { get; set; } = new HeartInfo();
@@ -238,7 +179,7 @@ public class UserInfo
     public int Profile { get; set; } = 0;
 }
 
-[System.Serializable]
+[Serializable]
 public class HeartInfo
 {
     public int currentHeart { get; set; } = 0;
@@ -246,7 +187,7 @@ public class HeartInfo
     public int remainingSeconds { get; set; } = 0;
 }
 
-[System.Serializable]
+[Serializable]
 public class ItemInfo
 {
     public int Roller { get; set; } = 0;

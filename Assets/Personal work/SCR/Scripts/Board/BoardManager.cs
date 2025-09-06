@@ -87,7 +87,6 @@ namespace SCR_B
             _boardData = BoardLoader.LoadBoard();
             progress.fillAmount = 0.5f;
             yield return new WaitForSeconds(0.1f);
-
             SetBoardData();
             progress.fillAmount = 0.75f;
             yield return new WaitForSeconds(0.1f);

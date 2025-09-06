@@ -175,21 +175,21 @@ public class StageManager : Singleton<StageManager>
     //         int loadedIndex = 0;
     //         bool parsed = int.TryParse(value, out loadedIndex); //정수 변환
 
-     //       if (parsed == true)
-     //       {
-     //           CurrentStageIndex = loadedIndex - 1;
-     //           Debug.Log($"스테이지 로드 완료: {CurrentStageIndex + 1}");
-     //           OutGameManager.UpdateStageStartButton(); // 버튼 업데이트
-     //       }
-     //       else
-     //       {
-     //           Debug.LogWarning($"Stage 값이 정수가 아님: {value}");
-     //       }
-     //   }
-     //   else
-     //   {
-     //       Debug.Log("Stage 값이 없음");
-     //  }
+    //       if (parsed == true)
+    //       {
+    //           CurrentStageIndex = loadedIndex - 1;
+    //           Debug.Log($"스테이지 로드 완료: {CurrentStageIndex + 1}");
+    //           OutGameManager.UpdateStageStartButton(); // 버튼 업데이트
+    //       }
+    //       else
+    //       {
+    //           Debug.LogWarning($"Stage 값이 정수가 아님: {value}");
+    //       }
+    //   }
+    //   else
+    //   {
+    //       Debug.Log("Stage 값이 없음");
+    //  }
 
     //     yield break;
 

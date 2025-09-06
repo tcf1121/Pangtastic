@@ -30,7 +30,7 @@ public class DatabaseSystem : Singleton<DatabaseSystem>
     void Start()
     {
         FirebaseDatabase.DefaultInstance.GoOnline();
-
+        FirebaseDatabase.DefaultInstance.SetPersistenceEnabled(false);
         // firebase 초기화
         dbRef = FirebaseDatabase.DefaultInstance.RootReference;
     }

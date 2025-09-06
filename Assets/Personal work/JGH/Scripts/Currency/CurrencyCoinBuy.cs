@@ -9,12 +9,12 @@ public class CurrencyCoinBuy : MonoBehaviour
     private void Start()
     {
         if (_button == null) _button = GetComponent<Button>();
-        
+
         // CoinManager 자동 검색
         var RewardSystem = FindObjectOfType<CurrencySystem>();
         if (RewardSystem != null)
         {
-            _button.onClick.AddListener(() => Manager.Currency.SpendCoin(_spendAmount));
+            _button.onClick.AddListener(() => CurrencySystem.Instance.SpendCoin(_spendAmount));
         }
     }
 }
