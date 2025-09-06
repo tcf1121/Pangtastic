@@ -13,12 +13,30 @@ namespace KDJ
 
     public class BoardLoader : MonoBehaviour
     {
+        [SerializeField] TestStageManager testStageManager;
         private PuzzleBoardSO puzzleBoardSO;
         public BoardData BoardDataArray;
 
+        private void Awake()
+        {
+            if (testStageManager == null)
+            {
+                testStageManager = FindObjectOfType<TestStageManager>();
+                if (testStageManager == null)
+                {
+                    Debug.LogError("TestStageManager를 찾을 수 없습니다!");
+                }
+            }
+        }
+
         public BoardData LoadBoard()
         {
-            puzzleBoardSO = Manager.Stage.CurrentStage.PuzzleBoard;
+            //실 사용 코드
+            //puzzleBoardSO = Manager.Stage.CurrentStage.PuzzleBoard;
+
+            // 테스트용 코드
+            puzzleBoardSO = testStageManager.CurrentBoard;
+
             if (puzzleBoardSO == null)
             {
                 Debug.LogError("PuzzleBoardSO 없음");

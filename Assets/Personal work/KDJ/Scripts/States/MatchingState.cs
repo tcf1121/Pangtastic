@@ -49,15 +49,25 @@ namespace KDJ.States
                 if (startIsSpecial || endIsSpecial)
                 {
                     var effect = boardManager.GetComponent<SpecialBlockEffect>(); // BoardManager 오브젝트에 붙어있음
-                    var gameBoard = boardManager.Spawner.GameBoardData;              // 보드 데이터 접근
+                    var gameBoard = boardManager.Spawner.GameBoardData;           // 보드 데이터 접근
                     var hits = new List<Vector2Int>();
 
                     if (effect != null && gameBoard != null)
                     {
-                        if (startIsSpecial) effect.UseSpecial(startPos, startBlock.GemType, gameBoard, hits);
-                        if (endIsSpecial) effect.UseSpecial(endPos, endBlock.GemType, gameBoard, hits);
+                        if (startIsSpecial && endIsSpecial)
+                        {
+                            effect.UseCombo(startPos, endPos,startBlock.GemType, endBlock.GemType, gameBoard, hits);
+                        }
+                        else if (startIsSpecial)
+                        {
+                            effect.UseSpecial(startPos, startBlock.GemType, gameBoard, hits);
+                        }
+                        else if (endIsSpecial)
+                        {
+                            effect.UseSpecial(endPos, endBlock.GemType, gameBoard, hits);
+                        }
 
-                        // 한방에 파괴 + 점수 (+콤보타이머)
+                        // 공통 처리: 파괴/점수/콤보
                         int destroyed = effect.ApplyDamageAndScore(boardManager, hits);
                         usedSpecial = destroyed > 0;
                     }
