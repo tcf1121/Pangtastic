@@ -6,8 +6,10 @@ using System.Linq;
 using TMPro;
 using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.AddressableAssets;
 using UnityEngine.Localization.Settings;
 using UnityEngine.Networking;
+using UnityEngine.ResourceManagement.AsyncOperations;
 using UnityEngine.SceneManagement;
 
 public class ScriptingSystem : Singleton<ScriptingSystem>
@@ -311,11 +313,8 @@ public class ScriptingSystem : Singleton<ScriptingSystem>
        }
         // 대사창 활성화
         TotalDialogShow(true);
-
+        
         DialogLine line = currentDialogList[currentIndex];
-        
-        // ===== 이미지 교체  =====
-        
         
         
         // ===== SFX 실행 =====
@@ -341,38 +340,17 @@ public class ScriptingSystem : Singleton<ScriptingSystem>
             // Manager.Audio.BgmAudioSource.loop = false;
             // Manager.Audio.BgmAudioSource.volume = 1f;
         }
-
-        // ===== 화자가 on일 때 처리 =====
+        
+        // ===== 이미지 처리 =====
         List<string> activeSpeakers = new List<string>();
-        if (line.centerSpeakerOnOff == "on")
-        {
-            SetChildActive("CenterImg", true);
-            activeSpeakers.Add(line.centerCharacter);
-        }
-        else {
-            SetChildActive("CenterImg", false);
-        }
-
-        if (line.leftSpeakerOnOff == "on")
-        {
-            SetChildActive("LeftImg", true);
-            activeSpeakers.Add(line.leftCharacter);
-        }
-        else
-        {
-            SetChildActive("LeftImg", false);
-        }
-
-        if (line.rightSpeakerOnOff == "on")
-        {
-            activeSpeakers.Add(line.rightCharacter);
-            SetChildActive("RightImg", true);
-        }
-        else
-        {
-            SetChildActive("RightImg", false);
-        }
-
+        // 중앙이미지
+        UpdateSpeakerImage("CenterImg", line.centerSpeakerOnOff, line.centerSpeakerImgPath, line.centerCharacter, activeSpeakers);
+        // 왼쪽이미지
+        UpdateSpeakerImage("LeftImg",   line.leftSpeakerOnOff,   line.leftSpeakerImgPath,   line.leftCharacter,   activeSpeakers);
+        // 오른쪽 이미지
+        UpdateSpeakerImage("RightImg",  line.rightSpeakerOnOff,  line.rightSpeakerImgPath,  line.rightCharacter,  activeSpeakers);
+        
+        // 화좌 표시 포맷
         string activeSpeakerNames = string.Join(", ", activeSpeakers);
         
         // UI 표시
@@ -398,12 +376,65 @@ public class ScriptingSystem : Singleton<ScriptingSystem>
 
         currentIndex++;
     }
-
-    // 리소스 로드 함수 (예: Resources 폴더에 이미지 넣었을 때)
-    private Sprite LoadSprite(string path)
+    
+    private void UpdateSpeakerImage(string childName, string state, string spritePath, string characterName, List<string> activeSpeakers)
     {
-        if (string.IsNullOrEmpty(path)) return null;
-        return Resources.Load<Sprite>(path);
+        Transform child = transform.Find(childName);
+        if (child == null) return;
+    
+        var img = child.GetComponent<UnityEngine.UI.Image>();
+        if (img == null) return;
+    
+        if (string.IsNullOrEmpty(state))
+        {
+            child.gameObject.SetActive(false);
+            return;
+        }
+    
+        child.gameObject.SetActive(true);
+    
+        // Addressables 로드
+        LoadSprite(spritePath, sprite =>
+        {
+            if (sprite != null) img.sprite = sprite;
+        });
+    
+        if (state == "on")
+        {
+            img.color = Color.white; // 선명
+            activeSpeakers.Add(characterName);
+        }
+        else if (state == "off")
+        {
+            img.color = new Color(0.5f, 0.5f, 0.5f, 0.5f); // 검은 알파
+        }
+        else
+        {
+            child.gameObject.SetActive(false);
+        }
+    }
+
+    private void LoadSprite(string path, System.Action<Sprite> onLoaded)
+    {
+        if (string.IsNullOrEmpty(path))
+        {
+            onLoaded?.Invoke(null);
+            return;
+        }
+
+        AsyncOperationHandle<Sprite> handle = Addressables.LoadAssetAsync<Sprite>(path);
+        handle.Completed += op =>
+        {
+            if (op.Status == AsyncOperationStatus.Succeeded)
+            {
+                onLoaded?.Invoke(op.Result);
+            }
+            else
+            {
+                Debug.LogError($"Sprite 로드 실패: {path}");
+                onLoaded?.Invoke(null);
+            }
+        };
     }
     
      public void SetChildActive(string childName, bool active)
