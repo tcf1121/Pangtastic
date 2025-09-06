@@ -23,7 +23,7 @@ namespace SCR_B
 
         public override void Broken()
         {
-            Object.Destroy(BlockInstance);
+            ObjectPool.ReturnPool(BlockInstance);
             BoardManager.GetBoard().BoardData.BlockArray[Pos.y, Pos.x] = null;
         }
 

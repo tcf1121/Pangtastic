@@ -1,9 +1,16 @@
-레시피 ID,레시피 이름,재료1 ID,재료1 요구 수량,재료2 ID,재료2 ID 요구 수량,재료3 ID,재료3 ID 요구 수량,레시피 사진
+﻿레시피 ID,레시피 이름,재료1 ID,재료1 요구 수량,재료2 ID,재료2 ID 요구 수량,재료3 ID,재료3 ID 요구 수량,레시피 사진
 int,string,int,int,int,int,int,int,string
 recipe_id,recipe_name,material1_id,material1_quantity,material2_id,material2_quantity,material3_id,material3_quantity,spritePath
-2001,블루베리 도넛,103,6,null,null,null,null,Assets\Imports\Image\Recipe_Blueberry.png
-2002,치즈 도넛,104,6,null,null,null,null,Assets\Imports\Image\Recipe_Chese.png
-2003,초코 도넛,102,6,null,null,null,null,Assets\Imports\Image\Recipe_Choco.png
-2004,라벤더 도넛,101,6,null,null,null,null,Assets\Imports\Image\Recipe_Lavender.png
-2005,딸기 도넛,105,6,null,null,null,null,Assets\Imports\Image\Recipe_Strawberry.png
-2006,슈가 도넛,106,6,null,null,null,null,Assets\Imports\Image\Recipe_Suger.png
+2001,라벤더 도넛 박스,2501,3,null,null,null,null,
+2002,초코 도넛 박스,2502,3,null,null,null,null,
+2003,블루베리 도넛 박스,2503,3,null,null,null,null,
+2004,치즈 도넛 박스,2504,3,null,null,null,null,
+2005,딸기 도넛 박스,2505,3,null,null,null,null,
+2006,슈가 도넛 박스,2506,3,null,null,null,null,
+2007,키즈 핑크 도넛,2505,3,2502,3,null,null,
+2008,핑크 폰데링,2505,3,2506,3,null,null,
+2009,말차 폰데링,2501,3,2503,3,null,null,
+2010,라벤더 딸기 도넛,2505,3,2501,3,null,null,
+2011,슈가 초코 도넛,2506,3,2502,3,null,null,
+2012,황치즈 쿠키,2504,3,2506,3,null,null,
+2013,레인보우 도넛,2501,3,2503,3,2505,3,

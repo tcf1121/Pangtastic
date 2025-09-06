@@ -16,7 +16,10 @@ namespace SCR_B
 
         public IEnumerator Move(Vector2Int firstPos, Vector2Int secondPos, bool check = true)
         {
-            if (firstPos.y >= _boardData.GetHeight() || secondPos.y >= _boardData.GetHeight()) yield break;
+            if (firstPos.y >= _boardData.GetHeight() || secondPos.y >= _boardData.GetHeight() ||
+            firstPos.x >= _boardData.GetWidth() || secondPos.x >= _boardData.GetWidth() ||
+            firstPos.y < 0 || secondPos.y < 0 ||
+            firstPos.x < 0 || secondPos.x < 0) yield break;
             if (_boardData.BlockArray[firstPos.y, firstPos.x].GemType > GemType.Oven) yield break;
             BoardManager.SetCanTouch(false);
             Debug.Log($"{firstPos}{secondPos}");

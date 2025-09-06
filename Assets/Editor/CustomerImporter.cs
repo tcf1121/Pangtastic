@@ -99,7 +99,7 @@ public class CustomerImporter
             if (customer.CustomerPic == null)
             {
                 Debug.LogError($"손님 이미지 없음 {customer.Name}, 경로 : {spritePath}");
-                return;
+                //return;
             }
 
             CustomerType customerType;

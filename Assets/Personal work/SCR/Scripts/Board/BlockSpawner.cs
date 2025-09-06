@@ -204,26 +204,27 @@ namespace SCR_B
         {
             if (!_boardData.BlockPlateArray[y, x]) return;
             GemType gemType = _boardData.BlockArray[y, x].GemType;
-            GameObject blockPrefab = InGameManager.GetPrefab(gemType);
-            if (blockPrefab != null)
+            Sprite blockSprite = InGameManager.GetPrefab(gemType).GetComponent<GemPrefab>().GetSprite();
+            if (blockSprite != null)
             {
-                GameObject blockInstance = Instantiate(blockPrefab, spawnRoot.transform);
+                GameObject blockInstance = ObjectPool.TakeFromPool();
+                blockInstance.GetComponent<GemPrefab>().SetSprite(blockSprite);
 
-                blockInstance.transform.position = GetWorldPos(x, y);
+                blockInstance.gameObject.transform.position = GetWorldPos(x, y);
 
                 if (_boardData.BlockArray[y, x].GemType == GemType.Ice)
                 {
                     blockInstance.GetComponent<GemPrefab>().SetSprite((_boardData.BlockArray[y, x] as Ice).GetIceImage());
-                    _boardData.BlockArray[y, x].BlockInstance = blockInstance;
+                    _boardData.BlockArray[y, x].BlockInstance = blockInstance.GetComponent<GemPrefab>();
                 }
 
                 if (gemType == GemType.Dust || gemType == GemType.Syrup)
                 {
-                    _boardData.OverlayArray[y, x].BlockInstance = blockInstance;
+                    _boardData.OverlayArray[y, x].BlockInstance = blockInstance.GetComponent<GemPrefab>();
                 }
                 else
                 {
-                    _boardData.BlockArray[y, x].BlockInstance = blockInstance;
+                    _boardData.BlockArray[y, x].BlockInstance = blockInstance.GetComponent<GemPrefab>();
                 }
             }
         }
@@ -237,22 +238,23 @@ namespace SCR_B
         public void SpawnBlock(int x, int y, GemType gemType)
         {
             _boardData.SetArray(x, y, gemType);
-            GameObject blockPrefab = InGameManager.GetPrefab(gemType);
-            if (blockPrefab != null)
+            Sprite blockSprite = InGameManager.GetPrefab(gemType).GetComponent<GemPrefab>().GetSprite();
+            if (blockSprite != null)
             {
-                GameObject blockInstance = Instantiate(blockPrefab, spawnRoot.transform);
+                GameObject blockInstance = ObjectPool.TakeFromPool();
+                blockInstance.GetComponent<GemPrefab>().SetSprite(blockSprite);
 
-                blockInstance.transform.position = GetWorldPos(x, y);
+                blockInstance.gameObject.transform.position = GetWorldPos(x, y);
 
                 if (_boardData.BlockArray[y, x].GemType == GemType.Ice)
                     _boardData.BlockArray[y, x].BlockInstance.GetComponent<GemPrefab>().SetSprite((_boardData.BlockArray[y, x] as Ice).GetIceImage());
                 if (gemType == GemType.Dust || gemType == GemType.Syrup)
                 {
-                    _boardData.OverlayArray[y, x].BlockInstance = blockInstance;
+                    _boardData.OverlayArray[y, x].BlockInstance = blockInstance.GetComponent<GemPrefab>();
                 }
                 else
                 {
-                    _boardData.BlockArray[y, x].BlockInstance = blockInstance;
+                    _boardData.BlockArray[y, x].BlockInstance = blockInstance.GetComponent<GemPrefab>();
                 }
             }
         }
@@ -286,7 +288,7 @@ namespace SCR_B
         {
             if (_boardData.BlockArray[y, x].BlockInstance != null)
             {
-                Destroy(_boardData.BlockArray[y, x].BlockInstance);
+                ObjectPool.ReturnPool(_boardData.BlockArray[y, x].BlockInstance);
                 _boardData.DelArray(x, y);
             }
 

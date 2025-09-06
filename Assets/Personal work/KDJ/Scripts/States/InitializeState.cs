@@ -10,7 +10,7 @@ namespace KDJ.States
             // 테스트 코드
             boardManager.StartCoroutine(boardManager.StageInit());
 
-            // InGameManager.SpawnCustomer();
+            InGameManager.SpawnCustomer();
         }
 
         public void OnUpdate(BoardManager boardManager) { }

@@ -72,7 +72,6 @@ if(donutPanToggle.isOn)
 if(coffeeToggle.isOn)
 
             */
-            Manager.User.UseHeart();
 
             LoadingManager.LoadScene(3);
         }
