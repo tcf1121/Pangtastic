@@ -114,14 +114,15 @@ public class ScriptingSystem : Singleton<ScriptingSystem>
         stringDB = LoadSO<SO_ScriptString>(stringDBKey);
         speakerDB = LoadSO<SO_ScriptSpeaker>(speakerDBKey);
         soundDB = LoadSO<SO_ScriptSound>(soundDBKey);
-
+        
         if (dialogDB == null || stringDB == null || speakerDB == null || soundDB == null)
         {
             Debug.LogError("[ScriptingSystem] 하나 이상의 SO 로딩 실패!");
             return;
         }
     }
-    
+
+
     private T LoadSO<T>(string key) where T : ScriptableObject
     {
         AsyncOperationHandle<T> handle = Addressables.LoadAssetAsync<T>(key);
@@ -150,6 +151,8 @@ public class ScriptingSystem : Singleton<ScriptingSystem>
     // ========= SO 데이터 로드 =========
     public void DialogLoadSO(int id)
     {
+        ApplyFontToAllTMP();
+        
         var dialogAllDialogs = dialogDB.dialogs;
         var stringAllDialogs = stringDB.strings;
         var speakerAllDialogs = speakerDB.speakers;
@@ -421,6 +424,9 @@ public class ScriptingSystem : Singleton<ScriptingSystem>
         ApplyFontToAllTMP();
     }
 
+    /// <summary>
+    /// 폰트 적용
+    /// </summary>
     private void ApplyFontToAllTMP()
     {
         string code = LocalizationSettings.SelectedLocale.Identifier.Code;
