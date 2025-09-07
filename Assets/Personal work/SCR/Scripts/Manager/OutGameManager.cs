@@ -33,7 +33,7 @@ public class OutGameManager : MonoBehaviour
         _stageButtonText.text = $"Stage {index + 1}";
         
         // TODO: SCRIPT TEST
-        // StartCoroutine(Manager.Scripting.DialogLoadCSV(6002));
+        Manager.Scripting.DialogLoadSO(6002);
     }
 
     public static void UpdateStageStartButton()
