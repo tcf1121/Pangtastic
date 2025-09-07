@@ -33,6 +33,7 @@ public class OutGameManager : MonoBehaviour
         // TODO: SCRIPT TEST
         //TODO: TEST 제거 해도됨 
         // LocalizationSettings.SelectedLocale = LocalizationSettings.AvailableLocales.GetLocale("en");
+        // LocalizationSettings.SelectedLocale = LocalizationSettings.AvailableLocales.GetLocale("zh");
         // Manager.Scripting.DialogLoadSO(6002);
     }
 
