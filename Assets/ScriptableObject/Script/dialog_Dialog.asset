@@ -1,0 +1,55 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 890938a5c66c4bec8d7034c41035acaa, type: 3}
+  m_Name: dialog_Dialog
+  m_EditorClassIdentifier: 
+  dialogs:
+  - dialogId: 6001
+    dialogGroup: 1
+    order: 10
+    centerSpeakerId: speaker_coco_on
+    leftSpeakerId: 
+    rightSpeakerId: 
+    dialogStringId: string_dialog_6001
+    spritePath: 
+    bgmSoundId: ingame
+    sfxSoundId: sfx1
+  - dialogId: 6002
+    dialogGroup: 1
+    order: 20
+    centerSpeakerId: 
+    leftSpeakerId: speaker_coco_off
+    rightSpeakerId: speaker_kuku_on
+    dialogStringId: string_dialog_6002
+    spritePath: 
+    bgmSoundId: outgame
+    sfxSoundId: sfx2
+  - dialogId: 6003
+    dialogGroup: 1
+    order: 30
+    centerSpeakerId: 
+    leftSpeakerId: speaker_coco_on
+    rightSpeakerId: speaker_kuku_off
+    dialogStringId: string_dialog_6003
+    spritePath: 
+    bgmSoundId: ingame
+    sfxSoundId: sfx3
+  - dialogId: 6004
+    dialogGroup: 1
+    order: 40
+    centerSpeakerId: 
+    leftSpeakerId: speaker_coco_off
+    rightSpeakerId: speaker_kuku_on
+    dialogStringId: string_dialog_6004
+    spritePath: 
+    bgmSoundId: outgame
+    sfxSoundId: sfx1

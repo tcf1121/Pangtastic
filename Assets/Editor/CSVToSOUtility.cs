@@ -1,0 +1,166 @@
+#if UNITY_EDITOR
+using UnityEngine;
+using UnityEditor;
+using System.Collections.Generic;
+using System.IO;
+
+public class CSVToSOUtility : EditorWindow
+{
+    private string csvPath = "";
+
+    [MenuItem("Tools/CSV → SO 변환기")]
+    static void Init()
+    {
+        GetWindow<CSVToSOUtility>("CSV → SO 변환기");
+    }
+
+    private void OnGUI()
+    {
+        GUILayout.Label("CSV → ScriptableObject 변환기", EditorStyles.boldLabel);
+
+        if (GUILayout.Button("CSV 파일 선택"))
+        {
+            csvPath = EditorUtility.OpenFilePanel("CSV 파일 선택", Application.dataPath, "csv");
+        }
+
+        EditorGUILayout.LabelField("선택된 파일:", string.IsNullOrEmpty(csvPath) ? "없음" : csvPath);
+
+        if (!string.IsNullOrEmpty(csvPath))
+        {
+            if (GUILayout.Button("Dialog CSV → SO_ScriptDialog")) ConvertDialog(File.ReadAllText(csvPath), Path.GetFileNameWithoutExtension(csvPath));
+            if (GUILayout.Button("String CSV → SO_ScriptString")) ConvertString(File.ReadAllText(csvPath), Path.GetFileNameWithoutExtension(csvPath));
+            if (GUILayout.Button("Speaker CSV → SO_ScriptSpeaker")) ConvertSpeaker(File.ReadAllText(csvPath), Path.GetFileNameWithoutExtension(csvPath));
+            if (GUILayout.Button("Sound CSV → SO_ScriptSound")) ConvertSound(File.ReadAllText(csvPath), Path.GetFileNameWithoutExtension(csvPath));
+        }
+    }
+
+    private void ConvertDialog(string csvText, string fileName)
+    {
+        var so = ScriptableObject.CreateInstance<SO_ScriptDialog>();
+        so.dialogs = new List<ScriptingSystem.DialogData>();
+
+        var rows = csvText.Split('\n');
+        for (int i = 3; i < rows.Length; i++)
+        {
+            if (string.IsNullOrWhiteSpace(rows[i])) continue;
+            var cols = rows[i].Trim().Split(',');
+
+            var data = new ScriptingSystem.DialogData
+            {
+                dialogId = SafeInt(cols, 0),
+                dialogGroup = SafeInt(cols, 1),
+                order = SafeInt(cols, 2),
+                centerSpeakerId = Safe(cols, 3),
+                leftSpeakerId = Safe(cols, 4),
+                rightSpeakerId = Safe(cols, 5),
+                dialogStringId = Safe(cols, 6),
+                spritePath = Safe(cols, 7),
+                bgmSoundId = Safe(cols, 8),
+                sfxSoundId = Safe(cols, 9)
+            };
+            so.dialogs.Add(data);
+        }
+
+        SaveSO(so, $"{fileName}_Dialog.asset");
+    }
+
+    private void ConvertString(string csvText, string fileName)
+    {
+        var so = ScriptableObject.CreateInstance<SO_ScriptString>();
+        so.strings = new List<ScriptingSystem.StringData>();
+
+        var rows = csvText.Split('\n');
+        for (int i = 3; i < rows.Length; i++)
+        {
+            if (string.IsNullOrWhiteSpace(rows[i])) continue;
+            var cols = rows[i].Trim().Split(',');
+
+            var data = new ScriptingSystem.StringData
+            {
+                stringId = Safe(cols, 0),
+                korean = Safe(cols, 1),
+                english = Safe(cols, 2),
+                chinese = Safe(cols, 3)
+            };
+            so.strings.Add(data);
+        }
+
+        SaveSO(so, $"{fileName}_String.asset");
+    }
+
+    private void ConvertSpeaker(string csvText, string fileName)
+    {
+        var so = ScriptableObject.CreateInstance<SO_ScriptSpeaker>();
+        so.speakers = new List<ScriptingSystem.SpeakerData>();
+
+        var rows = csvText.Split('\n');
+        for (int i = 3; i < rows.Length; i++)
+        {
+            if (string.IsNullOrWhiteSpace(rows[i])) continue;
+            var cols = rows[i].Trim().Split(',');
+
+            var data = new ScriptingSystem.SpeakerData
+            {
+                speakerId = Safe(cols, 0),
+                nameStringId = Safe(cols, 1),
+                spritePath = Safe(cols, 2),
+                description = Safe(cols, 3)
+            };
+            so.speakers.Add(data);
+        }
+
+        SaveSO(so, $"{fileName}_Speaker.asset");
+    }
+
+    private void ConvertSound(string csvText, string fileName)
+    {
+        var so = ScriptableObject.CreateInstance<SO_ScriptSound>();
+        so.sounds = new List<ScriptingSystem.SoundData>();
+
+        var rows = csvText.Split('\n');
+        for (int i = 3; i < rows.Length; i++)
+        {
+            if (string.IsNullOrWhiteSpace(rows[i])) continue;
+            var cols = rows[i].Trim().Split(',');
+
+            var data = new ScriptingSystem.SoundData
+            {
+                soundId = Safe(cols, 0),
+                name = Safe(cols, 1),
+                filePath = Safe(cols, 2),
+                volume = SafeFloat(cols, 3, 1f),
+                loopCheck = SafeBool(cols, 4),
+                description = Safe(cols, 5)
+            };
+            so.sounds.Add(data);
+        }
+
+        SaveSO(so, $"{fileName}_Sound.asset");
+    }
+
+    // ===== Helper =====
+    private string Safe(string[] cols, int index) =>
+        (cols.Length > index) ? cols[index] : "";
+
+    private int SafeInt(string[] cols, int index) =>
+        (cols.Length > index && int.TryParse(cols[index], out var v)) ? v : 0;
+
+    private float SafeFloat(string[] cols, int index, float def) =>
+        (cols.Length > index && float.TryParse(cols[index], out var v)) ? v : def;
+
+    private bool SafeBool(string[] cols, int index) =>
+        (cols.Length > index && bool.TryParse(cols[index], out var v)) && v;
+
+    private void SaveSO(ScriptableObject so, string fileName)
+    {
+        string savePath = "Assets/ScriptableObject/Script";
+        if (!Directory.Exists(savePath)) Directory.CreateDirectory(savePath);
+
+        string path = Path.Combine(savePath, fileName);
+        AssetDatabase.CreateAsset(so, path);
+        AssetDatabase.SaveAssets();
+        AssetDatabase.Refresh();
+        Debug.Log($"[CSVToSO] 저장 완료: {path}");
+    }
+}
+#endif
