@@ -156,16 +156,16 @@ public class ScriptingSystem : Singleton<ScriptingSystem>
                     soundWww.result == UnityWebRequest.Result.Success &&
                     speakerWww.result == UnityWebRequest.Result.Success)
                 {
-                    dialogCsvText = CryptoUtility.DecryptTextFromBytes(dialogWww.downloadHandler.data);
+                    dialogCsvText = CryptoUtility.TextDecryptFromBytes(dialogWww.downloadHandler.data);
                     dialogAllDialogs = DialogParseCSV(dialogCsvText);
 
-                    stringCsvText = CryptoUtility.DecryptTextFromBytes(stringWww.downloadHandler.data);
+                    stringCsvText = CryptoUtility.TextDecryptFromBytes(stringWww.downloadHandler.data);
                     stringAllDialogs = StringParseCSV(stringCsvText);
 
-                    speakerCsvText = CryptoUtility.DecryptTextFromBytes(speakerWww.downloadHandler.data);
+                    speakerCsvText = CryptoUtility.TextDecryptFromBytes(speakerWww.downloadHandler.data);
                     speakerAllDialogs = SpeakerParseCSV(speakerCsvText);
 
-                    soundCsvText = CryptoUtility.DecryptTextFromBytes(soundWww.downloadHandler.data);
+                    soundCsvText = CryptoUtility.TextDecryptFromBytes(soundWww.downloadHandler.data);
                     soundAllDialogs = SoundParseCSV(soundCsvText);
                 }
                 else
@@ -175,16 +175,16 @@ public class ScriptingSystem : Singleton<ScriptingSystem>
                 }
        #else
                // PC, iOS, 에디터
-               dialogCsvText = CryptoUtility.DecryptTextFromFile(File.ReadAllText(dialogPath));
+               dialogCsvText = CryptoUtility.TextDecryptFromFile(File.ReadAllText(dialogPath));
                dialogAllDialogs = DialogParseCSV(dialogCsvText);
                
-               stringCsvText = CryptoUtility.DecryptTextFromFile(File.ReadAllText(stringPath));
+               stringCsvText = CryptoUtility.TextDecryptFromFile(File.ReadAllText(stringPath));
                stringAllDialogs = StringParseCSV(stringCsvText);
                
-               speakerCsvText = CryptoUtility.DecryptTextFromFile(File.ReadAllText(speakerPath));
+               speakerCsvText = CryptoUtility.TextDecryptFromFile(File.ReadAllText(speakerPath));
                speakerAllDialogs = SpeakerParseCSV(speakerCsvText);
                
-               soundCsvText = CryptoUtility.DecryptTextFromFile(File.ReadAllText(soundPath));
+               soundCsvText = CryptoUtility.TextDecryptFromFile(File.ReadAllText(soundPath));
                soundAllDialogs = SoundParseCSV(soundCsvText);
                
                yield return null;
