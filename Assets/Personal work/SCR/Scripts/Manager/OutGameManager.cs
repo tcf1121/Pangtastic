@@ -1,8 +1,6 @@
-using System.Collections;
-using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
-using UnityEngine.SceneManagement;
+using UnityEngine.Localization.Settings;
 using UnityEngine.UI;
 
 public class OutGameManager : MonoBehaviour
@@ -34,6 +32,7 @@ public class OutGameManager : MonoBehaviour
         
         // TODO: SCRIPT TEST
         //TODO: TEST 제거 해도됨 
+        // LocalizationSettings.SelectedLocale = LocalizationSettings.AvailableLocales.GetLocale("en");
         // Manager.Scripting.DialogLoadSO(6002);
     }
 
