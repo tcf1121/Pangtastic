@@ -3,15 +3,16 @@ using UnityEngine;
 using UnityEditor;
 using System.Collections.Generic;
 using System.IO;
+using System.Text;
 
-public class CSVToSOUtility : EditorWindow
+public class ScriptingCSVToSOUtility : EditorWindow
 {
     private string csvPath = "";
 
-    [MenuItem("Tools/CSV → SO 변환기")]
+    [MenuItem("Tools/ScriptingCSV → SO 변환기")]
     static void Init()
     {
-        GetWindow<CSVToSOUtility>("CSV → SO 변환기");
+        GetWindow<ScriptingCSVToSOUtility>("CSV → SO 변환기");
     }
 
     private void OnGUI()
@@ -36,14 +37,14 @@ public class CSVToSOUtility : EditorWindow
 
     private void ConvertDialog(string csvText, string fileName)
     {
-        var so = ScriptableObject.CreateInstance<SO_ScriptDialog>();
+        var so = CreateInstance<SO_ScriptDialog>();
         so.dialogs = new List<ScriptingSystem.DialogData>();
 
         var rows = csvText.Split('\n');
         for (int i = 3; i < rows.Length; i++)
         {
             if (string.IsNullOrWhiteSpace(rows[i])) continue;
-            var cols = rows[i].Trim().Split(',');
+            var cols = ParseCsvLine(rows[i].Trim());
 
             var data = new ScriptingSystem.DialogData
             {
@@ -66,14 +67,14 @@ public class CSVToSOUtility : EditorWindow
 
     private void ConvertString(string csvText, string fileName)
     {
-        var so = ScriptableObject.CreateInstance<SO_ScriptString>();
+        var so = CreateInstance<SO_ScriptString>();
         so.strings = new List<ScriptingSystem.StringData>();
 
         var rows = csvText.Split('\n');
         for (int i = 3; i < rows.Length; i++)
         {
             if (string.IsNullOrWhiteSpace(rows[i])) continue;
-            var cols = rows[i].Trim().Split(',');
+            var cols = ParseCsvLine(rows[i].Trim());
 
             var data = new ScriptingSystem.StringData
             {
@@ -90,14 +91,14 @@ public class CSVToSOUtility : EditorWindow
 
     private void ConvertSpeaker(string csvText, string fileName)
     {
-        var so = ScriptableObject.CreateInstance<SO_ScriptSpeaker>();
+        var so = CreateInstance<SO_ScriptSpeaker>();
         so.speakers = new List<ScriptingSystem.SpeakerData>();
 
         var rows = csvText.Split('\n');
         for (int i = 3; i < rows.Length; i++)
         {
             if (string.IsNullOrWhiteSpace(rows[i])) continue;
-            var cols = rows[i].Trim().Split(',');
+            var cols = ParseCsvLine(rows[i].Trim());
 
             var data = new ScriptingSystem.SpeakerData
             {
@@ -114,14 +115,14 @@ public class CSVToSOUtility : EditorWindow
 
     private void ConvertSound(string csvText, string fileName)
     {
-        var so = ScriptableObject.CreateInstance<SO_ScriptSound>();
+        var so = CreateInstance<SO_ScriptSound>();
         so.sounds = new List<ScriptingSystem.SoundData>();
 
         var rows = csvText.Split('\n');
         for (int i = 3; i < rows.Length; i++)
         {
             if (string.IsNullOrWhiteSpace(rows[i])) continue;
-            var cols = rows[i].Trim().Split(',');
+            var cols = ParseCsvLine(rows[i].Trim());
 
             var data = new ScriptingSystem.SoundData
             {
@@ -161,6 +162,37 @@ public class CSVToSOUtility : EditorWindow
         AssetDatabase.SaveAssets();
         AssetDatabase.Refresh();
         Debug.Log($"[CSVToSO] 저장 완료: {path}");
+    }
+    private string[] ParseCsvLine(string line)
+    {
+        var result = new List<string>();
+        var sb = new StringBuilder();
+        bool insideQuotes = false;
+
+        foreach (char c in line)
+        {
+            if (c == '"')
+            {
+                insideQuotes = !insideQuotes; // 따옴표 토글
+            }
+            else if (c == ',' && !insideQuotes)
+            {
+                result.Add(sb.ToString());
+                sb.Clear();
+            }
+            else
+            {
+                sb.Append(c);
+            }
+        }
+
+        result.Add(sb.ToString());
+
+        // 따옴표 제거
+        for (int i = 0; i < result.Count; i++)
+            result[i] = result[i].Trim('"');
+
+        return result.ToArray();
     }
 }
 #endif
