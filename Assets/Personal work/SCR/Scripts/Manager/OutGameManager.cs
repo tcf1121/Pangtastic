@@ -1,8 +1,6 @@
-using System.Collections;
-using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
-using UnityEngine.SceneManagement;
+using UnityEngine.Localization.Settings;
 using UnityEngine.UI;
 
 public class OutGameManager : MonoBehaviour
@@ -31,6 +29,12 @@ public class OutGameManager : MonoBehaviour
         UserInfoUI.Instance.SetActive(true);
         int index = Manager.Stage.CurrentStageIndex;
         _stageButtonText.text = $"Stage {index + 1}";
+        
+        // TODO: SCRIPT TEST
+        //TODO: TEST 제거 해도됨 
+        // LocalizationSettings.SelectedLocale = LocalizationSettings.AvailableLocales.GetLocale("en");
+        // LocalizationSettings.SelectedLocale = LocalizationSettings.AvailableLocales.GetLocale("zh");
+        // Manager.Scripting.DialogLoadSO(6002);
     }
 
     public static void UpdateStageStartButton()

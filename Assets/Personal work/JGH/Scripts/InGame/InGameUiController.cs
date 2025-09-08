@@ -10,7 +10,6 @@ public class InGameUiController : MonoBehaviour
     private void Start()
     {
         Manager.Audio.PlayBGMByName("InGameMusic");
-        //Manager.Heart.isPlaying = true;
     }
 
     public void ChangeOutGameScene()

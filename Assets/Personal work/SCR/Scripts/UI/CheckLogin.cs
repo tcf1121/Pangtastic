@@ -8,6 +8,7 @@ using UnityEngine.UI;
 
 namespace SCR
 {
+
     public class CheckLogin : MonoBehaviour
     {
         [SerializeField] Button _enterBtn;
@@ -97,7 +98,10 @@ namespace SCR
                 FirebaseUser newUser = task.Result.User;
                 string uid = newUser.UserId;
                 Debug.LogFormat($"게스트 로그인 성공 : {newUser.UserId}");
+
                 Manager.Data.NewUser(uid, DateTime.Now.ToString("O"));
+                // Manager.User.NewUser(uid, DateTime.Now.ToString("O"));
+
                 SceneManager.LoadScene("Lobby Scene");
             });
 
