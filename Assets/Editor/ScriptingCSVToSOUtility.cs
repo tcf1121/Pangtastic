@@ -166,17 +166,29 @@ public class ScriptingCSVToSOUtility : EditorWindow
         AssetDatabase.Refresh();
         Debug.Log($"[CSVToSO] 저장 완료: {path}");
     }
+    
     private string[] ParseCsvLine(string line)
     {
         var result = new List<string>();
         var sb = new StringBuilder();
         bool insideQuotes = false;
 
-        foreach (char c in line)
+        for (int i = 0; i < line.Length; i++)
         {
+            char c = line[i];
+
             if (c == '"')
             {
-                insideQuotes = !insideQuotes; // 따옴표 토글
+                // "" → " 로 변환
+                if (insideQuotes && i + 1 < line.Length && line[i + 1] == '"')
+                {
+                    sb.Append('"');
+                    i++; // 다음 따옴표 스킵
+                }
+                else
+                {
+                    insideQuotes = !insideQuotes; // 따옴표 열기/닫기
+                }
             }
             else if (c == ',' && !insideQuotes)
             {
@@ -191,11 +203,22 @@ public class ScriptingCSVToSOUtility : EditorWindow
 
         result.Add(sb.ToString());
 
-        // 따옴표 제거
+        // 후처리: 따옴표 제거 & 이스케이프 해제 & Trim
         for (int i = 0; i < result.Count; i++)
-            result[i] = result[i].Trim('"');
+        {
+            string field = result[i].Trim();
+
+            if (field.StartsWith("\"") && field.EndsWith("\""))
+            {
+                field = field.Substring(1, field.Length - 2);
+            }
+
+            // "" → " 치환
+            result[i] = field.Replace("\"\"", "\"");
+        }
 
         return result.ToArray();
     }
+
 }
 #endif
