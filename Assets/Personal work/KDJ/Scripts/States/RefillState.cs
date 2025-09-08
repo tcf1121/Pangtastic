@@ -1,16 +1,20 @@
 using UnityEngine;
 using System.Collections;
+using SCR;
+using LHJ;
 
 namespace KDJ.States
 {
     public class RefillState : IGameState
     {
         private Coroutine _refillProcessCoroutine;
+        int count = 0;
 
         public void OnEnter(BoardManager boardManager)
         {
             Debug.Log("블록 재충전 상태");
-            
+            count = 0;
+
             // 상태에 진입하면 전체 리필 프로세스를 한 번만 시작합니다.
             _refillProcessCoroutine = boardManager.Spawner.StartCoroutine(RefillAndChangeState(boardManager));
         }
@@ -37,9 +41,10 @@ namespace KDJ.States
         {
             // 배열에서 파괴된 블록 인스턴스를 정리
             boardManager.Spawner.CheckAndClearDestroyedBlocks();
-            
+
             // 빈 셀의 개수만큼 대기열에 블록을 채움
             // boardManager.Spawner.SpawnBlock(); // 이 로직은 RefillBoardCoroutine으로 통합되었습니다.
+            yield return new WaitWhile(() => SpecialBlockEffect.effectRunning);
 
             // Spawner에서 새로운 리필 코루틴을 실행하고 끝날 때까지 대기
             yield return boardManager.Spawner.StartCoroutine(boardManager.Spawner.RefillBoardCoroutine(boardManager.BlockMover));
