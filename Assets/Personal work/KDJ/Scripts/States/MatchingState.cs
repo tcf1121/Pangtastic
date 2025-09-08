@@ -54,20 +54,23 @@ namespace KDJ.States
                     {
                         if (startIsSpecial && endIsSpecial)
                         {
-                            effect.UseCombo(startPos, endPos,startBlock.GemType, endBlock.GemType, gameBoard, hits);
+                            effect.UseCombo(startPos, endPos, startBlock.GemType, endBlock.GemType, gameBoard, hits);
+                            usedSpecial = true;
                         }
                         else if (startIsSpecial)
                         {
                             effect.UseSpecial(startPos, startBlock.GemType, gameBoard, hits);
+                            usedSpecial = true;
                         }
                         else if (endIsSpecial)
                         {
                             effect.UseSpecial(endPos, endBlock.GemType, gameBoard, hits);
+                            usedSpecial = true;
                         }
 
                         // 공통 처리: 파괴/점수/콤보
                         int destroyed = effect.ApplyDamageAndScore(boardManager, hits);
-                        usedSpecial = destroyed > 0;
+                        // usedSpecial = destroyed > 0;
                     }
                 }
             }

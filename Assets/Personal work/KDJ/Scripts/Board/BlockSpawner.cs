@@ -102,7 +102,7 @@ namespace KDJ
             }
 
             // 게임 시작시 매치가 이루어진다면 데이터 셔플을 수행하여 매치되지 않는 상태를 만듭니다.
-            if(boardManager.MatchChecker.AllBlockMatchCheck(boardManager))
+            if (boardManager.MatchChecker.AllBlockMatchCheck(boardManager))
             {
                 DataShuffle(boardManager, 1000);
             }
@@ -982,7 +982,56 @@ namespace KDJ
             return false; // 어떤 활동도 불가능
         }
 
+        public int GetMaxDonutSpawnRange()
+        {
+            return _spawnRangeMax;
+        }
+
+        // KDJ: 가이드라인 - 특정 블록을 애니메이션과 함께 스폰하는 코루틴
+        public IEnumerator SpawnWithAnimation(int x, int y, GemType gemType)
+        {
+            Vector3 position = BoardManager.Instance.BlockMover.GridToWorld(new Vector2Int(x, y), GameBoardData.Width, GameBoardData.Height);
+            Block newBlock = CreateNewBlock(gemType);
+
+            if (gemType < GemType.Milk)
+            {
+                PooledObject pooledObject = BlockPool.GetObject();
+                SpriteRenderer spriteRenderer = pooledObject.GetComponent<SpriteRenderer>();
+                if (spriteRenderer != null && (int)gemType < normalBlockSprites.Count)
+                {
+                    spriteRenderer.sprite = normalBlockSprites[(int)gemType];
+                }
+                pooledObject.transform.position = position;
+                pooledObject.transform.SetParent(null);
+                newBlock.BlockInstance = pooledObject.gameObject;
+            }
+            else
+            {
+                GameObject blockPrefabSpecial = GetBlockPrefab((int)gemType);
+                if (blockPrefabSpecial == null) yield break;
+                GameObject blockInstanceSpecial = Instantiate(blockPrefabSpecial, position, Quaternion.identity);
+                newBlock.BlockInstance = blockInstanceSpecial;
+            }
+
+            GameBoardData.SetBlock(x, y, newBlock);
+
+            newBlock.BlockInstance.transform.localScale = Vector3.zero;
+            float timer = 0f;
+
+            while (timer < 0.1f)
+            {
+                timer += Time.deltaTime;
+                newBlock.BlockInstance.transform.localScale = Vector3.Lerp(Vector3.zero, Vector3.one, timer / 0.1f);
+                yield return null;
+            }
+
+            // 확실하게 최종 크기로 설정
+            newBlock.BlockInstance.transform.localScale = Vector3.one;
+
+        }
 
         #endregion
+
+
     }
 }

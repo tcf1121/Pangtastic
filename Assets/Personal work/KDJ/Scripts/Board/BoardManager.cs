@@ -40,6 +40,7 @@ namespace KDJ
         public bool IsItemSelected { get; private set; } = false;
         public ItemType SelectedItemType { get; private set; }
         public ObjectPool ScoreUIPool;
+        public bool IsWaitingForAnimation { get; set; } = false;
 
 
         private void Awake()

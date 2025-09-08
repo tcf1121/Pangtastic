@@ -1,4 +1,5 @@
-using KDJ;
+using SCR;
+using System.Collections;
 using UnityEngine;
 
 namespace KDJ
@@ -23,8 +24,27 @@ namespace KDJ
 
         public override void Broken()
         {
+            _brokenCoroutine = BoardManager.Instance.StartCoroutine(BrokenAnimation(X, Y));
+        }
+
+        private IEnumerator BrokenAnimation(int x, int y)
+        {
+            BoardManager.Instance.IsWaitingForAnimation = true;
+            // 애니메이션 재생 대기 (예: 0.5초)
+            GameObject blockObject = BoardManager.Instance.Spawner.GameBoardData.GetBlock(x, y).BlockInstance;
+            float timer = 0f;
+            while (timer < 0.1f)
+            {
+                timer += Time.deltaTime;
+                blockObject.transform.localScale = Vector3.Lerp(Vector3.one, Vector3.zero, timer / 0.1f);
+                yield return null;
+            }
+
             base.Broken();
-            BoardManager.Instance.Spawner.SpawnRandomBlock(X, Y);
+            BoardManager.Instance.StartCoroutine(BoardManager.Instance.Spawner.SpawnWithAnimation(x, y,
+            (GemType)Random.Range(0, BoardManager.Instance.Spawner.GetMaxDonutSpawnRange() + 1)));
+            BoardManager.Instance.IsWaitingForAnimation = false;
+            _brokenCoroutine = null;
         }
     }
 }

@@ -42,9 +42,8 @@ namespace KDJ.States
             // 배열에서 파괴된 블록 인스턴스를 정리
             boardManager.Spawner.CheckAndClearDestroyedBlocks();
 
-            // 빈 셀의 개수만큼 대기열에 블록을 채움
-            // boardManager.Spawner.SpawnBlock(); // 이 로직은 RefillBoardCoroutine으로 통합되었습니다.
-            yield return new WaitWhile(() => SpecialBlockEffect.effectRunning);
+            // 애니메이션 재생중이라면 대기
+            yield return new WaitWhile(() => SpecialBlockEffect.effectRunning || boardManager.IsWaitingForAnimation);
 
             // Spawner에서 새로운 리필 코루틴을 실행하고 끝날 때까지 대기
             yield return boardManager.Spawner.StartCoroutine(boardManager.Spawner.RefillBoardCoroutine(boardManager.BlockMover));

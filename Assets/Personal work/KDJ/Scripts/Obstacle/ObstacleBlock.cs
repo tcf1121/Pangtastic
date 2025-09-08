@@ -8,6 +8,7 @@ namespace KDJ
         public int CurrentHP { get; set; }
         public int X { get; set; }
         public int Y { get; set; }
+        protected Coroutine _brokenCoroutine;
 
 
         public virtual void TakeDamage()
