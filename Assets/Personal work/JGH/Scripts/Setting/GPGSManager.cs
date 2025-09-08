@@ -220,7 +220,7 @@ public class GPGSManager : Singleton<GPGSManager>
                 string gpgsName = PlayGamesPlatform.Instance.localUser.userName;
                 Debug.Log($"GPGS 이름 : {gpgsName}");
 
-               
+
 
                 if (string.IsNullOrEmpty(gpgsName))
                 {
@@ -230,7 +230,7 @@ public class GPGSManager : Singleton<GPGSManager>
                 }
 
                 var profile = new UserProfile { DisplayName = gpgsName };
-                
+
                 Manager.DB.user.UpdateUserProfileAsync(profile).ContinueWithOnMainThread(task =>
                 {
                     if (task.IsCanceled || task.IsFaulted)
@@ -248,7 +248,7 @@ public class GPGSManager : Singleton<GPGSManager>
 
                     Debug.Log($"DB.DisplayName : {Manager.DB.user.DisplayName}");
                     Debug.Log($"profile.DisplayName : {profile.DisplayName}");
-                    
+
 
                     string uid = Manager.DB.auth.CurrentUser.UserId;
                     Manager.DB.MigrateGuestDataToUser(uid); //마이그레이션

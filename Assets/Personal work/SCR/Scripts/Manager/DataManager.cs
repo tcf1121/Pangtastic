@@ -15,10 +15,7 @@ public class DataManager : Singleton<DataManager>
     }
 
     // 새로운 유저가 접속할 때 새로운 정보를 만듦
-    public async
-    // 새로운 유저가 접속할 때 새로운 정보를 만듦
-    Task
-NewUser(string uid, string now)
+    public async Task NewUser(string uid, string now)
     {
         var newUserData = new UserData();
         newUserData.PlayerName = "guest";
