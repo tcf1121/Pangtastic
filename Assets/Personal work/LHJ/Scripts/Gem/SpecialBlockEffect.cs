@@ -10,8 +10,14 @@ namespace LHJ
     public class SpecialBlockEffect : MonoBehaviour
     {
         private System.Random _rand = new System.Random();
+        [Header("밀대")]
         [SerializeField] private GameObject _rollerHorizontalFx;
         [SerializeField] private GameObject _rollerVerticalFx;
+
+        [Header("우유")]
+        [SerializeField] private GameObject _milkDropFx;   
+        [SerializeField] private GameObject _milkSplashFx;
+        [SerializeField] private float _milkFlyTime;
         public static bool effectRunning { get { return _running > 0; } }
 
         private static int _running;
@@ -40,27 +46,9 @@ namespace LHJ
             // 우유
             if (specialType == GemType.Milk)
             {
-                AddCell(gameBoard, pos.x, pos.y, outDamage);
-                // var targetGems = InGameManager.GetTagetGem();
-                // var candidates = GetTargetPos(gameBoard, targetGems);
-                List<Vector2Int> candidates = new List<Vector2Int>();
-                Shuffle(candidates);
-
-                // 최대 3개 선택, 부족하면 랜덤 보충
-                List<Vector2Int> picks = new List<Vector2Int>(3);
-                int take = Mathf.Min(3, candidates.Count);
-                for (int i = 0; i < take; i++) picks.Add(candidates[i]);
-
-                while (picks.Count < 3)
-                {
-                    int x = Random.Range(0, gameBoard.Width);
-                    int y = Random.Range(0, gameBoard.Height);
-                    Vector2Int v = new Vector2Int(x, y);
-                    if (!ContainsVec(picks, v)) picks.Add(v);
-                }
-
-                for (int i = 0; i < picks.Count; i++)
-                    outDamage.Add(picks[i]);
+                var bm = BoardManager.Instance;
+                if (bm != null)
+                    bm.StartCoroutine(MilkRoutine(pos, gameBoard, bm));
                 return;
             }
 
@@ -159,6 +147,7 @@ namespace LHJ
                 return;
             }
         }
+        // 밀대(가로,세로)
         public IEnumerator RollerRoutine(Vector2Int pos, bool isHorizontal, GameBoardData gameBoard, BoardManager board)
         {
             if (gameBoard == null || board == null) yield break;
@@ -255,9 +244,113 @@ namespace LHJ
                     if (extraHits.Count > 0) ApplyDamageAndScore(board, extraHits);
                 }
             }
-
             Destroy(fx);
             EndEffect();
+        }
+
+        private IEnumerator MilkRoutine(Vector2Int origin, GameBoardData gameBoard, BoardManager board, System.Action<List<Vector2Int>> onCompleted = null)
+        {
+            if (gameBoard == null || board == null) yield break;
+            BeginEffect();
+
+            // 0) 타겟 선정: 필요 재료 우선, 없으면 랜덤 노말 3개
+            List<Vector2Int> targets = GetMilkTargets(gameBoard, 3);
+            if (targets.Count == 0) { EndEffect(); yield break; }
+
+            var selfHit = new List<Vector2Int>(1);
+            AddCell(gameBoard, origin.x, origin.y, selfHit);
+            if (selfHit.Count > 0) ApplyDamageAndScore(board, selfHit);
+
+            Vector3 originWorld = GridToWorld(board, gameBoard, origin.x, origin.y);
+
+            int finished = 0;
+            for (int i = 0; i < targets.Count; i++)
+            {
+                Vector2Int tg = targets[i];
+                Vector3 targetWorld = GridToWorld(board, gameBoard, tg.x, tg.y);
+                Vector3 mid = (originWorld + targetWorld) * 0.5f;
+                mid += new Vector3(Random.Range(-0.2f, 0.2f), Random.Range(0.3f, 0.6f), 0f);
+
+                GameObject drop = Instantiate(_milkDropFx, originWorld, Quaternion.identity, board.transform);
+                if (drop.TryGetComponent<SpriteRenderer>(out var sr)) sr.sortingOrder = 9999;
+
+                Vector3[] path = new Vector3[] { originWorld, mid, targetWorld };
+                drop.transform.DOMove(targetWorld, _milkFlyTime).SetEase(Ease.InOutSine).OnUpdate(() =>
+
+                {
+                    // 흔들림: sin 파동으로 좌우 이동
+                    float wobble = Mathf.Sin(Time.time * 20f) * 0.2f;
+                    drop.transform.position += new Vector3(wobble, 0f, 0f);
+                })
+
+                    .OnComplete(() =>
+                    {
+                        // 스플래시 FX
+                        if (_milkSplashFx != null)
+                        {
+                            var splash = Instantiate(_milkSplashFx, targetWorld, Quaternion.identity, board.transform);
+                            Destroy(splash, 0.5f); // 0.5초 뒤 자동 제거 → 이미지 안 남음
+                        }
+                        // 타겟 블록 제거
+                        var one = new List<Vector2Int>(1) { tg };
+                        if (one.Count > 0) ApplyDamageAndScore(board, one);
+
+                        Destroy(drop);
+                        finished++;
+                    });
+            }
+
+            // 모든 드롭이 끝날 때까지 대기
+            float elapsed = 0f;
+            float timeout = _milkFlyTime + 0.25f; // 여유 버퍼
+            while (finished < targets.Count && elapsed < timeout)
+            {
+                elapsed += Time.deltaTime;
+                yield return null;
+            }
+            if (onCompleted != null)
+                onCompleted(targets);
+            EndEffect();
+        }
+        private List<Vector2Int> GetMilkTargets(GameBoardData gb, int count)
+        {
+            // 필요 재료 우선
+            // List<GemType> needed = InGameManager.GetTagetGem();
+            List<GemType> needed = new List<GemType>(); 
+
+            List<Vector2Int> result = new List<Vector2Int>();
+
+            if (needed != null && needed.Count > 0)
+            {
+                List<Vector2Int> candidates = GetTargetPos(gb, needed);  
+                Shuffle(candidates);                                     
+                int take = Mathf.Min(count, candidates.Count);
+                for (int i = 0; i < take; i++) result.Add(candidates[i]);
+            }
+
+            // 노말 젬에서 랜덤 보충
+            if (result.Count < count)
+            {
+                List<Vector2Int> normals = new List<Vector2Int>();
+                for (int y = 0; y < gb.Height; y++)
+                {
+                    for (int x = 0; x < gb.Width; x++)
+                    {
+                        var b = gb.GetBlock(x, y);
+                        if (b != null && b.BlockInstance != null && b.GemType < GemType.Milk)
+                            normals.Add(new Vector2Int(x, y));
+                    }
+                }
+                Shuffle(normals);
+                for (int i = 0; i < normals.Count && result.Count < count; i++)
+                {
+                    Vector2Int v = normals[i];
+                    bool exists = false;
+                    for (int j = 0; j < result.Count; j++) if (result[j] == v) { exists = true; break; }
+                    if (!exists) result.Add(v);
+                }
+            }
+            return result;
         }
         // 요구재료 좌표 목록 
         private List<Vector2Int> GetTargetPos(GameBoardData gameBoard, List<GemType> gemTypes)
@@ -309,7 +402,7 @@ namespace LHJ
                 {
                     //if (b.GemType < GemType.Milk)
                     //    InGameManager.AddIngredientSta(b.GemType);
-
+                    DOTween.Kill(b.BlockInstance.transform, complete: true);
                     if (b is ObstacleBlock ob)
                     {
                         ob.TakeDamage();
@@ -412,65 +505,37 @@ namespace LHJ
             if ((a == GemType.Roller_v && b == GemType.Milk) ||
                 (a == GemType.Milk && b == GemType.Roller_v))
             {
-                // 우유 선택 로직
-                // List<GemType> targets = InGameManager.GetTagetGem();
-                // List<Vector2Int> candidates = GetTargetPos(gameBoard, targets);
-                List<Vector2Int> candidates = new List<Vector2Int>();
-                Shuffle(candidates);
-
-                List<Vector2Int> picks = new List<Vector2Int>(3);
-                int take = (candidates.Count < 3) ? candidates.Count : 3;
-                for (int i = 0; i < take; i++) picks.Add(candidates[i]);
-
-                while (picks.Count < 3)
+                var bm = BoardManager.Instance;
+                if (bm != null)
                 {
-                    int rx = Random.Range(0, gameBoard.Width);
-                    int ry = Random.Range(0, gameBoard.Height);
-                    Vector2Int v = new Vector2Int(rx, ry);
+                    Vector2Int milkPos = (a == GemType.Milk) ? firstPos : secondPos;
 
-                    bool exists = false;
-                    for (int j = 0; j < picks.Count; j++)
-                        if (picks[j].x == v.x && picks[j].y == v.y) { exists = true; break; }
-
-                    if (!exists) picks.Add(v);
+                    bm.StartCoroutine(MilkRoutine(milkPos, gameBoard, bm, (landed) =>
+                    {
+                        // 우유 3발 모두 끝난 뒤 → 그 자리에서 세로 라인 발동
+                        for (int i = 0; i < landed.Count; i++)
+                            bm.StartCoroutine(RollerRoutine(landed[i], false, gameBoard, bm));
+                    }));
                 }
-
-                for (int i = 0; i < picks.Count; i++)
-                    UseSpecial(picks[i], GemType.Roller_v, gameBoard, outDamage);
-
                 return;
             }
 
-            // 6) 밀대(가로) + 우유 
+            // 6) 밀대(가로) + 우유
             if ((a == GemType.Roller_h && b == GemType.Milk) ||
                 (a == GemType.Milk && b == GemType.Roller_h))
             {
-                // 우유 선택 로직
-                // List<GemType> targets = InGameManager.GetTagetGem();
-                // List<Vector2Int> candidates = GetTargetPos(gameBoard, targets);
-                List<Vector2Int> candidates = new List<Vector2Int>();
-                Shuffle(candidates);
-
-                List<Vector2Int> picks = new List<Vector2Int>(3);
-                int take = (candidates.Count < 3) ? candidates.Count : 3;
-                for (int i = 0; i < take; i++) picks.Add(candidates[i]);
-
-                while (picks.Count < 3)
+                var bm = BoardManager.Instance;
+                if (bm != null)
                 {
-                    int rx = Random.Range(0, gameBoard.Width);
-                    int ry = Random.Range(0, gameBoard.Height);
-                    Vector2Int v = new Vector2Int(rx, ry);
+                    Vector2Int milkPos = (a == GemType.Milk) ? firstPos : secondPos;
 
-                    bool exists = false;
-                    for (int j = 0; j < picks.Count; j++)
-                        if (picks[j].x == v.x && picks[j].y == v.y) { exists = true; break; }
-
-                    if (!exists) picks.Add(v);
+                    bm.StartCoroutine(MilkRoutine(milkPos, gameBoard, bm, (landed) =>
+                    {
+                        // 우유 3발 모두 끝난 뒤 → 그 자리에서 가로 라인 발동
+                        for (int i = 0; i < landed.Count; i++)
+                            bm.StartCoroutine(RollerRoutine(landed[i], true, gameBoard, bm));
+                    }));
                 }
-
-                for (int i = 0; i < picks.Count; i++)
-                    UseSpecial(picks[i], GemType.Roller_h, gameBoard, outDamage);
-
                 return;
             }
 
