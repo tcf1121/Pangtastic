@@ -30,7 +30,6 @@ namespace KDJ
         private IEnumerator BrokenAnimation(int x, int y)
         {
             BoardManager.Instance.IsWaitingForAnimation = true;
-            // 애니메이션 재생 대기 (예: 0.5초)
             GameObject blockObject = BoardManager.Instance.Spawner.GameBoardData.GetBlock(x, y).BlockInstance;
             float timer = 0f;
             while (timer < 0.1f)
