@@ -54,7 +54,7 @@ namespace SCR_B
 
         public override void Broken()
         {
-            Object.Destroy(BlockInstance);
+            BlockInstance.Broken();
             BoardManager.GetBoard().Spawner.SpawnBlock(Pos.x, Pos.y, RandomGift());
         }
 

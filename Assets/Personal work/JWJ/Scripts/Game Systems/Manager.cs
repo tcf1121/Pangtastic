@@ -19,6 +19,7 @@ public static class Manager
     public static TimerManager Timer => TimerManager.GetInstance();
 
     public static IAPManager IAP => IAPManager.GetInstance();
+    public static LanguageSystem Language => LanguageSystem.GetInstance();
 
 
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
@@ -28,9 +29,9 @@ public static class Manager
         UserInfoManager.CreateManager();
         AudioSystem.CreateManager();
         ScriptingSystem.CreateManager();
-      
+
         DataManager.CreateManager();
-      
+
         DatabaseSystem.CreateManager();
         GPGSManager.CreateManager();
         AdSystem.CreateManager();
@@ -38,6 +39,7 @@ public static class Manager
         TimerManager.CreateManager();
         IAPManager.CreateManager();
 
+        LanguageSystem.CreateManager();
         //CurrencySystem.CreateManager();
         //HeartSystem.CreateManager();
     }

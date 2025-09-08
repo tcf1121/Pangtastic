@@ -1,29 +1,3 @@
-﻿,,,,,,,,,,
-,,,,,,,,,,
-,,,,,,,,,,
-,,,,,,,,,,
-,,,,,,,,,,
-,,,,,,,,,,
-,,,,,,,,,,
-레벨 수치 ID,등장 손님 ID,요구메뉴1의 재료1 배수,요구메뉴1의 재료2 배수,요구메뉴1의 재료3 배수,요구메뉴2의 재료1 배수,요구메뉴2의 재료2 배수,요구메뉴3의 재료1 배수,요구메뉴3의 재료2 배수,요구메뉴4의 재료1 배수,요구메뉴4의 재료2 배수
-int,int,float,float,float,float,float,float,float,float,float
-level_id,customer_id,reqmat1_multiplier,reqmat1_multiplier,reqmat1_multiplier,reqmat1_multiplier,reqmat1_multiplier,reqmat1_multiplier,reqmat1_multiplier,reqmat1_multiplier,reqmat1_multiplier
-,,,,,,,,,,
-,,,,,,,,,,
-,,,,,,,,,,
-,,,,,,,,,,
-,,,,,,,,,,
-,,,,,,,,,,
-,,,,,,,,,,
-,,"꼭 1~10처럼 여러 범위가 아니라 1~1로 할 수도 있음. (특정 스테이지부터 특정 손님이 등장해야 할 경우, 이렇게 조절) (대신, 플머에게 인지시켜줘야 함.)",,,,,,,,
-,,,,,,,,,,
-,,,,,,,,,,
-,,,,,블록 해금,,,,,
-,,,,,,,,,,
-,,,,,,,,,,
-,,,,,,,,,,
-,,,,,,,,,,
-,,,,,,,,,,
-,,,,,,,,,,
-,,,,,,,,,,
-,,,스테이지마다 재료의 배수,,,,,,,
+﻿레벨 수치 ID,재료 1 ID,재료 1 배수,재료 2 ID,재료 2 배수,재료 3 ID,재료 3 배수,재료 4 ID,재료 4 배수,재료 5 ID,재료 5 배수,재료 6 ID,재료 6 배수
+int,int,float,int,float,int,float,int,float,int,float,int,float
+level_id,mat1_id,reqmat1_multiplier,mat2_id,reqmat2_multiplier,mat3_id,reqmat3_multiplier,mat4_id,reqmat4_multiplier,mat5_id,reqmat4_multiplier,mat6_id,reqmat4_multiplier

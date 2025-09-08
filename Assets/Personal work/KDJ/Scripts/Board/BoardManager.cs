@@ -39,6 +39,8 @@ namespace KDJ
         public static BoardManager Instance { get; private set; }
         public bool IsItemSelected { get; private set; } = false;
         public ItemType SelectedItemType { get; private set; }
+        public ObjectPool ScoreUIPool;
+        public bool IsWaitingForAnimation { get; set; } = false;
 
 
         private void Awake()
@@ -69,7 +71,7 @@ namespace KDJ
             }
         }
 
-        
+
         /// <summary>
         /// 스테이지 초기화 코루틴
         /// 실제로 사용할 코루틴
@@ -133,7 +135,7 @@ namespace KDJ
             yield return new WaitForSeconds(0.1f);
 
             // TestCode. 스테이지 세팅
-            TestStageManager.SetStage(CurStage);
+            TestStageManager.SetStage(CurStage - 1);
             BoardData loadedBoardData = BoardLoader.LoadBoard();
             //Manager.Stage.SetStage(boardManager.CurStage);
 
@@ -234,6 +236,46 @@ namespace KDJ
 
         public IEnumerator AnimateAndDestroyMatches(HashSet<Vector2Int> coordsToDestroy, (Vector2Int pos, int type)? specialToCreate, Vector2Int? specialSpawnPos, Vector2Int? swapPosition = null)
         {
+            List<HashSet<Vector2Int>> matchGroups = new List<HashSet<Vector2Int>>();
+            HashSet<Vector2Int> visited = new HashSet<Vector2Int>();
+
+            foreach (Vector2Int coord in coordsToDestroy)
+            {
+                if (visited.Contains(coord)) continue;
+
+                HashSet<Vector2Int> newGroup = new HashSet<Vector2Int>();
+                Queue<Vector2Int> queue = new Queue<Vector2Int>();
+                queue.Enqueue(coord);
+                newGroup.Add(coord);
+                visited.Add(coord);
+
+                while (queue.Count > 0)
+                {
+                    Vector2Int curCoord = queue.Dequeue();
+                    Vector2Int[] neighbors = new Vector2Int[]
+                    {
+                        new Vector2Int(curCoord.x, curCoord.y + 1), // 상
+                        new Vector2Int(curCoord.x, curCoord.y - 1), // 하
+                        new Vector2Int(curCoord.x - 1, curCoord.y), // 좌
+                        new Vector2Int(curCoord.x + 1, curCoord.y)  // 우
+                    };
+
+                    foreach (Vector2Int neighbor in neighbors)
+                    {
+                        if (coordsToDestroy.Contains(neighbor) && !visited.Contains(neighbor))
+                        {
+                            queue.Enqueue(neighbor);
+                            newGroup.Add(neighbor);
+                            visited.Add(neighbor);
+                        }
+                    }
+                }
+
+                matchGroups.Add(newGroup);
+            }
+
+            ShowScoreForMatches(matchGroups);
+
             // 애니메이션 총 시간
             float shrinkTime = _duration * 0.7f;
             float popTime = _duration * 0.3f;
@@ -306,12 +348,53 @@ namespace KDJ
             // 4단계: 특수 블록 생성
             if (specialToCreate.HasValue && specialSpawnPos.HasValue)
             {
+                // 특수 블록이 생성될 위치에 리턴하지 못한 블록이 있다면 리턴
+                Vector3 worldPos = BlockMover.GridToWorld(specialSpawnPos.Value, Spawner.GameBoardData.Width, Spawner.GameBoardData.Height);
+                Collider2D[] colliders = Physics2D.OverlapCircleAll(worldPos, 0.1f);
+
+                foreach (var collider in colliders)
+                {
+                    if (collider.TryGetComponent<PooledObject>(out var pooledObj))
+                    {
+                        pooledObj.ReturnToPool();
+                    }
+                    else
+                    {
+                        Destroy(collider.gameObject);
+                    }
+                }
+
                 var creation = specialToCreate.Value;
                 Spawner.SpawnBlock(specialSpawnPos.Value.x, specialSpawnPos.Value.y, (GemType)creation.type, BlockMover);
             }
 
             // 5단계: 다음 상태로 전환
             ChangeState(new RefillState());
+        }
+
+        private void ShowScoreForMatches(List<HashSet<Vector2Int>> matchGroups)
+        {
+            foreach (var group in matchGroups)
+            {
+                Vector2 centerPos = Vector2.zero;
+                int matchCount = group.Count;
+                int totalScore = 0;
+                foreach (var coord in group)
+                {
+                    Block block = Spawner.GameBoardData.GetBlock(coord.x, coord.y);
+                    if (block != null)
+                    {
+                        totalScore += MatchChecker.CalculateScore(block.Score);
+                        centerPos += new Vector2(coord.x, coord.y);
+                    }
+                }
+                centerPos /= matchCount;
+                Vector3 worldPos = BlockMover.GridToWorld(new Vector2Int(Mathf.RoundToInt(centerPos.x), Mathf.RoundToInt(centerPos.y)), Spawner.GameBoardData.Width, Spawner.GameBoardData.Height);
+                TMP_Text scorePopup = ScoreUIPool.GetObject().GetComponent<TMP_Text>();
+                scorePopup.transform.position = worldPos;
+                scorePopup.text = $"{totalScore}";
+                scorePopup.GetComponentInParent<PooledObject>().ReturnToPool(1.0f);
+            }
         }
         #endregion
     }

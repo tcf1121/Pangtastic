@@ -101,12 +101,25 @@ namespace KDJ
                 }
             }
 
-            // 데이터 셔플을 먼저 수행하여 매치되지 않는 상태를 만듭니다.
-            DataShuffle(boardManager, 1000);
+            // 게임 시작시 매치가 이루어진다면 데이터 셔플을 수행하여 매치되지 않는 상태를 만듭니다.
+            if (boardManager.MatchChecker.AllBlockMatchCheck(boardManager))
+            {
+                DataShuffle(boardManager, 1000);
+            }
 
             // 3. 모든 블록 GameObject 생성
             DrawAllBlocks(blockMover);
             DrawAllOverlayBlocks(blockMover);
+
+            // 4. 현재 스테이지에 맞춰 스폰될 블록 종류 설정 
+            // if (Manager.User.GetStage() < 52)
+            // {
+            //     _spawnRangeMax = 5;
+            // }
+            // else
+            // {
+            //     _spawnRangeMax = 6;
+            // }
 
             // 테스트용 블록 교체 실행
             if (_test_blockOverrides != null && _test_blockOverrides.Count > 0)
@@ -194,7 +207,7 @@ namespace KDJ
                         }
 
                         pooledObject.transform.position = position;
-                        pooledObject.gameObject.SetActive(true);
+                        pooledObject.transform.SetParent(null);
                         GameBoardData.BlockArray[y, x].BlockInstance = pooledObject.gameObject;
                     }
                     else
@@ -245,7 +258,7 @@ namespace KDJ
                             }
 
                             pooledObject.transform.position = position;
-                            pooledObject.gameObject.SetActive(true);
+                            pooledObject.transform.SetParent(null);
                             block.BlockInstance = pooledObject.gameObject;
                         }
                         else
@@ -562,7 +575,7 @@ namespace KDJ
                             spriteRenderer.sprite = normalBlockSprites[(int)newBlock.GemType];
                         }
                         newBlock.BlockInstance = pooledObject.gameObject;
-                        pooledObject.gameObject.SetActive(true);
+                        pooledObject.transform.SetParent(null);
                         newBlock.BlockInstance.transform.position = position;
                     }
                     else
@@ -657,6 +670,14 @@ namespace KDJ
             return newBlock;
         }
 
+
+        /// <summary>
+        /// 특정 위치에 특정 종류의 블록을 생성하고 배치합니다.
+        /// </summary>
+        /// <param name="x"></param>
+        /// <param name="y"></param>
+        /// <param name="gemType"></param>
+        /// <param name="blockMover"></param>
         public void SpawnBlock(int x, int y, GemType gemType, BlockMover blockMover)
         {
             Vector3 position = blockMover.GridToWorld(new Vector2Int(x, y), GameBoardData.Width, GameBoardData.Height);
@@ -671,7 +692,7 @@ namespace KDJ
                     spriteRenderer.sprite = normalBlockSprites[(int)gemType];
                 }
                 pooledObject.transform.position = position;
-                pooledObject.gameObject.SetActive(true);
+                pooledObject.transform.SetParent(null);
                 newBlock.BlockInstance = pooledObject.gameObject;
             }
             else
@@ -685,6 +706,10 @@ namespace KDJ
             GameBoardData.SetBlock(x, y, newBlock);
         }
 
+        /// <summary>
+        /// 랜덤한 위치에 특수 블록을 생성합니다.
+        /// </summary>
+        /// <param name="gemType"></param>
         public void RandomPosSpawnSpecialBlock(GemType gemType)
         {
             List<Vector2Int> validPositions = new List<Vector2Int>();
@@ -778,7 +803,7 @@ namespace KDJ
                         if (GameBoardData.BlockPlate.BlockPlateArray[y, x])
                         {
                             Block block = GameBoardData.GetBlock(x, y);
-                            if (block != null && block.IsNormal)
+                            if (block != null && block.GemType <= GemType.Sugar)
                             {
                                 normalBlocks.Add(block);
                                 normalBlockPositions.Add(new Vector2Int(x, y));
@@ -816,6 +841,8 @@ namespace KDJ
                     break;
                 }
             }
+
+            Debug.Log($"DataShuffle: {tries}회 만에 셔플 완료.");
         }
 
         public Block SetRandomBlock(int x, int y)
@@ -828,8 +855,6 @@ namespace KDJ
 
         public void SpawnRandomBlock(int x, int y)
         {
-            // 가이드라인: 이 함수는 현재 사용되지 않는 것으로 보이지만, 만약 사용된다면
-            // 여기의 Instantiate도 풀링으로 교체해야 합니다.
             GemType gemType = (GemType)Random.Range(0, _spawnRangeMax + 1);
             Block newBlock = CreateNewBlock(gemType);
             GameObject blockPrefab = GetBlockPrefab((int)gemType);
@@ -957,7 +982,57 @@ namespace KDJ
             return false; // 어떤 활동도 불가능
         }
 
+        public int GetMaxDonutSpawnRange()
+        {
+            return _spawnRangeMax;
+        }
+
+        // KDJ: 가이드라인 - 특정 블록을 애니메이션과 함께 스폰하는 코루틴
+        public IEnumerator SpawnWithAnimation(int x, int y, GemType gemType)
+        {
+            BoardManager.Instance.IsWaitingForAnimation = true;
+            Vector3 position = BoardManager.Instance.BlockMover.GridToWorld(new Vector2Int(x, y), GameBoardData.Width, GameBoardData.Height);
+            Block newBlock = CreateNewBlock(gemType);
+
+            if (gemType < GemType.Milk)
+            {
+                PooledObject pooledObject = BlockPool.GetObject();
+                SpriteRenderer spriteRenderer = pooledObject.GetComponent<SpriteRenderer>();
+                if (spriteRenderer != null && (int)gemType < normalBlockSprites.Count)
+                {
+                    spriteRenderer.sprite = normalBlockSprites[(int)gemType];
+                }
+                pooledObject.transform.position = position;
+                pooledObject.transform.SetParent(null);
+                newBlock.BlockInstance = pooledObject.gameObject;
+            }
+            else
+            {
+                GameObject blockPrefabSpecial = GetBlockPrefab((int)gemType);
+                if (blockPrefabSpecial == null) yield break;
+                GameObject blockInstanceSpecial = Instantiate(blockPrefabSpecial, position, Quaternion.identity);
+                newBlock.BlockInstance = blockInstanceSpecial;
+            }
+
+            GameBoardData.SetBlock(x, y, newBlock);
+
+            newBlock.BlockInstance.transform.localScale = Vector3.zero;
+            float timer = 0f;
+
+            while (timer < 0.1f)
+            {
+                timer += Time.deltaTime;
+                newBlock.BlockInstance.transform.localScale = Vector3.Lerp(Vector3.zero, Vector3.one, timer / 0.1f);
+                yield return null;
+            }
+
+            // 확실하게 최종 크기로 설정
+            newBlock.BlockInstance.transform.localScale = Vector3.one;
+            BoardManager.Instance.IsWaitingForAnimation = false;
+        }
 
         #endregion
+
+
     }
 }

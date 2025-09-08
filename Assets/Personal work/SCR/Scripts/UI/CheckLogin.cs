@@ -99,7 +99,7 @@ namespace SCR
                 string uid = newUser.UserId;
                 Debug.LogFormat($"게스트 로그인 성공 : {newUser.UserId}");
 
-                Manager.Data.NewUser(uid, DateTime.Now.ToString("O"));
+                await Manager.Data.NewUser(uid, DateTime.Now.ToString("O"));
                 // Manager.User.NewUser(uid, DateTime.Now.ToString("O"));
 
                 SceneManager.LoadScene("Lobby Scene");

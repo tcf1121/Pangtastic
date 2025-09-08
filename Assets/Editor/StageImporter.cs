@@ -96,11 +96,11 @@ public class StageImporter
             int stage_id = int.Parse(splitData[0]);
             int customer_id = int.Parse(splitData[1]);
             int order_count = int.Parse(splitData[2]);
-            int level_id = int.Parse(splitData[3]);
+            int.TryParse(splitData[3], out int level_id);
             int stage_recipe_bundle = int.Parse(splitData[4]);
             string stage_type = splitData[5];
             int puzzle_board_id = int.Parse(splitData[6]);
-            int max_gold_gain = int.Parse(splitData[7]);
+            int.TryParse(splitData[7], out int max_gold_gain);
 
             string soPath = stageSoDir + "/Stage_" + stage_id + ".asset"; // SO파일 저장경로/파일이름
 
@@ -203,11 +203,11 @@ public class StageImporter
 
             int rowBundleId = int.Parse(splitData[0]);
 
-            if(rowBundleId != bundleId) //이 id가 찾는게 아니면
+            if (rowBundleId != bundleId) //이 id가 찾는게 아니면
             {
                 continue; //다음
             }
- 
+
             for (int j = 1; j < splitData.Length; j++) // 레시피 ID 열들 순회
             {
                 string cell = splitData[j];

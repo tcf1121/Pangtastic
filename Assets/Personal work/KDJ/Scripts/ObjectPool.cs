@@ -50,7 +50,6 @@ namespace KDJ
             }
 
             var pooledObject = pool.Dequeue();
-            pooledObject.transform.SetParent(null);
             pooledObject.gameObject.SetActive(true);
             return pooledObject;
         }

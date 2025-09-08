@@ -110,10 +110,18 @@ public class UserInfoUI : MonoBehaviour
     private void SetHeart(int value)
     {
         _heart.text = $"{value}";
-        if (Instance._heartCor != null)
+        if (value == 5)
         {
-            StopCoroutine(Instance._heartCor);
-            Instance._heartCor = null;
+            if (Instance._heartCor != null)
+            {
+                StopCoroutine(Instance._heartCor);
+                Instance._heartCor = null;
+                SetHeartTimer(0);
+            }
+        }
+        else
+        {
+            StartHeartTimer();
         }
     }
 

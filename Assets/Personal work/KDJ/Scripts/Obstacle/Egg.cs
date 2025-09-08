@@ -1,4 +1,5 @@
 using SCR;
+using System.Collections;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
 using UnityEngine.ResourceManagement.AsyncOperations;
@@ -51,7 +52,7 @@ namespace KDJ
         {
             InGameManager.AddScore(Score);
             InGameManager.AddIngredientSta(GemType);
-            base.Broken();
+            _brokenCoroutine = BoardManager.Instance.StartCoroutine(BrokenAnimation(X, Y));
         }
 
         public override void SplashDamage()
@@ -59,18 +60,21 @@ namespace KDJ
             TakeDamage();
         }
 
-        // public override Block Clone()
-        // {
-        //     return new Egg(Pos.x, Pos.y)
-        //     {
-        //         CurrentHP = this.CurrentHP,
-        //         Pos = this.Pos,
-        //         Score = this.Score,
-        //         BlockInstance = this.BlockInstance,
-        //         GemType = this.GemType,
-        //         IsObstacle = this.IsObstacle,
-        //         CanMove = this.CanMove,
-        //     };
-        // }
+        private IEnumerator BrokenAnimation(int x, int y)
+        {
+            BoardManager.Instance.IsWaitingForAnimation = true;
+            GameObject blockObject = BoardManager.Instance.Spawner.GameBoardData.GetBlock(x, y).BlockInstance;
+            float timer = 0f;
+            while (timer < 0.1f)
+            {
+                timer += Time.deltaTime;
+                blockObject.transform.localScale = Vector3.Lerp(Vector3.one, Vector3.zero, timer / 0.1f);
+                yield return null;
+            }
+
+            base.Broken();
+            BoardManager.Instance.IsWaitingForAnimation = false;
+            _brokenCoroutine = null;
+        }
     }
 }

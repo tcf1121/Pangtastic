@@ -36,8 +36,6 @@ namespace KDJ.States
             bool wasSwap = startPos != endPos; // 스왑에 의한 매치인지 확인
             bool usedSpecial = false;
 
-            // 1. 특수 블록 활성화 체크 (스왑 시에만)
-            Debug.Log($"스왑 여부: {wasSwap}, 시작 위치: {startPos}, 종료 위치: {endPos}");
             if (wasSwap)
             {
                 var startBlock = boardManager.Spawner.GameBoardData.GetBlock(startPos.x, startPos.y);
@@ -56,20 +54,23 @@ namespace KDJ.States
                     {
                         if (startIsSpecial && endIsSpecial)
                         {
-                            effect.UseCombo(startPos, endPos,startBlock.GemType, endBlock.GemType, gameBoard, hits);
+                            effect.UseCombo(startPos, endPos, startBlock.GemType, endBlock.GemType, gameBoard, hits);
+                            usedSpecial = true;
                         }
                         else if (startIsSpecial)
                         {
                             effect.UseSpecial(startPos, startBlock.GemType, gameBoard, hits);
+                            usedSpecial = true;
                         }
                         else if (endIsSpecial)
                         {
                             effect.UseSpecial(endPos, endBlock.GemType, gameBoard, hits);
+                            usedSpecial = true;
                         }
 
                         // 공통 처리: 파괴/점수/콤보
                         int destroyed = effect.ApplyDamageAndScore(boardManager, hits);
-                        usedSpecial = destroyed > 0;
+                        // usedSpecial = destroyed > 0;
                     }
                 }
             }
