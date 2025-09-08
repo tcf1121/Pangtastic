@@ -37,7 +37,7 @@ public class TestPurchase : MonoBehaviour
 
         if (isProductsReady == true)
         {
-            if (Manager.IAP.CheckNonConsumable(_nonConsumableID))
+            if (Manager.IAP.CheckNonConsumableOwned(_nonConsumableID))
             {
                 nonConsumableBotton.interactable = false;
                 Debug.Log($"{_nonConsumableID} 이미 구매함. 버튼 비활성화");
@@ -61,7 +61,7 @@ public class TestPurchase : MonoBehaviour
     {
 
         Debug.Log("논컨슈머블 버튼 눌림");
-        if(Manager.IAP.CheckNonConsumable(_nonConsumableID))
+        if(Manager.IAP.CheckNonConsumableOwned(_nonConsumableID))
         {
             Debug.LogWarning("이미 구매한 아이템입니다.");
             return;

@@ -230,7 +230,7 @@ public class IAPManager : Singleton<IAPManager>
         Debug.Log($"구매 시도: {productId}");
     }
 
-    public bool CheckNonConsumable(string id)
+    public bool CheckNonConsumableOwned(string id)
     {
         return _owned.Contains(id);
     }
