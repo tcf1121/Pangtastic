@@ -69,7 +69,7 @@ namespace KDJ
             }
         }
 
-        
+
         /// <summary>
         /// 스테이지 초기화 코루틴
         /// 실제로 사용할 코루틴
@@ -289,13 +289,13 @@ namespace KDJ
                         if (block.BlockInstance.TryGetComponent<PooledObject>(out var pooledObj))
                         {
                             int score = MatchChecker.CalculateScore(block.Score);
-                            InGameManager.AddScore(score);
-                            InGameManager.AddIngredientSta(block.GemType);
+                            //InGameManager.AddScore(score);
+                            //InGameManager.AddIngredientSta(block.GemType);
                             pooledObj.ReturnToPool();
                         }
                         else
                         {
-                            InGameManager.AddIngredientSta(block.GemType);
+                            //InGameManager.AddIngredientSta(block.GemType);
                             Destroy(block.BlockInstance);
                         }
                     }

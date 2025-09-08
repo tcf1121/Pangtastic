@@ -73,7 +73,7 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 1
-  m_Sprite: {fileID: 21300000, guid: 966def53d0ca54e919283bbbcebe06c3, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 837d6406c140ef14c92f3c17b3d1f242, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -94,6 +94,7 @@ GameObject:
   m_Component:
   - component: {fileID: 6823904056426768018}
   - component: {fileID: 5582009677784141954}
+  - component: {fileID: 8258195963645252223}
   m_Layer: 0
   m_Name: Coin
   m_TagString: Untagged
@@ -129,3 +130,24 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 04e029371d2c1774a8f5f8a9c9401f4b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!95 &8258195963645252223
+Animator:
+  serializedVersion: 5
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4311203844512484936}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: 2e6ecd53a8fe20e43b973b4653e6b3c9, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_StabilizeFeet: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorStateOnDisable: 0
+  m_WriteDefaultValuesOnDisable: 0

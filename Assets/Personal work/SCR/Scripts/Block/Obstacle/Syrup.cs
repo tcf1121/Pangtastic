@@ -18,7 +18,7 @@ namespace SCR_B
         public override void Broken()
         {
             InGameManager.AddIngredientSta(GemType);
-            Object.Destroy(BlockInstance);
+            BlockInstance.Broken();
             BoardManager.GetBoard().BoardData.OverlayArray[Pos.y, Pos.x] = null;
         }
     }

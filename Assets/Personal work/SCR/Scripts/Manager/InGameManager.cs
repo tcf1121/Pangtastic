@@ -22,6 +22,7 @@ public class InGameManager : MonoBehaviour
     void Awake()
     {
         UserInfoUI.Instance.SetActive(false);
+        Manager.User.UseHeart();
         instate = this;
         customerFlowController.OnStageCleared += StageClear;
         customerFlowController.OnStageFailed += StageFail;

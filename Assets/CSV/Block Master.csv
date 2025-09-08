@@ -1,9 +1,22 @@
-﻿블록 ID,블록 이름,블록 타입,이동 유무,충돌 유무,스폰 유무
-int,string,int,bool,bool,bool
-block_id,block_name,block_type,is_movable,is_collidable,is_spawnable
-1,라벤더 도넛,1,T,T,T
-2,초코 도넛,1,T,T,T
-3,블루베리 도넛,1,T,T,T
-4,치즈 도넛,1,T,T,T
-5,딸기 도넛,1,T,T,T
-6,슈가 도넛,1,T,T,T
+﻿블록 ID,블록 이름,블록 타입,이미지 경로,블록 이름 스트링 ID
+int,string,enum,string,string
+block_id,block_name,GemType,sprite_path,"block_name_id"
+101,라벤더 도넛,Lavender,,
+102,초코 도넛,,,
+103,블루베리 도넛,,,
+104,치즈 도넛,,,
+105,딸기 도넛,,,
+106,슈가 도넛,,,
+201,,,,
+202,,,,
+203,,,,
+204,,,,
+205,,,,
+206,,,,
+207,,,,
+208,,,,
+301,,,,
+302,,,,
+303,,,,
+304,,,,
+305,,,,
