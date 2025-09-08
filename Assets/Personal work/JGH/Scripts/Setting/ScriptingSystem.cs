@@ -28,7 +28,7 @@ public class ScriptingSystem : Singleton<ScriptingSystem>
     [SerializeField] private string stringDBKey = "Assets/ScriptableObject/Script/string_String.asset";
     [SerializeField] private string speakerDBKey = "Assets/ScriptableObject/Script/speaker_Speaker.asset";
     [SerializeField] private string soundDBKey = "Assets/ScriptableObject/Script/sound_Sound.asset";
-    
+
     private SO_ScriptDialog dialogDB;
     private SO_ScriptString stringDB;
     private SO_ScriptSpeaker speakerDB;
@@ -114,13 +114,13 @@ public class ScriptingSystem : Singleton<ScriptingSystem>
     protected override void Awake()
     {
         base.Awake();
-        
+
         // Addressables 즉시 로드
         dialogDB = LoadSO<SO_ScriptDialog>(dialogDBKey);
         stringDB = LoadSO<SO_ScriptString>(stringDBKey);
         speakerDB = LoadSO<SO_ScriptSpeaker>(speakerDBKey);
         soundDB = LoadSO<SO_ScriptSound>(soundDBKey);
-        
+
         if (dialogDB == null || stringDB == null || speakerDB == null || soundDB == null)
         {
             Debug.LogError("[ScriptingSystem] 하나 이상의 SO 로딩 실패!");
@@ -145,7 +145,7 @@ public class ScriptingSystem : Singleton<ScriptingSystem>
 
         return result;
     }
-    
+
     private void Update()
     {
         if (Input.GetMouseButtonDown(0))
@@ -157,8 +157,8 @@ public class ScriptingSystem : Singleton<ScriptingSystem>
     // ========= SO 데이터 로드 =========
     public void DialogLoadSO(int id)
     {
-        ApplyFontToAllTMP();
-        
+        //ApplyFontToAllTMP();
+
         var dialogAllDialogs = dialogDB.dialogs;
         var stringAllDialogs = stringDB.strings;
         var speakerAllDialogs = speakerDB.speakers;
@@ -443,28 +443,28 @@ public class ScriptingSystem : Singleton<ScriptingSystem>
 
     private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
-        ApplyFontToAllTMP();
+        //ApplyFontToAllTMP();
     }
 
     /// <summary>
     /// 폰트 적용
     /// </summary>
-    private void ApplyFontToAllTMP()
-    {
-        string code = LocalizationSettings.SelectedLocale.Identifier.Code;
-        TMP_FontAsset targetFont = defaultFont;
+    // private void ApplyFontToAllTMP()
+    // {
+    //     string code = LocalizationSettings.SelectedLocale.Identifier.Code;
+    //     TMP_FontAsset targetFont = defaultFont;
 
-        if (code.StartsWith("zh"))
-            targetFont = chineseFont;
-        else if (code.StartsWith("en"))
-            targetFont = englishFont;
+    //     if (code.StartsWith("zh"))
+    //         targetFont = chineseFont;
+    //     else if (code.StartsWith("en"))
+    //         targetFont = englishFont;
 
-        TMP_Text[] texts = Resources.FindObjectsOfTypeAll<TMP_Text>();
-        foreach (TMP_Text text in texts)
-        {
-            if (!text.gameObject.scene.IsValid()) continue;
-            if (text.CompareTag("NoFontChange")) continue;
-            text.font = targetFont;
-        }
-    }
+    //     TMP_Text[] texts = Resources.FindObjectsOfTypeAll<TMP_Text>();
+    //     foreach (TMP_Text text in texts)
+    //     {
+    //         if (!text.gameObject.scene.IsValid()) continue;
+    //         if (text.CompareTag("NoFontChange")) continue;
+    //         text.font = targetFont;
+    //     }
+    // }
 }

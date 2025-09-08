@@ -15,7 +15,10 @@ public class DataManager : Singleton<DataManager>
     }
 
     // 새로운 유저가 접속할 때 새로운 정보를 만듦
-    public async void NewUser(string uid, string now)
+    public async
+    // 새로운 유저가 접속할 때 새로운 정보를 만듦
+    Task
+NewUser(string uid, string now)
     {
         var newUserData = new UserData();
         newUserData.PlayerName = "guest";
@@ -26,12 +29,12 @@ public class DataManager : Singleton<DataManager>
         try
         {
             await Manager.DB.GetUserPath(uid).SetRawJsonValueAsync(json);
+            Manager.User.SetUser(newUserData);
         }
         catch (Exception ex)
         {
             Debug.LogError("유저 데이터 생성 실패: " + ex.Message);
         }
-        Manager.User.SetUser(newUserData);
     }
 
     // 기존 유저가 접속할 때 기존 데이터를 가져와서 CurrentData에 넣음

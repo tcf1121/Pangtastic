@@ -116,7 +116,7 @@ public class RecipeImporter // 레시피 CSV를 RecipeSO로 변환하는 클래�
             return;
         }
 
-        string ingredientSOPath = ingredientSoDir + "/Ingredient_" + ingredientID + ".asset"; // 재료SO 경로
+        string ingredientSOPath = ingredientSoDir + "/" + ingredientID + ".asset"; // 재료SO 경로
         IngredientSO ing = AssetDatabase.LoadAssetAtPath<IngredientSO>(ingredientSOPath); // 재료SO 로드
 
         if (ing == null) //재료가 없으면

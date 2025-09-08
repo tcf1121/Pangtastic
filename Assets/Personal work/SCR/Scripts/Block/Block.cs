@@ -7,7 +7,7 @@ namespace SCR_B
     public class Block
     {
         public int Score { get; protected set; }
-        public GameObject BlockInstance { get; set; } = null;
+        public GemPrefab BlockInstance { get; set; } = null;
         public GemType GemType { get; set; }
         public bool IsObstacle { get; set; }
         public bool CanMove { get; set; }
@@ -31,7 +31,7 @@ namespace SCR_B
         public virtual void Broken()
         {
             if (BlockInstance != null)
-                Object.Destroy(BlockInstance);
+                BlockInstance.Broken();
             BoardManager.GetBoard().BoardData.BlockArray[Pos.y, Pos.x] = null;
         }
 

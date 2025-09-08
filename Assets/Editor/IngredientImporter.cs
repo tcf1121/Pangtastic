@@ -60,7 +60,7 @@ public class IngredientImporter : EditorWindow
             string name = splitData[1];
             string spritePath = splitData[2];
 
-            string soPath = saveDir + "/Ingredient_" + id + ".asset"; // SO파일 저장경로/파일이름
+            string soPath = saveDir + "/" + id + ".asset"; // SO파일 저장경로/파일이름
 
             IngredientSO so = AssetDatabase.LoadAssetAtPath<IngredientSO>(soPath); // 기존 SO 불러오기
 
@@ -72,7 +72,7 @@ public class IngredientImporter : EditorWindow
             }
             else //이미 파일이 있으면
             {
-                
+
                 Debug.Log("기존 재료SO 갱신: " + name);
             }
 

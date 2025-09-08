@@ -3,12 +3,36 @@ using SCR;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using DG.Tweening;
 
 namespace LHJ
 {
     public class SpecialBlockEffect : MonoBehaviour
     {
         private System.Random _rand = new System.Random();
+        [SerializeField] private GameObject _rollerHorizontalFx;
+        [SerializeField] private GameObject _rollerVerticalFx;
+        public static bool effectRunning { get { return _running > 0; } }
+
+        private static int _running;
+        private bool IsSpecial(GemType t)
+        {
+            return t == GemType.Roller_h
+                || t == GemType.Roller_v
+                || t == GemType.DonutBox
+                || t == GemType.Milk
+                || t == GemType.Oven;
+        }
+
+        private static void BeginEffect()
+        {
+            _running++;  
+        }
+
+        private static void EndEffect()
+        {
+            if (_running > 0) _running--;
+        }
         public void UseSpecial(Vector2Int pos, GemType specialType, GameBoardData gameBoard, List<Vector2Int> outDamage)
         {
             if (gameBoard == null || outDamage == null) return;
@@ -43,16 +67,18 @@ namespace LHJ
             // 세로 밀대
             if (specialType == GemType.Roller_v)
             {
-                for (int y = 0; y < gameBoard.Height; y++)
-                    AddCell(gameBoard, pos.x, y, outDamage);
+                var bm = BoardManager.Instance;
+                if (bm != null)
+                    bm.StartCoroutine(RollerRoutine(pos, false, gameBoard, bm));
                 return;
             }
 
             // 가로 밀대
             if (specialType == GemType.Roller_h)
             {
-                for (int x = 0; x < gameBoard.Width; x++)
-                    AddCell(gameBoard, x, pos.y, outDamage);
+                var bm = BoardManager.Instance;
+                if (bm != null)
+                    bm.StartCoroutine(RollerRoutine(pos, true, gameBoard, bm));
                 return;
 
             }
@@ -133,7 +159,106 @@ namespace LHJ
                 return;
             }
         }
-   
+        public IEnumerator RollerRoutine(Vector2Int pos, bool isHorizontal, GameBoardData gameBoard, BoardManager board)
+        {
+            if (gameBoard == null || board == null) yield break;
+            BeginEffect();
+
+            GameObject fxPrefab = isHorizontal ? _rollerHorizontalFx : _rollerVerticalFx;
+            GameObject fx = Instantiate(fxPrefab, board.transform);
+
+            Vector3 startWorld, endWorld;
+            if (isHorizontal)
+            {
+                startWorld = GridToWorld(board, gameBoard, 0, pos.y);
+                endWorld = GridToWorld(board, gameBoard, gameBoard.Width - 1, pos.y);
+            }
+            else
+            {
+                startWorld = GridToWorld(board, gameBoard, pos.x, gameBoard.Height - 1);
+                endWorld = GridToWorld(board, gameBoard, pos.x, 0);
+            }
+            fx.transform.position = startWorld;
+            if (fx.TryGetComponent<SpriteRenderer>(out var sr)) sr.sortingOrder = 9999;
+
+            float stepTime = 0.15f;
+            float duration = (isHorizontal ? gameBoard.Width : gameBoard.Height) * stepTime;
+            fx.transform.DOMove(endWorld, duration).SetEase(Ease.Linear);
+
+            // 시작칸 먼저 제거
+            {
+                var origin = new List<Vector2Int>();
+                AddCell(gameBoard, pos.x, pos.y, origin);
+                if (origin.Count > 0) ApplyDamageAndScore(board, origin);
+            }
+
+            // 라인 진행 중 만난 특수블록 예약
+            List<(Vector2Int p, GemType t)> queuedSpecials = new List<(Vector2Int, GemType)>();
+
+            if (isHorizontal)
+            {
+                for (int x = 0; x < gameBoard.Width; x++)
+                {
+                    bool isOriginCell = (x == pos.x);  
+                    var cur = gameBoard.GetBlock(x, pos.y);
+
+                    if (!isOriginCell && cur != null && cur.BlockInstance != null && IsSpecial(cur.GemType))
+                    {
+                        bool exists = false;
+                        for (int i = 0; i < queuedSpecials.Count; i++)
+                            if (queuedSpecials[i].p.x == x && queuedSpecials[i].p.y == pos.y) { exists = true; break; }
+                        if (!exists) queuedSpecials.Add((new Vector2Int(x, pos.y), cur.GemType));
+                    }
+
+                    var hits = new List<Vector2Int>();
+                    AddCell(gameBoard, x, pos.y, hits);
+                    if (hits.Count > 0) ApplyDamageAndScore(board, hits);
+
+                    yield return new WaitForSeconds(stepTime);
+                }
+            }
+            else
+            {
+                for (int y = gameBoard.Height - 1; y >= 0; y--)
+                {
+                    bool isOriginCell = (y == pos.y); 
+                    var cur = gameBoard.GetBlock(pos.x, y);
+
+                    if (!isOriginCell && cur != null && cur.BlockInstance != null && IsSpecial(cur.GemType))
+                    {
+                        bool exists = false;
+                        for (int i = 0; i < queuedSpecials.Count; i++)
+                            if (queuedSpecials[i].p.x == pos.x && queuedSpecials[i].p.y == y) { exists = true; break; }
+                        if (!exists) queuedSpecials.Add((new Vector2Int(pos.x, y), cur.GemType));
+                    }
+
+                    var hits = new List<Vector2Int>();
+                    AddCell(gameBoard, pos.x, y, hits);
+                    if (hits.Count > 0) ApplyDamageAndScore(board, hits);
+
+                    yield return new WaitForSeconds(stepTime);
+                }
+            }
+
+            for (int i = 0; i < queuedSpecials.Count; i++)
+            {
+                var (p, t) = queuedSpecials[i];
+
+                if (t == GemType.Roller_h)
+                    board.StartCoroutine(RollerRoutine(p, true, gameBoard, board));
+                else if (t == GemType.Roller_v)
+                    board.StartCoroutine(RollerRoutine(p, false, gameBoard, board));
+                else
+                {
+                    var extraHits = new List<Vector2Int>();
+                    UseSpecial(p, t, gameBoard, extraHits);
+                    if (extraHits.Count > 0) ApplyDamageAndScore(board, extraHits);
+                }
+            }
+
+            Destroy(fx);
+            EndEffect();
+        }
         // 요구재료 좌표 목록 
         private List<Vector2Int> GetTargetPos(GameBoardData gameBoard, List<GemType> gemTypes)
         {
@@ -173,75 +298,6 @@ namespace LHJ
                 }
                 if (!exists) unique.Add(v);
             }
-
-            // 연쇄 발동: unique 안에 '특수블록'이 있으면 다시 UseSpecial로 범위 확장
-            List<Vector2Int> expanded = new List<Vector2Int>();
-            for (int i = 0; i < unique.Count; i++) expanded.Add(unique[i]);
-
-            List<Vector2Int> visited = new List<Vector2Int>();
-            Queue<Vector2Int> q = new Queue<Vector2Int>();
-            var mover = board.BlockMover;
-            Vector2Int startSwap = (mover != null) ? mover.StartBlockPos : new Vector2Int(int.MinValue, int.MinValue);
-            Vector2Int endSwap = (mover != null) ? mover.EndBlockPos : new Vector2Int(int.MinValue, int.MinValue);
-
-            // 초기 큐 적재: expanded에 포함된 특수블록 좌표
-            for (int i = 0; i < expanded.Count; i++)
-            {
-                Vector2Int p = expanded[i];
-                var blk0 = gameBoard.GetBlock(p.x, p.y);
-                if (blk0 != null && blk0.BlockInstance != null && blk0.GemType >= GemType.Milk)
-                {
-                    if (p == startSwap || p == endSwap) continue;
-                    bool seen = false;
-                    for (int k = 0; k < visited.Count; k++)
-                        if (visited[k].x == p.x && visited[k].y == p.y) { seen = true; break; }
-                    if (!seen)
-                    {
-                        visited.Add(p);
-                        q.Enqueue(p);
-                    }
-                }
-            }
-
-            while (q.Count > 0)
-            {
-                Vector2Int cur = q.Dequeue();
-                var curBlk = gameBoard.GetBlock(cur.x, cur.y);
-                if (curBlk == null || curBlk.BlockInstance == null) continue;
-
-                // 현재 특수블록의 효과 범위를 임시 리스트로 뽑는다.
-                List<Vector2Int> add = new List<Vector2Int>();
-                UseSpecial(cur, curBlk.GemType, gameBoard, add);
-
-                // 새로 얻은 범위를 expanded에 병합
-                for (int i = 0; i < add.Count; i++)
-                {
-                    Vector2Int v = add[i];
-                    bool exists = false;
-                    for (int j = 0; j < expanded.Count; j++)
-                    {
-                        if (expanded[j].x == v.x && expanded[j].y == v.y) { exists = true; break; }
-                    }
-                    if (!exists) expanded.Add(v);
-
-                    // 그 범위 안에 다른 특수블록이 있으면 큐에 추가 
-                    var b = gameBoard.GetBlock(v.x, v.y);
-                    if (b != null && b.BlockInstance != null && b.GemType >= GemType.Milk)
-                    {
-                        bool seen = false;
-                        for (int k = 0; k < visited.Count; k++)
-                            if (visited[k].x == v.x && visited[k].y == v.y) { seen = true; break; }
-                        if (!seen)
-                        {
-                            visited.Add(v);
-                            q.Enqueue(v);
-                        }
-                    }
-                }
-            }
-
-            // 체인 확장 결과로 대체
-            unique = expanded;
             int destroyedCount = 0;
 
             // 실제 파괴
@@ -608,6 +664,10 @@ namespace LHJ
             if (y < gb.Height && !gb.BlockPlate.BlockPlateArray[y, x]) return;
 
             outDamage.Add(new Vector2Int(x, y));
+        }
+        private Vector3 GridToWorld(BoardManager board, GameBoardData gb, int x, int y)
+        {
+            return board.BlockMover.GridToWorld(new Vector2Int(x, y), gb.Width, gb.Height);
         }
     }
 }
