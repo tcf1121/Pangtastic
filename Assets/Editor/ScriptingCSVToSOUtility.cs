@@ -84,7 +84,8 @@ public class ScriptingCSVToSOUtility : EditorWindow
                 stringId = Safe(cols, 0),
                 korean = Safe(cols, 1),
                 english = Safe(cols, 2),
-                chinese = Safe(cols, 3)
+                chinese = Safe(cols, 3),
+                japanese = Safe(cols, 4)
             };
             so.strings.Add(data);
         }

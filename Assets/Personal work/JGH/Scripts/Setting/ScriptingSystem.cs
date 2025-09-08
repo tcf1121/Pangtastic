@@ -64,6 +64,7 @@ public class ScriptingSystem : Singleton<ScriptingSystem>
         public string korean;
         public string english;
         public string chinese;
+        public string japanese;
     }
 
     [Serializable]
@@ -155,7 +156,8 @@ public class ScriptingSystem : Singleton<ScriptingSystem>
     {
         //ApplyFontToAllTMP();
         // LocalizationSettings.SelectedLocale = LocalizationSettings.AvailableLocales.GetLocale("en");
-        LocalizationSettings.SelectedLocale = LocalizationSettings.AvailableLocales.GetLocale("zh");
+        // LocalizationSettings.SelectedLocale = LocalizationSettings.AvailableLocales.GetLocale("zh");
+        LocalizationSettings.SelectedLocale = LocalizationSettings.AvailableLocales.GetLocale("jp");
         Manager.Language.ChangeLanguage();
 
         var dialogAllDialogs = dialogScript.dialogs;
@@ -286,6 +288,7 @@ public class ScriptingSystem : Singleton<ScriptingSystem>
             "ko" => s.korean,
             "en" => s.english,
             "zh" => s.chinese,
+            "ja" => s.japanese,
             _ => s.korean
         };
     }
