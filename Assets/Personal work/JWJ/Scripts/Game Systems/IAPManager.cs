@@ -1,7 +1,9 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.AddressableAssets;
 using UnityEngine.Purchasing;
+using UnityEngine.ResourceManagement.AsyncOperations;
 
 public class IAPManager : Singleton<IAPManager>
 {
@@ -21,7 +23,24 @@ public class IAPManager : Singleton<IAPManager>
     protected override void Awake()
     {
         base.Awake();
-        InitializeIAP();
+        
+        AsyncOperationHandle<ProductCatalogSO> handle = Addressables.LoadAssetAsync<ProductCatalogSO>("CatalogSO");
+        handle.Completed += OnCatalogLoaded;
+    }
+
+    private void OnCatalogLoaded(AsyncOperationHandle<ProductCatalogSO> handle)
+    {
+        if (handle.Status == AsyncOperationStatus.Succeeded)
+        {
+            _catalog = handle.Result;
+
+            Debug.Log($"카탈로그 로드 완료.");
+            InitializeIAP();
+        }
+        else
+        {
+            Debug.LogError($"카탈로그 로드 실패:{handle.OperationException}");
+        }
     }
 
     private async void InitializeIAP()
