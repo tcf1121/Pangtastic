@@ -49,7 +49,7 @@ public class LanguageSystem : Singleton<LanguageSystem>
         ChangeLanguage();
     }
 
-    private void ChangeLanguage()
+    public void ChangeLanguage()
     {
         int language = (int)currentLang;
         LocalizationSettings.SelectedLocale = languageList.Infos[language].Locale;

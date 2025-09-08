@@ -16,9 +16,12 @@ MonoBehaviour:
   - dialogId: 6001
     dialogGroup: 1
     order: 10
-    centerSpeakerId: speaker_coco_on
+    centerSpeakerId: speaker_coco
+    centerSpeakerCheck: TRUE
     leftSpeakerId: 
+    leftSpeakerCheck: 
     rightSpeakerId: 
+    rightSpeakerCheck: 
     dialogStringId: string_dialog_6001
     spritePath: 
     bgmSoundId: ingame
@@ -27,8 +30,11 @@ MonoBehaviour:
     dialogGroup: 1
     order: 20
     centerSpeakerId: 
-    leftSpeakerId: speaker_coco_off
-    rightSpeakerId: speaker_kuku_on
+    centerSpeakerCheck: 
+    leftSpeakerId: speaker_coco
+    leftSpeakerCheck: FALSE
+    rightSpeakerId: speaker_kuku
+    rightSpeakerCheck: TRUE
     dialogStringId: string_dialog_6002
     spritePath: 
     bgmSoundId: outgame
@@ -37,8 +43,11 @@ MonoBehaviour:
     dialogGroup: 1
     order: 30
     centerSpeakerId: 
-    leftSpeakerId: speaker_coco_on
-    rightSpeakerId: speaker_kuku_off
+    centerSpeakerCheck: 
+    leftSpeakerId: speaker_coco
+    leftSpeakerCheck: TRUE
+    rightSpeakerId: speaker_kuku
+    rightSpeakerCheck: FALSE
     dialogStringId: string_dialog_6003
     spritePath: 
     bgmSoundId: ingame
@@ -47,8 +56,11 @@ MonoBehaviour:
     dialogGroup: 1
     order: 40
     centerSpeakerId: 
-    leftSpeakerId: speaker_coco_off
-    rightSpeakerId: speaker_kuku_on
+    centerSpeakerCheck: 
+    leftSpeakerId: speaker_coco
+    leftSpeakerCheck: TRUE
+    rightSpeakerId: speaker_kuku
+    rightSpeakerCheck: TRUE
     dialogStringId: string_dialog_6004
     spritePath: 
     bgmSoundId: outgame
