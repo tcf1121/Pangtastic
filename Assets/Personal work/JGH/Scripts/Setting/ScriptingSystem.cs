@@ -46,8 +46,14 @@ public class ScriptingSystem : Singleton<ScriptingSystem>
         public int order;
 
         public string centerSpeakerId;
+        public string centerSpeakerCheck;
+        
         public string leftSpeakerId;
+        public string leftSpeakerCheck;
+        
         public string rightSpeakerId;
+        public string rightSpeakerCheck;
+        
         public string dialogStringId;
         public string spritePath;
         public string bgmSoundId;
@@ -76,9 +82,6 @@ public class ScriptingSystem : Singleton<ScriptingSystem>
     public class DialogLine
     {
         public string script;
-        public string centerCharacter;
-        public string leftCharacter;
-        public string rightCharacter;
         public string bgm;
         public bool bgmLoop;
         public float bgmVolume;
@@ -86,6 +89,9 @@ public class ScriptingSystem : Singleton<ScriptingSystem>
         public bool sfxLoop;
         public float sfxVolume;
         public string backgroundIgm;
+        public string centerCharacter;
+        public string leftCharacter;
+        public string rightCharacter;
         public string centerSpeakerImgPath;
         public string leftSpeakerImgPath;
         public string rightSpeakerImgPath;
@@ -187,12 +193,30 @@ public class ScriptingSystem : Singleton<ScriptingSystem>
             bool sfxLoop = false;
             float sfxVolume = 1;
 
+            
+            
+            if (!string.IsNullOrEmpty(dialog_d.centerSpeakerCheck))
+            {
+                centerSpeakerOnOff = dialog_d.centerSpeakerCheck;
+            }
+            
+            if (!string.IsNullOrEmpty(dialog_d.leftSpeakerCheck))
+            {
+                centerSpeakerOnOff = dialog_d.leftSpeakerCheck;
+            }
+            
+            if (!string.IsNullOrEmpty(dialog_d.rightSpeakerCheck))
+            {
+                centerSpeakerOnOff = dialog_d.rightSpeakerCheck;
+            }
+            
+            
+
             if (!string.IsNullOrEmpty(dialog_d.centerSpeakerId) &&
                 speakerDict.TryGetValue(dialog_d.centerSpeakerId, out var centerSpeaker))
             {
                 centerCharacter = ResolveString(centerSpeaker.nameStringId, langCode, stringDict);
                 centerSpeakerImgPath = centerSpeaker.spritePath;
-                centerSpeakerOnOff = centerSpeaker.speakerId.Split('_').Last();
             }
 
             if (!string.IsNullOrEmpty(dialog_d.leftSpeakerId) &&
@@ -200,7 +224,6 @@ public class ScriptingSystem : Singleton<ScriptingSystem>
             {
                 leftCharacter = ResolveString(leftSpeaker.nameStringId, langCode, stringDict);
                 leftSpeakerImgPath = leftSpeaker.spritePath;
-                leftSpeakerOnOff = leftSpeaker.speakerId.Split('_').Last();
             }
 
             if (!string.IsNullOrEmpty(dialog_d.rightSpeakerId) &&
@@ -208,7 +231,6 @@ public class ScriptingSystem : Singleton<ScriptingSystem>
             {
                 rightCharacter = ResolveString(rightSpeaker.nameStringId, langCode, stringDict);
                 rightSpeakerImgPath = rightSpeaker.spritePath;
-                rightSpeakerOnOff = rightSpeaker.speakerId.Split('_').Last();
             }
 
             if (!string.IsNullOrEmpty(dialog_d.bgmSoundId) &&
@@ -361,12 +383,12 @@ public class ScriptingSystem : Singleton<ScriptingSystem>
             }
         });
 
-        if (state == "on")
+        if (state.ToLower() == "true")
         {
             img.color = Color.white;
             activeSpeakers.Add(characterName);
         }
-        else if (state == "off")
+        else if (state.ToLower() == "false")
         {
             img.color = new Color(0.7f, 0.7f, 0.7f, 0.7f);
         }
@@ -384,13 +406,13 @@ public class ScriptingSystem : Singleton<ScriptingSystem>
             return;
         }
 
-        var handle = Addressables.LoadAssetAsync<SO_SpriteData>(path);
+        var handle = Addressables.LoadAssetAsync<Sprite>(path);
         handle.Completed += op =>
         {
             if (op.Status == AsyncOperationStatus.Succeeded)
             {
-                SO_SpriteData so = op.Result;
-                onLoaded?.Invoke(so != null ? so.loadedSprite : null);
+                Sprite  sp  = op.Result;
+                onLoaded?.Invoke(sp);
             }
             else
             {

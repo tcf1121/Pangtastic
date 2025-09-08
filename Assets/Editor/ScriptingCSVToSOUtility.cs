@@ -52,12 +52,15 @@ public class ScriptingCSVToSOUtility : EditorWindow
                 dialogGroup = SafeInt(cols, 1),
                 order = SafeInt(cols, 2),
                 centerSpeakerId = Safe(cols, 3),
-                leftSpeakerId = Safe(cols, 4),
-                rightSpeakerId = Safe(cols, 5),
-                dialogStringId = Safe(cols, 6),
-                spritePath = Safe(cols, 7),
-                bgmSoundId = Safe(cols, 8),
-                sfxSoundId = Safe(cols, 9)
+                centerSpeakerCheck = Safe(cols, 4),
+                leftSpeakerId = Safe(cols, 5),
+                leftSpeakerCheck = Safe(cols, 6),
+                rightSpeakerId = Safe(cols, 7),
+                rightSpeakerCheck = Safe(cols, 8),
+                dialogStringId = Safe(cols, 9),
+                spritePath = Safe(cols, 10),
+                bgmSoundId = Safe(cols, 11),
+                sfxSoundId = Safe(cols, 12)
             };
             so.dialogs.Add(data);
         }
