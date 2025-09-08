@@ -1,4 +1,6 @@
 using SCR;
+using System.Collections;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
 using UnityEngine.ResourceManagement.AsyncOperations;
@@ -9,6 +11,7 @@ namespace KDJ
     public class GiftBox : ObstacleBlock
     {
         [SerializeField] private Sprite _currentImage;
+        private Coroutine _damageCoroutine;
         public GiftBox(int xpos, int ypos)
         {
             X = xpos;
@@ -35,6 +38,11 @@ namespace KDJ
         {
             CurrentHP--;
 
+            if (CurrentHP > 0)
+            {
+                _damageCoroutine = BoardManager.Instance.StartCoroutine(DamageAnimation(X, Y));
+            }
+
             if (CurrentHP <= 0)
             {
                 Debug.Log("파괴됨");
@@ -55,8 +63,7 @@ namespace KDJ
 
         public override void Broken()
         {
-            Object.Destroy(BlockInstance);
-            BoardManager.Instance.Spawner.SpawnBlock(X, Y, RandomGift(), BoardManager.Instance.BlockMover);
+            _brokenCoroutine = BoardManager.Instance.StartCoroutine(BrokenAnimation(X, Y));
         }
 
         private GemType RandomGift()
@@ -84,18 +91,47 @@ namespace KDJ
             }
         }
 
-        // public override Block Clone()
-        // {
-        //     return new GiftBox(Pos.x, Pos.y)
-        //     {
-        //         CurrentHP = this.CurrentHP,
-        //         Pos = this.Pos,
-        //         Score = this.Score,
-        //         BlockInstance = this.BlockInstance,
-        //         GemType = this.GemType,
-        //         IsObstacle = this.IsObstacle,
-        //         CanMove = this.CanMove,
-        //     };
-        // }
+        private IEnumerator BrokenAnimation(int x, int y)
+        {
+            BoardManager.Instance.IsWaitingForAnimation = true;
+            GameObject blockObject = BoardManager.Instance.Spawner.GameBoardData.GetBlock(x, y).BlockInstance;
+            float timer = 0f;
+            while (timer < 0.1f)
+            {
+                timer += Time.deltaTime;
+                blockObject.transform.localScale = Vector3.Lerp(Vector3.one, Vector3.zero, timer / 0.1f);
+                yield return null;
+            }
+
+            base.Broken();
+            BoardManager.Instance.StartCoroutine(BoardManager.Instance.Spawner.SpawnWithAnimation(x, y, RandomGift()));
+            _brokenCoroutine = null;
+        }
+
+        private IEnumerator DamageAnimation(int x, int y)
+        {
+            BoardManager.Instance.IsWaitingForAnimation = true;
+            GameObject blockObject = BoardManager.Instance.Spawner.GameBoardData.GetBlock(x, y).BlockInstance;
+            float timer = 0f;
+            Vector3 originalScale = blockObject.transform.localScale;
+            while (timer < 0.1f)
+            {
+                timer += Time.deltaTime;
+                // 좌우로 빠르게 흔들림. 0.05초마다 좌우로 흔들리게
+                if ((int)(timer / 0.025f) % 2 == 0)
+                {
+                    blockObject.transform.rotation = Quaternion.Lerp(Quaternion.Euler(0, 0, -10), Quaternion.Euler(0, 0, 10), (timer % 0.025f) / 0.025f);
+                }
+                else
+                {
+                    blockObject.transform.rotation = Quaternion.Lerp(Quaternion.Euler(0, 0, 10), Quaternion.Euler(0, 0, -10), (timer % 0.025f) / 0.025f);
+                }
+                yield return null;
+            }
+            blockObject.transform.rotation = Quaternion.Euler(0, 0, 0);
+
+            BoardManager.Instance.IsWaitingForAnimation = false;
+            _damageCoroutine = null;
+        }
     }
 }

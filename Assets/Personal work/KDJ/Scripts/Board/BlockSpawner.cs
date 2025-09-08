@@ -990,6 +990,7 @@ namespace KDJ
         // KDJ: 가이드라인 - 특정 블록을 애니메이션과 함께 스폰하는 코루틴
         public IEnumerator SpawnWithAnimation(int x, int y, GemType gemType)
         {
+            BoardManager.Instance.IsWaitingForAnimation = true;
             Vector3 position = BoardManager.Instance.BlockMover.GridToWorld(new Vector2Int(x, y), GameBoardData.Width, GameBoardData.Height);
             Block newBlock = CreateNewBlock(gemType);
 
@@ -1027,7 +1028,7 @@ namespace KDJ
 
             // 확실하게 최종 크기로 설정
             newBlock.BlockInstance.transform.localScale = Vector3.one;
-
+            BoardManager.Instance.IsWaitingForAnimation = false;
         }
 
         #endregion
