@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
@@ -23,6 +24,8 @@ namespace KDJ
             AsyncOperationHandle<Sprite> handle = Addressables.LoadAssetAsync<Sprite>(path);
             handle.Completed += OnSpriteLoadCompleted;
         }
+
+        private Coroutine _damageCoroutine;
 
         private void OnSpriteLoadCompleted(AsyncOperationHandle<Sprite> handle)
         {
@@ -55,11 +58,19 @@ namespace KDJ
             if (CurrentHP <= 0)
             {
                 Debug.Log("파괴됨");
-                Broken();
+                if (_brokenCoroutine == null)
+                {
+                    _brokenCoroutine = BoardManager.Instance.StartCoroutine(BrokenAnimation(X, Y));
+                }
             }
             else
             {
                 BlockInstance.GetComponent<SpriteRenderer>().sprite = _currentImage;
+
+                if (_damageCoroutine == null)
+                {
+                    _damageCoroutine = BoardManager.Instance.StartCoroutine(DamageAnimation(X, Y));
+                }
             }
         }
 
@@ -74,6 +85,48 @@ namespace KDJ
                 BoardManager.Instance.Spawner.GameBoardData.BlockArray[pos.y, pos.x] = null;
 
             base.Broken();
+        }
+
+        private IEnumerator BrokenAnimation(int x, int y)
+        {
+            BoardManager.Instance.IsWaitingForAnimation = true;
+            float timer = 0f;
+            while (timer < 0.15f)
+            {
+                timer += Time.deltaTime;
+                BlockInstance.transform.localScale = Vector3.Lerp(Vector3.one, Vector3.zero, timer / 0.1f);
+                yield return null;
+            }
+
+            Broken();
+            _brokenCoroutine = null;
+            BoardManager.Instance.IsWaitingForAnimation = false;
+        }
+
+        private IEnumerator DamageAnimation(int x, int y)
+        {
+            BoardManager.Instance.IsWaitingForAnimation = true;
+            float timer = 0f;
+
+            while (timer < 0.15f)
+            {
+                timer += Time.deltaTime;
+                // 좌우로 빠르게 흔들림. 0.05초마다 좌우로 흔들리게
+                if ((int)(timer / 0.025f) % 2 == 0)
+                {
+                    BlockInstance.transform.rotation = Quaternion.Lerp(Quaternion.Euler(0, 0, -20), Quaternion.Euler(0, 0, 20), (timer % 0.025f) / 0.025f);
+                }
+                else
+                {
+                    BlockInstance.transform.rotation = Quaternion.Lerp(Quaternion.Euler(0, 0, 20), Quaternion.Euler(0, 0, -20), (timer % 0.025f) / 0.025f);
+                }
+                yield return null;
+            }
+
+            BlockInstance.transform.rotation = Quaternion.Euler(0, 0, 0);
+
+            BoardManager.Instance.IsWaitingForAnimation = false;
+            _damageCoroutine = null;
         }
     }
 }

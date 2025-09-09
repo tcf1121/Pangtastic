@@ -285,6 +285,14 @@ namespace KDJ
             {
                 if (coord.x >= 0 && coord.x < gameBoard.Width && coord.y >= 0 && coord.y < gameBoard.Height)
                 {
+                    Block overlayNeighbor = gameBoard.GetOverlayBlock(coord.x, coord.y);
+                    if (overlayNeighbor is Ice ice)
+                    {
+                        ice.SplashDamage(gameBoard.GetBlock(x, y).GemType);
+                        damagedObstacles.Add(ice);
+                        continue;
+                    }
+                    
                     Block neighbor = gameBoard.GetBlock(coord.x, coord.y);
                     if (neighbor == null) continue;
 
@@ -312,11 +320,12 @@ namespace KDJ
         {
             var gameBoard = boardManager.Spawner.GameBoardData;
             Block overlayBlock = gameBoard.GetOverlayBlock(x, y);
+
             if (overlayBlock is ObstacleBlock obstacle && !damagedObstacles.Contains(obstacle))
-            {
-                obstacle.TakeDamage();
-                damagedObstacles.Add(obstacle);
-            }
+                {
+                    obstacle.TakeDamage();
+                    damagedObstacles.Add(obstacle);
+                }
         }
         #endregion
 

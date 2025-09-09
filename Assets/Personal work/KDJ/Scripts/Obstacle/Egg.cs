@@ -60,12 +60,20 @@ namespace KDJ
             TakeDamage();
         }
 
+        public override void OnLand(int y)
+        {
+            if (y == 0)
+            {
+                TakeDamage();
+            }
+        }
+
         private IEnumerator BrokenAnimation(int x, int y)
         {
             BoardManager.Instance.IsWaitingForAnimation = true;
             GameObject blockObject = BoardManager.Instance.Spawner.GameBoardData.GetBlock(x, y).BlockInstance;
             float timer = 0f;
-            while (timer < 0.1f)
+            while (timer < 0.15f)
             {
                 timer += Time.deltaTime;
                 blockObject.transform.localScale = Vector3.Lerp(Vector3.one, Vector3.zero, timer / 0.1f);

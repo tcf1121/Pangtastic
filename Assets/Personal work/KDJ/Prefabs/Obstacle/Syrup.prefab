@@ -10,6 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 6823904056426768018}
   - component: {fileID: 2895292844725595011}
+  - component: {fileID: -6803638448680584874}
   m_Layer: 0
   m_Name: Syrup
   m_TagString: Untagged
@@ -82,5 +83,102 @@ SpriteRenderer:
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
-  m_MaskInteraction: 0
+  m_MaskInteraction: 1
   m_SpriteSortPoint: 0
+--- !u!114 &-6803638448680584874
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4311203844512484936}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9a5c456385680bf4d83d23a40ec50cb2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  duration: 0.15
+  scaleX:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 1
+      inSlope: 1.4666599
+      outSlope: 1.4666599
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0.1784719
+    - serializedVersion: 3
+      time: 0.32665077
+      value: 1.2715344
+      inSlope: 0.0000054282186
+      outSlope: 0.0000054282186
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.20163593
+    - serializedVersion: 3
+      time: 0.65
+      value: 1.0014892
+      inSlope: -1.4815168
+      outSlope: -1.4815168
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.17172095
+      outWeight: 0.12895939
+    - serializedVersion: 3
+      time: 1
+      value: -0.000010848045
+      inSlope: -1.1296021
+      outSlope: -1.1296021
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.42340583
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  scaleY:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 1
+      inSlope: -1.6552819
+      outSlope: -1.6552819
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0.16838905
+    - serializedVersion: 3
+      time: 0.3162083
+      value: 0.78094614
+      inSlope: 0.0010946029
+      outSlope: 0.0010946029
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.09967845
+    - serializedVersion: 3
+      time: 0.65
+      value: 0.99777913
+      inSlope: 1.3071351
+      outSlope: 1.3071351
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.2052734
+      outWeight: 0.20814504
+    - serializedVersion: 3
+      time: 1
+      value: 0.00004074583
+      inSlope: -0.4454825
+      outSlope: -0.4454825
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.35627607
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
