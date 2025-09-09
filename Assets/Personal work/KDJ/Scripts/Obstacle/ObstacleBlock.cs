@@ -34,19 +34,10 @@ namespace KDJ
 
         }
 
-        // public override Block Clone()
-        // {
-        //     return new ObstacleBlock
-        //     {
-        //         CurrentHP = this.CurrentHP,
-        //         Pos = this.Pos,
-        //         Score = this.Score,
-        //         BlockInstance = this.BlockInstance,
-        //         GemType = this.GemType,
-        //         IsObstacle = this.IsObstacle,
-        //         CanMove = this.CanMove,
-        //     };
-        // }
+        public virtual void OnLand(int y)
+        {
+
+        }
     }
 
 }

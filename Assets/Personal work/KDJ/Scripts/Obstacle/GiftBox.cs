@@ -120,11 +120,11 @@ namespace KDJ
                 // 좌우로 빠르게 흔들림. 0.05초마다 좌우로 흔들리게
                 if ((int)(timer / 0.025f) % 2 == 0)
                 {
-                    blockObject.transform.rotation = Quaternion.Lerp(Quaternion.Euler(0, 0, -10), Quaternion.Euler(0, 0, 10), (timer % 0.025f) / 0.025f);
+                    blockObject.transform.rotation = Quaternion.Lerp(Quaternion.Euler(0, 0, -20), Quaternion.Euler(0, 0, 20), (timer % 0.025f) / 0.025f);
                 }
                 else
                 {
-                    blockObject.transform.rotation = Quaternion.Lerp(Quaternion.Euler(0, 0, 10), Quaternion.Euler(0, 0, -10), (timer % 0.025f) / 0.025f);
+                    blockObject.transform.rotation = Quaternion.Lerp(Quaternion.Euler(0, 0, 20), Quaternion.Euler(0, 0, -20), (timer % 0.025f) / 0.025f);
                 }
                 yield return null;
             }

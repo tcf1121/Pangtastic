@@ -415,6 +415,7 @@ namespace KDJ
                                 {
                                     ob.X = x;
                                     ob.Y = destY;
+                                    ob.OnLand(destY);
                                 }
 
                                 movedFlags[destY, x] = true; // 이 틱에서 이동했음을 표시
@@ -448,6 +449,7 @@ namespace KDJ
                                     {
                                         ob.X = x - 1;
                                         ob.Y = y + 1;
+                                        ob.OnLand(y);
                                     }
                                     movedFlags[y, x] = true;
                                     activityThisStep = true;
@@ -465,6 +467,7 @@ namespace KDJ
                                         {
                                             ob.X = x + 1;
                                             ob.Y = y + 1;
+                                            ob.OnLand(y);
                                         }
                                         movedFlags[y, x] = true;
                                         activityThisStep = true;
@@ -497,6 +500,7 @@ namespace KDJ
                                         {
                                             ob.X = x - 1;
                                             ob.Y = y - 1;
+                                            ob.OnLand(y - 1);
                                         }
                                         movedToThisTick[y - 1, x - 1] = true;
                                         activityThisStep = true;
@@ -511,6 +515,7 @@ namespace KDJ
                                         {
                                             ob.X = x + 1;
                                             ob.Y = y - 1;
+                                            ob.OnLand(y - 1);
                                         }
                                         movedToThisTick[y - 1, x + 1] = true;
                                         activityThisStep = true;
@@ -521,8 +526,6 @@ namespace KDJ
                         }
                     }
                 }
-
-                // ... (낙하 로직은 그대로) ...
 
                 // --- 3순위: 새 블록 생성 (대기열 채우기) ---
                 if (RefillWaitingQueue(blockMover))

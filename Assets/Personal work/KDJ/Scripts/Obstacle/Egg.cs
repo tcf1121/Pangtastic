@@ -60,6 +60,14 @@ namespace KDJ
             TakeDamage();
         }
 
+        public override void OnLand(int y)
+        {
+            if (y == 0)
+            {
+                TakeDamage();
+            }
+        }
+
         private IEnumerator BrokenAnimation(int x, int y)
         {
             BoardManager.Instance.IsWaitingForAnimation = true;
