@@ -81,7 +81,7 @@ namespace KDJ
             Block startBlock = gameBoard.GetBlock(startGrid.x, startGrid.y);
             Block endBlock = gameBoard.GetBlock(swapEndGrid.x, swapEndGrid.y);
 
-            if (startBlock == null || startBlock.IsObstacle || endBlock == null || endBlock.IsObstacle) return false;
+            if (startBlock == null || !startBlock.CanMove || startBlock.IsObstacle || endBlock == null || !endBlock.CanMove || endBlock.IsObstacle) return false;
 
             StartBlockPos = startGrid;
             EndBlockPos = swapEndGrid;

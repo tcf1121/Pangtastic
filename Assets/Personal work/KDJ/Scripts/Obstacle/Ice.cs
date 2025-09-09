@@ -1,3 +1,4 @@
+using LHJ;
 using SCR;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
@@ -20,23 +21,22 @@ namespace KDJ
             IsObstacle = true;
             CanMove = false;
             DountType = (GemType)Random.Range(0, 6);
-            string path = $"Assets/Imports/Image/Donut/Iced_{DountType}.png";
-            Debug.Log(path);
-            AsyncOperationHandle<Sprite> handle = Addressables.LoadAssetAsync<Sprite>(path);
-            handle.Completed += OnSpriteLoadCompleted;
-
+            // string path = $"Assets/Imports/Image/Donut/Iced_{DountType}.png";
+            //Debug.Log(path);
+            //AsyncOperationHandle<Sprite> handle = Addressables.LoadAssetAsync<Sprite>(path);
+            //handle.Completed += OnSpriteLoadCompleted;
         }
 
-        private void OnSpriteLoadCompleted(AsyncOperationHandle<Sprite> handle)
-        {
-            if (handle.Status == AsyncOperationStatus.Succeeded)
-            {
-                Debug.Log("가져오기 완료");
-                iceSprite = handle.Result;
-                SetSprite();
-                Debug.Log(iceSprite);
-            }
-        }
+        // private void OnSpriteLoadCompleted(AsyncOperationHandle<Sprite> handle)
+        // {
+        //     if (handle.Status == AsyncOperationStatus.Succeeded)
+        //     {
+        //         Debug.Log("가져오기 완료");
+        //         iceSprite = handle.Result;
+        //         SetSprite();
+        //         Debug.Log(iceSprite);
+        //     }
+        // }
 
         public void SetSprite()
         {
@@ -52,15 +52,19 @@ namespace KDJ
             return iceSprite;
         }
 
-        public override void SplashDamage()
+        public override void SplashDamage(GemType type)
         {
-            TakeDamage();
+            if (BoardManager.Instance.Spawner.GameBoardData.BlockArray[Y, X].GemType == type)
+            {
+                TakeDamage();
+            }
         }
 
         public override void Broken()
         {
             Object.Destroy(BlockInstance);
-            BoardManager.Instance.Spawner.SpawnBlock(X, Y, DountType, BoardManager.Instance.BlockMover);
+            BoardManager.Instance.Spawner.GameBoardData.BlockArray[Y, X].IsNormal = true;
+            BoardManager.Instance.Spawner.GameBoardData.BlockArray[Y, X].CanMove = true;
         }
     }
 }

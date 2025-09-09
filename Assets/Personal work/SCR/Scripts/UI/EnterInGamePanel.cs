@@ -19,11 +19,11 @@ public class EnterInGamePanel : MonoBehaviour
 
     void Awake()
     {
-
+        // 여기서 레시피 만들어서 Stage에 넣기
     }
     void GetRecipe()
     {
-        List<RecipeSO> recipeSOs = Manager.Stage.CurrentStage.StageRecipes.ToList();
+        List<RecipeSO> recipeSOs = /*여기만 바꾸면 됨*/Manager.Stage.CurrentStage.StageRecipes.ToList();
         for (int i = 0; i < recipeImages.Count; i++)
         {
             if (i < recipeSOs.Count)
