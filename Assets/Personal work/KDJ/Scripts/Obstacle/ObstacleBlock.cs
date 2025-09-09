@@ -1,4 +1,5 @@
 
+using SCR;
 using UnityEngine;
 
 namespace KDJ
@@ -30,6 +31,11 @@ namespace KDJ
         }
 
         public virtual void SplashDamage()
+        {
+
+        }
+
+        public virtual void SplashDamage(GemType type)
         {
 
         }

@@ -1,10 +1,8 @@
 using SCR;
 using System.Collections;
-using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
 using UnityEngine.ResourceManagement.AsyncOperations;
-using UnityEngine.UI;
 
 namespace KDJ
 {
@@ -94,12 +92,11 @@ namespace KDJ
         private IEnumerator BrokenAnimation(int x, int y)
         {
             BoardManager.Instance.IsWaitingForAnimation = true;
-            GameObject blockObject = BoardManager.Instance.Spawner.GameBoardData.GetBlock(x, y).BlockInstance;
             float timer = 0f;
-            while (timer < 0.1f)
+            while (timer < 0.15f)
             {
                 timer += Time.deltaTime;
-                blockObject.transform.localScale = Vector3.Lerp(Vector3.one, Vector3.zero, timer / 0.1f);
+                BlockInstance.transform.localScale = Vector3.Lerp(Vector3.one, Vector3.zero, timer / 0.1f);
                 yield return null;
             }
 
@@ -111,24 +108,24 @@ namespace KDJ
         private IEnumerator DamageAnimation(int x, int y)
         {
             BoardManager.Instance.IsWaitingForAnimation = true;
-            GameObject blockObject = BoardManager.Instance.Spawner.GameBoardData.GetBlock(x, y).BlockInstance;
             float timer = 0f;
-            Vector3 originalScale = blockObject.transform.localScale;
-            while (timer < 0.1f)
+
+            while (timer < 0.15f)
             {
                 timer += Time.deltaTime;
                 // 좌우로 빠르게 흔들림. 0.05초마다 좌우로 흔들리게
                 if ((int)(timer / 0.025f) % 2 == 0)
                 {
-                    blockObject.transform.rotation = Quaternion.Lerp(Quaternion.Euler(0, 0, -20), Quaternion.Euler(0, 0, 20), (timer % 0.025f) / 0.025f);
+                    BlockInstance.transform.rotation = Quaternion.Lerp(Quaternion.Euler(0, 0, -20), Quaternion.Euler(0, 0, 20), (timer % 0.025f) / 0.025f);
                 }
                 else
                 {
-                    blockObject.transform.rotation = Quaternion.Lerp(Quaternion.Euler(0, 0, 20), Quaternion.Euler(0, 0, -20), (timer % 0.025f) / 0.025f);
+                    BlockInstance.transform.rotation = Quaternion.Lerp(Quaternion.Euler(0, 0, 20), Quaternion.Euler(0, 0, -20), (timer % 0.025f) / 0.025f);
                 }
                 yield return null;
             }
-            blockObject.transform.rotation = Quaternion.Euler(0, 0, 0);
+
+            BlockInstance.transform.rotation = Quaternion.Euler(0, 0, 0);
 
             BoardManager.Instance.IsWaitingForAnimation = false;
             _damageCoroutine = null;

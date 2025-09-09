@@ -120,7 +120,14 @@ namespace KDJ
                         GemType = (GemType)donutNum,
                     };
                 }
-                else if (finalGemType == GemType.Ice) boardData.BlockArray[y, x] = new Ice(x, y);
+                else if (finalGemType == GemType.Ice)
+                {
+                    boardData.BlockArray[y, x] = new Block()
+                    {
+                        GemType = (GemType)Random.Range(0, 6),
+                    };
+                    boardData.OverlayArray[y, x] = new Ice(x, y);
+                }
                 else if (finalGemType == GemType.DonutBag) boardData.BlockArray[y, x] = new DonutBag(x, y);
                 else if (finalGemType == GemType.Coin) boardData.BlockArray[y, x] = new Coin(x, y);
                 else if (finalGemType == GemType.GiftBox) boardData.BlockArray[y, x] = new GiftBox(x, y);
