@@ -13,13 +13,32 @@ MonoBehaviour:
   m_Name: Catalog
   m_EditorClassIdentifier: 
   _entries:
-  - ProductId: testitem.onetime
+  - ProductId: welcomepackage
     ProductType: 1
     Rewards:
     - RewardType: 1
-      RewardAmount: 5000
-  - ProductId: testitem.unlimit
+      RewardAmount: 2000
+    - RewardType: 2
+      RewardAmount: 10
+  - ProductId: starterpack
+    ProductType: 1
+    Rewards:
+    - RewardType: 1
+      RewardAmount: 2222
+    - RewardType: 2
+      RewardAmount: 11
+  - ProductId: noads
+    ProductType: 1
+    Rewards:
+    - RewardType: 1
+      RewardAmount: 1111
+  - ProductId: heart
     ProductType: 0
     Rewards:
     - RewardType: 0
       RewardAmount: 1
+  - ProductId: 5000coin
+    ProductType: 0
+    Rewards:
+    - RewardType: 1
+      RewardAmount: 5000
