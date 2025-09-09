@@ -41,7 +41,7 @@ public class OrderRecipe
 
         for (int i = 0; i < ingredients.Count; i++)
         {
-            if (ingredients[i] == ingredient && collected[i] < required[i]) //레시피에 들어온 재료가 필요하고 더 필요할때
+            if (ingredients[i].ID == ingredient.ID && collected[i] < required[i]) //레시피에 들어온 재료가 필요하고 더 필요할때
             {
                 collected[i]++;
                 have = collected[i];
