@@ -152,6 +152,17 @@ public class UserInfoManager : Singleton<UserInfoManager>
         else currentData.ItemInfo.Coffee--;
     }
 
+    public void AddItem(ItemType item, int num = 1)
+    {
+        if (item == ItemType.Roller) currentData.ItemInfo.Roller += num;
+        else if (item == ItemType.DonutBox) currentData.ItemInfo.DonutBox += num;
+        else if (item == ItemType.Oven) currentData.ItemInfo.Oven += num;
+        else if (item == ItemType.Whisk) currentData.ItemInfo.Whisk += num;
+        else if (item == ItemType.Scissors) currentData.ItemInfo.Scissors += num;
+        else if (item == ItemType.DonutPan) currentData.ItemInfo.DonutPan += num;
+        else currentData.ItemInfo.Coffee += num;
+    }
+
     public void SetName(string name)
     {
         currentData.PlayerName = name;
