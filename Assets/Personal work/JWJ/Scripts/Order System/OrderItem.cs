@@ -10,7 +10,7 @@ public class OrderItem : MonoBehaviour
     [SerializeField] private GameObject clearImage;
     [SerializeField] private List<IngredientItem> ingredientSlots = new List<IngredientItem>();
 
-    private Dictionary<IngredientSO, IngredientItem> _rows = new Dictionary<IngredientSO, IngredientItem>();
+    private Dictionary<int, IngredientItem> _rows = new();
 
     public void SetMenu(Sprite icon)
     {
@@ -45,7 +45,7 @@ public class OrderItem : MonoBehaviour
             IngredientItem slot = ingredientSlots[slotIndex];
             slot.gameObject.SetActive(true);
             slot.Init(ing.IngredientPic, have, need);
-            _rows[ing] = slot;
+            _rows[ing.ID] = slot;
             slotIndex++;
         }
 
@@ -55,7 +55,7 @@ public class OrderItem : MonoBehaviour
     public void UpdateRow(IngredientSO ing, int have, int need) //필요 개수 업데이트
     {
         IngredientItem row;
-        if(_rows.TryGetValue(ing, out row) == true)
+        if(_rows.TryGetValue(ing.ID, out row) == true)
         {
             row.SetAmount(have, need);
         }
