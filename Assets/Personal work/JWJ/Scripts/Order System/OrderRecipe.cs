@@ -11,7 +11,7 @@ public class OrderRecipe
     public bool IsCompleted { get; private set; }
 
     //리스트 값들 읽기전용
-    public int IngredientCount => ingredients.Count; 
+    public int IngredientCount => ingredients.Count;
     public IngredientSO GetIngredient(int index) => ingredients[index];
     public int GetRequiredAmount(int index) => required[index];
     public int GetCollectedAmount(int index) => collected[index];
@@ -43,6 +43,7 @@ public class OrderRecipe
         {
             if (ingredients[i].ID == ingredient.ID && collected[i] < required[i]) //레시피에 들어온 재료가 필요하고 더 필요할때
             {
+
                 collected[i]++;
                 have = collected[i];
                 need = required[i];
@@ -68,6 +69,4 @@ public class OrderRecipe
         }
         return true;
     }
-
-
 }

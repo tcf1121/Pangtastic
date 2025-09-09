@@ -81,7 +81,7 @@ namespace LHJ
             int destroyed = 0;
             switch (type)
             {
-                case ItemType.Scissor:
+                case ItemType.Scissors:
                     destroyed = ApplyScissor(pos);
                     break;
                 case ItemType.Whisk:

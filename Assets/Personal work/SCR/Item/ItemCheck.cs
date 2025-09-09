@@ -7,7 +7,7 @@ namespace SCR
     {
         private static ItemCheck instance;
 
-        private LHJ.ItemType? _selected = null;
+        private ItemType? _selected = null;
 
         private bool _isSelect = false;
 
@@ -19,7 +19,7 @@ namespace SCR
         }
 
 
-        public static void Select(LHJ.ItemType type)
+        public static void Select(ItemType type)
         {
             if (instance == null)
                 instance = GameObject.Find("ItemManager").GetComponent<ItemCheck>();
@@ -42,7 +42,7 @@ namespace SCR
             return instance._isSelect;
         }
 
-        public static LHJ.ItemType? GetItemType()
+        public static ItemType? GetItemType()
         {
             if (instance == null)
                 instance = GameObject.Find("ItemManager").GetComponent<ItemCheck>();

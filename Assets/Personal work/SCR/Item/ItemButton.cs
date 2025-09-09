@@ -6,7 +6,7 @@ namespace SCR
     [RequireComponent(typeof(Button))]
     public class ItemButton : MonoBehaviour
     {
-        [SerializeField] private LHJ.ItemType _type;
+        [SerializeField] private ItemType _type;
         private Button _button;
 
         private bool _selected = false;
