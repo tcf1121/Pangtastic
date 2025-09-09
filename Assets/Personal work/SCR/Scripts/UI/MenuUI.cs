@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using UnityEditor.Localization.Plugins.XLIFF.V20;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -14,7 +15,10 @@ public class MenuUI : MonoBehaviour
         {
             int buttonIndex = i; // 클로저 문제 방지를 위해 인덱스 복사
             menuBtns[i].onClick.AddListener(() => ClickMenu(buttonIndex));
+
         }
+        menuBtns[1].onClick.AddListener(GoHome);
+        menuBtns[2].onClick.AddListener(GoRoom);
     }
 
     private void ClickMenu(int index)
@@ -37,5 +41,19 @@ public class MenuUI : MonoBehaviour
             }
         }
         LayoutRebuilder.ForceRebuildLayoutImmediate(GetComponent<RectTransform>());
+    }
+
+    private void GoHome()
+    {
+        Camera.main.transform.position = new Vector3(0, 10, -8);
+        Camera.main.transform.rotation = Quaternion.Euler(45, 0, 0);
+        Camera.main.orthographicSize = 15;
+    }
+
+    private void GoRoom()
+    {
+        Camera.main.transform.position = new Vector3(0, 10, -8);
+        Camera.main.transform.rotation = Quaternion.Euler(45, 0, 0);
+        Camera.main.orthographicSize = 6;
     }
 }

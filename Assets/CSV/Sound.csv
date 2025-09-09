@@ -1,12 +1,14 @@
 ﻿사운드 ID,이름,파일 경로,볼륨,루프 체크,설명
 string,string,string,float,bool,string
 sound_id,name,file_path,volume,loop_check,description
-dialog_bgm_openning_1,,dialog_bgm_openning_1.mp3,1,FALSE,
-dialog_bgm_happy_1,,dialog_bgm_happy_1.wav,1,TRUE,
-dialog_bgm_evening_1,,dialog_bgm_evening_1.wav,1,TRUE,
-,,,,,
-,,,,,
+ingame,InGameMusic,dialog_bgm_openning_1.mp3,1,TRUE,
+outgame,OutGameMusic,dialog_bgm_happy_1.wav,1,TRUE,
+sfx1,GameInSfx,dialog_bgm_evening_1.wav,1,FALSE,
+sfx2,GameExitSfx,,0.5,FALSE,
+sfx3,GameToHomeSfx,,1,FALSE,
 ,,,,,
 ,,,,,
 ,,,,,
 테스트용 임시 데이터 입니다. (동욱),,,,,
+loop_check가 true인 것은 bgm 클릭쪽에 넣어주세요 (기훈)(개발팀에게),,,,,
+loop_check가 flase인 것은 sfx 클릭쪽에 넣어주세요 (기훈)(개발팀에게),,,,,

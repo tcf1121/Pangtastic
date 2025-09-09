@@ -164,6 +164,40 @@ public class OrderStateController : MonoBehaviour
         _isRunning = true; //인내심 작동중?
     }
 
+    public void HalfPatience() //인내심 시작
+    {
+        float timeToReachZero = 0;
+
+        if (_curCustomer.Type == CustomerType.Normal)
+        {
+            timeToReachZero = 60f;
+        }
+        else if (_curCustomer.Type == CustomerType.Unique)
+        {
+            timeToReachZero = 50f;
+        }
+        else if (_curCustomer.Type == CustomerType.Special)
+        {
+            timeToReachZero = 30f;
+        }
+        else
+        {
+            Debug.LogWarning("커스터머 타입 이상함");
+        }
+
+        _maxPatience = 100;
+        _curPatience = _maxPatience / 2;
+
+        //슬라이더 설정
+        patienceSlider.minValue = 0f;
+        patienceSlider.maxValue = _maxPatience;
+        patienceSlider.value = _curPatience;
+
+        _elapsed = timeToReachZero / 2; //경과시간
+        _hasEnded = false; //주문종료?
+        _isRunning = true; //인내심 작동중?
+    }
+
     private void StopPatience() //인내심 정지
     {
         _isRunning = false;

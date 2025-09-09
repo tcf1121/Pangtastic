@@ -67,7 +67,7 @@ public class UserInfoManager : Singleton<UserInfoManager>
 
     public bool CanUseCoin(int value)
     {
-        if (currentData.UserInfo.Coin - value > 0) return true;
+        if (currentData.UserInfo.Coin - value >= 0) return true;
         else return false;
     }
 
@@ -141,6 +141,28 @@ public class UserInfoManager : Singleton<UserInfoManager>
         currentData.ItemInfo = itemInfo;
     }
 
+    public void UseItem(ItemType item)
+    {
+        if (item == ItemType.Roller) currentData.ItemInfo.Roller--;
+        else if (item == ItemType.DonutBox) currentData.ItemInfo.DonutBox--;
+        else if (item == ItemType.Oven) currentData.ItemInfo.Oven--;
+        else if (item == ItemType.Whisk) currentData.ItemInfo.Whisk--;
+        else if (item == ItemType.Scissors) currentData.ItemInfo.Scissors--;
+        else if (item == ItemType.DonutPan) currentData.ItemInfo.DonutPan--;
+        else currentData.ItemInfo.Coffee--;
+    }
+
+    public void AddItem(ItemType item, int num = 1)
+    {
+        if (item == ItemType.Roller) currentData.ItemInfo.Roller += num;
+        else if (item == ItemType.DonutBox) currentData.ItemInfo.DonutBox += num;
+        else if (item == ItemType.Oven) currentData.ItemInfo.Oven += num;
+        else if (item == ItemType.Whisk) currentData.ItemInfo.Whisk += num;
+        else if (item == ItemType.Scissors) currentData.ItemInfo.Scissors += num;
+        else if (item == ItemType.DonutPan) currentData.ItemInfo.DonutPan += num;
+        else currentData.ItemInfo.Coffee += num;
+    }
+
     public void SetName(string name)
     {
         currentData.PlayerName = name;
@@ -159,6 +181,16 @@ public class UserInfoManager : Singleton<UserInfoManager>
 
 
 
+}
+public enum ItemType
+{
+    Roller,
+    DonutBox,
+    Oven,
+    Whisk,
+    Scissors,
+    DonutPan,
+    Coffee
 }
 
 [Serializable]
@@ -197,4 +229,6 @@ public class ItemInfo
     public int Scissors { get; set; } = 0;
     public int DonutPan { get; set; } = 0;
     public int Coffee { get; set; } = 0;
+
+
 }
