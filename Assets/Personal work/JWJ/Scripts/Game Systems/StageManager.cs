@@ -13,6 +13,7 @@ public class StageManager : Singleton<StageManager>
     public int CurrentStageIndex { get { return Manager.User.GetStage(); } }
     public StageSO CurrentStage => stages[CurrentStageIndex];
     private List<bool> UseItem = new();
+    // 레시피 변수 추가
 
     protected override void Awake()
     {

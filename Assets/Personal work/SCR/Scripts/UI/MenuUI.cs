@@ -1,6 +1,4 @@
-using System.Collections;
 using System.Collections.Generic;
-using UnityEditor.Localization.Plugins.XLIFF.V20;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -8,6 +6,8 @@ public class MenuUI : MonoBehaviour
 {
     [SerializeField] private List<Button> menuBtns;
     [SerializeField] private List<GameObject> menuPanels;
+    [SerializeField] private List<Transform> _roomCameraPosList;
+    [SerializeField] int curRoom;
 
     void Awake()
     {
@@ -45,15 +45,15 @@ public class MenuUI : MonoBehaviour
 
     private void GoHome()
     {
-        Camera.main.transform.position = new Vector3(0, 10, -8);
+        Camera.main.transform.position = new Vector3(0, 9, 5);
         Camera.main.transform.rotation = Quaternion.Euler(45, 0, 0);
-        Camera.main.orthographicSize = 15;
+        Camera.main.orthographicSize = 10;
     }
 
     private void GoRoom()
     {
-        Camera.main.transform.position = new Vector3(0, 10, -8);
-        Camera.main.transform.rotation = Quaternion.Euler(45, 0, 0);
+        Camera.main.transform.position = _roomCameraPosList[curRoom].position;
+        Camera.main.transform.rotation = _roomCameraPosList[curRoom].rotation;
         Camera.main.orthographicSize = 6;
     }
 }

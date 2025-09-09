@@ -141,6 +141,17 @@ public class UserInfoManager : Singleton<UserInfoManager>
         currentData.ItemInfo = itemInfo;
     }
 
+    public bool CanUseItem(ItemType item)
+    {
+        if (item == ItemType.Roller) return currentData.ItemInfo.Roller > 0;
+        else if (item == ItemType.DonutBox) return currentData.ItemInfo.DonutBox > 0;
+        else if (item == ItemType.Oven) return currentData.ItemInfo.Oven > 0;
+        else if (item == ItemType.Whisk) return currentData.ItemInfo.Whisk > 0;
+        else if (item == ItemType.Scissors) return currentData.ItemInfo.Scissors > 0;
+        else if (item == ItemType.DonutPan) return currentData.ItemInfo.DonutPan > 0;
+        else return currentData.ItemInfo.Coffee > 0;
+    }
+
     public void UseItem(ItemType item)
     {
         if (item == ItemType.Roller) currentData.ItemInfo.Roller--;
