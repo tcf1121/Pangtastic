@@ -34,6 +34,7 @@ public class InGameManager : MonoBehaviour
         useCoinText.text = $"{_useCoin}";
         customerFlowController.OnStageCleared += StageClear;
         customerFlowController.OnStageFailed += StageFail;
+        _finishAD += ContinueGame;
         useCoinContinueButton.onClick.AddListener(GoldContinueGame);
         watchAddContinueButton.onClick.AddListener(AdContinueGame);
         _score = 0;
@@ -165,10 +166,15 @@ public class InGameManager : MonoBehaviour
         if (Manager.User.CanUseCoin(_useCoin))
         {
             Manager.User.UseCoin(_useCoin);
-            orderStateController.AddPatience(50f);
-            continueUI.SetActive(false);
-            BoardManager.SetTouch(true);
+            ContinueGame();
         }
+    }
+
+    private void ContinueGame()
+    {
+        orderStateController.AddPatience(50f);
+        continueUI.SetActive(false);
+        BoardManager.SetTouch(true);
     }
 
     public void PauseGame()
