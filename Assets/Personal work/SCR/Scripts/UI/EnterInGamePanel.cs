@@ -17,26 +17,36 @@ public class EnterInGamePanel : MonoBehaviour
     [SerializeField] List<Image> recipeImages;
     [SerializeField] GridLayoutGroup _grid;
 
+    private StageSO curStage;
+    private CustomerSO curCustomer;
+
+    List<RecipeSO> _stageRecipes = new List<RecipeSO>();
     void Awake()
     {
+        curStage = Manager.Stage.CurrentStage;
+        curCustomer = curStage.Customer;
+
+        _stageRecipes.Clear();
+        _stageRecipes = RecipeRule.BuildOrder(curCustomer, curStage);
         // 여기서 레시피 만들어서 Stage에 넣기
     }
     void GetRecipe()
     {
-        List<RecipeSO> recipeSOs = /*여기만 바꾸면 됨*/Manager.Stage.CurrentStage.StageRecipes.ToList();
+        //List<RecipeSO> recipeSOs = _stageRecipes;
+        //List<RecipeSO> recipeSOs = Manager.Stage.CurrentStage.StageRecipes.ToList();
         for (int i = 0; i < recipeImages.Count; i++)
         {
-            if (i < recipeSOs.Count)
+            if (i < _stageRecipes.Count)
             {
-                recipeImages[i].sprite = recipeSOs[i].FoodPic;
+                recipeImages[i].sprite = _stageRecipes[i].FoodPic;
                 recipeImages[i].gameObject.SetActive(true);
             }
             else
                 recipeImages[i].gameObject.SetActive(false);
         }
-        if (recipeSOs.Count < 4) _grid.cellSize = new Vector2(200, 200);
-        else if (recipeSOs.Count < 5) _grid.cellSize = new Vector2(150, 150);
-        else if (recipeSOs.Count < 6) _grid.cellSize = new Vector2(125, 125);
+        if (_stageRecipes.Count < 4) _grid.cellSize = new Vector2(200, 200);
+        else if (_stageRecipes.Count < 5) _grid.cellSize = new Vector2(150, 150);
+        else if (_stageRecipes.Count < 6) _grid.cellSize = new Vector2(125, 125);
         else _grid.cellSize = new Vector2(100, 100);
     }
 
