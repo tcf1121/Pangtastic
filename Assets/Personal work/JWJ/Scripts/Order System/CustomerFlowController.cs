@@ -32,22 +32,22 @@ public class CustomerFlowController : MonoBehaviour
         //{
         //    _boardManager = FindObjectOfType<BoardManager>();
         //}
-        _customerOrder.OnCustomerSuccess += OnCustomerSuccess;
+        _customerOrder.OnStageClear += OnStageClear;
         _customerOrder.OnCustomerFail += OnCustomerFail;
-        _customerOrder.OnSpecialCustomerSuccess += OnSpecialCustomerSuccess;
+        //_customerOrder.OnSpecialCustomerSuccess += OnSpecialCustomerSuccess;
         //_customerOrder.OnSpecialCustomerFail += OnSpecialCustomerFail;
-        _customerOrder.OnSpecialCustomerRewardGiven += OnSpecialCustomerRewardGiven;
+        _customerOrder.OnOrderSegmentCleared += OnOrderSegmentCleared;
 
         //spawnButton.onClick.AddListener(SpawnCustomer); //테스트용 버튼
     }
 
     private void OnDestroy()
     {
-        _customerOrder.OnCustomerSuccess -= OnCustomerSuccess;
+        _customerOrder.OnStageClear -= OnStageClear;
         _customerOrder.OnCustomerFail -= OnCustomerFail;
-        _customerOrder.OnSpecialCustomerSuccess -= OnSpecialCustomerSuccess;
+        //_customerOrder.OnSpecialCustomerSuccess -= OnSpecialCustomerSuccess;
         //_customerOrder.OnSpecialCustomerFail -= OnSpecialCustomerFail;
-        _customerOrder.OnSpecialCustomerRewardGiven -= OnSpecialCustomerRewardGiven;
+        _customerOrder.OnOrderSegmentCleared -= OnOrderSegmentCleared;
     }
 
     public void SpawnCustomer()
@@ -65,13 +65,13 @@ public class CustomerFlowController : MonoBehaviour
         Debug.Log($"현재 스테이지 {curStage.StageID}");
     }
 
-    private void OnCustomerSuccess(CustomerSO customer, float percentage)
+    private void OnOrderSegmentCleared(CustomerSO curCustomer, float percentage)
     {
-        StageClear(customer, percentage);
-    }
+        if(curCustomer.Type != CustomerType.Special)
+        {
+            return;
+        }
 
-    private void OnSpecialCustomerRewardGiven(float percentage)
-    {
         int percent = Mathf.FloorToInt(percentage);
         Debug.Log($"스페셜 중간 성공 인내심 {percent}%. 보상제공");
         List<GemType> rewardGive = new();
@@ -108,22 +108,12 @@ public class CustomerFlowController : MonoBehaviour
         InGameManager.RewardGem(rewardGive);
     }
 
-    private void OnSpecialCustomerSuccess(CustomerSO customer, float averagePercent)
-    {
-        StageClear(customer, averagePercent);
-    }
-
     private void OnCustomerFail()
     {
         StageFail();
     }
 
-    //private void OnSpecialCustomerFail(CustomerSO customer)
-    //{
-    //    StageFail();
-    //}
-
-    private void StageClear(CustomerSO customer, float percentage)
+    private void OnStageClear(CustomerSO customer, float percentage)
     {
         int percent = Mathf.FloorToInt(percentage); //int 로 변경
 

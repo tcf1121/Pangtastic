@@ -28,6 +28,7 @@ public class EnterInGamePanel : MonoBehaviour
 
         _stageRecipes.Clear();
         _stageRecipes = RecipeRule.BuildOrder(curCustomer, curStage);
+        Manager.Stage.SetStageRecipe(_stageRecipes);
         // 여기서 레시피 만들어서 Stage에 넣기
     }
     void GetRecipe()

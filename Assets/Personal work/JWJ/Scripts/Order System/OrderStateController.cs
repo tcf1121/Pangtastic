@@ -27,7 +27,7 @@ public class OrderStateController : MonoBehaviour
     private bool _hasEnded; //이미 성공/실패로 종료됐는지
 
 
-    public void StartOrder(List<RecipeSO> recipes, StageSO stage, CustomerSO customer)
+    public void StartOrder(List<RecipeSO> recipes, StageSO stage, CustomerSO customer, bool resetPatience)
     {
         _curCustomer = customer;
 
@@ -41,7 +41,10 @@ public class OrderStateController : MonoBehaviour
 
         OnOrderStarted?.Invoke(_orderRecipes, recipes); //UI로 정보 전달
 
-        StartPatience(); //인내심 감소 시작
+        if(resetPatience)
+        {
+            StartPatience();
+        }
     }
 
     public void AddIngredientSta(IngredientSO ingredient) //블록 터지면 호출되는 함수

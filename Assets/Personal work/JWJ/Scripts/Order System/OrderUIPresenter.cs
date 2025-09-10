@@ -55,8 +55,7 @@ public class OrderUIPresenter : MonoBehaviour
         _orderState.OnRecipeCompleted += OnRecipeCompleted;
         _orderState.OnOrderCompleted += OnOrderCompleted;
         _orderState.OnOrderTimeout += OnOrderTimeout;
-        _customerOrder.OnSpecialCustomerSuccess += OnSpecialOrderCompleted;
-        //_customerOrder.OnSpecialCustomerFail += OnSpecialCustomerFail;
+        _customerOrder.OnStageClear += OnStageClear;
         _customerFlow.OnCustomerSpawn += OnCustomerSpawn;
     }
 
@@ -67,8 +66,7 @@ public class OrderUIPresenter : MonoBehaviour
         _orderState.OnRecipeCompleted -= OnRecipeCompleted;
         _orderState.OnOrderCompleted -= OnOrderCompleted;
         _orderState.OnOrderTimeout -= OnOrderTimeout;
-        _customerOrder.OnSpecialCustomerSuccess -= OnSpecialOrderCompleted;
-        //_customerOrder.OnSpecialCustomerFail -= OnSpecialCustomerFail;
+        _customerOrder.OnStageClear -= OnStageClear;
         _customerFlow.OnCustomerSpawn -= OnCustomerSpawn;
 
         StopRunningCoroutines();
@@ -117,17 +115,10 @@ public class OrderUIPresenter : MonoBehaviour
 
     private void OnOrderCompleted(CustomerSO curCustomer, float percent) //주문 성공
     {
-        if (curCustomer.Type == CustomerType.Special) //스페셜 손님이면 중간주문은 이모지만
-        {
-            StartEmojiOnly(percent);
-        }
-        else // 노멀,유니크
-        {
-            StartEmojiAndDialogue(percent, curCustomer); // 이모지,대사 동시 표시
-        }
+        StartEmojiOnly(percent);
     }
 
-    private void OnSpecialOrderCompleted(CustomerSO curCustomer, float averagePercent) // 스페셜 최종 성공
+    private void OnStageClear(CustomerSO curCustomer, float averagePercent) // 스테이지 클리어
     {
         StartEmojiAndDialogue(averagePercent, curCustomer);
     }
@@ -136,11 +127,6 @@ public class OrderUIPresenter : MonoBehaviour
     {
         StartEmojiAndDialogue(0f, curCustomer);
     }
-
-    //private void OnSpecialCustomerFail(CustomerSO curCustomer) // 스페셜 최종 실패
-    //{
-    //    StartEmojiAndDialogue(0f, curCustomer);
-    //}
 
     private void StartEmojiOnly(float percent) //이모지 코루틴 시작
     {

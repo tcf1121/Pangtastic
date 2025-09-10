@@ -94,7 +94,7 @@ public class StageManager : Singleton<StageManager>
         _stageRecipes.AddRange(recipeList);
     }
 
-    public List<RecipeSO> GetStageRecipe()
+    public List<RecipeSO> GetStageRecipes()
     {
         return _stageRecipes;
     }
