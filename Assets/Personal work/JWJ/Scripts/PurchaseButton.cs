@@ -12,10 +12,11 @@ public class PurchaseButton : MonoBehaviour
 
     private void Awake()
     {
+        _button = GetComponent<Button>();
         _button.onClick.AddListener(OnClickBuy);
         Manager.IAP.OnProductsReady += OnProductsReady;
         Manager.IAP.OnNonConsumableOwned += OnNonConsumableOwned;
-        _buttonText.text = "";
+        //_buttonText.text = "";
     }
 
     private void OnDestroy()

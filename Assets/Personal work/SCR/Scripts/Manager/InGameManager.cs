@@ -1,6 +1,6 @@
 using SCR;
 using SCR_B;
-using System.Collections;
+using System;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
@@ -12,20 +12,31 @@ public class InGameManager : MonoBehaviour
     [SerializeField] OrderStateController orderStateController;
     [SerializeField] CustomerFlowController customerFlowController;
     [SerializeField] GameObject clearUI;
-    [SerializeField] GameObject failUI;
+    [SerializeField] GameObject continueUI;
+    [SerializeField] GameObject retryUI;
     [SerializeField] TMP_Text WinCoin;
+    [SerializeField] TMP_Text useCoinText;
+    [SerializeField] Button useCoinContinueButton;
+    [SerializeField] Button watchAddContinueButton;
 
     private static InGameManager instate;
     private int _score;
     private int _coin;
+    private bool _firstfail = true;
+    private Action _finishAD;
+    [SerializeField] private int _useCoin;
 
     void Awake()
     {
         UserInfoUI.Instance.SetActive(false);
         Manager.User.UseHeart();
         instate = this;
+        useCoinText.text = $"{_useCoin}";
         customerFlowController.OnStageCleared += StageClear;
         customerFlowController.OnStageFailed += StageFail;
+        _finishAD += ContinueGame;
+        useCoinContinueButton.onClick.AddListener(GoldContinueGame);
+        watchAddContinueButton.onClick.AddListener(AdContinueGame);
         _score = 0;
         _coin = 0;
     }
@@ -136,7 +147,34 @@ public class InGameManager : MonoBehaviour
         //instate.LoseCoin.text = $"{GetCoin()}";
         //instate.LoseScore.text = $"{GetScore()}";
         //Manager.Heart.UseHearts();
-        instate.failUI.SetActive(true);
+        if (instate._firstfail)
+        {
+            instate._firstfail = false;
+            instate.continueUI.SetActive(true);
+        }
+        else instate.retryUI.SetActive(true);
+    }
+
+    private void AdContinueGame()
+    {
+        Manager.Ad.LoadAD();
+        Manager.Ad.ShowAD(_finishAD);
+    }
+
+    private void GoldContinueGame()
+    {
+        if (Manager.User.CanUseCoin(_useCoin))
+        {
+            Manager.User.UseCoin(_useCoin);
+            ContinueGame();
+        }
+    }
+
+    private void ContinueGame()
+    {
+        orderStateController.AddPatience(50f);
+        continueUI.SetActive(false);
+        BoardManager.SetTouch(true);
     }
 
     public void PauseGame()

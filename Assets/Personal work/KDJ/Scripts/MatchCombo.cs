@@ -1,6 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
-using System.Threading;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -31,6 +28,7 @@ public class MatchCombo : MonoBehaviour
     {
         CurCombo++;
         _timer = 3f;
+        if (CurCombo > 1)
         _comboCount.text = "Combo\n" + CurCombo;
     }
 
@@ -42,7 +40,7 @@ public class MatchCombo : MonoBehaviour
     private void ResetCombo()
     {
         CurCombo = 0;
-        _comboCount.text = "Combo\n" + CurCombo;
+        _comboCount.text = "";
     }
 
     private void SetSliderValue()

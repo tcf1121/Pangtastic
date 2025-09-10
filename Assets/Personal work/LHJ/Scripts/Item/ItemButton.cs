@@ -12,11 +12,13 @@ namespace LHJ
         [SerializeField] private Button _button;
         [SerializeField] private BoardManager _board;
         [SerializeField] private ItemCheck _itemCheck;
+        [SerializeField] private GameObject _lockGO;
 
         private void Awake()
         {
             if (_button == null) _button = GetComponent<Button>();
             _button.onClick.AddListener(OnClick);
+            Lock();
         }
 
         private void OnClick()
@@ -24,7 +26,7 @@ namespace LHJ
             if (_type == ItemType.DonutPan)
             {
                 if (_itemCheck != null)
-                    _itemCheck.UseDonutPan();  
+                    _itemCheck.UseDonutPan();
                 return;
             }
 
@@ -32,7 +34,7 @@ namespace LHJ
             if (_type == ItemType.Coffee)
             {
                 if (_itemCheck != null)
-                    _itemCheck.UseCoffee(30f); 
+                    _itemCheck.UseCoffee(30f);
                 return;
             }
 
@@ -44,6 +46,16 @@ namespace LHJ
                 _board.ClearItemSelection();
             else
                 _board.SelectItem(_type);
+            Lock();
+        }
+
+        private void Lock()
+        {
+            if (!Manager.User.CanUseItem(_type))
+            {
+                _button.interactable = false;
+                _lockGO.SetActive(true);
+            }
         }
     }
 }

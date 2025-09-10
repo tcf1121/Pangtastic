@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 
 public class UserInfoManager : Singleton<UserInfoManager>
 {
@@ -67,7 +68,7 @@ public class UserInfoManager : Singleton<UserInfoManager>
 
     public bool CanUseCoin(int value)
     {
-        if (currentData.UserInfo.Coin - value > 0) return true;
+        if (currentData.UserInfo.Coin - value >= 0) return true;
         else return false;
     }
 
@@ -141,6 +142,39 @@ public class UserInfoManager : Singleton<UserInfoManager>
         currentData.ItemInfo = itemInfo;
     }
 
+    public bool CanUseItem(ItemType item)
+    {
+        if (item == ItemType.Roller) return currentData.ItemInfo.Roller > 0;
+        else if (item == ItemType.DonutBox) return currentData.ItemInfo.DonutBox > 0;
+        else if (item == ItemType.Oven) return currentData.ItemInfo.Oven > 0;
+        else if (item == ItemType.Whisk) return currentData.ItemInfo.Whisk > 0;
+        else if (item == ItemType.Scissors) return currentData.ItemInfo.Scissors > 0;
+        else if (item == ItemType.DonutPan) return currentData.ItemInfo.DonutPan > 0;
+        else return currentData.ItemInfo.Coffee > 0;
+    }
+
+    public void UseItem(ItemType item)
+    {
+        if (item == ItemType.Roller) currentData.ItemInfo.Roller--;
+        else if (item == ItemType.DonutBox) currentData.ItemInfo.DonutBox--;
+        else if (item == ItemType.Oven) currentData.ItemInfo.Oven--;
+        else if (item == ItemType.Whisk) currentData.ItemInfo.Whisk--;
+        else if (item == ItemType.Scissors) currentData.ItemInfo.Scissors--;
+        else if (item == ItemType.DonutPan) currentData.ItemInfo.DonutPan--;
+        else currentData.ItemInfo.Coffee--;
+    }
+
+    public void AddItem(ItemType item, int num = 1)
+    {
+        if (item == ItemType.Roller) currentData.ItemInfo.Roller += num;
+        else if (item == ItemType.DonutBox) currentData.ItemInfo.DonutBox += num;
+        else if (item == ItemType.Oven) currentData.ItemInfo.Oven += num;
+        else if (item == ItemType.Whisk) currentData.ItemInfo.Whisk += num;
+        else if (item == ItemType.Scissors) currentData.ItemInfo.Scissors += num;
+        else if (item == ItemType.DonutPan) currentData.ItemInfo.DonutPan += num;
+        else currentData.ItemInfo.Coffee += num;
+    }
+
     public void SetName(string name)
     {
         currentData.PlayerName = name;
@@ -156,9 +190,46 @@ public class UserInfoManager : Singleton<UserInfoManager>
         return currentData;
     }
 
+    public void SetCurPlace(MissonPlace curPlace)
+    {
+        currentData.PlaceInfo.CurPlace = (int)curPlace;
+    }
+
+    public void NewMissionList(int max)
+    {
+        currentData.PlaceInfo.CurMisson = new bool[max];
+        for (int i = 0; i < max; i++)
+        {
+            currentData.PlaceInfo.CurMisson[i] = false;
+        }
+    }
+
+    public MissonPlace GetCurPlace()
+    {
+        return (MissonPlace)currentData.PlaceInfo.CurPlace;
+    }
+
+    public void ClearCurMisson(int index)
+    {
+        currentData.PlaceInfo.CurMisson[index] = true;
+    }
+
+    public bool[] GetCurMisson()
+    {
+        return currentData.PlaceInfo.CurMisson;
+    }
 
 
-
+}
+public enum ItemType
+{
+    Roller,
+    DonutBox,
+    Oven,
+    Whisk,
+    Scissors,
+    DonutPan,
+    Coffee
 }
 
 [Serializable]
@@ -168,6 +239,7 @@ public class UserData
     public int Stage { get; set; } = 0;
     public string PlayerName { get; set; } = "";
     public ItemInfo ItemInfo { get; set; } = new ItemInfo();
+    public PlaceInfo PlaceInfo { get; set; } = new PlaceInfo();
 }
 
 [Serializable]
@@ -197,4 +269,11 @@ public class ItemInfo
     public int Scissors { get; set; } = 0;
     public int DonutPan { get; set; } = 0;
     public int Coffee { get; set; } = 0;
+}
+
+[Serializable]
+public class PlaceInfo
+{
+    public int CurPlace { get; set; } = 0;
+    public bool[] CurMisson { get; set; } = new bool[16];
 }

@@ -2,10 +2,6 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using SCR;
-using LHJ;
-using SCR_B;
-using TMPro;
-using SCR_O;
 
 namespace KDJ
 {
@@ -171,7 +167,18 @@ namespace KDJ
                 {
                     GameBoardData.OverlayArray[y, x] = new Syrup(x, y);
                 }
-                else if (gemType == GemType.Ice) GameBoardData.BlockArray[y, x] = new Ice(x, y);
+                else if (gemType == GemType.Ice)
+                {
+                    GameBoardData.BlockArray[y, x] = new Block()
+                    {
+                        GemType = (GemType)Random.Range(0, 6),
+                    };
+
+                    GameBoardData.BlockArray[y, x].IsNormal = false;
+                    GameBoardData.BlockArray[y, x].CanMove = false;
+
+                    GameBoardData.OverlayArray[y, x] = new Ice(x, y);
+                }
                 else if (gemType == GemType.DonutBag) GameBoardData.BlockArray[y, x] = new DonutBag(x, y);
                 else if (gemType == GemType.Coin) GameBoardData.BlockArray[y, x] = new Coin(x, y);
                 else if (gemType == GemType.GiftBox) GameBoardData.BlockArray[y, x] = new GiftBox(x, y);
@@ -194,6 +201,16 @@ namespace KDJ
                     if (blockPrefab != null)
                         GameBoardData.OverlayArray[y, x].BlockInstance = Instantiate(blockPrefab, position, Quaternion.identity);
                 }
+                else if (gemType == GemType.Ice)
+                {
+                    GameObject overlayPrefab = GetBlockPrefab((int)GemType.Ice);
+                    if (overlayPrefab != null)
+                        GameBoardData.OverlayArray[y, x].BlockInstance = Instantiate(overlayPrefab, position, Quaternion.identity);
+                    GameObject blockPrefabIce = GetBlockPrefab((int)GameBoardData.BlockArray[y, x].GemType);
+                    if (blockPrefabIce != null)
+                        GameBoardData.BlockArray[y, x].BlockInstance = BlockPool.GetObject().gameObject;
+                    GameBoardData.BlockArray[y, x].BlockInstance.transform.position = position;
+                }
                 else
                 {
                     if (gemType < GemType.Milk)
@@ -212,29 +229,40 @@ namespace KDJ
                     }
                     else
                     {
-                        GameObject blockPrefab = GetBlockPrefab((int)gemType);
-                        if (blockPrefab != null)
-                            GameBoardData.BlockArray[y, x].BlockInstance = Instantiate(blockPrefab, position, Quaternion.identity);
+                        GameObject blockPrefabSpecial = GetBlockPrefab((int)gemType);
+                        if (blockPrefabSpecial != null)
+                        {
+                            if (gemType == GemType.FlourBag)
+                            {
+                                Debug.Log("FlourBag 생성");
+                                position += new Vector3(0.5f, 0.5f, 0); // FlourBag는 중앙 정렬이 아니므로 위치 보정
+                                GameBoardData.BlockArray[y, x].BlockInstance = Instantiate(blockPrefabSpecial, position, Quaternion.identity);
+                            }
+                            else
+                            {
+                                GameBoardData.BlockArray[y, x].BlockInstance = Instantiate(blockPrefabSpecial, position, Quaternion.identity);
+                            }
+                        }
                     }
-                }
 
-                if (GameBoardData.BlockArray[y, x].GemType == GemType.Ice)
-                {
-                    Debug.Log("Ice블럭인가?" + (GameBoardData.BlockArray[y, x] is Ice));
-                    if (GameBoardData.BlockArray[y, x] is Ice iceBlock && iceBlock.BlockInstance != null)
+                    if (GameBoardData.BlockArray[y, x].GemType == GemType.Ice)
                     {
-                        iceBlock.IceObject = iceBlock.BlockInstance;
-                        Debug.Log("IceObject 설정됨:" + (iceBlock.IceObject != null));
+                        Debug.Log("Ice블럭인가?" + (GameBoardData.BlockArray[y, x] is Ice));
+                        if (GameBoardData.BlockArray[y, x] is Ice iceBlock && iceBlock.BlockInstance != null)
+                        {
+                            iceBlock.IceObject = iceBlock.BlockInstance;
+                            Debug.Log("IceObject 설정됨:" + (iceBlock.IceObject != null));
+                        }
                     }
+
+                    GameBoardData.SetBlock(x, y, GameBoardData.BlockArray[y, x]);
+
                 }
-
-                GameBoardData.SetBlock(x, y, GameBoardData.BlockArray[y, x]);
-
             }
         }
 
         /// <summary>
-        /// 보드 데이터에 따라 모든 일반 블록의 게임 오브젝트를 생성하고 배치합니다.
+        /// 보드 데이터에 따라 모든 블록의 게임 오브젝트를 생성하고 배치합니다.
         /// </summary>
         public void DrawAllBlocks(BlockMover blockMover)
         {
@@ -250,6 +278,7 @@ namespace KDJ
                         if (block.GemType < GemType.Milk)
                         {
                             PooledObject pooledObject = BlockPool.GetObject();
+                            pooledObject.transform.localScale = Vector3.one;
                             SpriteRenderer spriteRenderer = pooledObject.GetComponent<SpriteRenderer>();
 
                             if (spriteRenderer != null && (int)block.GemType < normalBlockSprites.Count)
@@ -265,7 +294,18 @@ namespace KDJ
                         {
                             GameObject blockPrefabSpecial = GetBlockPrefab((int)block.GemType);
                             if (blockPrefabSpecial != null)
-                                block.BlockInstance = Instantiate(blockPrefabSpecial, position, Quaternion.identity);
+                            {
+                                if (block.GemType == GemType.FlourBag)
+                                {
+                                    Debug.Log("FlourBag 생성");
+                                    position += new Vector3(0.5f, 0.5f, 0); // FlourBag는 중앙 정렬이 아니므로 위치 보정
+                                    block.BlockInstance = Instantiate(blockPrefabSpecial, position, Quaternion.identity);
+                                }
+                                else
+                                {
+                                    block.BlockInstance = Instantiate(blockPrefabSpecial, position, Quaternion.identity);
+                                }
+                            }
                         }
 
 
@@ -282,16 +322,6 @@ namespace KDJ
                             else
                             {
                                 block.CanMove = false;
-                            }
-
-                            if (block.GemType == GemType.Ice)
-                            {
-                                Debug.Log("Ice블럭인가?" + (block is Ice));
-                                if (block is Ice iceBlock && iceBlock.BlockInstance != null)
-                                {
-                                    iceBlock.IceObject = iceBlock.BlockInstance;
-                                    Debug.Log("IceObject 설정됨:" + (iceBlock.IceObject != null));
-                                }
                             }
                         }
                         else if (block.GemType < GemType.Dust && block.GemType > GemType.Sugar)
@@ -330,6 +360,14 @@ namespace KDJ
                         block.IsObstacle = true;
                         block.IsNormal = false;
                         block.CanMove = false;
+
+                        if (block.GemType == GemType.Ice)
+                        {
+                            Block normalBlock = GameBoardData.GetBlock(x, y);
+                            normalBlock.CanMove = false; // 얼음 위의 일반 블록은 움직일 수 없습니다.
+                            normalBlock.IsNormal = false;
+                        }
+
                         Vector3 position = blockMover.GridToWorld(new Vector2Int(x, y), GameBoardData.Width, GameBoardData.Height);
                         GameObject blockPrefab = GetBlockPrefab((int)block.GemType);
                         if (blockPrefab != null)
@@ -415,6 +453,7 @@ namespace KDJ
                                 {
                                     ob.X = x;
                                     ob.Y = destY;
+                                    ob.OnLand(destY);
                                 }
 
                                 movedFlags[destY, x] = true; // 이 틱에서 이동했음을 표시
@@ -448,6 +487,7 @@ namespace KDJ
                                     {
                                         ob.X = x - 1;
                                         ob.Y = y + 1;
+                                        ob.OnLand(y);
                                     }
                                     movedFlags[y, x] = true;
                                     activityThisStep = true;
@@ -465,6 +505,7 @@ namespace KDJ
                                         {
                                             ob.X = x + 1;
                                             ob.Y = y + 1;
+                                            ob.OnLand(y);
                                         }
                                         movedFlags[y, x] = true;
                                         activityThisStep = true;
@@ -497,6 +538,7 @@ namespace KDJ
                                         {
                                             ob.X = x - 1;
                                             ob.Y = y - 1;
+                                            ob.OnLand(y - 1);
                                         }
                                         movedToThisTick[y - 1, x - 1] = true;
                                         activityThisStep = true;
@@ -511,6 +553,7 @@ namespace KDJ
                                         {
                                             ob.X = x + 1;
                                             ob.Y = y - 1;
+                                            ob.OnLand(y - 1);
                                         }
                                         movedToThisTick[y - 1, x + 1] = true;
                                         activityThisStep = true;
@@ -521,8 +564,6 @@ namespace KDJ
                         }
                     }
                 }
-
-                // ... (낙하 로직은 그대로) ...
 
                 // --- 3순위: 새 블록 생성 (대기열 채우기) ---
                 if (RefillWaitingQueue(blockMover))
@@ -556,7 +597,7 @@ namespace KDJ
                     {
                         for (int i = 0; i < 5; i++)
                         {
-                            _blockWaitingQueue[x].Enqueue(new Block { GemType = (GemType)Random.Range(0, _spawnRangeMax + 1) });
+                            _blockWaitingQueue[x].Enqueue(new Block { GemType = (GemType)Random.Range(0, _spawnRangeMax) });
                         }
                     }
 
@@ -568,6 +609,7 @@ namespace KDJ
                     if (newBlock.GemType < GemType.Milk)
                     {
                         PooledObject pooledObject = BlockPool.GetObject();
+                        pooledObject.transform.localScale = Vector3.one;
 
                         SpriteRenderer spriteRenderer = pooledObject.GetComponent<SpriteRenderer>();
                         if (spriteRenderer != null && (int)newBlock.GemType < normalBlockSprites.Count)
@@ -686,6 +728,7 @@ namespace KDJ
             if (gemType < GemType.Milk)
             {
                 PooledObject pooledObject = BlockPool.GetObject();
+                pooledObject.transform.localScale = Vector3.one;
                 SpriteRenderer spriteRenderer = pooledObject.GetComponent<SpriteRenderer>();
                 if (spriteRenderer != null && (int)gemType < normalBlockSprites.Count)
                 {
@@ -847,7 +890,7 @@ namespace KDJ
 
         public Block SetRandomBlock(int x, int y)
         {
-            GemType gemType = (GemType)Random.Range(0, _spawnRangeMax + 1);
+            GemType gemType = (GemType)Random.Range(0, _spawnRangeMax);
             Block newBlock = CreateNewBlock(gemType);
             GameBoardData.SetBlock(x, y, newBlock);
             return newBlock;
@@ -855,7 +898,7 @@ namespace KDJ
 
         public void SpawnRandomBlock(int x, int y)
         {
-            GemType gemType = (GemType)Random.Range(0, _spawnRangeMax + 1);
+            GemType gemType = (GemType)Random.Range(0, _spawnRangeMax);
             Block newBlock = CreateNewBlock(gemType);
             GameObject blockPrefab = GetBlockPrefab((int)gemType);
             if (blockPrefab == null) return;
@@ -987,7 +1030,6 @@ namespace KDJ
             return _spawnRangeMax;
         }
 
-        // KDJ: 가이드라인 - 특정 블록을 애니메이션과 함께 스폰하는 코루틴
         public IEnumerator SpawnWithAnimation(int x, int y, GemType gemType)
         {
             BoardManager.Instance.IsWaitingForAnimation = true;

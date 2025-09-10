@@ -24,6 +24,9 @@ namespace KDJ
         [SerializeField] private bool isTest = false;
         [Header("애니메이션 설정")]
         [SerializeField] private float _duration = 0.3f;
+        [SerializeField] private ObjectPool _explosionEffectPool;
+        [SerializeField] private AnimationCurve _explosionScaleCurve;
+        [SerializeField] private AnimationCurve _explosionAlphaCurve;
 
         public IGameState CurrentState { get; private set; }
         public BlockSpawner Spawner { get; private set; }
@@ -277,8 +280,8 @@ namespace KDJ
             ShowScoreForMatches(matchGroups);
 
             // 애니메이션 총 시간
-            float shrinkTime = _duration * 0.7f;
-            float popTime = _duration * 0.3f;
+            float shrinkTime = _duration * 0.35f;
+            float popTime = _duration * 0.65f;
 
             Vector3 originalScale = Vector3.one;
             Vector3 shrinkScale = Vector3.one * 0.2f;
@@ -293,6 +296,7 @@ namespace KDJ
                 }
             }
 
+            IsWaitingForAnimation = true;
             // 1단계: 축소
             float timer = 0;
             while (timer < shrinkTime)
@@ -301,12 +305,24 @@ namespace KDJ
                 float progress = Mathf.Clamp01(timer / shrinkTime);
                 foreach (var block in blocksToAnimate)
                 {
-                    block.BlockInstance.transform.localScale = Vector3.Lerp(originalScale, shrinkScale, progress);
+                    block.BlockInstance.transform.localScale = Vector3.Lerp(originalScale, Vector3.zero, progress);
                 }
                 yield return null;
             }
 
-            // 2단계: 원래 크기로 복귀
+            // 2단계: 폭발 이펙트 생성
+            SpriteRenderer[] renderers = new SpriteRenderer[blocksToAnimate.Count];
+
+            foreach (var block in blocksToAnimate)
+            {
+                Vector3 blockPos = block.BlockInstance.transform.position;
+                block.BlockInstance.GetComponent<PooledObject>().ReturnToPool();
+                block.BlockInstance = _explosionEffectPool.GetObject().gameObject;
+                block.BlockInstance.transform.position = blockPos;
+                block.BlockInstance.transform.localScale = shrinkScale;
+                renderers[blocksToAnimate.IndexOf(block)] = block.BlockInstance.GetComponent<SpriteRenderer>();
+            }
+
             timer = 0;
             while (timer < popTime)
             {
@@ -314,10 +330,17 @@ namespace KDJ
                 float progress = Mathf.Clamp01(timer / popTime);
                 foreach (var block in blocksToAnimate)
                 {
-                    block.BlockInstance.transform.localScale = Vector3.Lerp(shrinkScale, originalScale, progress);
+                    float scaleValue = _explosionScaleCurve.Evaluate(progress);
+                    float alphaValue = _explosionAlphaCurve.Evaluate(progress);
+                    Color color = renderers[blocksToAnimate.IndexOf(block)].color;
+                    color.a = alphaValue;
+                    renderers[blocksToAnimate.IndexOf(block)].color = color;
+                    block.BlockInstance.transform.localScale = Vector3.one * scaleValue;
                 }
                 yield return null;
             }
+
+            IsWaitingForAnimation = false;
 
             // 3단계: 파괴 및 데이터 정리
             foreach (var coord in coordsToDestroy)

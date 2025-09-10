@@ -27,6 +27,7 @@ public class LanguageSystem : Singleton<LanguageSystem>
             languageList = handle.Result;
             Debug.Log($"languageList 로드 완료.");
             SetSystemLanguage();
+            ChangeLanguage();
         }
         else
         {
@@ -51,6 +52,7 @@ public class LanguageSystem : Singleton<LanguageSystem>
 
     public void ChangeLanguage()
     {
+        if (languageList == null) return;
         int language = (int)currentLang;
         LocalizationSettings.SelectedLocale = languageList.Infos[language].Locale;
         Debug.Log("언어 변경됨: " + languageList.Infos[language].Language);

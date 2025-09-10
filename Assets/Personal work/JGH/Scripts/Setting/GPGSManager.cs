@@ -5,6 +5,7 @@ using GooglePlayGames.BasicApi;
 using System.Collections;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using static DatabaseSystem;
 
 public class GPGSManager : Singleton<GPGSManager>
 {
@@ -155,7 +156,7 @@ public class GPGSManager : Singleton<GPGSManager>
         AuthenticateUser();
     }
 
-    public void LinkGuestToGoogle(System.Action<bool> onDone) // 게스트 > 구글 전환
+    public void LinkGuestToGoogle(System.Action<bool> onDone) // 게스트 구글 링크
     {
         if (PlayGamesPlatform.Instance.localUser.authenticated == false)
         {
@@ -163,7 +164,7 @@ public class GPGSManager : Singleton<GPGSManager>
             {
                 if (status != SignInStatus.Success)
                 {
-                    Debug.LogError("GPGS 로그인 실패");
+                    Debug.LogError($"GPGS 로그인 실패 {status.ToString()}");
                     onDone?.Invoke(false);
                     return;
                 }
@@ -220,7 +221,7 @@ public class GPGSManager : Singleton<GPGSManager>
                 string gpgsName = PlayGamesPlatform.Instance.localUser.userName;
                 Debug.Log($"GPGS 이름 : {gpgsName}");
 
-               
+
 
                 if (string.IsNullOrEmpty(gpgsName))
                 {
@@ -230,7 +231,7 @@ public class GPGSManager : Singleton<GPGSManager>
                 }
 
                 var profile = new UserProfile { DisplayName = gpgsName };
-                
+
                 Manager.DB.user.UpdateUserProfileAsync(profile).ContinueWithOnMainThread(task =>
                 {
                     if (task.IsCanceled || task.IsFaulted)
@@ -245,10 +246,10 @@ public class GPGSManager : Singleton<GPGSManager>
                     cur.PlayerName = string.IsNullOrEmpty(gpgsName) ? "Player" : gpgsName; //이름 있으면 이름, 없으면 Player
 
                     Manager.User.SetUser(cur); //저장
-
+                    //Manager.DB.ChangeNickname(gpgsName);
+                    
                     Debug.Log($"DB.DisplayName : {Manager.DB.user.DisplayName}");
                     Debug.Log($"profile.DisplayName : {profile.DisplayName}");
-                    
 
                     string uid = Manager.DB.auth.CurrentUser.UserId;
                     Manager.DB.MigrateGuestDataToUser(uid); //마이그레이션

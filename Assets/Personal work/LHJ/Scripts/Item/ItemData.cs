@@ -2,13 +2,13 @@ using UnityEngine;
 
 namespace LHJ
 {
-    public enum ItemType
-    {
-        Whisk,    // 3x3
-        Scissor,  // 가로+세로
-        DonutPan,
-        Coffee
-    }
+    // public enum ItemType
+    // {
+    //     Whisk,    // 3x3
+    //     Scissor,  // 가로+세로
+    //     DonutPan,
+    //     Coffee
+    // }
 
     [CreateAssetMenu(fileName = "ItemData", menuName = "Puzzle/ItemData")]
     public class ItemData : ScriptableObject
