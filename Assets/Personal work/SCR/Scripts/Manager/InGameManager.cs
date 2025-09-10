@@ -1,6 +1,6 @@
 using SCR;
 using SCR_B;
-using System.Collections;
+using System;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
@@ -23,6 +23,7 @@ public class InGameManager : MonoBehaviour
     private int _score;
     private int _coin;
     private bool _firstfail = true;
+    private Action lookAction;
     [SerializeField] private int _useCoin;
 
     void Awake()
@@ -34,6 +35,7 @@ public class InGameManager : MonoBehaviour
         customerFlowController.OnStageCleared += StageClear;
         customerFlowController.OnStageFailed += StageFail;
         useCoinContinueButton.onClick.AddListener(GoldContinueGame);
+        watchAddContinueButton.onClick.AddListener(AdContinueGame);
         _score = 0;
         _coin = 0;
     }
@@ -154,7 +156,8 @@ public class InGameManager : MonoBehaviour
 
     private void AdContinueGame()
     {
-
+        Manager.Ad.LoadAD();
+        Manager.Ad.ShowAD(lookAction);
     }
 
     private void GoldContinueGame()

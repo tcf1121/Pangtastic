@@ -1,13 +1,14 @@
 using GoogleMobileAds.Api;
+using System;
 using UnityEngine;
 using UnityEngine.UI;
 
 public class AdSystem : Singleton<AdSystem>
 {
     //public static AdSystem Instance { get; private set; }
-    
+
     private RewardedInterstitialAd _rewardedInterstitialAd;
-    
+
     protected override void Awake()
     {
         base.Awake();
@@ -25,7 +26,7 @@ public class AdSystem : Singleton<AdSystem>
 
             LoadAD();
             Debug.Log("Google Mobile Ads initialization complete.");
-        }); 
+        });
     }
 
     /// <summary>
@@ -62,8 +63,8 @@ public class AdSystem : Singleton<AdSystem>
                       + ad.GetResponseInfo());
 
             _rewardedInterstitialAd = ad;
-            
-            
+
+
             // 이벤트 등록
             _rewardedInterstitialAd.OnAdFullScreenContentClosed += () =>
             {
@@ -76,15 +77,15 @@ public class AdSystem : Singleton<AdSystem>
                 Debug.LogError("Ad failed to show: " + adError);
             };
         });
-        
+
     }
-    public void ShowAD()
+    public void ShowAD(Action action = null)
     {
         if (_rewardedInterstitialAd != null && _rewardedInterstitialAd.CanShowAd())
         {
             _rewardedInterstitialAd.Show((Reward reward) =>
             {
-                // TODO: Reward the user.
+                action?.Invoke();
                 Debug.Log($"User earned reward: {reward.Amount} {reward.Type}");
             });
         }
