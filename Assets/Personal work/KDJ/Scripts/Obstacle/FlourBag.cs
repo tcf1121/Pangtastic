@@ -42,7 +42,7 @@ namespace KDJ
             fourPos.Add(new Vector2Int(X + 1, Y + 1));
             foreach (var pos in fourPos)
             {
-                if (array[pos.y, pos.x].BlockInstance != null)
+                if (array[pos.y, pos.x] != null && array[pos.y, pos.x].BlockInstance != null)
                 {
                     GameObject.Destroy(array[pos.y, pos.x].BlockInstance);
                 }

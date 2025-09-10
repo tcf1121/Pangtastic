@@ -31,11 +31,19 @@ namespace KDJ
 
         public BoardData LoadBoard()
         {
-            //실 사용 코드
-            //puzzleBoardSO = Manager.Stage.CurrentStage.PuzzleBoard;
+            int maxBlockType;
 
+            if (Manager.User.GetStage() < 52)
+                maxBlockType = 5;
+            else
+                maxBlockType = 6;
+                
+            //실 사용 코드
+            if (!BoardManager.Instance.IsTest)
+                puzzleBoardSO = Manager.Stage.CurrentStage.PuzzleBoard;
             // 테스트용 코드
-            puzzleBoardSO = testStageManager.CurrentBoard;
+            else
+                puzzleBoardSO = testStageManager.CurrentBoard;
 
             if (puzzleBoardSO == null)
             {
@@ -98,13 +106,13 @@ namespace KDJ
 
                 if (finalGemType == GemType.Random)
                 {
-                    finalGemType = (GemType)UnityEngine.Random.Range(0, 6); // 0~5 사이의 GemType을 바로 생성
+                    finalGemType = (GemType)UnityEngine.Random.Range(0, maxBlockType); // 0~5 사이의 GemType을 바로 생성
                 }
 
                 if (finalGemType == GemType.Dust)
                 {
                     boardData.OverlayArray[y, x] = new Dust(x, y);
-                    int donutNum = UnityEngine.Random.Range(0, 6);
+                    int donutNum = UnityEngine.Random.Range(0, maxBlockType);
                     boardData.BlockArray[y, x] = new Block()
                     {
                         GemType = (GemType)donutNum,
@@ -114,7 +122,7 @@ namespace KDJ
                 else if (finalGemType == GemType.Syrup)
                 {
                     boardData.OverlayArray[y, x] = new Syrup(x, y);
-                    int donutNum = UnityEngine.Random.Range(0, 6);
+                    int donutNum = UnityEngine.Random.Range(0, maxBlockType);
                     boardData.BlockArray[y, x] = new Block()
                     {
                         GemType = (GemType)donutNum,
@@ -124,7 +132,7 @@ namespace KDJ
                 {
                     boardData.BlockArray[y, x] = new Block()
                     {
-                        GemType = (GemType)Random.Range(0, 6),
+                        GemType = (GemType)Random.Range(0, maxBlockType),
                     };
                     boardData.OverlayArray[y, x] = new Ice(x, y);
                 }

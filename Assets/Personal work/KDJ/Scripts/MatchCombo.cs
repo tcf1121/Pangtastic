@@ -15,7 +15,6 @@ public class MatchCombo : MonoBehaviour
         if (CurCombo > 0)
         {
             _timer -= Time.deltaTime;
-            SetSliderValue();
 
             if (_timer <= 0f)
             {

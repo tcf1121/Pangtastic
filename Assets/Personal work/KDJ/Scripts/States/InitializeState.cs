@@ -8,7 +8,8 @@ namespace KDJ.States
         public void OnEnter(BoardManager boardManager)
         {
             // 테스트 코드
-            boardManager.StartCoroutine(boardManager.StageInit());
+            if (boardManager.IsTest)
+                boardManager.StartCoroutine(boardManager.StageInit());
 
             InGameManager.SpawnCustomer();
         }

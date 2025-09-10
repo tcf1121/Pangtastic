@@ -108,7 +108,7 @@ namespace KDJ
 
                     var block = gameBoard.GetBlock(x, y);
                     // 특수 블록은 매치 검사에서 제외
-                    if (block.GemType > GemType.Sugar && block.GemType < GemType.Dust) continue;
+                    if (!block.IsNormal) continue;
 
                     // 가로, 세로, 2x2 큐브 매치 확인
                     if (FindFullLineMatch(boardManager, x, y, true).Count >= 3) return true;
