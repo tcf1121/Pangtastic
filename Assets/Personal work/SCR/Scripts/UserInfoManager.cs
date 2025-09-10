@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 
 public class UserInfoManager : Singleton<UserInfoManager>
 {
@@ -189,7 +190,34 @@ public class UserInfoManager : Singleton<UserInfoManager>
         return currentData;
     }
 
+    public void SetCurPlace(MissonPlace curPlace)
+    {
+        currentData.PlaceInfo.CurPlace = (int)curPlace;
+    }
 
+    public void NewMissionList(int max)
+    {
+        currentData.PlaceInfo.CurMisson.Clear();
+        for (int i = 0; i < max; i++)
+        {
+            currentData.PlaceInfo.CurMisson.Add(false);
+        }
+    }
+
+    public MissonPlace GetCurPlace()
+    {
+        return (MissonPlace)currentData.PlaceInfo.CurPlace;
+    }
+
+    public void ClearCurMisson(int index)
+    {
+        currentData.PlaceInfo.CurMisson[index] = true;
+    }
+
+    public List<bool> GetCurMisson()
+    {
+        return currentData.PlaceInfo.CurMisson;
+    }
 
 
 }
@@ -211,6 +239,7 @@ public class UserData
     public int Stage { get; set; } = 0;
     public string PlayerName { get; set; } = "";
     public ItemInfo ItemInfo { get; set; } = new ItemInfo();
+    public PlaceInfo PlaceInfo { get; set; } = new PlaceInfo();
 }
 
 [Serializable]
@@ -240,6 +269,11 @@ public class ItemInfo
     public int Scissors { get; set; } = 0;
     public int DonutPan { get; set; } = 0;
     public int Coffee { get; set; } = 0;
+}
 
-
+[Serializable]
+public class PlaceInfo
+{
+    public int CurPlace { get; set; } = 0;
+    public List<bool> CurMisson { get; set; } = new();
 }
