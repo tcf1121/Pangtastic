@@ -197,10 +197,10 @@ public class UserInfoManager : Singleton<UserInfoManager>
 
     public void NewMissionList(int max)
     {
-        currentData.PlaceInfo.CurMisson.Clear();
+        currentData.PlaceInfo.CurMisson = new bool[max];
         for (int i = 0; i < max; i++)
         {
-            currentData.PlaceInfo.CurMisson.Add(false);
+            currentData.PlaceInfo.CurMisson[i] = false;
         }
     }
 
@@ -214,7 +214,7 @@ public class UserInfoManager : Singleton<UserInfoManager>
         currentData.PlaceInfo.CurMisson[index] = true;
     }
 
-    public List<bool> GetCurMisson()
+    public bool[] GetCurMisson()
     {
         return currentData.PlaceInfo.CurMisson;
     }
@@ -275,5 +275,5 @@ public class ItemInfo
 public class PlaceInfo
 {
     public int CurPlace { get; set; } = 0;
-    public List<bool> CurMisson { get; set; } = new();
+    public bool[] CurMisson { get; set; } = new bool[16];
 }
