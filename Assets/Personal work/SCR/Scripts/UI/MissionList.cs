@@ -9,17 +9,16 @@ public class MissionList : MonoBehaviour
     [SerializeField] TMP_Text _titleText;
     [SerializeField] TMP_Text _needStarText;
     [SerializeField] Button _useStarBtn;
-    private RoomManager _roomManager;
+    [SerializeField] private MissionPopup _missionPopup;
     private int _index;
     private int _needStar;
 
-    public void SetMission(int index, string title, int star, RoomManager roomManager)
+    public void SetMission(Mission mission)
     {
-        _roomManager = roomManager;
-        _titleText.text = title;
-        _index = index;
-        _needStar = star;
-        _needStarText.text = $"{star}";
+        _titleText.text = mission.Explane;
+        _index = mission.MissionID - 1;
+        _needStar = mission.Star;
+        _needStarText.text = $"{mission.Star}";
         _useStarBtn.onClick.AddListener(UseStar);
         transform.SetSiblingIndex(2);
         gameObject.SetActive(true);
@@ -30,7 +29,7 @@ public class MissionList : MonoBehaviour
         if (Manager.User.CanUseStar(_needStar))
         {
             Manager.User.UseStar(_needStar);
-            _roomManager.ClearMission(_index);
+            _missionPopup.ClearMission(_index);
             transform.SetSiblingIndex(0);
             gameObject.SetActive(false);
         }

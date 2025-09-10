@@ -1,12 +1,14 @@
 using System.Collections.Generic;
+using Unity.VisualScripting;
+using UnityEditor.Build.Pipeline;
 using UnityEngine;
 
 public class RoomManager : MonoBehaviour
 {
     [SerializeField] private List<GameObject> lockedRooms;
     private MissonPlace curPlace;
+    [SerializeField] MissionListSO missionList;
     [SerializeField] private MissIonBtn missonBtn;
-    [SerializeField] private List<int> maxMissionNum;
 
     void Awake()
     {
@@ -21,21 +23,43 @@ public class RoomManager : MonoBehaviour
     public void ClearPlace()
     {
         if (curPlace < MissonPlace.Greengrocery)
+        {
             curPlace++;
-        Manager.User.SetCurPlace(curPlace);
-        Manager.User.NewMissionList(maxMissionNum[0]);
-        lockedRooms[(int)curPlace].SetActive(true);
-        missonBtn.Refresh();
+            Manager.User.SetCurPlace(curPlace);
+            Manager.User.NewMissionList(GetMaxMission());
+            lockedRooms[(int)curPlace].SetActive(true);
+            missonBtn.Refresh();
+        }
     }
 
     public void ClearMission(int index)
     {
-
+        Manager.User.ClearCurMisson(index);
     }
 
     public int GetMaxMission()
     {
-        return maxMissionNum[(int)curPlace];
+        return missionList.Missions[(int)curPlace].Mission.Count;
+    }
+
+    public List<Mission> CreateMission(int num = 1)
+    {
+        List<Mission> returnMission = new();
+        List<bool> isclearMission = Manager.User.GetCurMisson();
+        List<Mission> missionLists = missionList.Missions[(int)curPlace].Mission;
+        for (int i = 0; i < isclearMission.Count; i++)
+        {
+            if (isclearMission[i] == false)
+            {
+                if (missionLists[i].Prerequisites == 0 ||
+                isclearMission[missionLists[i].Prerequisites - 1])
+                {
+                    returnMission.Add(missionLists[i]);
+                    if (returnMission.Count == num) break;
+                }
+            }
+        }
+        return returnMission;
     }
 }
 
