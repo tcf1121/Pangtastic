@@ -163,7 +163,7 @@ public class InGameManager : MonoBehaviour
         if (Manager.User.CanUseCoin(_useCoin))
         {
             Manager.User.UseCoin(_useCoin);
-            orderStateController.HalfPatience();
+            orderStateController.AddPatience(50f);
             continueUI.SetActive(false);
             KDJ.BoardManager.SetTouch(true);
         }

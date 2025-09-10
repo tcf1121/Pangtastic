@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -11,6 +12,8 @@ public class CharacterImageMake : MonoBehaviour
     [SerializeField] List<RawImage> _rawImages;
     [SerializeField] Color _speakerColor;
     [SerializeField] Color _elseColor;
+    [SerializeField] List<GameObject> _nameLabel;
+    [SerializeField] List<TMP_Text> _charactersName;
 
     void Awake()
     {
@@ -20,22 +23,41 @@ public class CharacterImageMake : MonoBehaviour
 
     public void SetDialog(string leftChar, string centerChar, string rightchar, int speakerIndex)
     {
+        SetNameLabel(0, leftChar);
+        SetNameLabel(1, centerChar);
+        SetNameLabel(2, rightchar);
         SetCharacter(0, StringToCharint(leftChar));
         SetCharacter(1, StringToCharint(centerChar));
         SetCharacter(2, StringToCharint(rightchar));
         for (int i = 0; i < _rawImages.Count; i++)
         {
-            if (i == speakerIndex) _rawImages[i].color = _speakerColor;
-            else _rawImages[i].color = _elseColor;
+            if (i == speakerIndex)
+            {
+                _rawImages[i].color = _speakerColor;
+                _nameLabel[i].transform.GetChild(2).gameObject.SetActive(false);
+            }
+            else
+            {
+                _rawImages[i].color = _elseColor;
+                _nameLabel[i].transform.GetChild(2).gameObject.SetActive(true);
+            }
         }
     }
 
-
+    private void SetNameLabel(int index, string name)
+    {
+        _charactersName[index].text = name;
+        if (name == null) _nameLabel[index].SetActive(false);
+        else _nameLabel[index].SetActive(true);
+    }
 
 
     private void SetCharacter(int index, int? charindex)
     {
-        if (charindex == null) charindex = _centerCharacters.Count;
+        if (charindex == null)
+        {
+            charindex = _centerCharacters.Count;
+        }
         if (index == 0)
         {
             for (int i = 0; i < _leftCharacters.Count; i++)

@@ -36,6 +36,7 @@ public class DataManager : Singleton<DataManager>
         {
             await Manager.DB.GetUserPath(uid).SetRawJsonValueAsync(json);
             Manager.User.SetUser(newUserData);
+            Manager.User.NewMissionList(17);
         }
         catch (Exception ex)
         {
