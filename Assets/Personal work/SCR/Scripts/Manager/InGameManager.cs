@@ -23,7 +23,7 @@ public class InGameManager : MonoBehaviour
     private int _score;
     private int _coin;
     private bool _firstfail = true;
-    private Action lookAction;
+    private Action _finishAD;
     [SerializeField] private int _useCoin;
 
     void Awake()
@@ -157,7 +157,7 @@ public class InGameManager : MonoBehaviour
     private void AdContinueGame()
     {
         Manager.Ad.LoadAD();
-        Manager.Ad.ShowAD(lookAction);
+        Manager.Ad.ShowAD(_finishAD);
     }
 
     private void GoldContinueGame()
