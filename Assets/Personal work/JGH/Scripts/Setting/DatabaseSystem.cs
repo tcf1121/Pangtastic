@@ -2,6 +2,7 @@ using Firebase;
 using Firebase.Auth;
 using Firebase.Database;
 using Firebase.Extensions;
+using GooglePlayGames;
 using UnityEngine;
 using UnityEngine.AI;
 
@@ -96,7 +97,7 @@ public class DatabaseSystem : Singleton<DatabaseSystem>
 
         dbRef.Child(info.type)
             .Child(info.uid)
-            .Child("playerName")
+            .Child("PlayerName")
             .SetValueAsync(info.nickname);
     }
 
@@ -141,9 +142,22 @@ public class DatabaseSystem : Singleton<DatabaseSystem>
                     }
 
                     Debug.Log("게스트 데이터 삭제 완료, 마이그레이션 성공");
-                    UserIntoSave();
+                    ChangeNickname(PlayGamesPlatform.Instance.localUser.userName);
                 });
             });
         });
+    }
+
+    public void ChangeNickname(string newName)
+    {
+        string authJson = GetAuthInfo();
+        AuthInfo info = JsonUtility.FromJson<AuthInfo>(authJson);
+
+        dbRef.Child(info.type)
+            .Child(info.uid)
+            .Child("PlayerName")
+            .SetValueAsync(newName);
+
+        Debug.Log($"바뀐 닉네임: {newName}");
     }
 }

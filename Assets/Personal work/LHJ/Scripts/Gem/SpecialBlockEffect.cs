@@ -18,6 +18,12 @@ namespace LHJ
         [SerializeField] private GameObject _milkDropFx;   
         [SerializeField] private GameObject _milkSplashFx;
         [SerializeField] private float _milkFlyTime;
+
+        [Header("오븐")]
+        [SerializeField] private GameObject _ovenFx;          // 오븐 본체 이미지
+
+        [Header("도넛상자")]
+        [SerializeField] private GameObject _donutBurstFx;
         public static bool effectRunning { get { return _running > 0; } }
 
         private static int _running;
@@ -74,76 +80,18 @@ namespace LHJ
             // 도넛 박스 (5x5)
             if (specialType == GemType.DonutBox)
             {
-                for (int x = pos.x - 2; x <= pos.x + 2; x++)
-                    for (int y = pos.y - 2; y <= pos.y + 2; y++)
-                        if (x >= 0 && x < gameBoard.Width && y >= 0 && y < gameBoard.Height)
-                            AddCell(gameBoard, x, y, outDamage);
+                var bm = BoardManager.Instance;
+                if (bm != null)
+                    bm.StartCoroutine(DonutRoutine(pos, gameBoard, bm));
                 return;
             }
 
             // 오븐
             if (specialType == GemType.Oven)
             {
-                AddCell(gameBoard, pos.x, pos.y, outDamage);
-                Vector2Int? other = null;
-                // 1) BoardManager의 스왑 좌표 사용
-                var bm = BoardManager.Instance; // 싱글턴 사용
-                if (bm != null && bm.BlockMover != null)
-                {
-                    Vector2Int start = bm.BlockMover.StartBlockPos;
-                    Vector2Int end = bm.BlockMover.EndBlockPos;
-
-                    if (pos == start) other = end;
-                    else if (pos == end) other = start;
-                }
-
-                if (other == null)
-                {
-                    Vector2Int[] dirs = new Vector2Int[]
-                    {
-                        new Vector2Int(-1, 0),
-                        new Vector2Int( 1, 0),
-                        new Vector2Int( 0, 1),
-                        new Vector2Int( 0,-1),
-                    };
-
-                    for (int i = 0; i < dirs.Length; i++)
-                    {
-                        int nx = pos.x + dirs[i].x;
-                        int ny = pos.y + dirs[i].y;
-                        if (nx < 0 || nx >= gameBoard.Width || ny < 0 || ny >= gameBoard.Height)
-                            continue;
-
-                        var nb = gameBoard.GetBlock(nx, ny);
-                        if (nb != null && nb.BlockInstance != null && nb.GemType < GemType.Milk)
-                        {
-                            other = new Vector2Int(nx, ny);
-                            break;
-                        }
-                    }
-                }
-
-                // 스왑 상대 타입 전체 누적
-                if (other != null)
-                {
-                    var ob = gameBoard.GetBlock(other.Value.x, other.Value.y);
-                    if (ob != null && ob.BlockInstance != null && ob.GemType < GemType.Milk)
-                    {
-                        var targetType = ob.GemType;
-
-                        for (int y = 0; y < gameBoard.Height; y++)
-                        {
-                            for (int x = 0; x < gameBoard.Width; x++)
-                            {
-                                var b = gameBoard.GetBlock(x, y);
-                                if (b != null && b.BlockInstance != null && b.GemType == targetType)
-                                {
-                                    AddCell(gameBoard, x, y, outDamage);
-                                }
-                            }
-                        }
-                    }
-                }
+                var bm = BoardManager.Instance;
+                if (bm != null)
+                    bm.StartCoroutine(OvenRoutine(pos, gameBoard, bm));
                 return;
             }
         }
@@ -366,6 +314,192 @@ namespace LHJ
                 }
             }
             return list;
+        }
+        private IEnumerator OvenRoutine(Vector2Int origin, GameBoardData gameBoard, BoardManager board)
+        {
+            if (gameBoard == null || board == null) yield break;
+            BeginEffect();
+            GemType? targetType = null;
+            if (board.BlockMover != null)
+            {
+                Vector2Int start = board.BlockMover.StartBlockPos;
+                Vector2Int end = board.BlockMover.EndBlockPos;
+                Vector2Int? other = null;
+                if (origin == start) other = end;
+                else if (origin == end) other = start;
+
+                if (other.HasValue)
+                {
+                    var ob = gameBoard.GetBlock(other.Value.x, other.Value.y);
+                    if (ob != null && ob.BlockInstance != null && ob.GemType < GemType.Milk)
+                        targetType = ob.GemType;
+                }
+            }
+            if (!targetType.HasValue)
+            {
+                Vector2Int[] dirs = { new Vector2Int(-1, 0), new Vector2Int(1, 0), new Vector2Int(0, 1), new Vector2Int(0, -1) };
+                for (int i = 0; i < dirs.Length && !targetType.HasValue; i++)
+                {
+                    int nx = origin.x + dirs[i].x, ny = origin.y + dirs[i].y;
+                    if (nx < 0 || nx >= gameBoard.Width || ny < 0 || ny >= gameBoard.Height) continue;
+                    var nb = gameBoard.GetBlock(nx, ny);
+                    if (nb != null && nb.BlockInstance != null && nb.GemType < GemType.Milk)
+                        targetType = nb.GemType;
+                }
+            }
+
+            Vector3 originWorld = GridToWorld(board, gameBoard, origin.x, origin.y);
+            GameObject oven = Instantiate(_ovenFx, originWorld, Quaternion.identity, board.transform);
+
+            Vector3 cell00 = GridToWorld(board, gameBoard, 0, 0);
+            Vector3 cell10 = GridToWorld(board, gameBoard, 1, 0);
+            float cellSize = Mathf.Abs(cell10.x - cell00.x); 
+            float baseScale = 1f;
+
+            if (oven.TryGetComponent<SpriteRenderer>(out var sr))
+            {
+                sr.sortingOrder = 9999;
+
+                float spriteSize = Mathf.Max(0.0001f, sr.bounds.size.x);
+                baseScale = cellSize / spriteSize;
+                oven.transform.localScale = Vector3.one * baseScale;
+                oven.transform.DOScale(Vector3.one * baseScale * 1.5f, 0.20f).SetEase(Ease.OutBack);
+
+                float shakeDur = 1.0f;
+                oven.transform.DORotate(new Vector3(0, 0, 15f), 0.083f)
+                    .SetLoops(Mathf.RoundToInt(shakeDur / 0.083f), LoopType.Yoyo);
+            }
+
+            List<Vector2Int> targets = new List<Vector2Int>(32) { origin };
+            if (targetType.HasValue)
+            {
+                GemType t = targetType.Value;
+                for (int y = 0; y < gameBoard.Height; y++)
+                    for (int x = 0; x < gameBoard.Width; x++)
+                    {
+                        var b = gameBoard.GetBlock(x, y);
+                        if (b != null && b.BlockInstance != null && b.GemType == t)
+                        {
+                            if (x == origin.x && y == origin.y) continue; 
+                            targets.Add(new Vector2Int(x, y));
+                        }
+                    }
+            }
+
+            float lineWidth = cellSize * 0.12f;
+            List<GameObject> lines = new List<GameObject>(targets.Count);
+            for (int i = 0; i < targets.Count; i++)
+            {
+                var p = targets[i];
+                if (p.x == origin.x && p.y == origin.y) continue;
+
+                Vector3 to = GridToWorld(board, gameBoard, p.x, p.y);
+
+                GameObject go = new GameObject("OvenTraceLine");
+                go.transform.SetParent(board.transform, false);
+                var lr = go.AddComponent<LineRenderer>();
+                lr.useWorldSpace = true;
+                lr.positionCount = 2;
+                lr.numCapVertices = 4;
+                lr.numCornerVertices = 4;
+                lr.startWidth = lr.endWidth = lineWidth;
+                lr.material = new Material(Shader.Find("Sprites/Default"));
+                lr.startColor = lr.endColor = Color.white;
+                var rend = lr.GetComponent<Renderer>();
+                if (rend != null) { rend.sortingLayerName = "Effects"; rend.sortingOrder = 200; }
+
+                lr.SetPosition(0, originWorld);
+                lr.SetPosition(1, originWorld);
+                DOTween.To(() => 0f,v => lr.SetPosition(1, Vector3.Lerp(originWorld, to, v)), 1f, 1.0f).SetEase(Ease.OutSine);
+
+                lines.Add(go);
+            }
+
+            yield return new WaitForSeconds(1.0f);
+
+            for (int i = 0; i < targets.Count; i++)
+            {
+                var b = gameBoard.GetBlock(targets[i].x, targets[i].y);
+                if (b != null && b.BlockInstance != null)
+                {
+                    Transform t = b.BlockInstance.transform;
+                    Vector3 s0 = t.localScale;
+                    t.DOScale(s0 * 1.2f, 0.2f).SetLoops(2, LoopType.Yoyo).SetEase(Ease.OutQuad);
+                }
+            }
+            yield return new WaitForSeconds(0.8f);
+
+            for (int i = 0; i < lines.Count; i++) Destroy(lines[i]);
+            if (oven != null)
+            {
+                oven.transform.DOScale(Vector3.one * baseScale, 0.15f);
+                Destroy(oven, 0.2f);
+            }
+
+            // 파괴
+            var hits = new List<Vector2Int>(targets.Count);
+            for (int i = 0; i < targets.Count; i++)
+                AddCell(gameBoard, targets[i].x, targets[i].y, hits);
+            if (hits.Count > 0) ApplyDamageAndScore(board, hits);
+
+            EndEffect();
+        }
+
+        private IEnumerator DonutRoutine(Vector2Int origin, GameBoardData gameBoard, BoardManager board)
+        {
+            if (gameBoard == null || board == null) yield break;
+            BeginEffect();
+
+            // 원점/셀 크기
+            Vector3 originWorld = GridToWorld(board, gameBoard, origin.x, origin.y);
+            Vector3 c0 = GridToWorld(board, gameBoard, 0, 0);
+            Vector3 c1 = GridToWorld(board, gameBoard, 1, 0);
+            float cellSize = Mathf.Abs(c1.x - c0.x);
+
+            int left = Mathf.Min(2, origin.x);
+            int right = Mathf.Min(2, gameBoard.Width - 1 - origin.x);
+            int down = Mathf.Min(2, origin.y);
+            int up = Mathf.Min(2, gameBoard.Height - 1 - origin.y);
+
+            int cellsX = left + right + 1;  
+            int cellsY = down + up + 1;
+
+            float areaX = cellSize * cellsX;
+            float areaY = cellSize * cellsY;
+
+            GameObject fx = null;
+            if (_donutBurstFx != null)
+            {
+                fx = Object.Instantiate(_donutBurstFx, originWorld, Quaternion.identity, board.transform);
+                if (fx.TryGetComponent<SpriteRenderer>(out var sr))
+                {
+                    sr.sortingOrder = 9999;
+
+                    Vector2 sprLocal = sr.sprite.bounds.size;
+                    Vector3 parentLossy = (fx.transform.parent != null) ? fx.transform.parent.lossyScale : Vector3.one;
+
+                    float scaleX = (areaX / Mathf.Max(0.0001f, sprLocal.x)) / Mathf.Max(0.0001f, parentLossy.x);
+                    float scaleY = (areaY / Mathf.Max(0.0001f, sprLocal.y)) / Mathf.Max(0.0001f, parentLossy.y);
+
+                    fx.transform.localScale = new Vector3(scaleX, scaleY, 1f);
+                }
+            }
+
+            yield return new WaitForSeconds(0.5f);
+
+            var hits = new List<Vector2Int>();
+            for (int y = origin.y - 2; y <= origin.y + 2; y++)
+            {
+                for (int x = origin.x - 2; x <= origin.x + 2; x++)
+                {
+                    if (x < 0 || x >= gameBoard.Width || y < 0 || y >= gameBoard.Height) continue;
+                    AddCell(gameBoard, x, y, hits);
+                }
+            }
+            if (hits.Count > 0) ApplyDamageAndScore(board, hits);
+
+            if (fx != null) Object.Destroy(fx);
+            EndEffect();
         }
 
         // 점수 및 콤보 시간

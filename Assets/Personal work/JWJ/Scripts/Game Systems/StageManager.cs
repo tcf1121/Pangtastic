@@ -13,6 +13,7 @@ public class StageManager : Singleton<StageManager>
     public int CurrentStageIndex { get { return Manager.User.GetStage(); } }
     public StageSO CurrentStage => stages[CurrentStageIndex];
     private List<bool> UseItem = new();
+    private List<RecipeSO> _stageRecipes = new();
     // 레시피 변수 추가
 
     protected override void Awake()
@@ -85,6 +86,17 @@ public class StageManager : Singleton<StageManager>
     public List<bool> GetUseItem()
     {
         return UseItem;
+    }
+
+    public void SetStageRecipe(List<RecipeSO> recipeList)
+    {
+        _stageRecipes.Clear();
+        _stageRecipes.AddRange(recipeList);
+    }
+
+    public List<RecipeSO> GetStageRecipes()
+    {
+        return _stageRecipes;
     }
 
     // public void SaveStage()

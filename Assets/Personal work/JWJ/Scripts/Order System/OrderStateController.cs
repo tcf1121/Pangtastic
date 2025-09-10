@@ -1,6 +1,7 @@
 using SCR;
 using System;
 using System.Collections.Generic;
+using UnityEditor.Localization.Plugins.XLIFF.V12;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -14,23 +15,27 @@ public class OrderStateController : MonoBehaviour
     public event Action<CustomerSO, float> OnOrderCompleted;
     public event Action<CustomerSO> OnOrderTimeout; //레시피 인덱스
 
-    [SerializeField] private Slider patienceSlider;
-
+    [SerializeField] private PatienceSliderUI _patienceUI;
     private CustomerSO _curCustomer;
 
     private List<OrderRecipe> _orderRecipes = new List<OrderRecipe>();
 
-    private float _maxPatience; //인내심 최대값
-    public float _curPatience; //현재 인내심
-    public float _elapsed; //경과 시간
+    private float _maxPatience = 100f; //인내심 최대값
+    private float _curPatience; //현재 인내심
+    private float _elapsed; //경과 시간
     private bool _isRunning; //타이머 동작중 여부
     private bool _hasEnded; //이미 성공/실패로 종료됐는지
 
+    private void Awake()
+    {
+        _patienceUI = FindObjectOfType<PatienceSliderUI>();
+    }
 
-    public void StartOrder(List<RecipeSO> recipes, StageSO stage, CustomerSO customer)
+    public void StartOrder(List<RecipeSO> recipes, StageSO stage, CustomerSO customer, bool resetPatience)
     {
         _curCustomer = customer;
-
+        _hasEnded = false;
+        _isRunning = true;
         _orderRecipes.Clear();
 
         for (int i = 0; i < recipes.Count; i++) // 주문 레시피 순회
@@ -41,7 +46,10 @@ public class OrderStateController : MonoBehaviour
 
         OnOrderStarted?.Invoke(_orderRecipes, recipes); //UI로 정보 전달
 
-        StartPatience(); //인내심 감소 시작
+        if(resetPatience)
+        {
+            AddPatience(100f);
+        }
     }
 
     public void AddIngredientSta(IngredientSO ingredient) //블록 터지면 호출되는 함수
@@ -149,56 +157,61 @@ public class OrderStateController : MonoBehaviour
         return true;
     }
 
-    private void StartPatience() //인내심 시작
+    public void AddPatience(float amount)
     {
-        _maxPatience = 100;
-        _curPatience = _maxPatience;
+        float timeToReachZero = GetTimeToZero();
 
-        //슬라이더 설정
-        patienceSlider.minValue = 0f;
-        patienceSlider.maxValue = _maxPatience;
-        patienceSlider.value = _curPatience;
+        if (_curPatience < 0f)
+        {
+            _curPatience = 0f;
+        }
+        Debug.Log($"현재 인내심: {_curPatience}, 추가 인내심 : {amount}");
+        _curPatience += amount;
+        Debug.Log($"더해진 인내심: {_curPatience}");
 
-        _elapsed = 0f; //경과시간
-        _hasEnded = false; //주문종료?
-        _isRunning = true; //인내심 작동중?
+        if (_curPatience > _maxPatience)
+        {
+            _curPatience = _maxPatience;
+        }
+
+        // 진행도 = 총진행 - (현재/최대)
+        float progress = 1f - (_curPatience / _maxPatience);
+
+        // 경과 시간 재계산
+        _elapsed = timeToReachZero * progress;
+
+        _hasEnded = false;
+        _isRunning = true;
+
+        _patienceUI.SetPatience(_curPatience, _maxPatience);
     }
-
-    public void HalfPatience() //인내심 시작
+    private float GetTimeToZero()
     {
-        float timeToReachZero = 0;
+        float timeToReachZero = 0f;
 
-        if (_curCustomer.Type == CustomerType.Normal)
+        if (_curCustomer != null && _curCustomer.Type == CustomerType.Normal)
         {
             timeToReachZero = 60f;
         }
-        else if (_curCustomer.Type == CustomerType.Unique)
+        else if (_curCustomer != null && _curCustomer.Type == CustomerType.Unique)
         {
             timeToReachZero = 50f;
         }
-        else if (_curCustomer.Type == CustomerType.Special)
+        else if (_curCustomer != null && _curCustomer.Type == CustomerType.Special)
         {
             timeToReachZero = 30f;
         }
         else
         {
             Debug.LogWarning("커스터머 타입 이상함");
+            timeToReachZero = 60f;
         }
 
-        _maxPatience = 100;
-        _curPatience = _maxPatience / 2;
-
-        //슬라이더 설정
-        patienceSlider.minValue = 0f;
-        patienceSlider.maxValue = _maxPatience;
-        patienceSlider.value = _curPatience;
-
-        _elapsed = timeToReachZero / 2; //경과시간
-        _hasEnded = false; //주문종료?
-        _isRunning = true; //인내심 작동중?
+        return timeToReachZero;
     }
 
-    private void StopPatience() //인내심 정지
+
+    private void StopPatience()
     {
         _isRunning = false;
     }
@@ -213,47 +226,29 @@ public class OrderStateController : MonoBehaviour
 
     private void PatienceGaugeDown()
     {
-        if (_hasEnded) //주문 종료됐으면
+        if (_hasEnded)
         {
             return;
         }
 
-        float timeToReachZero = 0;
+        float timeToReachZero = GetTimeToZero();
 
-        if (_curCustomer.Type == CustomerType.Normal)
+        _elapsed += Time.deltaTime;
+        float progress = _elapsed / timeToReachZero;
+
+        if (progress > 1f)
         {
-            timeToReachZero = 60f;
-        }
-        else if (_curCustomer.Type == CustomerType.Unique)
-        {
-            timeToReachZero = 50f;
-        }
-        else if (_curCustomer.Type == CustomerType.Special)
-        {
-            timeToReachZero = 30f;
-        }
-        else
-        {
-            Debug.LogWarning("커스터머 타입 이상함");
+            progress = 1f;
         }
 
+        _curPatience = _maxPatience * (1f - progress);
 
-        _elapsed += Time.deltaTime; //경과시간 누적
+        _patienceUI.SetPatience(_curPatience, _maxPatience);
 
-        float progress = _elapsed / timeToReachZero; //진행 비율 계산
-        if (progress > 1) //혹시 음수로 내려가면 
+        if (progress >= 1f) // 시간이 끝나면
         {
-            progress = 1; //0으로 고정
-        }
-
-        _curPatience = _maxPatience * (1 - progress); //현재 인내심은 최대에서 진행 비율만큼 감소하는 값
-
-        patienceSlider.value = _curPatience; //슬라이더에 벨류 반영
-
-        if (progress >= 1) //타임 오버
-        {
-            _isRunning = false;
-            _hasEnded = true;
+            _isRunning = false; // 타이머 정지
+            _hasEnded = true; // 종료
             OnOrderTimeout?.Invoke(_curCustomer);
         }
     }

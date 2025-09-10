@@ -210,6 +210,19 @@ public class IAPManager : Singleton<IAPManager>
 
     public void TryPurchase(string productId)
     {
+        if (Manager.DB.GetUserRoot() == "guests")
+        {
+            Debug.LogWarning("게스트 계정은 결제 불가 1");
+            return;
+        }
+
+        if (Manager.DB.auth.CurrentUser.IsAnonymous)
+        {
+            Debug.LogWarning("게스트 계정은 결제 불가 2");
+            //계정 전환 창 띄워주는 로직 추가할거면 여기에
+            return;
+        }
+
         if (_store == null)
         {
             Debug.LogError("스토어매니저 없음");
