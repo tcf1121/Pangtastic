@@ -35,6 +35,7 @@ public class OrderStateController : MonoBehaviour
     {
         _curCustomer = customer;
         _hasEnded = false;
+        _isRunning = true;
         _orderRecipes.Clear();
 
         for (int i = 0; i < recipes.Count; i++) // 주문 레시피 순회
