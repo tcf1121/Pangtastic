@@ -20,7 +20,8 @@ namespace LHJ
         [SerializeField] private float _milkFlyTime;
 
         [Header("오븐")]
-        [SerializeField] private GameObject _ovenFx;          // 오븐 본체 이미지
+        [SerializeField] private GameObject _ovenFx;  
+        [SerializeField] private Material _ovenStrokeMat;
 
         [Header("도넛상자")]
         [SerializeField] private GameObject _donutBurstFx;
@@ -196,50 +197,41 @@ namespace LHJ
             EndEffect();
         }
 
-        private IEnumerator MilkRoutine(Vector2Int origin, GameBoardData gameBoard, BoardManager board, System.Action<List<Vector2Int>> onCompleted = null)
+        private IEnumerator MilkRoutine(Vector2Int origin, GameBoardData gameBoard, BoardManager board,int count = 3, bool destroyOrigin = true, System.Action<List<Vector2Int>> onCompleted = null)
         {
             if (gameBoard == null || board == null) yield break;
             BeginEffect();
-
-            // 0) 타겟 선정: 필요 재료 우선, 없으면 랜덤 노말 3개
-            List<Vector2Int> targets = GetMilkTargets(gameBoard, 3);
+            List<Vector2Int> targets = GetMilkTargets(gameBoard, count);
             if (targets.Count == 0) { EndEffect(); yield break; }
 
-            var selfHit = new List<Vector2Int>(1);
-            AddCell(gameBoard, origin.x, origin.y, selfHit);
-            if (selfHit.Count > 0) ApplyDamageAndScore(board, selfHit);
+            if (destroyOrigin)
+            {
+                var selfHit = new List<Vector2Int>(1);
+                AddCell(gameBoard, origin.x, origin.y, selfHit);
+                if (selfHit.Count > 0) ApplyDamageAndScore(board, selfHit);
+            }
 
             Vector3 originWorld = GridToWorld(board, gameBoard, origin.x, origin.y);
-
             int finished = 0;
+
             for (int i = 0; i < targets.Count; i++)
             {
                 Vector2Int tg = targets[i];
                 Vector3 targetWorld = GridToWorld(board, gameBoard, tg.x, tg.y);
-                Vector3 mid = (originWorld + targetWorld) * 0.5f;
-                mid += new Vector3(Random.Range(-0.2f, 0.2f), Random.Range(0.3f, 0.6f), 0f);
 
                 GameObject drop = Instantiate(_milkDropFx, originWorld, Quaternion.identity, board.transform);
                 if (drop.TryGetComponent<SpriteRenderer>(out var sr)) sr.sortingOrder = 9999;
 
-                Vector3[] path = new Vector3[] { originWorld, mid, targetWorld };
-                drop.transform.DOMove(targetWorld, _milkFlyTime).SetEase(Ease.InOutSine).OnUpdate(() =>
-
-                {
-                    // 흔들림: sin 파동으로 좌우 이동
-                    float wobble = Mathf.Sin(Time.time * 20f) * 0.2f;
-                    drop.transform.position += new Vector3(wobble, 0f, 0f);
-                })
-
+                drop.transform.DOMove(targetWorld, _milkFlyTime)
+                    .SetEase(Ease.InOutSine)
                     .OnComplete(() =>
                     {
-                        // 스플래시 FX
                         if (_milkSplashFx != null)
                         {
                             var splash = Instantiate(_milkSplashFx, targetWorld, Quaternion.identity, board.transform);
-                            Destroy(splash, 0.5f); // 0.5초 뒤 자동 제거 → 이미지 안 남음
+                            Destroy(splash, 0.5f);
                         }
-                        // 타겟 블록 제거
+
                         var one = new List<Vector2Int>(1) { tg };
                         if (one.Count > 0) ApplyDamageAndScore(board, one);
 
@@ -248,23 +240,21 @@ namespace LHJ
                     });
             }
 
-            // 모든 드롭이 끝날 때까지 대기
             float elapsed = 0f;
-            float timeout = _milkFlyTime + 0.25f; // 여유 버퍼
+            float timeout = _milkFlyTime + 0.25f;
             while (finished < targets.Count && elapsed < timeout)
             {
                 elapsed += Time.deltaTime;
                 yield return null;
             }
-            if (onCompleted != null)
-                onCompleted(targets);
+
+            onCompleted?.Invoke(targets);
             EndEffect();
         }
         private List<Vector2Int> GetMilkTargets(GameBoardData gb, int count)
         {
             // 필요 재료 우선
-            // List<GemType> needed = InGameManager.GetTagetGem();
-            List<GemType> needed = new List<GemType>(); 
+            List<GemType> needed = InGameManager.GetTagetGem();
 
             List<Vector2Int> result = new List<Vector2Int>();
 
@@ -385,6 +375,7 @@ namespace LHJ
                         }
                     }
             }
+            ApplyStroke(gameBoard, targets);
 
             float lineWidth = cellSize * 0.12f;
             List<GameObject> lines = new List<GameObject>(targets.Count);
@@ -427,7 +418,6 @@ namespace LHJ
                     t.DOScale(s0 * 1.2f, 0.2f).SetLoops(2, LoopType.Yoyo).SetEase(Ease.OutQuad);
                 }
             }
-            yield return new WaitForSeconds(0.8f);
 
             for (int i = 0; i < lines.Count; i++) Destroy(lines[i]);
             if (oven != null)
@@ -445,60 +435,53 @@ namespace LHJ
             EndEffect();
         }
 
-        private IEnumerator DonutRoutine(Vector2Int origin, GameBoardData gameBoard, BoardManager board)
+        private IEnumerator DonutRoutine(Vector2Int origin, GameBoardData gameBoard, BoardManager board, int range = 2)
         {
             if (gameBoard == null || board == null) yield break;
             BeginEffect();
 
-            // 원점/셀 크기
             Vector3 originWorld = GridToWorld(board, gameBoard, origin.x, origin.y);
-            Vector3 c0 = GridToWorld(board, gameBoard, 0, 0);
-            Vector3 c1 = GridToWorld(board, gameBoard, 1, 0);
-            float cellSize = Mathf.Abs(c1.x - c0.x);
-
-            int left = Mathf.Min(2, origin.x);
-            int right = Mathf.Min(2, gameBoard.Width - 1 - origin.x);
-            int down = Mathf.Min(2, origin.y);
-            int up = Mathf.Min(2, gameBoard.Height - 1 - origin.y);
-
-            int cellsX = left + right + 1;  
-            int cellsY = down + up + 1;
-
-            float areaX = cellSize * cellsX;
-            float areaY = cellSize * cellsY;
-
             GameObject fx = null;
             if (_donutBurstFx != null)
             {
                 fx = Object.Instantiate(_donutBurstFx, originWorld, Quaternion.identity, board.transform);
-                if (fx.TryGetComponent<SpriteRenderer>(out var sr))
-                {
-                    sr.sortingOrder = 9999;
-
-                    Vector2 sprLocal = sr.sprite.bounds.size;
-                    Vector3 parentLossy = (fx.transform.parent != null) ? fx.transform.parent.lossyScale : Vector3.one;
-
-                    float scaleX = (areaX / Mathf.Max(0.0001f, sprLocal.x)) / Mathf.Max(0.0001f, parentLossy.x);
-                    float scaleY = (areaY / Mathf.Max(0.0001f, sprLocal.y)) / Mathf.Max(0.0001f, parentLossy.y);
-
-                    fx.transform.localScale = new Vector3(scaleX, scaleY, 1f);
-                }
+                if (fx.TryGetComponent<SpriteRenderer>(out var sr)) sr.sortingOrder = 9999;
             }
 
             yield return new WaitForSeconds(0.5f);
 
             var hits = new List<Vector2Int>();
-            for (int y = origin.y - 2; y <= origin.y + 2; y++)
+            var queuedSpecials = new List<(Vector2Int pos, GemType type)>();
+
+            for (int y = origin.y - range; y <= origin.y + range; y++)
             {
-                for (int x = origin.x - 2; x <= origin.x + 2; x++)
+                for (int x = origin.x - range; x <= origin.x + range; x++)
                 {
-                    if (x < 0 || x >= gameBoard.Width || y < 0 || y >= gameBoard.Height) continue;
+                    if (x < 0 || x >= gameBoard.Width || y < 0 || y >= gameBoard.Height)
+                        continue;
+
+                    var blk = gameBoard.GetBlock(x, y);
+                    if (blk != null && blk.BlockInstance != null)
+                    {
+                        if (IsSpecial(blk.GemType) && !(x == origin.x && y == origin.y))
+                        {
+                            queuedSpecials.Add((new Vector2Int(x, y), blk.GemType));
+                        }
+                    }
                     AddCell(gameBoard, x, y, hits);
                 }
             }
+
             if (hits.Count > 0) ApplyDamageAndScore(board, hits);
 
             if (fx != null) Object.Destroy(fx);
+
+            for (int i = 0; i < queuedSpecials.Count; i++)
+            {
+                var (p, t) = queuedSpecials[i];
+                UseSpecial(p, t, gameBoard, new List<Vector2Int>());
+            }
+
             EndEffect();
         }
 
@@ -531,14 +514,27 @@ namespace LHJ
             for (int i = 0; i < unique.Count; i++)
             {
                 var c = unique[i];
+                var overlay = gameBoard.GetOverlayBlock(c.x, c.y);
+                if (overlay is ObstacleBlock overlayOb && overlay.BlockInstance != null)
+                {
+                    overlayOb.TakeDamage();
+                    continue;
+                }
+
                 var b = gameBoard.GetBlock(c.x, c.y);
                 if (b != null && b.BlockInstance != null)
                 {
-                    //if (b.GemType < GemType.Milk)
-                    //    InGameManager.AddIngredientSta(b.GemType);
+                    if (b.GemType < GemType.Milk)
+                        InGameManager.AddIngredientSta(b.GemType);
                     DOTween.Kill(b.BlockInstance.transform, complete: true);
+                    RevertStroke(b.BlockInstance);
                     if (b is ObstacleBlock ob)
                     {
+                        if (b.IsNormal != true)
+                        {
+                            ob.TakeDamage();
+                            continue;
+                        }
                         ob.TakeDamage();
                         continue;
                     }
@@ -551,6 +547,7 @@ namespace LHJ
                     {
                         Destroy(b.BlockInstance);
                     }
+
                     
                     gameBoard.SetBlock(c.x, c.y, null);
                     destroyedCount++;
@@ -594,35 +591,22 @@ namespace LHJ
             // 2) 우유 + 우유
             if (a == GemType.Milk && b == GemType.Milk)
             {
-                // var targets = InGameManager.GetTagetGem();
-                // var candidates = GetTargetPos(gameBoard, targets);
-                List<Vector2Int> candidates = new List<Vector2Int>();
-                Shuffle(candidates);
-
-                List<Vector2Int> picks = new List<Vector2Int>(5);
-                int take = Mathf.Min(5, candidates.Count);
-                for (int i = 0; i < take; i++) picks.Add(candidates[i]);
-
-                while (picks.Count < 5)
+                var bm = BoardManager.Instance;
+                if (bm != null)
                 {
-                    int rx = Random.Range(0, gameBoard.Width);
-                    int ry = Random.Range(0, gameBoard.Height);
-                    Vector2Int v = new Vector2Int(rx, ry);
-                    bool exists = false;
-                    for (int j = 0; j < picks.Count; j++) if (picks[j] == v) { exists = true; break; }
-                    if (!exists) picks.Add(v);
+                    bm.StartCoroutine(MilkRoutine(secondPos, gameBoard, bm, 5, false));
                 }
-
-                for (int i = 0; i < picks.Count; i++) outDamage.Add(picks[i]);
                 return;
             }
 
             // 3) 도넛 + 도넛
             if (a == GemType.DonutBox && b == GemType.DonutBox)
             {
-                for (int x = secondPos.x - 4; x <= secondPos.x + 4; x++)
-                    for (int y = secondPos.y - 4; y <= secondPos.y + 4; y++)
-                        AddCell(gameBoard, x, y, outDamage);
+                var bm = BoardManager.Instance;
+                if (bm != null)
+                {
+                    bm.StartCoroutine(DonutRoutine(secondPos, gameBoard, bm, 4));
+                }
                 return;
             }
 
@@ -644,7 +628,7 @@ namespace LHJ
                 {
                     Vector2Int milkPos = (a == GemType.Milk) ? firstPos : secondPos;
 
-                    bm.StartCoroutine(MilkRoutine(milkPos, gameBoard, bm, (landed) =>
+                    bm.StartCoroutine(MilkRoutine(milkPos, gameBoard, bm, 3, true, (landed) =>
                     {
                         // 우유 3발 모두 끝난 뒤 → 그 자리에서 세로 라인 발동
                         for (int i = 0; i < landed.Count; i++)
@@ -663,11 +647,11 @@ namespace LHJ
                 {
                     Vector2Int milkPos = (a == GemType.Milk) ? firstPos : secondPos;
 
-                    bm.StartCoroutine(MilkRoutine(milkPos, gameBoard, bm, (landed) =>
+                    bm.StartCoroutine(MilkRoutine(milkPos, gameBoard, bm, 3, true, (landed) =>
                     {
-                        // 우유 3발 모두 끝난 뒤 → 그 자리에서 가로 라인 발동
+                        // 우유 3발 모두 끝난 뒤 → 그 자리에서 세로 라인 발동
                         for (int i = 0; i < landed.Count; i++)
-                            bm.StartCoroutine(RollerRoutine(landed[i], true, gameBoard, bm));
+                            bm.StartCoroutine(RollerRoutine(landed[i], false, gameBoard, bm));
                     }));
                 }
                 return;
@@ -695,32 +679,18 @@ namespace LHJ
             if ((a == GemType.Milk && b == GemType.DonutBox) ||
                 (a == GemType.DonutBox && b == GemType.Milk))
             {
-                // 우유 선택 로직
-                // List<GemType> targets = InGameManager.GetTagetGem();
-                // List<Vector2Int> candidates = GetTargetPos(gameBoard, targets);
-                List<Vector2Int> candidates = new List<Vector2Int>();
-                Shuffle(candidates);
-
-                List<Vector2Int> picks = new List<Vector2Int>(3);
-                int take = (candidates.Count < 3) ? candidates.Count : 3;
-                for (int i = 0; i < take; i++) picks.Add(candidates[i]);
-
-                while (picks.Count < 3)
+                var bm = BoardManager.Instance;
+                if (bm != null)
                 {
-                    int rx = Random.Range(0, gameBoard.Width);
-                    int ry = Random.Range(0, gameBoard.Height);
-                    Vector2Int v = new Vector2Int(rx, ry);
-
-                    bool exists = false;
-                    for (int j = 0; j < picks.Count; j++)
-                        if (picks[j].x == v.x && picks[j].y == v.y) { exists = true; break; }
-
-                    if (!exists) picks.Add(v);
+                    Vector2Int milkPos = (a == GemType.Milk) ? firstPos : secondPos;
+                    bm.StartCoroutine(MilkRoutine(milkPos, gameBoard, bm, 3, true, (landed) =>
+                    {
+                        for (int i = 0; i < landed.Count; i++)
+                        {
+                            bm.StartCoroutine(DonutRoutine(landed[i], gameBoard, bm, 2));
+                        }
+                    }));
                 }
-
-                for (int i = 0; i < picks.Count; i++)
-                    UseSpecial(picks[i], GemType.DonutBox, gameBoard, outDamage);
-
                 return;
             }
 
@@ -729,8 +699,7 @@ namespace LHJ
                 (a == GemType.Milk && b == GemType.Oven))
             {
                 // 1) 현재 필요한 재료 타입 목록
-                // List<GemType> need = InGameManager.GetTagetGem();
-                List<GemType> need = new List<GemType>();
+                List<GemType> need = InGameManager.GetTagetGem();
 
                 for (int y = 0; y < gameBoard.Height; y++)
                 {
@@ -798,7 +767,6 @@ namespace LHJ
             if ((a == GemType.Oven && b == GemType.DonutBox) ||
                 (a == GemType.DonutBox && b == GemType.Oven))
             {
-                // 보드에 존재하는 '서로 다른 노말 젬 타입' 목록 만들기
                 List<GemType> normalTypes = new List<GemType>();
                 for (int y = 0; y < gameBoard.Height; y++)
                 {
@@ -847,13 +815,6 @@ namespace LHJ
             }
         }
 
-        private bool ContainsVec(List<Vector2Int> list, Vector2Int v)
-        {
-            for (int i = 0; i < list.Count; i++)
-                if (list[i].x == v.x && list[i].y == v.y) return true;
-            return false;
-        }
-
         private void AddCell(GameBoardData gb, int x, int y, List<Vector2Int> outDamage, bool includeWaitingRow = false)
         {
             if (x < 0 || x >= gb.Width) return;
@@ -867,6 +828,50 @@ namespace LHJ
         private Vector3 GridToWorld(BoardManager board, GameBoardData gb, int x, int y)
         {
             return board.BlockMover.GridToWorld(new Vector2Int(x, y), gb.Width, gb.Height);
+        }
+        private class StrokeTag : MonoBehaviour
+        {
+            public Material original;
+            public bool hasOriginal;
+        }
+
+        private void ApplyStroke(GameBoardData gb, List<Vector2Int> cells)
+        {
+            if (_ovenStrokeMat == null || gb == null || cells == null) return;
+
+            for (int i = 0; i < cells.Count; i++)
+            {
+                var p = cells[i];
+                var blk = gb.GetBlock(p.x, p.y);
+                if (blk == null || blk.BlockInstance == null) continue;
+
+                if (blk.GemType >= GemType.Milk) continue;
+
+                var sr = blk.BlockInstance.GetComponent<SpriteRenderer>();
+                if (sr == null) continue;
+
+                var tag = blk.BlockInstance.GetComponent<StrokeTag>();
+                if (tag == null) tag = blk.BlockInstance.AddComponent<StrokeTag>();
+
+                if (!tag.hasOriginal)
+                {
+                    tag.original = sr.material;
+                    tag.hasOriginal = true;
+                }
+                sr.material = _ovenStrokeMat; // 스트로크 적용
+            }
+        }
+
+        private void RevertStroke(GameObject go)
+        {
+            if (go == null) return;
+            var sr = go.GetComponent<SpriteRenderer>();
+            var tag = go.GetComponent<StrokeTag>();
+            if (sr != null && tag != null && tag.hasOriginal)
+            {
+                sr.material = tag.original;
+                Destroy(tag);
+            }
         }
     }
 }
