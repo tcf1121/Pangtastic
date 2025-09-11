@@ -10,7 +10,7 @@ public class DataManager : Singleton<DataManager>
 {
     private string path;
 
-#if UNITY_ANDROID
+
     private async void OnApplicationPause(bool pause)
     {
         if (pause)
@@ -18,7 +18,7 @@ public class DataManager : Singleton<DataManager>
             await UploadUserDataAsync();
         }
     }
-#elif UNITY_EDITOR
+#if UNITY_ANDROID
     private async void OnApplicationQuit()
     {
         await UploadUserDataAsync();
