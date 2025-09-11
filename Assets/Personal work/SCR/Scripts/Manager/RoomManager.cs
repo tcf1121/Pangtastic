@@ -4,17 +4,18 @@ using UnityEngine;
 
 public class RoomManager : MonoBehaviour
 {
-    [SerializeField] private List<GameObject> lockedRooms;
+    [SerializeField] private List<Place> _places;
     private MissonPlace curPlace;
     [SerializeField] MissionListSO missionList;
-    [SerializeField] private MissIonBtn missonBtn;
+    [SerializeField] private MissionBtn missonBtn;
 
     void Awake()
     {
         curPlace = Manager.User.GetCurPlace();
-        for (int i = 0; i < lockedRooms.Count; i++)
+        for (int i = 0; i < _places.Count; i++)
         {
-            if (i <= (int)curPlace) lockedRooms[i].SetActive(false);
+            if (i < (int)curPlace) _places[i].AllClear();
+            else if (i == (int)curPlace) _places[i].CurrentClear();
         }
 
     }
@@ -26,7 +27,6 @@ public class RoomManager : MonoBehaviour
             curPlace++;
             Manager.User.SetCurPlace(curPlace);
             Manager.User.NewMissionList(GetMaxMission());
-            lockedRooms[(int)curPlace].SetActive(true);
             missonBtn.Refresh();
         }
     }
@@ -34,6 +34,8 @@ public class RoomManager : MonoBehaviour
     public void ClearMission(int index)
     {
         Manager.User.ClearCurMisson(index);
+        _places[(int)curPlace].MissionClear(index);
+        missonBtn.Refresh();
     }
 
     public int GetMaxMission()

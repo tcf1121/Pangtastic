@@ -21,7 +21,8 @@ namespace KDJ
 
         [SerializeField] private TMP_Text _blockInfo;
         [SerializeField] private TMP_Text _scoreInfo;
-        [SerializeField] private bool isTest = false;
+        public bool IsTest = false;
+        [SerializeField] private CameraController _cameraController;
         [Header("애니메이션 설정")]
         [SerializeField] private float _duration = 0.3f;
         [SerializeField] private ObjectPool _explosionEffectPool;
@@ -55,7 +56,7 @@ namespace KDJ
             }
             Instance = this;
 
-            if (isTest)
+            if (IsTest)
             {
                 Spawner = FindObjectOfType<BlockSpawner>();
                 MatchChecker = GetComponent<BoardMatchChecker>();
@@ -95,7 +96,7 @@ namespace KDJ
             yield return new WaitForSeconds(0.1f);
 
             // TestCode. 스테이지 세팅
-            TestStageManager.SetStage(CurStage);
+            //TestStageManager.SetStage(CurStage);
             BoardData loadedBoardData = BoardLoader.LoadBoard();
             //Manager.Stage.SetStage(boardManager.CurStage);
             progress.fillAmount = 0.5f;
@@ -124,8 +125,10 @@ namespace KDJ
             // 새로운 구조에 맞게 Spawner를 초기화합니다.
             Spawner.Initialize(this, loadedBoardData, blockPlate, BlockMover);
             Debug.Log($"보드 초기화 완료. 가로: {Spawner.GameBoardData.Width}, 세로: {Spawner.GameBoardData.Height}");
+            _cameraController.SetStarted(true);
             CanTouch = true;
             progress.fillAmount = 1f;
+            ChangeState(new ReadyState());
         }
 
         /// <summary>

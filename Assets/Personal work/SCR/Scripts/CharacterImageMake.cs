@@ -14,14 +14,16 @@ public class CharacterImageMake : MonoBehaviour
     [SerializeField] Color _elseColor;
     [SerializeField] List<GameObject> _nameLabel;
     [SerializeField] List<TMP_Text> _charactersName;
+    [SerializeField] TMP_Text _dialog;
 
     void Awake()
     {
-        SetDialog("Coco", null, "Fifi", 0);
+        SetCharacter("Coco", null, "Fifi", 0);
+        SetDialog("안녕안녕");
     }
 
 
-    public void SetDialog(string leftChar, string centerChar, string rightchar, int speakerIndex)
+    public void SetCharacter(string leftChar, string centerChar, string rightchar, int speakerIndex)
     {
         SetNameLabel(0, leftChar);
         SetNameLabel(1, centerChar);
@@ -42,6 +44,11 @@ public class CharacterImageMake : MonoBehaviour
                 _nameLabel[i].transform.GetChild(2).gameObject.SetActive(true);
             }
         }
+    }
+
+    public void SetDialog(string dialog)
+    {
+        _dialog.text = dialog;
     }
 
     private void SetNameLabel(int index, string name)

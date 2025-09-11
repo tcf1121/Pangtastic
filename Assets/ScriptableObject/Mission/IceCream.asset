@@ -1,0 +1,104 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e3ddf2ae44b46df4ea10ad3795cca9ef, type: 3}
+  m_Name: IceCream
+  m_EditorClassIdentifier: 
+  Place: 3
+  Mission:
+  - MissionID: 1
+    Star: 3
+    Explane: {fileID: 11400000, guid: 50584b81dac950c4daa76d641c1757bd, type: 2}
+    Prerequisites: 0
+  - MissionID: 2
+    Star: 1
+    Explane: {fileID: 11400000, guid: 6a71de4572fe4994b82b1a37609542f8, type: 2}
+    Prerequisites: 1
+  - MissionID: 3
+    Star: 2
+    Explane: {fileID: 11400000, guid: 9b02b1741465fda42a6dccfaa85020c8, type: 2}
+    Prerequisites: 1
+  - MissionID: 4
+    Star: 2
+    Explane: {fileID: 11400000, guid: bb8450e54723c83409fa68df25631ad1, type: 2}
+    Prerequisites: 3
+  - MissionID: 5
+    Star: 1
+    Explane: {fileID: 11400000, guid: a244d9308a4756b42b2862cd7d0dbf5a, type: 2}
+    Prerequisites: 4
+  - MissionID: 6
+    Star: 1
+    Explane: {fileID: 11400000, guid: 54ce86b7f042c824289db2a0af8ed968, type: 2}
+    Prerequisites: 5
+  - MissionID: 7
+    Star: 1
+    Explane: {fileID: 11400000, guid: 217dc733b67710e40999e2b41fedb5bf, type: 2}
+    Prerequisites: 6
+  - MissionID: 8
+    Star: 2
+    Explane: {fileID: 11400000, guid: 41fa3f8329606c340bd842998d0ae64c, type: 2}
+    Prerequisites: 3
+  - MissionID: 9
+    Star: 1
+    Explane: {fileID: 11400000, guid: 8998b2bf7ad86ff438506295bf4a6ec3, type: 2}
+    Prerequisites: 8
+  - MissionID: 10
+    Star: 2
+    Explane: {fileID: 11400000, guid: 752f2048f0399274b9acfd6bd701a9e1, type: 2}
+    Prerequisites: 5
+  - MissionID: 11
+    Star: 1
+    Explane: {fileID: 11400000, guid: 3eaef5dbcd37a004d8cb1ee60e099fc2, type: 2}
+    Prerequisites: 10
+  - MissionID: 12
+    Star: 1
+    Explane: {fileID: 11400000, guid: 2d97770b12e772a4d852677780ce7a9b, type: 2}
+    Prerequisites: 11
+  - MissionID: 13
+    Star: 2
+    Explane: {fileID: 11400000, guid: b5349a82e3c6df742b69f9ef2702d464, type: 2}
+    Prerequisites: 12
+  - MissionID: 14
+    Star: 1
+    Explane: {fileID: 11400000, guid: da690801312308b469ea1adb1bfba4b2, type: 2}
+    Prerequisites: 9
+  - MissionID: 15
+    Star: 2
+    Explane: {fileID: 11400000, guid: 2e78c96d6624d9f45b712fc67bfe35a5, type: 2}
+    Prerequisites: 9
+  - MissionID: 16
+    Star: 2
+    Explane: {fileID: 11400000, guid: 312708a3e53f6234bb6bb0be443598d1, type: 2}
+    Prerequisites: 7
+  - MissionID: 17
+    Star: 3
+    Explane: {fileID: 11400000, guid: 54b9f301ee9befd41baaf756d6d36c5c, type: 2}
+    Prerequisites: 13
+  - MissionID: 18
+    Star: 1
+    Explane: {fileID: 11400000, guid: 03fe848b464ca304eab928159733ce0d, type: 2}
+    Prerequisites: 4
+  - MissionID: 19
+    Star: 1
+    Explane: {fileID: 11400000, guid: fdd8763a54fc31146b29b7e1e971b545, type: 2}
+    Prerequisites: 17
+  - MissionID: 20
+    Star: 1
+    Explane: {fileID: 11400000, guid: e24fdb17a5dbda845ae1f4454b17a270, type: 2}
+    Prerequisites: 16
+  - MissionID: 21
+    Star: 3
+    Explane: {fileID: 11400000, guid: ceb1ecde7cd30344ba525f37a7cefbec, type: 2}
+    Prerequisites: 13
+  - MissionID: 22
+    Star: 2
+    Explane: {fileID: 11400000, guid: 1243558d82285364a8a36770efb0725a, type: 2}
+    Prerequisites: 21

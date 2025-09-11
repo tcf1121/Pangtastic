@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 
 public class UserInfoManager : Singleton<UserInfoManager>
 {
@@ -45,7 +44,7 @@ public class UserInfoManager : Singleton<UserInfoManager>
 
     public bool CanUseStar(int value)
     {
-        if (currentData.UserInfo.Star - value > 0) return true;
+        if (currentData.UserInfo.Star - value >= 0) return true;
         else return false;
     }
 
@@ -211,7 +210,7 @@ public class UserInfoManager : Singleton<UserInfoManager>
 
     public void ClearCurMisson(int index)
     {
-        currentData.PlaceInfo.CurMisson[index] = true;
+        currentData.PlaceInfo.CurMisson[index - 1] = true;
     }
 
     public bool[] GetCurMisson()

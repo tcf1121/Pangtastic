@@ -20,6 +20,7 @@ namespace SCR
 
         void Awake()
         {
+            Application.targetFrameRate = 60;
             _logoutBtn.onClick.AddListener(Logout);
             _enterBtn.onClick.AddListener(CheckBefore);
             _googlePlayBtn.onClick.AddListener(Manager.GPGS.AuthenticateUser);

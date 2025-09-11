@@ -14,6 +14,6 @@ public class Mission
 {
     public int MissionID;
     public int Star;
-    public string Explane;
+    public StringSO Explane;
     public int Prerequisites;
 }

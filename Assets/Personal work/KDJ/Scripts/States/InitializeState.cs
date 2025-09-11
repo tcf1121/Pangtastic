@@ -7,8 +7,10 @@ namespace KDJ.States
     {
         public void OnEnter(BoardManager boardManager)
         {
+            Debug.Log("초기화 상태 진입");
             // 테스트 코드
-            boardManager.StartCoroutine(boardManager.StageInit());
+            if (boardManager.IsTest)
+                boardManager.StartCoroutine(boardManager.StageInit());
 
             InGameManager.SpawnCustomer();
         }

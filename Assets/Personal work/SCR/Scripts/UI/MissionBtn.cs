@@ -5,7 +5,7 @@ using UnityEngine;
 using UnityEngine.UI;
 
 [RequireComponent(typeof(Button))]
-public class MissIonBtn : MonoBehaviour
+public class MissionBtn : MonoBehaviour
 {
     Button _missionBtn;
     [SerializeField] private RoomManager _roomManager;
