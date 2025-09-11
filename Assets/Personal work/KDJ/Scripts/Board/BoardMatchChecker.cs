@@ -86,6 +86,77 @@ namespace KDJ
             matchCount = possibleMoves.Count;
             return matchCount > 0;
         }
+        
+        /// <summary>
+        /// 힌트를 위해 최적의 매치 가능성을 찾아 리스트로 좌표를 반환합니다.
+        /// </summary>
+        /// <returns></returns>
+        private List<Vector2Int> OptimalMatchFind()
+        {
+            List<Vector2Int> result = new List<Vector2Int>();
+            
+            // 중복된 매치 가능성을 제외하기 위해 HashSet 사용
+            var possibleMoves = new HashSet<string>();
+            var gameBoard = BoardManager.Instance.Spawner.GameBoardData;
+
+            if (gameBoard == null) return null;
+
+            int height = gameBoard.Height;
+            int width = gameBoard.Width;
+
+            // 원본 배열을 건드리지 않기 위해 임시 배열 복사
+            Block[,] tempBlockArray = (Block[,])gameBoard.BlockArray.Clone();
+            // 비교할 매치들을 담을 리스트를 포함한 튜플 리스트
+            List<(List<Vector2Int> matchCoords, int matchWeight)> matchList = new List<(List<Vector2Int> matchCoords, int matchWeight)>();
+
+            for (int y = 0; y < height; y++)
+            {
+                for (int x = 0; x < width; x++)
+                {
+                    if (!gameBoard.BlockPlate.BlockPlateArray[y, x] || tempBlockArray[y, x] == null) continue;
+
+                    // 가로 방향으로 인접한 블록과 스왑하여 매치 확인
+                    if (x + 1 < width && gameBoard.BlockPlate.BlockPlateArray[y, x + 1] && tempBlockArray[y, x + 1] != null)
+                    {
+                        // 임시 스왑
+                        var temp = tempBlockArray[y, x];
+                        tempBlockArray[y, x] = tempBlockArray[y, x + 1];
+                        tempBlockArray[y, x + 1] = temp;
+
+                        if (CheckForMatchAt(BoardManager.Instance, x, y, tempBlockArray) || CheckForMatchAt(BoardManager.Instance, x + 1, y, tempBlockArray))
+                        {
+                            possibleMoves.Add($"({x},{y}):({x + 1},{y})");
+                        }
+
+                        // 스왑 원상 복구
+                        temp = tempBlockArray[y, x];
+                        tempBlockArray[y, x] = tempBlockArray[y, x + 1];
+                        tempBlockArray[y, x + 1] = temp;
+                    }
+
+                    // 세로 방향으로 인접한 블록과 스왑하여 매치 확인
+                    if (y + 1 < height && gameBoard.BlockPlate.BlockPlateArray[y + 1, x] && tempBlockArray[y + 1, x] != null)
+                    {
+                        // 임시 스왑
+                        var temp = tempBlockArray[y, x];
+                        tempBlockArray[y, x] = tempBlockArray[y + 1, x];
+                        tempBlockArray[y + 1, x] = temp;
+
+                        if (CheckForMatchAt(BoardManager.Instance, x, y, tempBlockArray) || CheckForMatchAt(BoardManager.Instance, x, y + 1, tempBlockArray))
+                        {
+                            possibleMoves.Add($"({x},{y}):({x},{y + 1})");
+                        }
+
+                        // 스왑 원상 복구
+                        temp = tempBlockArray[y, x];
+                        tempBlockArray[y, x] = tempBlockArray[y + 1, x];
+                        tempBlockArray[y + 1, x] = temp;
+                    }
+                }
+            }
+
+            return result;
+        }
 
         /// <summary>
         /// 현재 보드 상태에서 이미 완성된 매치가 있는지 확인합니다.
@@ -331,7 +402,7 @@ namespace KDJ
 
         #region 유틸 함수
         /// <summary>
-        /// 주어진 임시 배열에서 특정 위치의 블록이 매치되는지 확인합니다. (Shuffle 로직용)
+        /// 주어진 배열에서 특정 위치의 블록이 매치되는지 확인합니다.
         /// </summary>
         private bool CheckForMatchAt(BoardManager boardManager, int x, int y, Block[,] blockArray)
         {
