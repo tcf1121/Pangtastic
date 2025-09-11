@@ -1,26 +1,46 @@
-using System.Collections;
+using System;
 using System.Collections.Generic;
 using System.IO;
+using Unity.VisualScripting;
 using UnityEditor;
 using UnityEngine;
 
 public class MissionImporter
 {
-    private static string csvPath = "Assets/CSV/Mission/MiniCafe.csv"; // 손님 CSV 경로
-    private static string missionSoDir = "Assets/ScriptableObject/Mission"; // 손님 SO 저장 경로
+    private static string csvPathone = "Assets/CSV/Mission/"; // 손님 CSV 경로
+    private static string missionSoDir = "Assets/ScriptableObject/Mission/"; // 손님 SO 저장 경로
     private static int startRow = 1; // 데이터 시작 행
-    private static int columnCount = 4; //열 개수
+    private static int columnCount = 7; //열 개수
                                         //private static bool isNew;
+    private static List<string> places;
 
     // 메뉴 경로
     [MenuItem("PangTastic/Import Mission")]
     public static void StartImportMissions()
     {
-        ImportMissionCSV();
+        AddPlace();
+        foreach (string place in places)
+            ImportMissionCSV(place);
     }
 
-    private static void ImportMissionCSV()
+    private static void AddPlace()
     {
+        places = new()
+        {
+            "Donut",
+            "MiniCafe",
+            "Cafe",
+            "IceCream",
+            "Bakery",
+            "Pizzeria",
+            "Bar",
+            "Greengrocery"
+        };
+    }
+
+    private static void ImportMissionCSV(string place)
+    {
+        string csvPath = $"{csvPathone}{place}.csv";
         if (File.Exists(csvPath) == false) // CSV 파일 없으면
         {
             Debug.LogError("미션 CSV 파일 없음: " + csvPath);
@@ -40,7 +60,7 @@ public class MissionImporter
             Directory.CreateDirectory(missionSoDir); // 폴더 생성
         }
 
-        string soPath = missionSoDir + "/Cafe.asset"; // SO파일 저장경로/파일이름
+        string soPath = $"{missionSoDir}{place}.asset"; // SO파일 저장경로/파일이름
         Debug.Log(soPath);
         MissionSO mission = AssetDatabase.LoadAssetAtPath<MissionSO>(soPath); // 기존 손님 SO 불러오기
         Debug.Log(mission);
@@ -54,7 +74,7 @@ public class MissionImporter
         {
             Debug.Log("기존 미션SO 갱신: ");
         }
-        mission.Place = MissonPlace.Cafe;
+        mission.Place = (MissonPlace)Enum.Parse(typeof(MissonPlace), place);
         mission.Mission = new();
         for (int i = startRow; i < lines.Length; i++) // 데이터 행부터 끝까지 순회
         {
@@ -77,8 +97,8 @@ public class MissionImporter
 
             int.TryParse(splitData[0], out missionList.MissionID);
             int.TryParse(splitData[1], out missionList.Star);
-            missionList.Explane = splitData[2];
-            int.TryParse(splitData[3], out missionList.Prerequisites);
+            missionList.Explane = splitData[3];
+            int.TryParse(splitData[6], out missionList.Prerequisites);
 
             mission.Mission.Add(missionList);
 
