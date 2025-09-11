@@ -175,7 +175,7 @@ public class InGameManager : MonoBehaviour
     {
         orderStateController.AddPatience(50f);
         continueUI.SetActive(false);
-        BoardManager.SetTouch(true);
+        KDJ.BoardManager.SetTouch(true);
     }
 
     public void PauseGame()

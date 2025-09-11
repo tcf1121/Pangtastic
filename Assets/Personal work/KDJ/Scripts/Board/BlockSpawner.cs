@@ -855,7 +855,7 @@ namespace KDJ
                         if (GameBoardData.BlockPlate.BlockPlateArray[y, x])
                         {
                             Block block = GameBoardData.GetBlock(x, y);
-                            if (block != null && block.GemType <= GemType.Sugar)
+                            if (block != null && block.IsNormal)
                             {
                                 normalBlocks.Add(block);
                                 normalBlockPositions.Add(new Vector2Int(x, y));
