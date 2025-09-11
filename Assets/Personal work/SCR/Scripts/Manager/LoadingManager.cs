@@ -44,14 +44,14 @@ public class LoadingManager : MonoBehaviour
         Scene gameScene = SceneManager.GetSceneByName("Game Scene");
         // 씬의 모든 루트 오브젝트를 순회하며 BoardManager를 찾습니다.
         GameObject[] rootObjects = gameScene.GetRootGameObjects();
-        BoardManager boardManager = null;
+        KDJ.BoardManager boardManager = null;
 
         // 이 시점에서 rootObjects 배열의 길이를 확인하여 디버깅에 도움을 받을 수 있습니다.
         Debug.Log($"씬 '{_nextScene}'의 루트 오브젝트 개수: {rootObjects.Length}");
 
         foreach (GameObject rootObj in rootObjects)
         {
-            boardManager = rootObj.GetComponent<BoardManager>();
+            boardManager = rootObj.GetComponent<KDJ.BoardManager>();
             if (boardManager != null)
             {
                 break;

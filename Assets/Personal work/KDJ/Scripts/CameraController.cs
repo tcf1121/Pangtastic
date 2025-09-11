@@ -3,15 +3,12 @@ using UnityEngine;
 
 public class CameraController : MonoBehaviour
 {
-    void Start()
-    {
-        
-    }
+    private bool _isStarted = false;
 
     void Update()
     {
-        if (BoardManager.Instance.Spawner.GameBoardData != null)
-        SetCameraSize();
+        if (_isStarted)
+            SetCameraSize();
     }
 
     public void SetCameraSize()
@@ -21,6 +18,11 @@ public class CameraController : MonoBehaviour
 
         float newOrthographicSize = BoardManager.Instance.Spawner.GameBoardData.Width / screenAspect / 2f;
 
-        mainCamera.orthographicSize = newOrthographicSize + 1f;
+        mainCamera.orthographicSize = newOrthographicSize + 1.5f;
+    }
+    
+    public void SetStarted(bool isStarted)
+    {
+        _isStarted = isStarted;
     }
 }

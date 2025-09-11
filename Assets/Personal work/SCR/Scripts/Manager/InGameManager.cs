@@ -9,6 +9,7 @@ using UnityEngine.UI;
 public class InGameManager : MonoBehaviour
 {
     [SerializeField] private PrefabList blockList;
+    [SerializeField] private List<IngredientSO> ingredientSOs;
     [SerializeField] OrderStateController orderStateController;
     [SerializeField] CustomerFlowController customerFlowController;
     [SerializeField] GameObject clearUI;
@@ -90,20 +91,20 @@ public class InGameManager : MonoBehaviour
 
     public static void ResetScore()
     {
-        if (instate == null) GameObject.Find("InGameManager").GetComponent<InGameManager>();
+        if (instate == null) instate = GameObject.Find("InGameManager").GetComponent<InGameManager>();
         instate._score = 0;
         Debug.Log($"점수 초기화. 현재 점수: {instate._score}");
     }
 
     public static int GetScore()
     {
-        if (instate == null) GameObject.Find("InGameManager").GetComponent<InGameManager>();
+        if (instate == null) instate = GameObject.Find("InGameManager").GetComponent<InGameManager>();
         return instate._score;
     }
 
     public static void AddCoin(int num)
     {
-        if (instate == null) GameObject.Find("InGameManager").GetComponent<InGameManager>();
+        if (instate == null) instate = GameObject.Find("InGameManager").GetComponent<InGameManager>();
         instate._coin += num;
     }
 
@@ -114,36 +115,36 @@ public class InGameManager : MonoBehaviour
 
     public static int GetCoin()
     {
-        if (instate == null) GameObject.Find("InGameManager").GetComponent<InGameManager>();
+        if (instate == null) instate = GameObject.Find("InGameManager").GetComponent<InGameManager>();
         return instate._coin;
     }
 
     public static void AddIngredientSta(GemType ingredient)
     {
-        if (instate == null) GameObject.Find("InGameManager").GetComponent<InGameManager>();
+        if (instate == null) instate = GameObject.Find("InGameManager").GetComponent<InGameManager>();
         Debug.Log(ingredient);
-        instate.orderStateController.AddIngredientSta(instate.blockList.GemDatas[(int)ingredient].ingredientSO);
+        instate.orderStateController.AddIngredientSta(instate.ingredientSOs[(int)ingredient]);
     }
 
     public static void SpawnCustomer()
     {
-        if (instate == null) GameObject.Find("InGameManager").GetComponent<InGameManager>();
+        if (instate == null) instate = GameObject.Find("InGameManager").GetComponent<InGameManager>();
         instate.customerFlowController.SpawnCustomer();
     }
 
     public static void StageClear()
     {
-        if (instate == null) GameObject.Find("InGameManager").GetComponent<InGameManager>();
+        if (instate == null) instate = GameObject.Find("InGameManager").GetComponent<InGameManager>();
         AddCoin(GetScore() / 10);
-        BoardManager.SetTouch(false);
+        KDJ.BoardManager.SetTouch(false);
         instate.WinCoin.text = $"{GetCoin()}";
         instate.clearUI.SetActive(true);
     }
 
     public static void StageFail()
     {
-        if (instate == null) GameObject.Find("InGameManager").GetComponent<InGameManager>();
-        BoardManager.SetTouch(false);
+        if (instate == null) instate = GameObject.Find("InGameManager").GetComponent<InGameManager>();
+        KDJ.BoardManager.SetTouch(false);
         //instate.LoseCoin.text = $"{GetCoin()}";
         //instate.LoseScore.text = $"{GetScore()}";
         //Manager.Heart.UseHearts();
@@ -174,21 +175,21 @@ public class InGameManager : MonoBehaviour
     {
         orderStateController.AddPatience(50f);
         continueUI.SetActive(false);
-        BoardManager.SetTouch(true);
+        KDJ.BoardManager.SetTouch(true);
     }
 
     public void PauseGame()
     {
         Debug.Log("게임 중지");
         Time.timeScale = 0f;
-        BoardManager.SetTouch(false);
+        KDJ.BoardManager.SetTouch(false);
     }
 
     public void ResumeGame()
     {
         Debug.Log("게임 재실행");
         Time.timeScale = 1f;
-        BoardManager.SetTouch(true);
+        KDJ.BoardManager.SetTouch(true);
     }
 
     public static void RewardGem(List<GemType> gemList)

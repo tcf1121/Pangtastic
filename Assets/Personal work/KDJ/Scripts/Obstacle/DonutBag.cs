@@ -24,6 +24,7 @@ namespace KDJ
 
         public override void Broken()
         {
+            Debug.Log("도넛봉지 부서짐");
             _brokenCoroutine = BoardManager.Instance.StartCoroutine(BrokenAnimation(X, Y));
         }
 
@@ -41,7 +42,7 @@ namespace KDJ
 
             base.Broken();
             BoardManager.Instance.StartCoroutine(BoardManager.Instance.Spawner.SpawnWithAnimation(x, y,
-            (GemType)Random.Range(0, BoardManager.Instance.Spawner.GetMaxDonutSpawnRange() + 1)));
+            (GemType)Random.Range(0, BoardManager.Instance.Spawner.GetMaxDonutSpawnRange())));
             BoardManager.Instance.IsWaitingForAnimation = false;
             _brokenCoroutine = null;
         }

@@ -86,9 +86,11 @@ namespace LHJ
             {
                 case ItemType.Scissors:
                     destroyed = ApplyScissor(pos);
+                    Manager.User.UseItem(type);
                     break;
                 case ItemType.Whisk:
                     destroyed = ApplyWhisk(pos);
+                    Manager.User.UseItem(type);
                     break;
                 case ItemType.DonutPan:
                     StartCoroutine(RegenSpecialBlockRoutine());
@@ -117,15 +119,25 @@ namespace LHJ
                 if (blk == null || blk.BlockInstance == null) continue;
 
                 var special = blk.BlockInstance.GetComponent<SpecialBlock>();
-                if (special != null) special.Activate(_board);
+                if (special != null)
+                {
+                    special.Activate(_board);
+                    continue;
+                }
+
                 if (blk is ObstacleBlock obstacle)
                 {
+                    if (blk.GemType == GemType.Syrup || blk.GemType == GemType.Egg)
+                    {
+                        InGameManager.AddIngredientSta(blk.GemType);
+                    }
                     obstacle.TakeDamage();
                     continue;
                 }
 
                 if (blk.BlockInstance.TryGetComponent<PooledObject>(out var pooledObject))
                 {
+                    InGameManager.AddIngredientSta(blk.GemType);
                     pooledObject.ReturnToPool();
                 }
                 else
@@ -143,10 +155,25 @@ namespace LHJ
                 if (blk == null || blk.BlockInstance == null) continue;
 
                 var special = blk.BlockInstance.GetComponent<SpecialBlock>();
-                if (special != null) special.Activate(_board);
+                if (special != null)
+                {
+                    special.Activate(_board);
+                    continue;
+                }
+
+                if (blk is ObstacleBlock obstacle)
+                {
+                    if (blk.GemType == GemType.Syrup || blk.GemType == GemType.Egg)
+                    {
+                        InGameManager.AddIngredientSta(blk.GemType);
+                    }
+                    obstacle.TakeDamage();
+                    continue;
+                }
 
                 if (blk.BlockInstance.TryGetComponent<PooledObject>(out var pooledObject))
                 {
+                    InGameManager.AddIngredientSta(blk.GemType);
                     pooledObject.ReturnToPool();
                 }
                 else
@@ -156,6 +183,8 @@ namespace LHJ
                 sp.GameBoardData.BlockArray[y, pos.x].BlockInstance = null;
                 destroyedCount++;
             }
+
+
 
             return destroyedCount;
         }
@@ -180,16 +209,25 @@ namespace LHJ
                     if (blk == null || blk.BlockInstance == null) continue;
 
                     var special = blk.BlockInstance.GetComponent<SpecialBlock>();
-                    if (special != null) special.Activate(_board);
-
-                    if (blk is SCR_O.ObstacleBlock obstacle)
+                    if (special != null)
                     {
-                        obstacle.TakeDamage(_board);
+                        special.Activate(_board);
+                        continue;
+                    }
+
+                    if (blk is ObstacleBlock obstacle)
+                    {
+                        if (blk.GemType == GemType.Syrup || blk.GemType == GemType.Egg)
+                        {
+                            InGameManager.AddIngredientSta(blk.GemType);
+                        }
+                        obstacle.TakeDamage();
                         continue;
                     }
 
                     if (blk.BlockInstance.TryGetComponent<PooledObject>(out var pooledObject))
                     {
+                        InGameManager.AddIngredientSta(blk.GemType);
                         pooledObject.ReturnToPool();
                     }
                     else

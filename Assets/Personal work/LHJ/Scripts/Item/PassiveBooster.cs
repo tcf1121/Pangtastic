@@ -28,6 +28,7 @@ public class PassiveBooster : MonoBehaviour
 
     private void OnEnable()
     {
+        SetPassiveItem(Manager.Stage.GetUseItem());
         if (_applyCo == null)
             _applyCo = StartCoroutine(WaitAndApplyRoutine());
     }
@@ -39,6 +40,13 @@ public class PassiveBooster : MonoBehaviour
             StopCoroutine(_applyCo);
             _applyCo = null;
         }
+    }
+
+    private void SetPassiveItem(List<bool> useItem)
+    {
+        if (useItem[0]) _useRoller = useItem[0];
+        if (useItem[1]) _useDonut = useItem[1];
+        if (useItem[2]) _useOven = useItem[2];
     }
 
     private IEnumerator WaitAndApplyRoutine()

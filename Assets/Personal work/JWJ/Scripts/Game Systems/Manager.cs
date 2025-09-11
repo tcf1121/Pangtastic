@@ -15,7 +15,7 @@ public static class Manager
     public static AdSystem Ad => AdSystem.GetInstance();
 
     public static EffectSystem Effect => EffectSystem.GetInstance();
-    //public static CurrencySystem Currency => CurrencySystem.GetInstance();
+    public static CurrencySystem Currency => CurrencySystem.GetInstance();
     public static TimerManager Timer => TimerManager.GetInstance();
 
     public static IAPManager IAP => IAPManager.GetInstance();
@@ -40,7 +40,7 @@ public static class Manager
         IAPManager.CreateManager();
 
         LanguageSystem.CreateManager();
-        //CurrencySystem.CreateManager();
+        CurrencySystem.CreateManager();
         //HeartSystem.CreateManager();
     }
 }
