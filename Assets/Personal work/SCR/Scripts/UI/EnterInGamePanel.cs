@@ -15,7 +15,6 @@ public class EnterInGamePanel : MonoBehaviour
     [SerializeField] Toggle ovenToggle;
     [SerializeField] Button enterBtn;
     [SerializeField] List<Image> recipeImages;
-    [SerializeField] GridLayoutGroup _grid;
     [SerializeField] Sprite questionMarkImage;
 
     private StageSO _curStage;
@@ -62,11 +61,6 @@ public class EnterInGamePanel : MonoBehaviour
                     recipeImages[i].gameObject.SetActive(false);
             }
         }
-        
-        if (_stageRecipes.Count < 4) _grid.cellSize = new Vector2(200, 200);
-        else if (_stageRecipes.Count < 5) _grid.cellSize = new Vector2(150, 150);
-        else if (_stageRecipes.Count < 6) _grid.cellSize = new Vector2(125, 125);
-        else _grid.cellSize = new Vector2(100, 100);
     }
 
     void OnEnable()

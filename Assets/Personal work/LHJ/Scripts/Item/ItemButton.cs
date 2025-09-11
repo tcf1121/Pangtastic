@@ -13,6 +13,7 @@ namespace LHJ
         [SerializeField] private ItemCheck _itemCheck;
         [SerializeField] private GameObject _lockGO;
         [SerializeField] private TMP_Text _countText;
+        [SerializeField] private GameObject _textBG;
 
         private void Awake()
         {
@@ -76,12 +77,16 @@ namespace LHJ
                 int count = GetItemCount(_type);
                 if (_countText != null)
                     _countText.text = count.ToString();
+                if (_textBG != null)
+                    _textBG.SetActive(true);
                 _lockGO.SetActive(false);
             }
             else
             {
                 _button.interactable = false;
                 _countText.text = "";
+                if (_textBG != null)
+                    _textBG.SetActive(false);
                 _lockGO.SetActive(true);
             }
         }
