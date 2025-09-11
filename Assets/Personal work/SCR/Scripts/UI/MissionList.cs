@@ -14,12 +14,16 @@ public class MissionList : MonoBehaviour
     public void SetMission(Mission mission)
     {
         _titleText.text = mission.Explane.value[(int)Manager.Language.GetLanguage()];
-        _index = mission.MissionID - 1;
+        _index = mission.MissionID;
         _needStar = mission.Star;
         _needStarText.text = $"{mission.Star}";
         _useStarBtn.onClick.AddListener(UseStar);
         transform.SetSiblingIndex(2);
         gameObject.SetActive(true);
+    }
+    public int GetIndex()
+    {
+        return _index;
     }
 
     private void UseStar()

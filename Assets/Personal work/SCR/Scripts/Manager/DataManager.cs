@@ -18,10 +18,10 @@ public class DataManager : Singleton<DataManager>
         }
     }
 
-    // private void OnApplicationQuit()
-    // {
-    //     UploadUserDataAsync().GetAwaiter().GetResult();
-    // }
+    private async void OnApplicationQuit()
+    {
+        await UploadUserDataAsync();
+    }
 
     // 새로운 유저가 접속할 때 새로운 정보를 만듦
     public async Task NewUser(string uid, string now)

@@ -1,14 +1,21 @@
+using System;
 using System.Collections.Generic;
+using System.Linq;
+using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class MissionPopup : MonoBehaviour
 {
     [SerializeField] RoomManager _roomManager;
     [SerializeField] List<MissionList> _missionLists;
+    [SerializeField] TMP_Text _progressText;
+    [SerializeField] Slider _progressSlider;
 
     void Awake()
     {
         OpenTwoMission();
+        Refresh();
     }
 
     private void OpenTwoMission()
@@ -24,6 +31,14 @@ public class MissionPopup : MonoBehaviour
 
     }
 
+    private void Refresh()
+    {
+        _progressSlider.minValue = 0;
+        _progressSlider.maxValue = Manager.User.GetCurMisson().Length;
+        _progressSlider.value = Array.FindAll(Manager.User.GetCurMisson(), n => n == true).ToList().Count;
+        _progressText.text = $"{Array.FindAll(Manager.User.GetCurMisson(), n => n == true).ToList().Count}/{_progressSlider.maxValue}";
+    }
+
     private MissionList GetMissionList()
     {
         foreach (var mission in _missionLists)
@@ -32,11 +47,20 @@ public class MissionPopup : MonoBehaviour
         return null;
     }
 
+    private MissionList GetCurMissionList()
+    {
+        foreach (var mission in _missionLists)
+            if (mission.gameObject.activeSelf)
+                return mission;
+        return null;
+    }
+
     private void SetMission()
     {
         if (GetMissionList() != null)
         {
-            GetMissionList().SetMission(_roomManager.CreateMission()[0]);
+            if (_roomManager.CreateMission()[0].MissionID == GetCurMissionList().GetIndex()) return;
+            else GetMissionList().SetMission(_roomManager.CreateMission()[0]);
         }
     }
 
@@ -44,5 +68,6 @@ public class MissionPopup : MonoBehaviour
     {
         _roomManager.ClearMission(index);
         SetMission();
+        Refresh();
     }
 }
