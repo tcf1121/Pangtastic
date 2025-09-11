@@ -43,6 +43,20 @@ public class IAPManager : Singleton<IAPManager>
         }
     }
 
+    public void RefreshOwnership()
+    {
+        if (_store != null && _isConnected && _isProductsReady)
+        {
+            _store.FetchPurchases();
+            Debug.Log("구매내역 새로고침");
+        }
+        else
+        {
+            Debug.LogWarning("스토어 준비안됨 새로고침 실패");
+        }
+    }
+
+
     private async void InitializeIAP()
     {
         _store = UnityIAPServices.StoreController();
@@ -132,6 +146,8 @@ public class IAPManager : Singleton<IAPManager>
                 }
             }
         }
+        _isProductsReady = true;
+        OnProductsReady?.Invoke(true);
     }
 
 
@@ -210,16 +226,10 @@ public class IAPManager : Singleton<IAPManager>
 
     public void TryPurchase(string productId)
     {
-        if (Manager.DB.GetUserRoot() == "guests")
+        if (Manager.DB.GetUserRoot() == "guests" || Manager.DB.auth.CurrentUser.IsAnonymous)
         {
-            Debug.LogWarning("게스트 계정은 결제 불가 1");
-            return;
-        }
-
-        if (Manager.DB.auth.CurrentUser.IsAnonymous)
-        {
-            Debug.LogWarning("게스트 계정은 결제 불가 2");
-            //계정 전환 창 띄워주는 로직 추가할거면 여기에
+            Debug.LogWarning("게스트 계정은 결제 불가");
+            OutGameManager.Instance.OpenAccountLinkingPopup();
             return;
         }
 
@@ -238,6 +248,14 @@ public class IAPManager : Singleton<IAPManager>
             Debug.LogWarning($"구매 불가 상품: {productId}");
             return;
         }
+
+        if (CheckNonConsumableOwned(productId))
+        {
+            Debug.LogWarning("이미 구매한 아이템입니다.");
+            OnNonConsumableOwned?.Invoke(productId);
+            return;
+        }
+
         _lastTriedProductId = productId;
         _store.PurchaseProduct(productId);
         Debug.Log($"구매 시도: {productId}");

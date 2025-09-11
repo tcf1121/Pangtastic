@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 public static class RecipeRule
@@ -106,6 +107,17 @@ public static class RecipeRule
                 }
             }
         }
+
+        int[] priorityIngredientIds = { 2507, 2508 }; //초코시럽, 계란
+
+        result.Sort((a, b) =>
+        {
+            bool aHas = a.Ingredients.Any(ing => priorityIngredientIds.Contains(ing.Ingredient.ID));
+            bool bHas = b.Ingredients.Any(ing => priorityIngredientIds.Contains(ing.Ingredient.ID));
+
+            if (aHas == bHas) return 0;
+            return aHas ? -1 : 1;
+        });
         return result;
     }
 
