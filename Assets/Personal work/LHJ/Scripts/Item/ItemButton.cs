@@ -21,12 +21,9 @@ namespace LHJ
             SetItemState();
         }
 
-        private void Update()
+        private void LateUpdate()
         {
-            if (!Manager.User.CanUseItem(_type))
-            {
-                SetItemState();
-            }
+            SetItemState();
         }
 
         private void OnClick()
@@ -59,7 +56,6 @@ namespace LHJ
                 _board.ClearItemSelection();
             else
                 _board.SelectItem(_type);
-            SetItemState();
         }
 
         private void Lock()
@@ -85,6 +81,7 @@ namespace LHJ
             else
             {
                 _button.interactable = false;
+                _countText.text = "";
                 _lockGO.SetActive(true);
             }
         }

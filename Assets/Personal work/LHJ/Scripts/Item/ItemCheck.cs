@@ -124,15 +124,20 @@ namespace LHJ
                     special.Activate(_board);
                     continue;
                 }
-                
+
                 if (blk is ObstacleBlock obstacle)
                 {
+                    if (blk.GemType == GemType.Syrup || blk.GemType == GemType.Egg)
+                    {
+                        InGameManager.AddIngredientSta(blk.GemType);
+                    }
                     obstacle.TakeDamage();
                     continue;
                 }
 
                 if (blk.BlockInstance.TryGetComponent<PooledObject>(out var pooledObject))
                 {
+                    InGameManager.AddIngredientSta(blk.GemType);
                     pooledObject.ReturnToPool();
                 }
                 else
@@ -158,12 +163,17 @@ namespace LHJ
 
                 if (blk is ObstacleBlock obstacle)
                 {
+                    if (blk.GemType == GemType.Syrup || blk.GemType == GemType.Egg)
+                    {
+                        InGameManager.AddIngredientSta(blk.GemType);
+                    }
                     obstacle.TakeDamage();
                     continue;
                 }
 
                 if (blk.BlockInstance.TryGetComponent<PooledObject>(out var pooledObject))
                 {
+                    InGameManager.AddIngredientSta(blk.GemType);
                     pooledObject.ReturnToPool();
                 }
                 else
@@ -206,13 +216,18 @@ namespace LHJ
                     }
 
                     if (blk is ObstacleBlock obstacle)
+                    {
+                        if (blk.GemType == GemType.Syrup || blk.GemType == GemType.Egg)
                         {
-                            obstacle.TakeDamage();
-                            continue;
+                            InGameManager.AddIngredientSta(blk.GemType);
                         }
+                        obstacle.TakeDamage();
+                        continue;
+                    }
 
                     if (blk.BlockInstance.TryGetComponent<PooledObject>(out var pooledObject))
                     {
+                        InGameManager.AddIngredientSta(blk.GemType);
                         pooledObject.ReturnToPool();
                     }
                     else
