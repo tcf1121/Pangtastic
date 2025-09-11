@@ -1,0 +1,106 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e3ddf2ae44b46df4ea10ad3795cca9ef, type: 3}
+  m_Name: IceCream
+  m_EditorClassIdentifier: 
+  Place: 3
+  Mission:
+  - MissionID: 1
+    Star: 3
+    Explane: "\uC0C8 \uAC00\uAC8C\uB97C \uC624\uD508 \uD574\uC694"
+    Prerequisites: 0
+  - MissionID: 2
+    Star: 1
+    Explane: "\uCC3D\uBB38\uC744 \uB2EC\uC544\uBD10\uC694"
+    Prerequisites: 1
+  - MissionID: 3
+    Star: 2
+    Explane: "\uC120\uBC18\uC744 \uC124\uCE58\uD574\uC694"
+    Prerequisites: 1
+  - MissionID: 4
+    Star: 2
+    Explane: "\uCE74\uC6B4\uD130\uB97C \uC124\uCE58\uD574\uC694(1/2)"
+    Prerequisites: 3
+  - MissionID: 5
+    Star: 1
+    Explane: "\uC544\uC774\uC2A4\uD06C\uB9BC \uBCF4\uAD00\uB3C4 \uD574\uC57C\uC8E0"
+    Prerequisites: 4
+  - MissionID: 6
+    Star: 1
+    Explane: "\uD14C\uC774\uBE14\uC744 \uB193\uC544\uBD10\uC694"
+    Prerequisites: 5
+  - MissionID: 7
+    Star: 1
+    Explane: "\uC758\uC790\uB3C4 \uB458\uAE4C\uC694"
+    Prerequisites: 6
+  - MissionID: 8
+    Star: 2
+    Explane: "\uC544\uC774\uC2A4\uD06C\uB9BC \uAE30\uACC4\uB97C \uC124\uCE58\uD574\uC694
+      (1/2)"
+    Prerequisites: 3
+  - MissionID: 9
+    Star: 1
+    Explane: "\uC544\uC774\uC2A4\uD06C\uB9BC \uAE30\uACC4\uB97C \uC124\uCE58\uD574\uC694
+      (2/2)"
+    Prerequisites: 8
+  - MissionID: 10
+    Star: 2
+    Explane: "\uB0C9\uC7A5\uACE0\uB3C4 \uC788\uC5B4\uC57C \uD574\uC694"
+    Prerequisites: 5
+  - MissionID: 11
+    Star: 1
+    Explane: "\uC544\uC774\uC2A4\uD06C\uB9BC\uC744 \uC900\uBE44\uD574\uC694 (1/3)"
+    Prerequisites: 10
+  - MissionID: 12
+    Star: 1
+    Explane: "\uC544\uC774\uC2A4\uD06C\uB9BC\uC744 \uC900\uBE44\uD574\uC694 (2/3)"
+    Prerequisites: 11
+  - MissionID: 13
+    Star: 2
+    Explane: "\uC544\uC774\uC2A4\uD06C\uB9BC\uC744 \uC900\uBE44\uD574\uC694 (3/3)"
+    Prerequisites: 12
+  - MissionID: 14
+    Star: 1
+    Explane: "\uCF58 \uC544\uC774\uC2A4\uD06C\uB9BC\uB3C4 \uB458\uAE4C\uC694?"
+    Prerequisites: 9
+  - MissionID: 15
+    Star: 2
+    Explane: "\uCEF5\uB3C4 \uB458\uAE4C\uC694?"
+    Prerequisites: 9
+  - MissionID: 16
+    Star: 2
+    Explane: "\uC190\uB2D8 \uB9DE\uC774\uB97C \uC900\uBE44\uD574\uC694"
+    Prerequisites: 7
+  - MissionID: 17
+    Star: 3
+    Explane: "\uC74C\uC2DD \uBAA8\uD615\uC744 \uBC30\uCE58\uD574\uC694"
+    Prerequisites: 13
+  - MissionID: 18
+    Star: 1
+    Explane: "\uCE74\uC6B4\uD130\uB97C \uC124\uCE58\uD574\uC694(2/2)"
+    Prerequisites: 4
+  - MissionID: 19
+    Star: 1
+    Explane: "\uD654\uBD84\uC744 \uC124\uCE58\uD574\uC694"
+    Prerequisites: 17
+  - MissionID: 20
+    Star: 1
+    Explane: "\uBBF8\uB2C8 \uAC04\uD310\uB3C4 \uB458\uAE4C\uC694?"
+    Prerequisites: 16
+  - MissionID: 21
+    Star: 3
+    Explane: "\uC544\uC774\uC2A4\uD06C\uB9BC \uC7A5\uC2DD\uC744 \uC124\uCE58\uD574\uC694"
+    Prerequisites: 13
+  - MissionID: 22
+    Star: 2
+    Explane: "\uBA54\uB274\uD310\uC744 \uC124\uCE58\uD574\uC694"
+    Prerequisites: 21
