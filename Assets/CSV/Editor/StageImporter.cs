@@ -98,7 +98,7 @@ public class StageImporter
             int.TryParse(splitData[3], out int level_id);
             int stage_recipe_bundle = int.Parse(splitData[4]);
             string stage_type = splitData[5];
-            int puzzle_board_id = int.Parse(splitData[6]);
+            int.TryParse(splitData[6], out int puzzle_board_id);
             int.TryParse(splitData[7], out int max_gold_gain);
 
             string soPath = stageSoDir + "/Stage_" + stage_id + ".asset"; // SO파일 저장경로/파일이름

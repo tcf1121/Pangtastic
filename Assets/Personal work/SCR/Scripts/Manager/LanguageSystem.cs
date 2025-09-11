@@ -50,6 +50,11 @@ public class LanguageSystem : Singleton<LanguageSystem>
         ChangeLanguage();
     }
 
+    public TMP_FontAsset GetFont()
+    {
+        return languageList.Infos[(int)currentLang].Font;
+    }
+
     public void ChangeLanguage()
     {
         if (languageList == null) return;
@@ -58,12 +63,10 @@ public class LanguageSystem : Singleton<LanguageSystem>
         Debug.Log("언어 변경됨: " + languageList.Infos[language].Language);
 
         //글꼴 전체 변경
-        TMP_Text[] allTexts = FindObjectsOfType<TMP_Text>(true);
+        TextLanguage[] allTexts = FindObjectsOfType<TextLanguage>(true);
         foreach (var text in allTexts)
         {
-            // 제외 태그 달린 건 건너뛰기
-            if (text.CompareTag(excludeTag)) continue;
-            text.font = languageList.Infos[language].Font;
+            text.ChangeLanguage();
         }
     }
 

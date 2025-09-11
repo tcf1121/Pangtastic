@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -15,7 +13,7 @@ public class MissionList : MonoBehaviour
 
     public void SetMission(Mission mission)
     {
-        _titleText.text = mission.Explane;
+        _titleText.text = mission.Explane.value[(int)Manager.Language.GetLanguage()];
         _index = mission.MissionID - 1;
         _needStar = mission.Star;
         _needStarText.text = $"{mission.Star}";
