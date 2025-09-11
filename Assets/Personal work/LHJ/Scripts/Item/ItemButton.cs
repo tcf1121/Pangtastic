@@ -70,7 +70,6 @@ namespace LHJ
 
         public void SetItemState()
         {
-            Debug.Log("보유 아이템 상태 : " + _type + " " + Manager.User.CanUseItem(_type));
             if (Manager.User.CanUseItem(_type))
             {
                 _button.interactable = true;
