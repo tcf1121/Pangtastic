@@ -16,7 +16,8 @@ namespace KDJ.States
             count = 0;
 
             // 상태에 진입하면 전체 리필 프로세스를 한 번만 시작합니다.
-            _refillProcessCoroutine = boardManager.Spawner.StartCoroutine(RefillAndChangeState(boardManager));
+            if (_refillProcessCoroutine == null)
+                _refillProcessCoroutine = boardManager.Spawner.StartCoroutine(RefillAndChangeState(boardManager));
         }
 
         public void OnUpdate(BoardManager boardManager)
