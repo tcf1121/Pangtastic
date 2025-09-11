@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using Unity.VisualScripting;
 using UnityEditor.Build.Pipeline;
 using UnityEngine;
@@ -45,7 +46,7 @@ public class RoomManager : MonoBehaviour
     public List<Mission> CreateMission(int num = 1)
     {
         List<Mission> returnMission = new();
-        List<bool> isclearMission = Manager.User.GetCurMisson();
+        List<bool> isclearMission = Manager.User.GetCurMisson().ToList();
         List<Mission> missionLists = missionList.Missions[(int)curPlace].Mission;
         for (int i = 0; i < isclearMission.Count; i++)
         {

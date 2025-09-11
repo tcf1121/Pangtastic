@@ -7,6 +7,7 @@ using UnityEngine.UI;
 
 public class CurrencyStarBuy : MonoBehaviour
 {
+    [SerializeField] private string buttonName;
     [SerializeField] private GameObject _prefab;
     [SerializeField] private Button _button;
 
@@ -17,18 +18,32 @@ public class CurrencyStarBuy : MonoBehaviour
 
     private void SetupAndPlayEffect()
     {
-
-        if (CurrencySystem.Instance.GetStars() < int.Parse(transform.Find("Amount").GetComponent<TMP_Text>().text))
+        if (string.IsNullOrEmpty(buttonName))
+        {
+            Debug.LogWarning("이름이 없습니다.");
+            return;
+        }
+        if (Manager.Currency.GetStars() < int.Parse(transform.Find("Amount").GetComponent<TMP_Text>().text))
         {
             Debug.LogWarning("별이 부족합니다.");
             return;
         }
+        
         // 별 차감
         var startText = GameObject.FindWithTag("StarText");
         if (startText)
         {
-            CurrencySystem.Instance.SpendStar(int.Parse(transform.Find("Amount").GetComponent<TMP_Text>().text));
+            Manager.Currency.SpendStar(int.Parse(transform.Find("Amount").GetComponent<TMP_Text>().text));
             var tmp = startText.GetComponent<TMP_Text>();
+
+
+            switch (buttonName)
+            {
+                case "":
+                    FindObjectOfType<FurnitureActive>()
+                        .ActivateByNames("Donuts_16 Variant", buttonName);
+                    break;
+            }
             //if (tmp) .SetStarText(tmp);
         }
 

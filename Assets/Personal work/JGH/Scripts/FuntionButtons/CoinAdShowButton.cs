@@ -3,7 +3,7 @@ using UnityEngine.UI;
 
 public class CoinAdShowButton : MonoBehaviour
 {
-    [SerializeField] private Button bmxButton; 
+    [SerializeField] private Button bmxButton;
 
     private void Start()
     {

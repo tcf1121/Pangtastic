@@ -1,6 +1,6 @@
 using SCR;
 using SCR_B;
-using System.Collections;
+using System;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
@@ -24,6 +24,7 @@ public class InGameManager : MonoBehaviour
     private int _score;
     private int _coin;
     private bool _firstfail = true;
+    private Action _finishAD;
     [SerializeField] private int _useCoin;
 
     void Awake()
@@ -34,7 +35,9 @@ public class InGameManager : MonoBehaviour
         useCoinText.text = $"{_useCoin}";
         customerFlowController.OnStageCleared += StageClear;
         customerFlowController.OnStageFailed += StageFail;
+        _finishAD += ContinueGame;
         useCoinContinueButton.onClick.AddListener(GoldContinueGame);
+        watchAddContinueButton.onClick.AddListener(AdContinueGame);
         _score = 0;
         _coin = 0;
     }
@@ -155,7 +158,8 @@ public class InGameManager : MonoBehaviour
 
     private void AdContinueGame()
     {
-
+        Manager.Ad.LoadAD();
+        Manager.Ad.ShowAD(_finishAD);
     }
 
     private void GoldContinueGame()
@@ -163,10 +167,15 @@ public class InGameManager : MonoBehaviour
         if (Manager.User.CanUseCoin(_useCoin))
         {
             Manager.User.UseCoin(_useCoin);
-            orderStateController.AddPatience(50f);
-            continueUI.SetActive(false);
-            KDJ.BoardManager.SetTouch(true);
+            ContinueGame();
         }
+    }
+
+    private void ContinueGame()
+    {
+        orderStateController.AddPatience(50f);
+        continueUI.SetActive(false);
+        BoardManager.SetTouch(true);
     }
 
     public void PauseGame()

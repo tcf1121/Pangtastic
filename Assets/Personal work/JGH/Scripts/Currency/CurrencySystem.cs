@@ -7,7 +7,7 @@ using Unity.VisualScripting;
 using UnityEngine.SceneManagement;
 
 
-public class CurrencySystem : MonoBehaviour
+public class CurrencySystem : Singleton<CurrencySystem>
 {
     public static CurrencySystem Instance { get; private set; } // 싱글톤 인스턴스
 
@@ -36,7 +36,8 @@ public class CurrencySystem : MonoBehaviour
 
     protected void Awake()
     {
-        //base.Awake();
+        base.Awake();
+        
         if (Instance == null)
         {
             Instance = this;

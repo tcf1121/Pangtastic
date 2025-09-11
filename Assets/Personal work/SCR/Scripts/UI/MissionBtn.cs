@@ -23,9 +23,9 @@ public class MissIonBtn : MonoBehaviour
     {
         _currentRoom.text = $"{Enum.GetName(typeof(MissonPlace), Manager.User.GetCurPlace())}";
         _progressSlider.minValue = 0;
-        _progressSlider.maxValue = Manager.User.GetCurMisson().Count;
-        _progressSlider.value = Manager.User.GetCurMisson().FindAll(n => n == true).ToList().Count;
-        _progressText.text = $"{Manager.User.GetCurMisson()}/{_progressSlider.maxValue}";
+        _progressSlider.maxValue = Manager.User.GetCurMisson().Length;
+        _progressSlider.value = Array.FindAll(Manager.User.GetCurMisson(), n => n == true).ToList().Count;
+        _progressText.text = $"{Array.FindAll(Manager.User.GetCurMisson(), n => n == true).ToList().Count}/{_progressSlider.maxValue}";
     }
 
 }
