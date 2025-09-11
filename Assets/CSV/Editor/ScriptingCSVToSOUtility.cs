@@ -9,7 +9,8 @@ public class ScriptingCSVToSOUtility : EditorWindow
 {
     private string csvPath = "";
 
-    [MenuItem("Tools/ScriptingCSV → SO 변환기")]
+    // [MenuItem("Tools/ScriptingCSV → SO 변환기")]
+    [MenuItem("PangTastic/ScriptingCSV → SO 변환기")]
     static void Init()
     {
         GetWindow<ScriptingCSVToSOUtility>("CSV → SO 변환기");
@@ -81,7 +82,8 @@ public class ScriptingCSVToSOUtility : EditorWindow
                 stringId = Safe(cols, 0),
                 korean = Safe(cols, 1),
                 english = Safe(cols, 2),
-                chinese = Safe(cols, 3)
+                chinese = Safe(cols, 3),
+                japanese = Safe(cols, 4),
             };
             so.strings.Add(data);
         }
