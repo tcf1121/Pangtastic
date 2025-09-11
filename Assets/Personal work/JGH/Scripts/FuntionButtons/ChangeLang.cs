@@ -21,7 +21,7 @@ public class ChangeLang : MonoBehaviour
     public void OnClickChangeLanguage()
     {
         Manager.Language.SetLanguage(language);
-
-        SceneManager.LoadScene(2/*로비씬*/);
+        Manager.Language.ChangeLanguage();
+        //SceneManager.LoadScene(2/*로비씬*/);
     }
 }

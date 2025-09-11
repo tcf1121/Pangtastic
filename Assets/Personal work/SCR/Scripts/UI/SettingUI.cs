@@ -11,6 +11,10 @@ public class SettingUI : MonoBehaviour
         string authJson = Manager.DB.GetAuthInfo();
         DatabaseSystem.AuthInfo info = JsonUtility.FromJson<DatabaseSystem.AuthInfo>(authJson);
         _userID.text = $"{info.uid}";
+    }
+
+    private void OnEnable()
+    {
         SetLanguageBtn();
     }
 

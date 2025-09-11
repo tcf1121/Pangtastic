@@ -48,18 +48,21 @@ namespace LHJ
         public void UseCoffee(float amount = 30f)
         {
             var order = FindObjectOfType<OrderStateController>();
-            if (order == null || order._curPatience <= 0f) return;
 
-            // 현재 진행률 기반으로 남은 시간 추정
-            float progress = 1f - (order._curPatience / 100f);
-            float estimatedTimeToZero = (progress > 0.001f) ? (order._elapsed / progress) : 60f;
+            order.AddPatience(amount);
 
-            // 인내심 증가
-            float newCur = Mathf.Min(order._curPatience + amount, 100f);
-            order._curPatience = newCur;
-
-            float newProgress = 1f - (newCur / 100f);
-            order._elapsed = Mathf.Clamp(newProgress * estimatedTimeToZero, 0f, estimatedTimeToZero);
+            //if (order == null || order._curPatience <= 0f) return;
+            //
+            //// 현재 진행률 기반으로 남은 시간 추정
+            //float progress = 1f - (order._curPatience / 100f);
+            //float estimatedTimeToZero = (progress > 0.001f) ? (order._elapsed / progress) : 60f;
+            //
+            //// 인내심 증가
+            //float newCur = Mathf.Min(order._curPatience + amount, 100f);
+            //order._curPatience = newCur;
+            //
+            //float newProgress = 1f - (newCur / 100f);
+            //order._elapsed = Mathf.Clamp(newProgress * estimatedTimeToZero, 0f, estimatedTimeToZero);
         }
 
         // 좌표 확인
