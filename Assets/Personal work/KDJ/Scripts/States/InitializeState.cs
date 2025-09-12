@@ -12,7 +12,6 @@ namespace KDJ.States
             if (boardManager.IsTest)
                 boardManager.StartCoroutine(boardManager.StageInit());
 
-            Application.targetFrameRate = 60;
             InGameManager.SpawnCustomer();
         }
 

@@ -1,7 +1,6 @@
 using SCR;
 using System;
 using System.Collections.Generic;
-using UnityEditor.Localization.Plugins.XLIFF.V12;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -46,7 +45,7 @@ public class OrderStateController : MonoBehaviour
 
         OnOrderStarted?.Invoke(_orderRecipes, recipes); //UI로 정보 전달
 
-        if(resetPatience)
+        if (resetPatience)
         {
             AddPatience(100f);
         }
