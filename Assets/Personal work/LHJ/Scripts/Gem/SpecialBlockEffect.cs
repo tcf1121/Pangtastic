@@ -13,6 +13,8 @@ namespace LHJ
         [Header("밀대")]
         [SerializeField] private GameObject _rollerHorizontalFx;
         [SerializeField] private GameObject _rollerVerticalFx;
+        [SerializeField] private GameObject _rollerTrailFxH;  // 가로 잔상 프리팹
+        [SerializeField] private GameObject _rollerTrailFxV;
 
         [Header("우유")]
         [SerializeField] private GameObject _milkDropFx;   
@@ -22,6 +24,7 @@ namespace LHJ
         [Header("오븐")]
         [SerializeField] private GameObject _ovenFx;  
         [SerializeField] private Material _ovenStrokeMat;
+        [SerializeField] private GameObject _ovenLineFx;
 
         [Header("도넛상자")]
         [SerializeField] private GameObject _donutBurstFx;
@@ -35,6 +38,10 @@ namespace LHJ
                 || t == GemType.DonutBox
                 || t == GemType.Milk
                 || t == GemType.Oven;
+        }
+        private void OnDisable()
+        {
+            _running = 0;
         }
 
         private static void BeginEffect()
@@ -104,6 +111,9 @@ namespace LHJ
 
             GameObject fxPrefab = isHorizontal ? _rollerHorizontalFx : _rollerVerticalFx;
             GameObject fx = Instantiate(fxPrefab, board.transform);
+
+            // 잔상 생성 코루틴 시작: 방향 전달
+            board.StartCoroutine(SpawnTrail(fx, board, isHorizontal));
 
             Vector3 startWorld, endWorld;
             if (isHorizontal)
@@ -196,6 +206,35 @@ namespace LHJ
             Destroy(fx);
             EndEffect();
         }
+        private IEnumerator SpawnTrail(GameObject roller, BoardManager board, bool isHorizontal)
+        {
+            GameObject trailPrefab = isHorizontal ? _rollerTrailFxH : _rollerTrailFxV;
+            if (trailPrefab == null) yield break;
+            Vector3 moveDir = isHorizontal ? Vector3.right : Vector3.down;
+
+            Vector3 c00 = GridToWorld(board, board.Spawner.GameBoardData, 0, 0);
+            Vector3 c10 = GridToWorld(board, board.Spawner.GameBoardData, 1, 0);
+            float cellSize = Mathf.Abs(c10.x - c00.x);
+
+            float backOffset = cellSize * 0.3f;
+
+            while (roller != null)
+            {
+                Vector3 spawnPos = roller.transform.position - moveDir * backOffset;
+
+                var trail = Instantiate(trailPrefab, spawnPos, Quaternion.identity, board.transform);
+
+                if (trail.TryGetComponent<SpriteRenderer>(out var sr))
+                {
+                    if (sr.sortingOrder < 9998) sr.sortingOrder = 9998;
+                    var c = sr.color;
+                    sr.color = new Color(c.r, c.g, c.b, Mathf.Min(c.a, 0.7f));
+                }
+
+                Destroy(trail, 0.25f);
+                yield return null;
+            }
+        }
 
         private IEnumerator MilkRoutine(Vector2Int origin, GameBoardData gameBoard, BoardManager board,int count = 3, bool destroyOrigin = true, System.Action<List<Vector2Int>> onCompleted = null)
         {
@@ -221,6 +260,12 @@ namespace LHJ
 
                 GameObject drop = Instantiate(_milkDropFx, originWorld, Quaternion.identity, board.transform);
                 if (drop.TryGetComponent<SpriteRenderer>(out var sr)) sr.sortingOrder = 9999;
+
+                float baseScale = drop.transform.localScale.x; // 기본 크기 저장
+                drop.transform
+                    .DOScale(Vector3.one * baseScale * 1.3f, _milkFlyTime * 0.5f) 
+                    .SetEase(Ease.OutQuad)
+                    .SetLoops(2, LoopType.Yoyo); // 다시 원래 크기로
 
                 drop.transform.DOMove(targetWorld, _milkFlyTime)
                     .SetEase(Ease.InOutSine)
@@ -309,6 +354,8 @@ namespace LHJ
         {
             if (gameBoard == null || board == null) yield break;
             BeginEffect();
+
+            // 1) 타겟 타입 추론(스왑 상대 → 인접 일반젬)
             GemType? targetType = null;
             if (board.BlockMover != null)
             {
@@ -338,16 +385,19 @@ namespace LHJ
                 }
             }
 
+            // 2) 오븐 본체 FX
             Vector3 originWorld = GridToWorld(board, gameBoard, origin.x, origin.y);
             GameObject oven = Instantiate(_ovenFx, originWorld, Quaternion.identity, board.transform);
 
             Vector3 cell00 = GridToWorld(board, gameBoard, 0, 0);
             Vector3 cell10 = GridToWorld(board, gameBoard, 1, 0);
-            float cellSize = Mathf.Abs(cell10.x - cell00.x); 
+            float cellSize = Mathf.Abs(cell10.x - cell00.x);
             float baseScale = 1f;
 
+            SpriteRenderer ovenSR = null;
             if (oven.TryGetComponent<SpriteRenderer>(out var sr))
             {
+                ovenSR = sr;
                 sr.sortingOrder = 9999;
 
                 float spriteSize = Mathf.Max(0.0001f, sr.bounds.size.x);
@@ -360,6 +410,7 @@ namespace LHJ
                     .SetLoops(Mathf.RoundToInt(shakeDur / 0.083f), LoopType.Yoyo);
             }
 
+            // 3) 타겟 좌표 수집(같은 타입 전부 + 자신)
             List<Vector2Int> targets = new List<Vector2Int>(32) { origin };
             if (targetType.HasValue)
             {
@@ -370,63 +421,86 @@ namespace LHJ
                         var b = gameBoard.GetBlock(x, y);
                         if (b != null && b.BlockInstance != null && b.GemType == t)
                         {
-                            if (x == origin.x && y == origin.y) continue; 
+                            if (x == origin.x && y == origin.y) continue;
                             targets.Add(new Vector2Int(x, y));
                         }
                     }
             }
             ApplyStroke(gameBoard, targets);
 
-            float lineWidth = cellSize * 0.12f;
-            List<GameObject> lines = new List<GameObject>(targets.Count);
+            // 4) 라인(선) 연출 — 길이/정렬 보정 포함
+            const float growTime = 0.40f;
+            const float stayTime = 0.20f;
+            float thicknessWorld = cellSize * 0.18f;
+
             for (int i = 0; i < targets.Count; i++)
             {
                 var p = targets[i];
                 if (p.x == origin.x && p.y == origin.y) continue;
 
                 Vector3 to = GridToWorld(board, gameBoard, p.x, p.y);
+                if (_ovenLineFx == null) continue;
 
-                GameObject go = new GameObject("OvenTraceLine");
-                go.transform.SetParent(board.transform, false);
-                var lr = go.AddComponent<LineRenderer>();
-                lr.useWorldSpace = true;
-                lr.positionCount = 2;
-                lr.numCapVertices = 4;
-                lr.numCornerVertices = 4;
-                lr.startWidth = lr.endWidth = lineWidth;
-                lr.material = new Material(Shader.Find("Sprites/Default"));
-                lr.startColor = lr.endColor = Color.white;
-                var rend = lr.GetComponent<Renderer>();
-                if (rend != null) { rend.sortingLayerName = "Effects"; rend.sortingOrder = 200; }
+                GameObject lineFx = Instantiate(_ovenLineFx, originWorld, Quaternion.identity, board.transform);
+                SpriteRenderer lsr = lineFx.GetComponentInChildren<SpriteRenderer>(true);
+                Transform scaleTarget = (lsr != null) ? lsr.transform : lineFx.transform;
 
-                lr.SetPosition(0, originWorld);
-                lr.SetPosition(1, originWorld);
-                DOTween.To(() => 0f,v => lr.SetPosition(1, Vector3.Lerp(originWorld, to, v)), 1f, 1.0f).SetEase(Ease.OutSine);
-
-                lines.Add(go);
-            }
-
-            yield return new WaitForSeconds(1.0f);
-
-            for (int i = 0; i < targets.Count; i++)
-            {
-                var b = gameBoard.GetBlock(targets[i].x, targets[i].y);
-                if (b != null && b.BlockInstance != null)
+                // (정렬) 보드에서 확실히 보이도록 오븐 SR 기준으로 레이어/오더 맞춤
+                if (lsr != null)
                 {
-                    Transform t = b.BlockInstance.transform;
-                    Vector3 s0 = t.localScale;
-                    t.DOScale(s0 * 1.2f, 0.2f).SetLoops(2, LoopType.Yoyo).SetEase(Ease.OutQuad);
+                    lineFx.layer = oven.layer;
+                    if (ovenSR != null)
+                    {
+                        lsr.sortingLayerID = ovenSR.sortingLayerID;
+                        lsr.sortingOrder = ovenSR.sortingOrder + 1;
+                    }
+                    else
+                    {
+                        lsr.sortingOrder = 5000;
+                    }
                 }
-            }
 
-            for (int i = 0; i < lines.Count; i++) Destroy(lines[i]);
+                // 방향/거리/회전
+                Vector3 dir = (to - originWorld);
+                float dist = dir.magnitude;
+                float ang = Mathf.Atan2(dir.y, dir.x) * Mathf.Rad2Deg;
+
+                Vector3 mid = originWorld + dir * 0.5f;
+                lineFx.transform.position = mid;
+                lineFx.transform.rotation = Quaternion.Euler(0f, 0f, ang);
+
+                // 스프라이트 단위 월드 크기
+                float unitWorldW = 1f, unitWorldH = 1f;
+                if (lsr != null && lsr.sprite != null)
+                {
+                    float lossX = Mathf.Max(0.0001f, lsr.transform.lossyScale.x);
+                    float lossY = Mathf.Max(0.0001f, lsr.transform.lossyScale.y);
+                    unitWorldW = Mathf.Max(0.0001f, lsr.bounds.size.x / lossX);
+                    unitWorldH = Mathf.Max(0.0001f, lsr.bounds.size.y / lossY);
+                }
+                float halfW = unitWorldW * 0.5f;
+                float overshoot = cellSize * 0.10f;          // 셀 10% 여유
+                float targetScaleX = (dist + halfW + overshoot) / unitWorldW;
+                float targetScaleY = thicknessWorld / unitWorldH;
+
+                Vector3 s0 = scaleTarget.localScale;
+                scaleTarget.localScale = new Vector3(0.01f, targetScaleY, s0.z);
+
+                var seq = DOTween.Sequence()
+                    .Append(scaleTarget.DOScaleX(targetScaleX, growTime).SetEase(Ease.OutSine))
+                    .AppendInterval(stayTime);
+
+                if (lsr != null) seq.Append(lsr.DOFade(0f, 0.18f));
+                seq.OnComplete(() => Destroy(lineFx));
+            }
+            yield return new WaitForSeconds(growTime + stayTime);
+
             if (oven != null)
             {
                 oven.transform.DOScale(Vector3.one * baseScale, 0.15f);
                 Destroy(oven, 0.2f);
             }
 
-            // 파괴
             var hits = new List<Vector2Int>(targets.Count);
             for (int i = 0; i < targets.Count; i++)
                 AddCell(gameBoard, targets[i].x, targets[i].y, hits);
