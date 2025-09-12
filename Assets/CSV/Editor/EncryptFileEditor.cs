@@ -6,13 +6,15 @@ using System.IO;
 public class EncryptFileEditors
 {
     // ===== Text =====
-    [MenuItem("Tools/Encrypt/Text File (streamingAssetsPath)")]
+    // [MenuItem("Tools/Encrypt/Text File (streamingAssetsPath)")]
+    [MenuItem("PangTastic/Encrypt/Text File (streamingAssetsPath)")]
     private static void EncryptText_Default()
     {
         TextEncrypt(Application.streamingAssetsPath);
     }
 
-    [MenuItem("Tools/Encrypt/Text File (경로 선택)")]
+    // [MenuItem("Tools/Encrypt/Text File (경로 선택)")]
+    [MenuItem("PangTastic/Encrypt/Text File (경로 선택)")]
     private static void EncryptText_Custom()
     {
         string folder = EditorUtility.OpenFolderPanel("저장할 위치 선택", Application.dataPath, "");
@@ -38,13 +40,15 @@ public class EncryptFileEditors
 
 
     // ===== Binary =====
-    [MenuItem("Tools/Encrypt/Binary File (streamingAssetsPath)")]
+    // [MenuItem("Tools/Encrypt/Binary File (streamingAssetsPath)")]
+    [MenuItem("PangTastic/Encrypt/Binary File (streamingAssetsPath)")]
     private static void EncryptBinary_Default()
     {
         EncryptBinary(Application.streamingAssetsPath);
     }
 
-    [MenuItem("Tools/Encrypt/Binary File (경로 선택)")]
+    // [MenuItem("Tools/Encrypt/Binary File (경로 선택)")]
+    [MenuItem("PangTastic/Encrypt/Binary File (경로 선택)")]
     private static void EncryptBinary_Custom()
     {
         string folder = EditorUtility.OpenFolderPanel("저장할 위치 선택", Application.dataPath, "");

@@ -1,7 +1,6 @@
 using SCR;
 using System;
 using System.Collections.Generic;
-using UnityEditor.Localization.Plugins.XLIFF.V12;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -46,7 +45,7 @@ public class OrderStateController : MonoBehaviour
 
         OnOrderStarted?.Invoke(_orderRecipes, recipes); //UI로 정보 전달
 
-        if(resetPatience)
+        if (resetPatience)
         {
             AddPatience(100f);
         }
@@ -273,19 +272,19 @@ public class OrderStateController : MonoBehaviour
 
     private GemType SoToGemtype(IngredientSO ingredientSO)
     {
-        if (ingredientSO.ID == 101)
+        if (ingredientSO.ID == 2501)
             return GemType.Lavender;
-        else if (ingredientSO.ID == 102)
+        else if (ingredientSO.ID == 2502)
             return GemType.Chocolate;
-        else if (ingredientSO.ID == 103)
+        else if (ingredientSO.ID == 2503)
             return GemType.Blueberry;
-        else if (ingredientSO.ID == 104)
+        else if (ingredientSO.ID == 2504)
             return GemType.Cheese;
-        else if (ingredientSO.ID == 105)
+        else if (ingredientSO.ID == 2505)
             return GemType.Strawberry;
-        else if (ingredientSO.ID == 106)
+        else if (ingredientSO.ID == 2506)
             return GemType.Sugar;
-        else if (ingredientSO.ID == 107)
+        else if (ingredientSO.ID == 2507)
             return GemType.Syrup;
         else
             return GemType.Egg;
