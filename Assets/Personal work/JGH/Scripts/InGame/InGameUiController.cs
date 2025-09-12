@@ -9,7 +9,7 @@ public class InGameUiController : MonoBehaviour
 
     private void Start()
     {
-        Manager.Audio.PlayBGMByName("InGameMusic");
+        //Manager.Audio.PlayBGMByName("InGameMusic");
     }
 
     public void ChangeOutGameScene()
@@ -21,7 +21,7 @@ public class InGameUiController : MonoBehaviour
         Manager.User.AddHeart();
 
         SceneManager.LoadScene(2/*로비씬*/);
-        Manager.Audio.PlaySFXByName("GameToHomeSfx");
+        //Manager.Audio.PlaySFXByName("GameToHomeSfx");
     }
 
     public void ChangeContinueOutGameScene()
@@ -35,13 +35,13 @@ public class InGameUiController : MonoBehaviour
 
         SceneManager.LoadScene(3/*게임씬*/);
 
-        Manager.Audio.PlaySFXByName("GameToHomeSfx");
+        //Manager.Audio.PlaySFXByName("GameToHomeSfx");
     }
 
     public void ChangeQuitGameScene()
     {
         SceneManager.LoadScene(2/*로비씬*/);
-        Manager.Audio.PlaySFXByName("GameToHomeSfx");
+        //Manager.Audio.PlaySFXByName("GameToHomeSfx");
     }
 
     public void ChangeRetryGameScene()
@@ -49,12 +49,12 @@ public class InGameUiController : MonoBehaviour
         needStartSetting = true;
         Manager.User.UseHeart();
         SceneManager.LoadScene(3/*게임씬*/);
-        Manager.Audio.PlaySFXByName("GameToHomeSfx");
+        //Manager.Audio.PlaySFXByName("GameToHomeSfx");
     }
 
     public void SfxGameExit()
     {
-        Manager.Audio.PlaySFXByName("GameExitSfx");
+        //Manager.Audio.PlaySFXByName("GameExitSfx");
     }
 
 }

@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 public class InGameManager : MonoBehaviour
@@ -40,6 +41,7 @@ public class InGameManager : MonoBehaviour
         watchAddContinueButton.onClick.AddListener(AdContinueGame);
         _score = 0;
         _coin = 0;
+        Manager.Audio.PlayPuzzleBGM();
     }
 
     public static void SetPuzzleSize(int xPos, int yPos, int xSize, int ySize)
@@ -135,6 +137,7 @@ public class InGameManager : MonoBehaviour
     public static void StageClear()
     {
         if (instate == null) instate = GameObject.Find("InGameManager").GetComponent<InGameManager>();
+        Manager.Audio.PlaySFX("Stage_Clear");
         AddCoin(GetScore() / 10);
         KDJ.BoardManager.SetTouch(false);
         instate.WinCoin.text = $"{GetCoin()}";
@@ -144,10 +147,8 @@ public class InGameManager : MonoBehaviour
     public static void StageFail()
     {
         if (instate == null) instate = GameObject.Find("InGameManager").GetComponent<InGameManager>();
+        Manager.Audio.PlaySFX("Stage_Fail");
         KDJ.BoardManager.SetTouch(false);
-        //instate.LoseCoin.text = $"{GetCoin()}";
-        //instate.LoseScore.text = $"{GetScore()}";
-        //Manager.Heart.UseHearts();
         if (instate._firstfail)
         {
             instate._firstfail = false;
@@ -202,6 +203,20 @@ public class InGameManager : MonoBehaviour
         List<GemType> gemTypes = instate.orderStateController.GetRequiredGem();
 
         return gemTypes;
+    }
+
+    public void ClearGame()
+    {
+        Manager.User.AddCoin(GetCoin());
+        Manager.User.AddStar(1);
+        Manager.User.AddHeart();
+
+        SceneManager.LoadScene(2/*로비씬*/);
+    }
+
+    public void QuitGame()
+    {
+        SceneManager.LoadScene(2/*로비씬*/);
     }
 
 }

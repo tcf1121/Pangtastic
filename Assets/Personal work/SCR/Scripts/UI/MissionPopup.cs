@@ -37,6 +37,8 @@ public class MissionPopup : MonoBehaviour
         _progressSlider.maxValue = Manager.User.GetCurMisson().Length;
         _progressSlider.value = Array.FindAll(Manager.User.GetCurMisson(), n => n == true).ToList().Count;
         _progressText.text = $"{Array.FindAll(Manager.User.GetCurMisson(), n => n == true).ToList().Count}/{_progressSlider.maxValue}";
+        if (GetCurMissionList() == null)
+            SetMission();
     }
 
     private MissionList GetMissionList()

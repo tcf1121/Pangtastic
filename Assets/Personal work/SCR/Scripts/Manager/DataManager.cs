@@ -10,38 +10,66 @@ public class DataManager : Singleton<DataManager>
 {
     private string path;
 
+    protected override void Awake()
+    {
+        base.Awake();
+        path = Path.Combine(Application.persistentDataPath, "userdata.json");
+    }
+
 
     private async void OnApplicationPause(bool pause)
     {
         if (pause)
         {
+            Save();
             await UploadUserDataAsync();
         }
     }
-#if UNITY_ANDROID
-    private async void OnApplicationQuit()
+
+    public void SetUser(bool isNew)
     {
-        await UploadUserDataAsync();
+        if (isNew) NewUser();
+        else HistoryUser();
     }
-#endif
+
+
+
     // 새로운 유저가 접속할 때 새로운 정보를 만듦
-    public async Task NewUser(string uid, string now)
+    public void NewUser()
     {
         var newUserData = new UserData();
         newUserData.PlayerName = "guest";
         newUserData.UserInfo.Heart.currentHeart = 5;
-        newUserData.UserInfo.Heart.lastSaveTime = now;
+        newUserData.UserInfo.Heart.lastSaveTime = DateTime.Now.ToString("O");
+        Manager.User.SetUser(newUserData);
+        Manager.User.NewMissionList(16);
 
-        string json = JsonConvert.SerializeObject(newUserData);
-        try
+        Save();
+    }
+
+    public void HistoryUser()
+    {
+        Manager.User.SetUser(Load());
+    }
+
+    public void Save()
+    {
+        string json = JsonConvert.SerializeObject(Manager.User.GetCurrentUserData());
+        File.WriteAllText(path, json);
+        Debug.Log("저장 완료: " + path);
+    }
+
+    public UserData Load()
+    {
+        if (File.Exists(path))
         {
-            await Manager.DB.GetUserPath(uid).SetRawJsonValueAsync(json);
-            Manager.User.SetUser(newUserData);
-            Manager.User.NewMissionList(16);
+            string json = File.ReadAllText(path);
+            return JsonConvert.DeserializeObject<UserData>(json);
         }
-        catch (Exception ex)
+        else
         {
-            Debug.LogError("유저 데이터 생성 실패: " + ex.Message);
+            Debug.LogWarning("저장된 데이터 없음, 기본값 반환");
+            return new UserData();
         }
     }
 

@@ -31,12 +31,8 @@ public class OutGameManager : MonoBehaviour
         UserInfoUI.Instance.SetActive(true);
         int index = Manager.Stage.CurrentStageIndex;
         _stageButtonText.text = $"Stage {index + 1}";
-        
-        // TODO: SCRIPT TEST
-        //TODO: TEST 제거 해도됨 
-        // LocalizationSettings.SelectedLocale = LocalizationSettings.AvailableLocales.GetLocale("en");
-        // LocalizationSettings.SelectedLocale = LocalizationSettings.AvailableLocales.GetLocale("zh");
-        // Manager.Scripting.DialogLoadSO(6002);
+        Manager.Audio.SetLobbyPlace(Manager.User.GetCurPlace());
+        Manager.Audio.PlayLobbyBGM();
     }
 
     public static void UpdateStageStartButton()
