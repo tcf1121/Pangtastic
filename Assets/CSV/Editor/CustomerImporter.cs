@@ -2,12 +2,14 @@ using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using UnityEditor;
+using UnityEditor.SceneManagement;
 using UnityEngine;
 
 public class CustomerImporter
 {
     private static string csvPath = "Assets/CSV/Customers.csv"; // 손님 CSV 경로
     private static string recipeSoDir = "Assets/ScriptableObject/Recipes"; // 레시피 SO경로
+    private static string stringSoDir = "Assets/ScriptableObject/String"; // 레시피 SO경로
     private static string customerSoDir = "Assets/ScriptableObject/Customers"; // 손님 SO 저장 경로
     private static int startRow = 3; // 데이터 시작 행
     private static int columnCount = 14; //열 개수
@@ -62,6 +64,7 @@ public class CustomerImporter
             string customer_type = splitData[2];
             string spritePath = splitData[3];
 
+            //선호 레시피 파싱
             int like_menu1 = (splitData[4].ToLower() == "null") ? 0 : int.Parse(splitData[4]); //값이 null(소문자 변경)이면 0, 아니면 파싱
             int like_menu2 = (splitData[5].ToLower() == "null") ? 0 : int.Parse(splitData[5]);
             int like_menu3 = (splitData[6].ToLower() == "null") ? 0 : int.Parse(splitData[6]);
@@ -72,8 +75,6 @@ public class CustomerImporter
             int like_menu8 = (splitData[11].ToLower() == "null") ? 0 : int.Parse(splitData[11]);
             int like_menu9 = (splitData[12].ToLower() == "null") ? 0 : int.Parse(splitData[12]);
             int like_menu10 = (splitData[13].ToLower() == "null") ? 0 : int.Parse(splitData[13]);
-
-
 
             string soPath = customerSoDir + "/Customer_" + customer_id + ".asset"; // SO파일 저장경로/파일이름
 
@@ -130,10 +131,11 @@ public class CustomerImporter
 
             customer.FavoriteRecipes = favList.ToArray();
 
-            //if (isNew == false) // 수정된 SO 라면
-            //{
-            //    EditorUtility.SetDirty(customer); // 변경사항 저장에 포함
-            //}
+            customer.DialogueEnter = AddDialogue(customer_id, "enter");
+            customer.DialogueHigh = AddDialogue(customer_id, "high");
+            customer.DialogueMid = AddDialogue(customer_id, "mid");
+            customer.DialogueLeft = AddDialogue(customer_id, "left");
+
 
             EditorUtility.SetDirty(customer); // 변경사항 저장에 포함
         }
@@ -159,5 +161,21 @@ public class CustomerImporter
         }
 
         list.Add(recipe);
+    }
+
+    private static StringSO AddDialogue(int customerId, string level)
+    {
+        string stringSOPath = stringSoDir + "/customer_" + customerId + "_" + level + ".asset";
+        StringSO stringSO = AssetDatabase.LoadAssetAtPath<StringSO>(stringSOPath);
+
+        if (stringSO == null)
+        {
+            Debug.LogError($"StringSO 없음 : {stringSOPath}");
+            return stringSO;
+        }
+        else
+        {
+            return stringSO;
+        }
     }
 }
