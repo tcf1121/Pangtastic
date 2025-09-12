@@ -263,7 +263,12 @@ public class IAPManager : Singleton<IAPManager>
 
     public bool CheckNonConsumableOwned(string id)
     {
-        return _owned.Contains(id);
+        Product product = _store.GetProductById(id);
+        if (product != null && product.definition.type == ProductType.NonConsumable)
+        {
+            return _owned.Contains(id);
+        }
+        return false;
     }
 
     private void GiveReward(string productId)

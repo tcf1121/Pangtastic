@@ -1,5 +1,7 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Reflection;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -142,7 +144,16 @@ public class OrderUIPresenter : MonoBehaviour
 
     private IEnumerator FirstDialogueRoutine(CustomerSO customer)
     {
-        _dialogue.text = "Hallo";// customer.FirstDialogue; //차후 수정
+        StringSO stringSO = customer.DialogueEnter;
+
+        if (stringSO == null)
+        {
+            _dialogue.text = "Hi! How are you?";
+        }
+        else
+        {
+            _dialogue.text = stringSO.value[(int)Manager.Language.GetLanguage()]; ;
+        }
         _chatBox.SetActive(true);
         yield return new WaitForSeconds(_dialogueDuration);
         _chatBox.SetActive(false);
@@ -158,18 +169,44 @@ public class OrderUIPresenter : MonoBehaviour
 
     private IEnumerator PairRoutine(CustomerSO curCustomer, float percent) //이모지 + 대사 코루틴
     {
-        //대사 차후 연결
         if (percent <= 0f)
         {
-            _dialogue.text = "nicht so gut";//curCustomer.LeftDialogue;
+            StringSO stringSO = curCustomer.DialogueLeft;
+
+            if (stringSO == null)
+            {
+                _dialogue.text = "This is not good";
+            }
+            else
+            {
+                _dialogue.text = stringSO.value[(int)Manager.Language.GetLanguage()]; ; ;
+            }
         }
         else if (percent <= 50f)
         {
-            _dialogue.text = "Kann man essen";// curCustomer.MidDialogue;
+            StringSO stringSO = curCustomer.DialogueLeft;
+
+            if (stringSO == null)
+            {
+                _dialogue.text = "Thanks";
+            }
+            else
+            {
+                _dialogue.text = stringSO.value[(int)Manager.Language.GetLanguage()]; ; ;
+            }
         }
         else
         {
-            _dialogue.text = "Sehr gut";//curCustomer.HighDialogue;
+            StringSO stringSO = curCustomer.DialogueLeft;
+
+            if (stringSO == null)
+            {
+                _dialogue.text = "You are the Best";
+            }
+            else
+            {
+                _dialogue.text = stringSO.value[(int)Manager.Language.GetLanguage()]; ; ;
+            }
         }
 
         _emojiImage.sprite = GetEmojiSprite(percent);
