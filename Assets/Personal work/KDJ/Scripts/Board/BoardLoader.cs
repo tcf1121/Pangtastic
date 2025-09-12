@@ -164,21 +164,24 @@ namespace KDJ
                         GemType = finalGemType,
                     };
                 }
-
-                if (boardData.BlockArray[y, x].GemType > GemType.Sugar)
-                    boardData.BlockArray[y, x].IsNormal = false;
-
-                if (boardData.BlockArray[y, x].GemType == GemType.Egg || boardData.BlockArray[y, x].GemType == GemType.Coin)
+                
+                if (boardData.BlockArray[y, x] != null)
                 {
-                    // 코인과 알은 이동은 가능
-                    boardData.BlockArray[y, x].IsObstacle = true;
-                    boardData.BlockArray[y, x].CanMove = true;
-                }
-                else if (boardData.BlockArray[y, x].GemType > GemType.Oven)
-                {
-                    // 그 외의 방해블록은 이동 불가
-                    boardData.BlockArray[y, x].IsObstacle = true;
-                    boardData.BlockArray[y, x].CanMove = false;
+                    if (boardData.BlockArray[y, x].GemType > GemType.Sugar)
+                        boardData.BlockArray[y, x].IsNormal = false;
+
+                    if (boardData.BlockArray[y, x].GemType == GemType.Egg || boardData.BlockArray[y, x].GemType == GemType.Coin)
+                    {
+                        // 코인과 알은 이동은 가능
+                        boardData.BlockArray[y, x].IsObstacle = true;
+                        boardData.BlockArray[y, x].CanMove = true;
+                    }
+                    else if (boardData.BlockArray[y, x].GemType > GemType.Oven)
+                    {
+                        // 그 외의 방해블록은 이동 불가
+                        boardData.BlockArray[y, x].IsObstacle = true;
+                        boardData.BlockArray[y, x].CanMove = false;
+                    }
                 }
             }
             BoardDataArray = boardData;
