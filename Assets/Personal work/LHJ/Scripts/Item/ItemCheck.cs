@@ -14,7 +14,7 @@ namespace LHJ
 
         private void Update()
         {
-            if (_board == null || !_board.IsItemSelected) return;
+            if (_board == null || !_board.IsItemSelected || !(BoardManager.Instance.CurrentState is ReadyState)) return;
 
             if (Input.GetMouseButtonDown(0))
             {
@@ -125,6 +125,13 @@ namespace LHJ
                     continue;
                 }
 
+                // 오버레이가 있다면 오버레이 우선 처리
+                if (sp.GameBoardData.OverlayArray[pos.y, x] != null && sp.GameBoardData.OverlayArray[pos.y, x] is ObstacleBlock obstacleBlock)
+                {
+                    obstacleBlock.TakeDamage();
+                    continue;
+                }
+
                 if (blk is ObstacleBlock obstacle)
                 {
                     if (blk.GemType == GemType.Syrup || blk.GemType == GemType.Egg)
@@ -158,6 +165,13 @@ namespace LHJ
                 if (special != null)
                 {
                     special.Activate(_board);
+                    continue;
+                }
+
+                // 오버레이가 있다면 오버레이 우선 처리
+                if (sp.GameBoardData.OverlayArray[y, pos.x] != null && sp.GameBoardData.OverlayArray[y, pos.x] is ObstacleBlock obstacleBlock)
+                {
+                    obstacleBlock.TakeDamage();
                     continue;
                 }
 
@@ -207,6 +221,13 @@ namespace LHJ
 
                     var blk = sp.GameBoardData.BlockArray[y, x];
                     if (blk == null || blk.BlockInstance == null) continue;
+
+                    // 오버레이가 있다면 오버레이 우선 처리
+                    if (sp.GameBoardData.OverlayArray[y, x] != null && sp.GameBoardData.OverlayArray[y, x] is ObstacleBlock obstacleBlock)
+                    {
+                        obstacleBlock.TakeDamage();
+                        continue;
+                    }
 
                     var special = blk.BlockInstance.GetComponent<SpecialBlock>();
                     if (special != null)

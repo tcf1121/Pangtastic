@@ -54,7 +54,8 @@ namespace KDJ
 
         public override void SplashDamage(GemType type)
         {
-            if (BoardManager.Instance.Spawner.GameBoardData.BlockArray[Y, X].GemType == type)
+            Block block = BoardManager.Instance.Spawner.GameBoardData.BlockArray[Y, X];
+            if (block != null && block.GemType == type)
             {
                 TakeDamage();
             }

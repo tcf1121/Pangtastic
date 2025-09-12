@@ -15,9 +15,12 @@ namespace KDJ.States
             Debug.Log("블록 재충전 상태");
             count = 0;
 
-            // 상태에 진입하면 전체 리필 프로세스를 한 번만 시작합니다.
-            if (_refillProcessCoroutine == null)
-                _refillProcessCoroutine = boardManager.Spawner.StartCoroutine(RefillAndChangeState(boardManager));
+            if (_refillProcessCoroutine != null)
+            {
+                boardManager.Spawner.StopCoroutine(_refillProcessCoroutine);
+            }
+            
+            _refillProcessCoroutine = boardManager.Spawner.StartCoroutine(RefillAndChangeState(boardManager));
         }
 
         public void OnUpdate(BoardManager boardManager)
