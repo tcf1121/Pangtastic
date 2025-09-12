@@ -31,12 +31,8 @@ namespace SCR
         {
 
             FirebaseAuth auth = FirebaseAuth.DefaultInstance;
-            if (auth.CurrentUser != null)
-            {
-                HowToLoginAsync(auth.CurrentUser.IsAnonymous);
-            }
-            else
-                LoginAsGuest();
+            Manager.Data.SetUser(auth.CurrentUser != null);
+            SceneManager.LoadScene("Lobby Scene");
         }
 
         private void Logout()
@@ -103,7 +99,7 @@ namespace SCR
                 //Manager.Data.NewUser(uid, );
                 // Manager.User.NewUser(uid, DateTime.Now.ToString("O"));
 
-                SceneManager.LoadScene("Lobby Scene");
+
             });
 
         }

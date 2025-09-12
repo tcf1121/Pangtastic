@@ -22,7 +22,9 @@ public class DataManager : Singleton<DataManager>
         if (pause)
         {
             Save();
-            await UploadUserDataAsync();
+            bool isGuest = FirebaseAuth.DefaultInstance.CurrentUser.IsAnonymous;
+            if (!isGuest)
+                await UploadUserDataAsync();
         }
     }
 
@@ -122,14 +124,6 @@ public class DataManager : Singleton<DataManager>
             return userData;
         }
         return null;
-    }
-
-    // 기기에 JSON 파일로 저장
-    public void SaveUserData()
-    {
-        string json = JsonConvert.SerializeObject(Manager.User.GetCurrentUserData());
-
-        File.WriteAllText(path, json);
     }
 
     // 파이어베이스에 업로드
