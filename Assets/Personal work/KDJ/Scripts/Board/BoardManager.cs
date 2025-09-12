@@ -45,6 +45,7 @@ namespace KDJ
         public ItemType SelectedItemType { get; private set; }
         public ObjectPool ScoreUIPool;
         public bool IsWaitingForAnimation { get; set; } = false;
+        public bool IsReadyForStart { get; set; } = false;
 
 
         private void Awake()
@@ -91,6 +92,7 @@ namespace KDJ
             BoardLoader = GetComponent<BoardLoader>();
             TestStageManager = FindObjectOfType<TestStageManager>();
             CanTouch = false;
+            IsReadyForStart = false;
             progress.fillAmount = 0.25f;
 
             yield return new WaitForSeconds(0.1f);
@@ -128,6 +130,7 @@ namespace KDJ
             _cameraController.SetStarted(true);
             CanTouch = true;
             progress.fillAmount = 1f;
+            IsReadyForStart = true;
             ChangeState(new ReadyState());
         }
 
