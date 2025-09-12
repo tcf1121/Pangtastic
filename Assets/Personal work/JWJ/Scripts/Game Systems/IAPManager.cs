@@ -23,7 +23,7 @@ public class IAPManager : Singleton<IAPManager>
     protected override void Awake()
     {
         base.Awake();
-        
+
         AsyncOperationHandle<ProductCatalogSO> handle = Addressables.LoadAssetAsync<ProductCatalogSO>("CatalogSO");
         handle.Completed += OnCatalogLoaded;
     }
@@ -176,7 +176,7 @@ public class IAPManager : Singleton<IAPManager>
 
             _lastTriedProductId = null;
 
-            
+
         }
     }
     private void OnPurchaseFailed(FailedOrder order)

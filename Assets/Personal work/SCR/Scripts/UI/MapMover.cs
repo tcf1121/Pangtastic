@@ -22,32 +22,36 @@ public class MapMover : MonoBehaviour
     private Vector2 _lastWorldPos;
     private Vector3 _targetPos;
     private Vector3 _velocity = Vector3.zero;
+    public bool isMove;
 
     void Start()
     {
         if (_cam == null) _cam = Camera.main;
         _targetPos = _cam.transform.position;
+        isMove = false;
     }
 
     void Update()
     {
-        HandleDrag();
-        HandleZoom();
+        if (!isMove)
+        {
+            HandleDrag();
+            HandleZoom();
 
-        // 부드럽게 카메라 이동
-        _cam.transform.position = Vector3.SmoothDamp(
-            _cam.transform.position,
-            _targetPos,
-            ref _velocity,
-            _smoothTime
-        );
-
-
+            // 부드럽게 카메라 이동
+            _cam.transform.position = Vector3.SmoothDamp(
+                _cam.transform.position,
+                _targetPos,
+                ref _velocity,
+                _smoothTime
+            );
+        }
     }
 
     void FixedUpdate()
     {
-        ClampCamera();
+        if (!isMove)
+            ClampCamera();
     }
 
     void HandleDrag()

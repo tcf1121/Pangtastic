@@ -8,7 +8,7 @@ using UnityEngine.Serialization;
 public class EffectSystem : Singleton<EffectSystem>
 {
     //public static EffectSystem Instance { get; private set; } // 싱글톤 인스턴스
-    
+
     [SerializeField] private float _spawnInterval = 0.05f; // 생성 간격
     [SerializeField] private float _moveTime = 0.8f;       // 이동 시간
     [SerializeField] public float _fadeTime = 1.3f; // 투명도 시간
@@ -17,12 +17,12 @@ public class EffectSystem : Singleton<EffectSystem>
     {
         base.Awake();
     }
-    
+
     public void CurrencyInPlayStartEffect(GameObject prefab, RectTransform spawnArea, RectTransform targetUI)
     {
         StartCoroutine(CurrencyInPlayEffect(prefab, spawnArea, targetUI));
     }
-    
+
     private IEnumerator CurrencyInPlayEffect(GameObject prefab, RectTransform spawnArea, RectTransform targetUI)
     {
         for (int i = 0; i < 10; i++)
@@ -64,7 +64,7 @@ public class EffectSystem : Singleton<EffectSystem>
             yield return new WaitForSeconds(_spawnInterval);
         }
     }
-    
+
     public void CurrencyInPlayStartEffectDown(GameObject prefab, RectTransform spawnArea, RectTransform targetUI)
     {
         StartCoroutine(CurrencyInPlayEffectDown(prefab, spawnArea, targetUI));
@@ -114,5 +114,5 @@ public class EffectSystem : Singleton<EffectSystem>
             yield return new WaitForSeconds(_spawnInterval);
         }
     }
-    
+
 }

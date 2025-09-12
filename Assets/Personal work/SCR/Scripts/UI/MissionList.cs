@@ -13,6 +13,8 @@ public class MissionList : MonoBehaviour
 
     public void SetMission(Mission mission)
     {
+        _useStarBtn.onClick.RemoveAllListeners();
+        _useStarBtn.enabled = true;
         _titleText.text = mission.Explane.value[(int)Manager.Language.GetLanguage()];
         _index = mission.MissionID;
         _needStar = mission.Star;
@@ -30,10 +32,13 @@ public class MissionList : MonoBehaviour
     {
         if (Manager.User.CanUseStar(_needStar))
         {
+
             Manager.User.UseStar(_needStar);
-            _missionPopup.ClearMission(_index);
+            Debug.Log($"{_needStar}소모");
+            _useStarBtn.enabled = false;
             transform.SetSiblingIndex(0);
             gameObject.SetActive(false);
+            _missionPopup.ClearMission(_index);
         }
     }
 }

@@ -11,34 +11,27 @@ public class MissionPopup : MonoBehaviour
     [SerializeField] List<MissionList> _missionLists;
     [SerializeField] TMP_Text _progressText;
     [SerializeField] Slider _progressSlider;
+    private Action OnPopup;
 
     void Awake()
     {
-        OpenTwoMission();
         Refresh();
+        OnPopup += openPopup;
     }
 
-    private void OpenTwoMission()
+    private void openPopup()
     {
-        List<Mission> twomission = _roomManager.CreateMission(2);
-        for (int i = 0; i < twomission.Count; i++)
-        {
-            if (GetMissionList() != null)
-            {
-                GetMissionList().SetMission(twomission[i]);
-            }
-        }
-
+        gameObject.transform.parent.gameObject.SetActive(true);
+        Refresh();
     }
 
     private void Refresh()
     {
         _progressSlider.minValue = 0;
-        _progressSlider.maxValue = Manager.User.GetCurMisson().Length;
         _progressSlider.value = Array.FindAll(Manager.User.GetCurMisson(), n => n == true).ToList().Count;
+        _progressSlider.maxValue = Manager.User.GetCurMisson().Length;
         _progressText.text = $"{Array.FindAll(Manager.User.GetCurMisson(), n => n == true).ToList().Count}/{_progressSlider.maxValue}";
-        if (GetCurMissionList() == null)
-            SetMission();
+        SetMission();
     }
 
     private MissionList GetMissionList()
@@ -49,27 +42,30 @@ public class MissionPopup : MonoBehaviour
         return null;
     }
 
-    private MissionList GetCurMissionList()
+    private void ClearMissionList()
     {
         foreach (var mission in _missionLists)
             if (mission.gameObject.activeSelf)
-                return mission;
-        return null;
+                mission.gameObject.SetActive(false);
     }
 
     private void SetMission()
     {
-        if (GetMissionList() != null)
-        {
-            if (_roomManager.CreateMission()[0].MissionID == GetCurMissionList().GetIndex()) return;
-            else GetMissionList().SetMission(_roomManager.CreateMission()[0]);
-        }
+        List<Mission> missions = _roomManager.CreateMission(2);
+        if (missions != null)
+            for (int i = 0; i < missions.Count; i++)
+            {
+                if (GetMissionList() != null)
+                {
+                    GetMissionList().SetMission(missions[i]);
+                }
+            }
     }
 
     public void ClearMission(int index)
     {
-        _roomManager.ClearMission(index);
-        SetMission();
-        Refresh();
+        gameObject.transform.parent.gameObject.SetActive(false);
+        ClearMissionList();
+        _roomManager.ClearMission(index, OnPopup);
     }
 }

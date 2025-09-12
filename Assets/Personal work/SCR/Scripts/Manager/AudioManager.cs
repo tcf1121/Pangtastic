@@ -32,7 +32,6 @@ public class AudioManager : Singleton<AudioManager>
 
     private void LoadAudioClips()
     {
-
         AsyncOperationHandle<AudioClips> handle = Addressables.LoadAssetAsync<AudioClips>("AudioSO");
         handle.Completed += OnAudioClipsLoaded;
     }

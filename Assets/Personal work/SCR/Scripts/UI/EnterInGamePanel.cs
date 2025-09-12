@@ -29,6 +29,7 @@ public class EnterInGamePanel : MonoBehaviour
         _stageRecipes.Clear();
         _stageRecipes = RecipeRule.BuildOrder(_curCustomer, _curStage);
         Manager.Stage.SetStageRecipe(_stageRecipes);
+        enterBtn.onClick.AddListener(EnterGame);
         // 여기서 레시피 만들어서 Stage에 넣기
     }
     void GetRecipe()
@@ -72,30 +73,45 @@ public class EnterInGamePanel : MonoBehaviour
         _ovenNum.text = $"{Manager.User.GetItem().Oven}";
         Manager.Stage.ResetUseItem();
         SetToggles();
-        enterBtn.onClick.AddListener(EnterGame);
     }
 
     void SetToggles()
     {
-        if (Manager.User.GetItem().Roller == 0)
+        if (Manager.User.GetItem().Roller <= 0)
         {
             rollerToggle.isOn = false;
             rollerToggle.interactable = false;
         }
-        if (Manager.User.GetItem().DonutBox == 0)
+        else if (Manager.User.GetItem().Roller > 0)
+        {
+            rollerToggle.isOn = false;
+            rollerToggle.interactable = true;
+        }
+        if (Manager.User.GetItem().DonutBox <= 0)
         {
             donutBoxToggle.isOn = false;
             donutBoxToggle.interactable = false;
         }
-        if (Manager.User.GetItem().Oven == 0)
+        else if (Manager.User.GetItem().DonutBox > 0)
+        {
+            donutBoxToggle.isOn = false;
+            donutBoxToggle.interactable = true;
+        }
+        if (Manager.User.GetItem().Oven <= 0)
         {
             ovenToggle.isOn = false;
             ovenToggle.interactable = false;
+        }
+        else if (Manager.User.GetItem().Oven > 0)
+        {
+            ovenToggle.isOn = false;
+            ovenToggle.interactable = true;
         }
     }
 
     void EnterGame()
     {
+        Debug.Log("게임 시작");
         if (Manager.User.CheckHeart())
         {
 

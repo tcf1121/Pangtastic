@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -5,9 +6,11 @@ using UnityEngine;
 public class RoomManager : MonoBehaviour
 {
     [SerializeField] private List<Place> _places;
+    [SerializeField] private MenuUI menuUI;
     private MissonPlace curPlace;
     [SerializeField] MissionListSO missionList;
     [SerializeField] private MissionBtn missonBtn;
+    Action clearPlace;
 
     void Awake()
     {
@@ -20,7 +23,7 @@ public class RoomManager : MonoBehaviour
 
     }
 
-    public void ClearPlace()
+    public void ClearPlace(Action openPopup = null)
     {
         if (curPlace < MissonPlace.Greengrocery)
         {
@@ -28,14 +31,34 @@ public class RoomManager : MonoBehaviour
             Manager.User.SetCurPlace(curPlace);
             Manager.User.NewMissionList(GetMaxMission());
             missonBtn.Refresh();
+            menuUI.GoHome(() =>
+            {
+                menuUI.GoRoom(() =>
+                {
+                    openPopup?.Invoke();
+                });
+            });
+
+
         }
     }
 
-    public void ClearMission(int index)
+
+    public void ClearMission(int index, Action openPopup = null)
     {
         Manager.User.ClearCurMisson(index);
-        _places[(int)curPlace].MissionClear(index);
-        missonBtn.Refresh();
+        if (Manager.User.MissionAllClear())
+        {
+            _places[(int)curPlace].MissionClear(index, () => ClearPlace(openPopup));
+        }
+        else
+        {
+            _places[(int)curPlace].MissionClear(index, openPopup);
+            missonBtn.Refresh();
+        }
+
+
+
     }
 
     public int GetMaxMission()
@@ -45,6 +68,7 @@ public class RoomManager : MonoBehaviour
 
     public List<Mission> CreateMission(int num = 1)
     {
+        if (num == 0) return null;
         List<Mission> returnMission = new();
         List<bool> isclearMission = Manager.User.GetCurMisson().ToList();
         List<Mission> missionLists = missionList.Missions[(int)curPlace].Mission;
