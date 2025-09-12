@@ -13,10 +13,12 @@ namespace KDJ.States
         public void OnEnter(BoardManager boardManager)
         {
             Debug.Log("블럭 매칭 상태");
-            if (_matchingCoroutine == null)
+            if (_matchingCoroutine != null)
             {
-                _matchingCoroutine = boardManager.StartCoroutine(MatchingCoroutine(boardManager));
+                boardManager.StopCoroutine(_matchingCoroutine);
             }
+            _matchingCoroutine = boardManager.StartCoroutine(MatchingCoroutine(boardManager));
+
         }
 
         public void OnUpdate(BoardManager boardManager) { }

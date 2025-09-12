@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using KDJ;
 using TMPro;
+using KDJ.States;
 
 namespace LHJ
 {
@@ -31,12 +32,15 @@ namespace LHJ
         {
             if (_type == ItemType.DonutPan)
             {
-                if (_itemCheck != null)
-                    _itemCheck.UseDonutPan();
+                if (BoardManager.Instance.CurrentState is ReadyState)
+                {
+                    if (_itemCheck != null)
+                        _itemCheck.UseDonutPan();
 
-                Manager.User.UseItem(_type);
-                SetItemState();
-                return;
+                    Manager.User.UseItem(_type);
+                    SetItemState();
+                    return;
+                }
             }
 
             // 즉시 발동형: 커피
@@ -58,6 +62,7 @@ namespace LHJ
             else
                 _board.SelectItem(_type);
         }
+        
 
         private void Lock()
         {
