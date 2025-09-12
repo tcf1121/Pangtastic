@@ -106,6 +106,7 @@ namespace KDJ
         private IEnumerator DamageAnimation(int x, int y)
         {
             BoardManager.Instance.IsWaitingForAnimation = true;
+
             float timer = 0f;
 
             while (timer < 0.15f)
@@ -127,6 +128,7 @@ namespace KDJ
 
             BoardManager.Instance.IsWaitingForAnimation = false;
             _damageCoroutine = null;
+
         }
     }
 }

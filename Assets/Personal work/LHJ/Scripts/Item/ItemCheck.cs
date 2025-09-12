@@ -4,7 +4,6 @@ using SCR;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.EventSystems;
 
 namespace LHJ
 {
@@ -111,12 +110,39 @@ namespace LHJ
             int w = sp.GameBoardData.BlockPlate.BlockPlateWidth;
             int h = sp.GameBoardData.BlockPlate.BlockPlateHeight;
             int destroyedCount = 0;
+            HashSet<Vector2Int> targetCoords = new HashSet<Vector2Int>();
 
             // 가로
             for (int x = 0; x < w; x++)
             {
                 var blk = sp.GameBoardData.BlockArray[pos.y, x];
-                if (blk == null || blk.BlockInstance == null) continue;
+
+                if (blk == null)
+                {
+                    continue;
+                }
+                else if (blk.GemType != GemType.Flour_s && blk.BlockInstance == null)
+                {
+                    continue;
+                }
+
+                if (blk.GemType == GemType.Flour_s || blk.GemType == GemType.FlourBag)
+                {
+                    if (blk is FlourBag flourBag && targetCoords.Add(new Vector2Int(x, pos.y)))
+                    {
+                        flourBag.TakeDamage();
+                        continue;
+                    }
+                    else if (blk is FlourBag_s flourBag_s && targetCoords.Add(flourBag_s.OwnerPos()))
+                    {
+                        flourBag_s.TakeDamage();
+                        continue;
+                    }
+                    else if (blk is FlourBag_s)
+                    {
+                        continue;
+                    }
+                }
 
                 var special = blk.BlockInstance.GetComponent<SpecialBlock>();
                 if (special != null)
@@ -159,7 +185,33 @@ namespace LHJ
             for (int y = 0; y < h; y++)
             {
                 var blk = sp.GameBoardData.BlockArray[y, pos.x];
-                if (blk == null || blk.BlockInstance == null) continue;
+
+                if (blk == null)
+                {
+                    continue;
+                }
+                else if (blk.GemType != GemType.Flour_s && blk.BlockInstance == null)
+                {
+                    continue;
+                }
+
+                if (blk.GemType == GemType.Flour_s || blk.GemType == GemType.FlourBag)
+                {
+                    if (blk is FlourBag flourBag && targetCoords.Add(new Vector2Int(pos.x, y)))
+                    {
+                        flourBag.TakeDamage();
+                        continue;
+                    }
+                    else if (blk is FlourBag_s flourBag_s && targetCoords.Add(flourBag_s.OwnerPos()))
+                    {
+                        flourBag_s.TakeDamage();
+                        continue;
+                    }
+                    else if (blk is FlourBag_s)
+                    {
+                        continue;
+                    }
+                }
 
                 var special = blk.BlockInstance.GetComponent<SpecialBlock>();
                 if (special != null)
@@ -210,6 +262,7 @@ namespace LHJ
             int w = sp.GameBoardData.BlockPlate.BlockPlateWidth;
             int h = sp.GameBoardData.BlockPlate.BlockPlateHeight;
             int destroyedCount = 0;
+            HashSet<Vector2Int> targetCoords = new HashSet<Vector2Int>();
 
             int r = 1;
             for (int y = pos.y - r; y <= pos.y + r; y++)
@@ -220,7 +273,33 @@ namespace LHJ
                     if (x < 0 || x >= w) continue;
 
                     var blk = sp.GameBoardData.BlockArray[y, x];
-                    if (blk == null || blk.BlockInstance == null) continue;
+
+                    if (blk == null)
+                    {
+                        continue;
+                    }
+                    else if (blk.GemType != GemType.Flour_s && blk.BlockInstance == null)
+                    {
+                        continue;
+                    }
+
+                    if (blk.GemType == GemType.Flour_s || blk.GemType == GemType.FlourBag)
+                    {
+                        if (blk is FlourBag flourBag && targetCoords.Add(new Vector2Int(x, y)))
+                        {
+                            flourBag.TakeDamage();
+                            continue;
+                        }
+                        else if (blk is FlourBag_s flourBag_s && targetCoords.Add(flourBag_s.OwnerPos()))
+                        {
+                            flourBag_s.TakeDamage();
+                            continue;
+                        }
+                        else if (blk is FlourBag_s)
+                        {
+                            continue;
+                        }
+                    }
 
                     // 오버레이가 있다면 오버레이 우선 처리
                     if (sp.GameBoardData.OverlayArray[y, x] != null && sp.GameBoardData.OverlayArray[y, x] is ObstacleBlock obstacleBlock)
@@ -277,8 +356,6 @@ namespace LHJ
             yield return null;
 
             _board.ChangeState(new KDJ.States.RefillState());
-            while (sp.HasEmptyBlockObjects())
-                yield return null;
 
             InjectRandomSpecial();
 
@@ -299,7 +376,9 @@ namespace LHJ
                 {
                     if (!sp.GameBoardData.BlockPlate.BlockPlateArray[y, x]) continue;
                     var blk = sp.GameBoardData.BlockArray[y, x];
+                    var ovl = sp.GameBoardData.OverlayArray[y, x];
                     if (blk == null || blk.IsObstacle) continue;
+                    if (ovl != null && ovl.GemType == GemType.Ice) continue;
 
                     bool isSpecial = (blk.GemType > SCR.GemType.Sugar && blk.GemType < SCR.GemType.Dust);
                     if (!isSpecial) candidates.Add(new Vector2Int(x, y));
