@@ -17,10 +17,12 @@ namespace KDJ.States
             // 매칭되는 블럭이 있을 경우 매칭 상태로 전환
             if (boardManager.MatchChecker.AllBlockMatchCheck(boardManager))
             {
-                if (_matchDelayCoroutine == null)
+                if (_matchDelayCoroutine != null)
                 {
-                    _matchDelayCoroutine = boardManager.StartCoroutine(MatchDelayCoroutine(boardManager));
+                    boardManager.StopCoroutine(_matchDelayCoroutine);
                 }
+                
+                _matchDelayCoroutine = boardManager.StartCoroutine(MatchDelayCoroutine(boardManager));
             }
         }
 

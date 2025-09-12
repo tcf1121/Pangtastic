@@ -49,7 +49,7 @@ namespace KDJ
             if (!boardManager.IsTest)
             {
                 Debug.Log($"현재 스테이지: {Manager.User.GetStage()}");
-                if (Manager.User.GetStage() < 52)
+                if (Manager.User.GetStage() < 51)
                 {
                     _spawnRangeMax = 5;
                 }
@@ -405,6 +405,7 @@ namespace KDJ
 
         public IEnumerator RefillBoardCoroutine(BlockMover blockMover)
         {
+            Debug.Log("RefillBoardCoroutine 진입");
             if (_isRefilling) yield break;
             _isRefilling = true;
 
@@ -816,7 +817,7 @@ namespace KDJ
 
             foreach (Block block in boardManager.Spawner.GameBoardData.BlockArray)
             {
-                if (block != null && block.BlockInstance != null && block.IsNormal)
+                if (block != null && block.BlockInstance != null && block.IsNormal && block.GemType <= GemType.Sugar)
                 {
                     PooledObject pooledObject = block.BlockInstance.GetComponent<PooledObject>();
                     if (pooledObject != null)
@@ -855,7 +856,7 @@ namespace KDJ
                         if (GameBoardData.BlockPlate.BlockPlateArray[y, x])
                         {
                             Block block = GameBoardData.GetBlock(x, y);
-                            if (block != null && block.IsNormal)
+                            if (block != null && block.IsNormal && block.GemType <= GemType.Sugar)
                             {
                                 normalBlocks.Add(block);
                                 normalBlockPositions.Add(new Vector2Int(x, y));

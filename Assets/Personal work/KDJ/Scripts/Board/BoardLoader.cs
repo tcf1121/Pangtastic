@@ -109,24 +109,33 @@ namespace KDJ
                     finalGemType = (GemType)UnityEngine.Random.Range(0, maxBlockType); // 0~5 사이의 GemType을 바로 생성
                 }
 
+                // 오버레이 배열은 바로 continue
                 if (finalGemType == GemType.Dust)
                 {
                     boardData.OverlayArray[y, x] = new Dust(x, y);
+                    boardData.OverlayArray[y, x].IsObstacle = true;
+                    boardData.OverlayArray[y, x].CanMove = false;
+                    boardData.OverlayArray[y, x].IsNormal = false;
                     int donutNum = UnityEngine.Random.Range(0, maxBlockType);
                     boardData.BlockArray[y, x] = new Block()
                     {
                         GemType = (GemType)donutNum,
 
                     };
+                    continue;
                 }
                 else if (finalGemType == GemType.Syrup)
                 {
                     boardData.OverlayArray[y, x] = new Syrup(x, y);
+                    boardData.OverlayArray[y, x].IsObstacle = true;
+                    boardData.OverlayArray[y, x].CanMove = false;
+                    boardData.OverlayArray[y, x].IsNormal = false;
                     int donutNum = UnityEngine.Random.Range(0, maxBlockType);
                     boardData.BlockArray[y, x] = new Block()
                     {
                         GemType = (GemType)donutNum,
                     };
+                    continue;
                 }
                 else if (finalGemType == GemType.Ice)
                 {
@@ -134,7 +143,13 @@ namespace KDJ
                     {
                         GemType = (GemType)Random.Range(0, maxBlockType),
                     };
+                    boardData.BlockArray[y, x].IsNormal = false;
+                    boardData.BlockArray[y, x].CanMove = false;
                     boardData.OverlayArray[y, x] = new Ice(x, y);
+                    boardData.OverlayArray[y, x].IsObstacle = true;
+                    boardData.OverlayArray[y, x].CanMove = false;
+                    boardData.OverlayArray[y, x].IsNormal = false;
+                    continue;
                 }
                 else if (finalGemType == GemType.DonutBag) boardData.BlockArray[y, x] = new DonutBag(x, y);
                 else if (finalGemType == GemType.Coin) boardData.BlockArray[y, x] = new Coin(x, y);
@@ -148,6 +163,25 @@ namespace KDJ
                     {
                         GemType = finalGemType,
                     };
+                }
+                
+                if (boardData.BlockArray[y, x] != null)
+                {
+                    if (boardData.BlockArray[y, x].GemType > GemType.Sugar)
+                        boardData.BlockArray[y, x].IsNormal = false;
+
+                    if (boardData.BlockArray[y, x].GemType == GemType.Egg || boardData.BlockArray[y, x].GemType == GemType.Coin)
+                    {
+                        // 코인과 알은 이동은 가능
+                        boardData.BlockArray[y, x].IsObstacle = true;
+                        boardData.BlockArray[y, x].CanMove = true;
+                    }
+                    else if (boardData.BlockArray[y, x].GemType > GemType.Oven)
+                    {
+                        // 그 외의 방해블록은 이동 불가
+                        boardData.BlockArray[y, x].IsObstacle = true;
+                        boardData.BlockArray[y, x].CanMove = false;
+                    }
                 }
             }
             BoardDataArray = boardData;
