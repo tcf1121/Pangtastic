@@ -4,7 +4,7 @@ public static class Manager
 {
     public static StageManager Stage => StageManager.GetInstance();
     public static UserInfoManager User => UserInfoManager.GetInstance();
-    public static AudioSystem Audio => AudioSystem.GetInstance();
+    public static AudioManager Audio => AudioManager.GetInstance();
 
     public static ScriptingSystem Scripting => ScriptingSystem.GetInstance();
 
@@ -27,7 +27,7 @@ public static class Manager
     {
         StageManager.CreateManager();
         UserInfoManager.CreateManager();
-        AudioSystem.CreateManager();
+        AudioManager.CreateManager();
         ScriptingSystem.CreateManager();
 
         DataManager.CreateManager();

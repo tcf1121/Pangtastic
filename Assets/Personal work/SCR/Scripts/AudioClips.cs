@@ -5,9 +5,23 @@ using UnityEngine;
 [CreateAssetMenu(fileName = "AudioClip", menuName = "Sound/AudioClip")]
 public class AudioClips : ScriptableObject
 {
-    [Header("BGM 클립들")]
-    [SerializeField] public List<AudioClipGroup> _bgmClips = new List<AudioClipGroup>();
+    [Header("로비 BGM")]
+    public List<AudioClip> Lobby = new List<AudioClip>();
+
+    [Header("퍼즐 BGM")]
+    public AudioClip Puzzle;
 
     [Header("SFX 클립들")]
-    [SerializeField] public List<AudioClipGroup> _sfxClips = new List<AudioClipGroup>();
+    public List<AudioClip> SFX = new List<AudioClip>();
+
+    public AudioClip PuzzleBGM()
+    {
+        return Puzzle;
+    }
+
+    public AudioClip LobbyBGM(MissonPlace place = MissonPlace.Donut)
+    {
+        return Lobby[(int)place];
+
+    }
 }

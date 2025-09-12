@@ -9545,9 +9545,9 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 1299568042}
-        m_TargetAssemblyTypeName: InGameUiController, Assembly-CSharp
-        m_MethodName: ChangeOutGameScene
+      - m_Target: {fileID: 1830214189}
+        m_TargetAssemblyTypeName: InGameManager, Assembly-CSharp
+        m_MethodName: ClearGame
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -11075,7 +11075,7 @@ MonoBehaviour:
   - {fileID: 1337261947}
   - {fileID: 118236870}
   - {fileID: 1913256858}
-  questionMarkImage: {fileID: 0}
+  questionMarkImage: {fileID: 21300000, guid: f87e2beafba114f038d68229ff50ff89, type: 3}
 --- !u!222 &881177895
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -12415,18 +12415,18 @@ PrefabInstance:
     - target: {fileID: 7407056468250555058, guid: 28ceb7c3a8cf74f3cb0f42adaa901266, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target
       value: 
-      objectReference: {fileID: 1299568042}
+      objectReference: {fileID: 1830214189}
     - target: {fileID: 7407056468250555058, guid: 28ceb7c3a8cf74f3cb0f42adaa901266, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_CallState
       value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 7407056468250555058, guid: 28ceb7c3a8cf74f3cb0f42adaa901266, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
-      value: ChangeQuitGameScene
+      value: QuitGame
       objectReference: {fileID: 0}
     - target: {fileID: 7407056468250555058, guid: 28ceb7c3a8cf74f3cb0f42adaa901266, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_TargetAssemblyTypeName
-      value: InGameUiController, Assembly-CSharp
+      value: InGameManager, Assembly-CSharp
       objectReference: {fileID: 0}
     - target: {fileID: 7407056468250555058, guid: 28ceb7c3a8cf74f3cb0f42adaa901266, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Arguments.m_ObjectArgumentAssemblyTypeName
@@ -15524,50 +15524,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1289769975}
   m_CullTransparentMesh: 1
---- !u!1 &1299568041
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1299568043}
-  - component: {fileID: 1299568042}
-  m_Layer: 0
-  m_Name: InGameUiController
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!114 &1299568042
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1299568041}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 89bf8d80f14cf4ce0b12c42eab840457, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
---- !u!4 &1299568043
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1299568041}
-  serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0.060929835, y: 919.3568, z: -9.780931}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 1830214190}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &1310202695
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -17466,18 +17422,18 @@ PrefabInstance:
     - target: {fileID: 8119982348827842688, guid: 2d8241bbf389c46218b1bdd53d8d3a71, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target
       value: 
-      objectReference: {fileID: 0}
+      objectReference: {fileID: 1830214189}
     - target: {fileID: 8119982348827842688, guid: 2d8241bbf389c46218b1bdd53d8d3a71, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
-      value: 
+      value: RetryGame
       objectReference: {fileID: 0}
     - target: {fileID: 8119982348827842688, guid: 2d8241bbf389c46218b1bdd53d8d3a71, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_TargetAssemblyTypeName
-      value: 
+      value: InGameManager, Assembly-CSharp
       objectReference: {fileID: 0}
     - target: {fileID: 8119982348827842688, guid: 2d8241bbf389c46218b1bdd53d8d3a71, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Arguments.m_ObjectArgumentAssemblyTypeName
-      value: 
+      value: UnityEngine.Object, UnityEngine
       objectReference: {fileID: 0}
     - target: {fileID: 8226954176273400776, guid: 2d8241bbf389c46218b1bdd53d8d3a71, type: 3}
       propertyPath: m_SizeDelta.x
@@ -17546,14 +17502,14 @@ PrefabInstance:
     - target: {fileID: 8987261976385213010, guid: 2d8241bbf389c46218b1bdd53d8d3a71, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target
       value: 
-      objectReference: {fileID: 1299568042}
+      objectReference: {fileID: 1830214189}
     - target: {fileID: 8987261976385213010, guid: 2d8241bbf389c46218b1bdd53d8d3a71, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
-      value: ChangeQuitGameScene
+      value: QuitGame
       objectReference: {fileID: 0}
     - target: {fileID: 8987261976385213010, guid: 2d8241bbf389c46218b1bdd53d8d3a71, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_TargetAssemblyTypeName
-      value: InGameUiController, Assembly-CSharp
+      value: InGameManager, Assembly-CSharp
       objectReference: {fileID: 0}
     - target: {fileID: 9054201863004191250, guid: 2d8241bbf389c46218b1bdd53d8d3a71, type: 3}
       propertyPath: m_AnchorMax.y
@@ -22391,7 +22347,6 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
-  - {fileID: 1299568043}
   - {fileID: 1491162733}
   - {fileID: 2021092435}
   - {fileID: 1175115141}
@@ -25828,6 +25783,10 @@ PrefabInstance:
       propertyPath: _customerFlow
       value: 
       objectReference: {fileID: 1334139403}
+    - target: {fileID: 2010907160834455811, guid: 79ed12a5a9e8897488627b675d5f4fb0, type: 3}
+      propertyPath: _dialogueDuration
+      value: 3
+      objectReference: {fileID: 0}
     - target: {fileID: 2010907160834455811, guid: 79ed12a5a9e8897488627b675d5f4fb0, type: 3}
       propertyPath: _recipeSlotList.Array.size
       value: 3
