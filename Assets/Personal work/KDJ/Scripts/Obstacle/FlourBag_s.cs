@@ -23,5 +23,11 @@ namespace KDJ
         {
             Owner.TakeDamage();
         }
+
+        public override void TakeDamage()
+        {
+            Debug.Log("밀가루 봉지 조각의 takeDamage 호출");
+            Owner.TakeDamage();
+        }
     }
 }

@@ -19,7 +19,7 @@ namespace KDJ.States
             {
                 boardManager.Spawner.StopCoroutine(_refillProcessCoroutine);
             }
-            
+
             _refillProcessCoroutine = boardManager.Spawner.StartCoroutine(RefillAndChangeState(boardManager));
         }
 
