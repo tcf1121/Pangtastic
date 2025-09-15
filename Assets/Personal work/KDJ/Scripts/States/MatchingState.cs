@@ -19,6 +19,8 @@ namespace KDJ.States
             }
             _matchingCoroutine = boardManager.StartCoroutine(MatchingCoroutine(boardManager));
 
+            
+
         }
 
         public void OnUpdate(BoardManager boardManager) { }
@@ -78,18 +80,26 @@ namespace KDJ.States
             }
 
             // 2. 매치 처리
-            var (coordsToDestroy, specialToCreate, specialSpawnPos) = boardManager.MatchChecker.ProcessMatches(boardManager, wasSwap ? endPos : (Vector2Int?)null);
+            var (coordsToDestroy, specialToCreate, specialSpawnPos) = boardManager.MatchChecker.ProcessMatches(boardManager, boardManager.InitialSwapPosition);
 
             // 3. 후속 처리
             if (coordsToDestroy.Count > 0)
             {
-                // 매치가 발생했으면, 애니메이션 코루틴 실행
-                yield return boardManager.StartCoroutine(boardManager.AnimateAndDestroyMatches(coordsToDestroy, specialToCreate, specialSpawnPos, wasSwap ? endPos : (Vector2Int?)null));
+                // 매치가 발생 시 힌트가 아직 남아있다면 힌트 숨기기
+                if (boardManager.CurHintPositions.Count > 0)
+                {
+                    boardManager.HideHint(boardManager.CurHintPositions);
+                    boardManager.CurHintPositions.Clear();
+                }
+                // 애니메이션 후 리필 상태로 이동
+                yield return boardManager.StartCoroutine(boardManager.AnimateAndDestroyMatches(coordsToDestroy, specialToCreate, specialSpawnPos, boardManager.InitialSwapPosition));
             }
             else if (usedSpecial)
             {
                 // 특수 블록만 사용되었으면 refill 상태로 이동
                 Debug.Log("특수 블록 사용");
+                boardManager.HideHint(boardManager.CurHintPositions);
+                boardManager.CurHintPositions.Clear();
                 boardManager.ChangeState(new RefillState());
             }
             else if (wasSwap)
