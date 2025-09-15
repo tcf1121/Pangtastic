@@ -6,12 +6,13 @@ using GooglePlayGames;
 using UnityEngine;
 using UnityEngine.AI;
 
-public class DatabaseSystem : Singleton<DatabaseSystem>
+public class DatabaseSystem : MonoBehaviour
 {
     //[HideInInspector] public static DatabaseSystem Instance { get; private set; }
     [HideInInspector] public FirebaseUser user;
     [HideInInspector] public DatabaseReference dbRef;
     [HideInInspector] public FirebaseAuth auth;
+    public static DatabaseSystem Instance;
 
     [System.Serializable]
     public class AuthInfo
@@ -21,9 +22,8 @@ public class DatabaseSystem : Singleton<DatabaseSystem>
         public string nickname;
     }
 
-    protected override void Awake()
+    void Awake()
     {
-        base.Awake();
         auth = FirebaseAuth.DefaultInstance;
         user = FirebaseAuth.DefaultInstance.CurrentUser;
     }
@@ -105,8 +105,8 @@ public class DatabaseSystem : Singleton<DatabaseSystem>
     {
         Debug.Log("데이터 마이그레이션 시작");
 
-        var guestRef = Manager.DB.dbRef.Child("guests").Child(uid);
-        var userRef = Manager.DB.dbRef.Child("users").Child(uid);
+        var guestRef = dbRef.Child("guests").Child(uid);
+        var userRef = dbRef.Child("users").Child(uid);
 
         guestRef.GetValueAsync().ContinueWithOnMainThread(readTask =>
         {

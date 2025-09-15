@@ -30,6 +30,7 @@ public class InGameManager : MonoBehaviour
 
     void Awake()
     {
+        Manager.Ad.LoadAD();
         UserInfoUI.Instance.SetActive(false);
         Manager.User.UseHeart();
         instate = this;
@@ -159,7 +160,6 @@ public class InGameManager : MonoBehaviour
 
     private void AdContinueGame()
     {
-        Manager.Ad.LoadAD();
         Manager.Ad.ShowAD(_finishAD);
     }
 

@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics;
 
 public class UserInfoManager : Singleton<UserInfoManager>
 {
@@ -211,6 +212,13 @@ public class UserInfoManager : Singleton<UserInfoManager>
     public void ClearCurMisson(int index)
     {
         currentData.PlaceInfo.CurMisson[index - 1] = true;
+    }
+
+    public bool MissionAllClear()
+    {
+        foreach (var tf in currentData.PlaceInfo.CurMisson)
+            if (!tf) return false;
+        return true;
     }
 
     public bool[] GetCurMisson()

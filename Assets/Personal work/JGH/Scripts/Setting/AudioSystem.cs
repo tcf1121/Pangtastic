@@ -1,3 +1,4 @@
+using System.Collections;
 using UnityEngine;
 using System.Collections.Generic;
 using UnityEngine.ResourceManagement.AsyncOperations;
@@ -12,16 +13,16 @@ public class AudioClipGroup
 
 namespace JGH
 {
+// <<<<<<< HEAD
     public class AudioSystem : MonoBehaviour
     {
         //public static AudioSystem Instance { get; private set; }
 
-        [Header("BGM 클립들")]
-        [SerializeField] private List<AudioClipGroup> _bgmClips = new List<AudioClipGroup>();
+        [SerializeField] private AudioClips audioClips;
 
-        [Header("SFX 클립들")]
-        [SerializeField] private List<AudioClipGroup> _sfxClips = new List<AudioClipGroup>();
+        [Header("BGM 클립들")] [SerializeField] private List<AudioClipGroup> _bgmClips = new List<AudioClipGroup>();
 
+        [Header("SFX 클립들")] [SerializeField] private List<AudioClipGroup> _sfxClips = new List<AudioClipGroup>();
 
         // AudioSource 컴포넌트들
         [HideInInspector] public AudioSource BgmAudioSource;
@@ -153,3 +154,6 @@ namespace JGH
 
     }
 }
+// =======
+// }
+// >>>>>>> Develop

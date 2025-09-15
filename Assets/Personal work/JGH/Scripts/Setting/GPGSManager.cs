@@ -58,7 +58,7 @@ public class GPGSManager : Singleton<GPGSManager>
                         .ContinueWithOnMainThread(task =>
                         {
                             // DB 저장 호출
-                            Manager.DB.UserIntoSave();
+                            //Manager.DB.UserIntoSave();
 
                             //JWJ 추가
                             Manager.DB.user = Manager.DB.auth.CurrentUser;
@@ -100,8 +100,8 @@ public class GPGSManager : Singleton<GPGSManager>
         if (_deleting) { Debug.LogWarning("삭제 진행 중입니다."); return; }
         _deleting = true;
 
-        string authJson = Manager.DB.GetAuthInfo();
-        DatabaseSystem.AuthInfo info = JsonUtility.FromJson<DatabaseSystem.AuthInfo>(authJson);
+        //string authJson = Manager.DB.GetAuthInfo();
+        //DatabaseSystem.AuthInfo info = JsonUtility.FromJson<DatabaseSystem.AuthInfo>(authJson);
 
         if (Manager.DB.user == null) { Fail("로그인 안됨"); return; }
 
@@ -216,7 +216,6 @@ public class GPGSManager : Singleton<GPGSManager>
                 }
 
                 Debug.Log("게스트 > 구글 링크 성공. ");
-                Manager.DB.user = Manager.DB.auth.CurrentUser;
 
                 string gpgsName = PlayGamesPlatform.Instance.localUser.userName;
                 Debug.Log($"GPGS 이름 : {gpgsName}");
@@ -246,13 +245,13 @@ public class GPGSManager : Singleton<GPGSManager>
                     cur.PlayerName = string.IsNullOrEmpty(gpgsName) ? "Player" : gpgsName; //이름 있으면 이름, 없으면 Player
 
                     Manager.User.SetUser(cur); //저장
-                    //Manager.DB.ChangeNickname(gpgsName);
-                    
+                                               //Manager.DB.ChangeNickname(gpgsName);
+
                     Debug.Log($"DB.DisplayName : {Manager.DB.user.DisplayName}");
                     Debug.Log($"profile.DisplayName : {profile.DisplayName}");
 
                     string uid = Manager.DB.auth.CurrentUser.UserId;
-                    Manager.DB.MigrateGuestDataToUser(uid); //마이그레이션
+                    //Manager.DB.MigrateGuestDataToUser(uid); //마이그레이션
                     //Manager.DB.UserIntoSave(); //이름 설정
                     onDone?.Invoke(true);
                 });

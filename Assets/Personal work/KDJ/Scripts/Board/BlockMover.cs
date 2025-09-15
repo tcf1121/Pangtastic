@@ -13,6 +13,12 @@ namespace KDJ
 
         private const float SWAP_DURATION = 0.1f;
 
+
+        // TODO: 터치 감도 개선 필요
+        // LateUpdate 안에서 Input.GetTouch(0).phase == TouchPhase.Moved 인 경우에만 좌표 계산 및 스왑 로직을 처리하면,     
+        // 손가락이 움직이지 않고 가만히 있을 때는 불필요한 계산을 줄여서 성능을 더 최적화할 수 있습니다.
+        // 해당 부분을 잘 이용해서 성능 최적화.
+
         public IEnumerator TrySwap(BoardManager boardManager, Action<bool> onResult)
         {
             if (!ValidateAndSetPositions(boardManager))
@@ -59,7 +65,7 @@ namespace KDJ
             blockB.BlockInstance.transform.position = startPosA;
         }
 
-        private bool ValidateAndSetPositions(BoardManager boardManager)
+        public bool ValidateAndSetPositions(BoardManager boardManager)
         {
             var gameBoard = boardManager.Spawner.GameBoardData;
             if (gameBoard == null) return false;

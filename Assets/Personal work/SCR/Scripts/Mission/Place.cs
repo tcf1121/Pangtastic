@@ -1,7 +1,8 @@
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using DG.Tweening;
+using System;
 
 public class Place : MonoBehaviour
 {
@@ -9,18 +10,30 @@ public class Place : MonoBehaviour
     [SerializeField] GameObject openObject;
     [SerializeField] List<GameObject> missionObjects;
 
-    public void MissionClear(int index)
+    public void MissionClear(int index, Action openPopup = null)
     {
+        GameObject furniture;
         if (openObject != null)
         {
-            if (index == 1) openObject.SetActive(false);
-            else missionObjects[index - 2].SetActive(true);
+            if (index == 1) furniture = openObject;
+            else furniture = missionObjects[index - 2];
         }
         else
         {
-            missionObjects[index - 1].SetActive(true);
+            furniture = missionObjects[index - 1];
         }
-
+        if (furniture != null)
+        {
+            furniture.transform.localScale = Vector3.zero; // 시작 스케일
+            if (openObject != null && index == 1) furniture.SetActive(false);
+            else furniture.SetActive(true);
+            furniture.transform.DOScale(Vector3.one, 0.5f)   // 0.5초 동안 스케일 0 → 1
+                .SetEase(Ease.OutBack)                       // 부드러운 튀는 느낌
+                .OnComplete(() =>
+                {
+                    openPopup?.Invoke();
+                });
+        }
     }
 
     public void AllClear()

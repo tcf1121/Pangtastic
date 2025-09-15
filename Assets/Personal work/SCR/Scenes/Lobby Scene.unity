@@ -9282,7 +9282,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 3612d535eab314b4faf26c8b065c7ff9, type: 3}
       propertyPath: m_LocalPosition.y
-      value: -20.979998
+      value: -20.44
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 3612d535eab314b4faf26c8b065c7ff9, type: 3}
       propertyPath: m_LocalPosition.z
@@ -10115,6 +10115,7 @@ MonoBehaviour:
   _zoomSpeed: 0.1
   _minZoom: 3
   _maxZoom: 10
+  isMove: 0
 --- !u!4 &431109646 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: 0021f061cf0a09541a25623daa288247, type: 3}
@@ -18719,7 +18720,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 3612d535eab314b4faf26c8b065c7ff9, type: 3}
       propertyPath: m_LocalPosition.y
-      value: -20.949898
+      value: -20.51
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 3612d535eab314b4faf26c8b065c7ff9, type: 3}
       propertyPath: m_LocalPosition.z
@@ -21200,7 +21201,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1692248296126866811, guid: 1f78462b7ad62fa4f908eb83bc912b62, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 6.8117123
+      value: 6.04
       objectReference: {fileID: 0}
     - target: {fileID: 1692248296126866811, guid: 1f78462b7ad62fa4f908eb83bc912b62, type: 3}
       propertyPath: m_LocalPosition.z
@@ -24445,6 +24446,7 @@ MonoBehaviour:
   - {fileID: 392426372}
   - {fileID: 430409023}
   - {fileID: 1376661603}
+  mapMover: {fileID: 430409027}
   _roomCameraPosList:
   - {fileID: 691550362}
   - {fileID: 1960897837}
@@ -24454,7 +24456,6 @@ MonoBehaviour:
   - {fileID: 749527062}
   - {fileID: 826958226}
   - {fileID: 844149590}
-  curRoom: 0
 --- !u!1 &966742262 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 1962629437695679895, guid: 28ceb7c3a8cf74f3cb0f42adaa901266, type: 3}
@@ -46579,6 +46580,7 @@ MonoBehaviour:
   - {fileID: 687457383}
   - {fileID: 2092687037}
   - {fileID: 789303481}
+  menuUI: {fileID: 960565056}
   missionList: {fileID: 11400000, guid: 62485a0331246e64aae5ac85ee485302, type: 2}
   missonBtn: {fileID: 5609320}
 --- !u!1 &1964958478

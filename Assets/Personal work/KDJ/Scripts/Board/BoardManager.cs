@@ -1,3 +1,4 @@
+using AllIn1SpriteShader;
 using KDJ.States;
 using LHJ;
 using SCR;
@@ -45,6 +46,12 @@ namespace KDJ
         public ItemType SelectedItemType { get; private set; }
         public ObjectPool ScoreUIPool;
         public bool IsWaitingForAnimation { get; set; } = false;
+        public bool IsReadyForStart { get; set; } = false;
+        public bool IsUseItem { get; set; } = false;
+        public Vector2Int? InitialSwapPosition { get; set; } // 한 턴의 스왑 시작 위치를 기억
+        public List<Vector2Int> CurHintPositions = new List<Vector2Int>();
+
+        private Coroutine _hintCoroutine;
 
 
         private void Awake()
@@ -91,6 +98,7 @@ namespace KDJ
             BoardLoader = GetComponent<BoardLoader>();
             TestStageManager = FindObjectOfType<TestStageManager>();
             CanTouch = false;
+            IsReadyForStart = false;
             progress.fillAmount = 0.25f;
 
             yield return new WaitForSeconds(0.1f);
@@ -128,6 +136,7 @@ namespace KDJ
             _cameraController.SetStarted(true);
             CanTouch = true;
             progress.fillAmount = 1f;
+            IsReadyForStart = true;
             ChangeState(new ReadyState());
         }
 
@@ -239,7 +248,9 @@ namespace KDJ
         {
             Debug.Log("TestCode 실행");
         }
+        #endregion
 
+        #region 효과
         public IEnumerator AnimateAndDestroyMatches(HashSet<Vector2Int> coordsToDestroy, (Vector2Int pos, int type)? specialToCreate, Vector2Int? specialSpawnPos, Vector2Int? swapPosition = null)
         {
             List<HashSet<Vector2Int>> matchGroups = new List<HashSet<Vector2Int>>();
@@ -398,6 +409,79 @@ namespace KDJ
             ChangeState(new RefillState());
         }
 
+        public void ShowHint(List<Vector2Int> hintPositions)
+        {
+            if (_hintCoroutine == null)
+                _hintCoroutine = StartCoroutine(HintCoroutine(hintPositions));
+
+        }
+
+        private IEnumerator HintCoroutine(List<Vector2Int> hintPositions)
+        {
+
+            float timer = 0f;
+            float alpha = 1f;
+            List<Material> shaders = new List<Material>();
+            foreach (var pos in hintPositions)
+            {
+                Block block = Spawner.GameBoardData.GetBlock(pos.x, pos.y);
+                if (block != null && block.BlockInstance != null)
+                {
+                    Material shader = block.BlockInstance.GetComponent<SpriteRenderer>().material;
+                    if (shader != null)
+                    {
+                        shaders.Add(shader);
+                        shader.EnableKeyword("SHINE_ON");
+                        shader.EnableKeyword("SHAKEUV_ON");
+                        shader.SetFloat("_ShakeSpeed", 3.5f);
+                        shader.SetFloat("_XMultiplier", 2f);
+                        shader.SetFloat("_YMultiplier", 2f);
+                        shader.SetFloat("_ShineLocation", 1f);
+                    }
+                }
+            }           
+
+            while (timer < 3f)
+            {
+                if (alpha <= 0f)
+                {
+                    alpha = 1f;
+                }
+
+                timer += Time.deltaTime;
+                alpha -= Time.deltaTime;
+                foreach (var shader in shaders)
+                {
+                    shader.SetFloat("_ShineLocation", alpha);
+                }
+                yield return null;
+            }
+        }
+
+        public void HideHint(List<Vector2Int> hintPositions)
+        {
+            if (_hintCoroutine != null)
+            {
+                StopCoroutine(_hintCoroutine);
+                _hintCoroutine = null;
+            }
+
+            foreach (var pos in hintPositions)
+            {
+                Block block = Spawner.GameBoardData.GetBlock(pos.x, pos.y);
+                if (block != null && block.BlockInstance != null)
+                {
+                    Material shader = block.BlockInstance.GetComponent<SpriteRenderer>().material;
+                    if (shader != null)
+                    {
+                        shader.SetFloat("_ShineLocation", 1);
+                        shader.DisableKeyword("SHINE_ON");
+                        shader.DisableKeyword("SHAKEUV_ON");
+                    }
+                }
+            }
+        }
+
         private void ShowScoreForMatches(List<HashSet<Vector2Int>> matchGroups)
         {
             foreach (var group in matchGroups)
@@ -423,5 +507,6 @@ namespace KDJ
             }
         }
         #endregion
+
     }
 }

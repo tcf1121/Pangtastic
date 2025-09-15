@@ -17,7 +17,7 @@ public class TempToPerm : MonoBehaviour
 
         _tempToPermButton.onClick.AddListener(LinkToGPGS);
 
-        if(_user != null && _user.IsAnonymous)
+        if (_user != null && _user.IsAnonymous)
         {
             _tempToPermButton.gameObject.SetActive(true);
             _tempToPermButton.interactable = true;

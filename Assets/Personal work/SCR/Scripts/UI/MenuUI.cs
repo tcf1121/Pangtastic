@@ -1,13 +1,15 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using DG.Tweening;
+using System;
 
 public class MenuUI : MonoBehaviour
 {
     [SerializeField] private List<Button> menuBtns;
     [SerializeField] private List<GameObject> menuPanels;
+    [SerializeField] private MapMover mapMover;
     [SerializeField] private List<Transform> _roomCameraPosList;
-    [SerializeField] int curRoom;
 
     void Awake()
     {
@@ -43,17 +45,35 @@ public class MenuUI : MonoBehaviour
         LayoutRebuilder.ForceRebuildLayoutImmediate(GetComponent<RectTransform>());
     }
 
+    public void GoHome(Action onComplete = null)
+    {
+        MoveCameraDOTween(new Vector3(0, 9, 5), Quaternion.Euler(45, 0, 0), 10, 1f, onComplete);
+    }
+
     private void GoHome()
     {
-        Camera.main.transform.position = new Vector3(0, 9, 5);
-        Camera.main.transform.rotation = Quaternion.Euler(45, 0, 0);
-        Camera.main.orthographicSize = 10;
+        mapMover.isMove = true;
+        MoveCameraDOTween(new Vector3(0, 9, 5), Quaternion.Euler(45, 0, 0), 10, 1f, () => mapMover.isMove = false);
+    }
+
+    public void GoRoom(Action onComplete = null)
+    {
+        int index = (int)Manager.User.GetCurPlace();
+        MoveCameraDOTween(_roomCameraPosList[index].position, _roomCameraPosList[index].rotation, 6, 1f, onComplete);
     }
 
     private void GoRoom()
     {
-        Camera.main.transform.position = _roomCameraPosList[curRoom].position;
-        Camera.main.transform.rotation = _roomCameraPosList[curRoom].rotation;
-        Camera.main.orthographicSize = 6;
+        int index = (int)Manager.User.GetCurPlace();
+        MoveCameraDOTween(_roomCameraPosList[index].position, _roomCameraPosList[index].rotation, 6, 1f);
+    }
+
+
+    private void MoveCameraDOTween(Vector3 pos, Quaternion rot, float size, float duration, Action onComplete = null)
+    {
+        Camera cam = Camera.main;
+        cam.transform.DOMove(pos, duration).SetEase(Ease.InOutSine);
+        cam.transform.DORotateQuaternion(rot, duration).SetEase(Ease.InOutSine);
+        cam.DOOrthoSize(size, duration).SetEase(Ease.InOutSine).OnComplete(() => onComplete?.Invoke());
     }
 }
