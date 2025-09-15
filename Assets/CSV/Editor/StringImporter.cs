@@ -1,4 +1,5 @@
 using System.IO;
+using System.Text.RegularExpressions;
 using UnityEditor;
 using UnityEngine;
 
@@ -46,20 +47,22 @@ public class StringImporter // 레시피 CSV를 RecipeSO로 변환하는 클래�
                 continue; // 건너뛰기
             }
 
-            string[] splitData = line.Split(','); // 콤마로 칼럼 분리
+            var splitData = Regex.Matches(line, "\"([^\"]*(\"\"[^\"]*)*)\"|([^,]+)");
+            //string[] splitData = line.Split(','); // 콤마로 칼럼 분리
 
-            if (splitData.Length < columnCount) // 열이 부족하면
+            if (splitData.Count < columnCount) // 열이 부족하면
             {
                 Debug.LogError("열 개수 부족함(행 " + i + "): " + line);
                 return;
             }
 
 
-            string String_id = splitData[0];
-            string korean = splitData[1];
-            string english = splitData[2];
-            string chinese = splitData[3];
-            string japanese = splitData[4];
+            string String_id = GetString(splitData, 0);
+            string korean = GetString(splitData, 1).Trim('"').Trim('”').Trim('“');
+            string english = GetString(splitData, 2).Trim('"');
+            string chinese = GetString(splitData, 3).Trim('"').Trim('”').Trim('“');
+
+            string japanese = GetString(splitData, 4).Trim('"').Trim('」').Trim('「');
 
             string soPath = stringSoDir + "/" + String_id + ".asset"; // SO파일 저장경로/파일이름
 
@@ -95,6 +98,11 @@ public class StringImporter // 레시피 CSV를 RecipeSO로 변환하는 클래�
         AssetDatabase.SaveAssets(); // 저장
         AssetDatabase.Refresh(); // 새로고침
         Debug.Log("== 스트링 임포트 완료 ==");
+    }
+
+    private static string GetString(MatchCollection matchCollection, int n)
+    {
+        return matchCollection[n].Groups[1].Success ? matchCollection[n].Groups[1].Value : matchCollection[n].Groups[3].Value;
     }
 
 }

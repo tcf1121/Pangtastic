@@ -10,7 +10,7 @@ public class MissionImporter
     private static string stringSoPath = "Assets/ScriptableObject/String/"; // 스트링 SO 경로
     private static string missionSoDir = "Assets/ScriptableObject/Mission/"; // 미션 SO 저장 경로
     private static int startRow = 1; // 데이터 시작 행
-    private static int columnCount = 7; //열 개수
+    private static int columnCount = 6; //열 개수
                                         //private static bool isNew;
     private static List<string> places;
 
@@ -97,8 +97,8 @@ public class MissionImporter
 
             int.TryParse(splitData[0], out missionList.MissionID);
             int.TryParse(splitData[1], out missionList.Star);
+            int.TryParse(splitData[2], out missionList.Prerequisites);
             missionList.Explane = AssetDatabase.LoadAssetAtPath<StringSO>(stringSoPath + splitData[3] + ".asset");
-            int.TryParse(splitData[6], out missionList.Prerequisites);
 
             mission.Mission.Add(missionList);
 

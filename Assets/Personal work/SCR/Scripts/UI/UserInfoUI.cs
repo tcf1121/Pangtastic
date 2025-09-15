@@ -9,6 +9,7 @@ public class UserInfoUI : MonoBehaviour
     [SerializeField] TMP_Text _coin;
     [SerializeField] TMP_Text _heart;
     [SerializeField] TMP_Text _heartTime;
+    [SerializeField] StringSO _heartSO;
     [SerializeField] TMP_Text _star;
     [SerializeField] Image _profileImage;
     [SerializeField] float _respwanTime;
@@ -45,7 +46,7 @@ public class UserInfoUI : MonoBehaviour
         _heartTimer += Instance.HeartTimer;
         _OnTimerFinished += Instance.FinishHeartTimeCor;
         if (Manager.User.GetHeart() == 5)
-            _heartTime.text = $"가득 참";
+            _heartTime.text = _heartSO.GetText(Manager.Language.GetLanguage());
         else
             SetHeartTime();
     }
@@ -128,7 +129,7 @@ public class UserInfoUI : MonoBehaviour
     private void SetHeartTimer(int value)
     {
         if (Manager.User.GetHeart() == 5)
-            _heartTime.text = $"가득 참";
+            _heartTime.text = _heartSO.GetText(Manager.Language.GetLanguage());
         else
         {
             int minutes = value / 60;

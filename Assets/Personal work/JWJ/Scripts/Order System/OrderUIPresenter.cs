@@ -26,7 +26,7 @@ public class OrderUIPresenter : MonoBehaviour
     [SerializeField] private Sprite _emojiLow;
 
     [Header("레시피 아이템 리스트")]
-    [SerializeField] private List<OrderItem> _recipeSlotList = new List<OrderItem>(); 
+    [SerializeField] private List<OrderItem> _recipeSlotList = new List<OrderItem>();
 
     private List<OrderItem> _activeRecipeSlots = new List<OrderItem>();
 
@@ -152,7 +152,7 @@ public class OrderUIPresenter : MonoBehaviour
         }
         else
         {
-            _dialogue.text = stringSO.value[(int)Manager.Language.GetLanguage()]; ;
+            _dialogue.text = stringSO.GetText(Manager.Language.GetLanguage());
         }
         _chatBox.SetActive(true);
         yield return new WaitForSeconds(_dialogueDuration);
@@ -179,7 +179,7 @@ public class OrderUIPresenter : MonoBehaviour
             }
             else
             {
-                _dialogue.text = stringSO.value[(int)Manager.Language.GetLanguage()]; ; ;
+                _dialogue.text = stringSO.GetText(Manager.Language.GetLanguage());
             }
         }
         else if (percent <= 50f)
@@ -192,7 +192,7 @@ public class OrderUIPresenter : MonoBehaviour
             }
             else
             {
-                _dialogue.text = stringSO.value[(int)Manager.Language.GetLanguage()]; ; ;
+                _dialogue.text = stringSO.GetText(Manager.Language.GetLanguage());
             }
         }
         else
@@ -205,7 +205,7 @@ public class OrderUIPresenter : MonoBehaviour
             }
             else
             {
-                _dialogue.text = stringSO.value[(int)Manager.Language.GetLanguage()]; ; ;
+                _dialogue.text = stringSO.GetText(Manager.Language.GetLanguage());
             }
         }
 
