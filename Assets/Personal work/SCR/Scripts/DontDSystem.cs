@@ -9,7 +9,7 @@ public class DontDSystem : MonoBehaviour
     [SerializeField] private GameObject _gameSystem;
     public GPGSManager GBGS;
     public DatabaseSystem DB;
-    public HeartSystem heartSystem;
+    //public HeartSystem heartSystem;
 
     private void Awake()
     {

@@ -10,113 +10,91 @@ public class DataManager : Singleton<DataManager>
 {
     private string path;
 
-    private async void OnApplicationPause(bool pause)
+    protected override void Awake()
+    {
+        base.Awake();
+        path = Path.Combine(Application.persistentDataPath, "userdata.json");
+    }
+
+
+    private void OnApplicationPause(bool pause)
     {
         if (pause)
         {
-            await UploadUserDataAsync();
+            Save();
+        }
+    }
+#if UNITY_EDITOR
+    private void OnApplicationQuit()
+    {
+        Save();
+    }
+
+#endif
+
+    public void SetUser()
+    {
+        if (!IsReturningUser()) NewUser();
+        else HistoryUser();
+    }
+
+    public bool IsReturningUser()
+    {
+        return File.Exists(path);
+    }
+
+    public void DeleteSaveData()
+    {
+        if (File.Exists(path))
+        {
+            File.Delete(path);
+            Debug.Log("저장된 유저 데이터 삭제 완료");
+        }
+        else
+        {
+            Debug.Log("삭제할 데이터가 없습니다.");
         }
     }
 
-    // private void OnApplicationQuit()
-    // {
-    //     UploadUserDataAsync().GetAwaiter().GetResult();
-    // }
+
 
     // 새로운 유저가 접속할 때 새로운 정보를 만듦
-    public async Task NewUser(string uid, string now)
+    public void NewUser()
     {
         var newUserData = new UserData();
         newUserData.PlayerName = "guest";
         newUserData.UserInfo.Heart.currentHeart = 5;
-        newUserData.UserInfo.Heart.lastSaveTime = now;
-
-        string json = JsonConvert.SerializeObject(newUserData);
-        try
-        {
-            await Manager.DB.GetUserPath(uid).SetRawJsonValueAsync(json);
-            Manager.User.SetUser(newUserData);
-            Manager.User.NewMissionList(16);
-        }
-        catch (Exception ex)
-        {
-            Debug.LogError("유저 데이터 생성 실패: " + ex.Message);
-        }
+        newUserData.UserInfo.Heart.lastSaveTime = DateTime.Now.ToString("O");
+        Manager.User.SetUser(newUserData);
+        Manager.User.NewMissionList(16);
     }
 
-    // 기존 유저가 접속할 때 기존 데이터를 가져와서 CurrentData에 넣음
-    public async Task SetUser(string uid)
+    public void HistoryUser()
     {
-        Manager.User.SetUser(await Manager.Data.DownloadUserData(uid));
-        if (Manager.User.GetCurrentUserData() != null)
+        Manager.User.SetUser(Load());
+    }
+
+    public void Save()
+    {
+        string json = JsonConvert.SerializeObject(Manager.User.GetCurrentUserData());
+        string encrypted = Crypto.Encrypt(json);
+        File.WriteAllText(path, encrypted);
+        Debug.Log("저장 완료: " + path);
+    }
+
+    public UserData Load()
+    {
+        if (File.Exists(path))
         {
-            Debug.Log("사용자 데이터 로드 및 할당 성공!");
+            string encrypted = File.ReadAllText(path);
+            string json = Crypto.Decrypt(encrypted);
+            Debug.Log("저장된 데이터 확인");
+            return JsonConvert.DeserializeObject<UserData>(json);
         }
         else
         {
-            Debug.LogError("사용자 데이터 로드 실패. currentData가 null입니다.");
-        }
-    }
-
-    public async Task<UserData> DownloadUserData(string uid)
-    {
-        var task = Manager.DB.GetUserPath(uid).GetValueAsync();
-
-        await task;
-
-        if (task.IsFaulted)
-        {
-            Debug.LogError("데이터 로드 실패: " + task.Exception);
-            return null;
-        }
-        if (task.IsCanceled)
-        {
-            Debug.LogError("데이터 로드 취소: " + task.Exception);
-            return null;
-        }
-
-        DataSnapshot snapshot = task.Result;
-
-        if (!snapshot.Exists)
-        {
-            Debug.LogWarning("해당 uid에 대한 사용자 데이터가 없습니다.");
-            return null;
-        }
-        else if (snapshot.Exists)
-        {
-            string json = snapshot.GetRawJsonValue();
-
-            Debug.Log(json);
-            UserData userData = JsonConvert.DeserializeObject<UserData>(json);
-            Debug.Log(userData.Stage);
-
-            return userData;
-        }
-        return null;
-    }
-
-    // 기기에 JSON 파일로 저장
-    public void SaveUserData()
-    {
-        string json = JsonConvert.SerializeObject(Manager.User.GetCurrentUserData());
-
-        File.WriteAllText(path, json);
-    }
-
-    // 파이어베이스에 업로드
-    public async Task UploadUserDataAsync()
-    {
-        Manager.User.SetLeaveTime(DateTime.Now.ToString("O"));
-        string json = JsonConvert.SerializeObject(Manager.User.GetCurrentUserData());
-        try
-        {
-            FirebaseAuth auth = FirebaseAuth.DefaultInstance;
-            string uid = auth.CurrentUser.UserId;
-            await Manager.DB.GetUserPath(uid).SetRawJsonValueAsync(json);
-        }
-        catch (Exception ex)
-        {
-            Debug.LogError("유저 데이터 생성 실패: " + ex.Message);
+            Debug.LogWarning("저장된 데이터 없음, 기본값 반환");
+            return new UserData();
         }
     }
 }

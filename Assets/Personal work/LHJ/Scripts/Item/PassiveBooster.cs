@@ -28,6 +28,7 @@ public class PassiveBooster : MonoBehaviour
 
     private void OnEnable()
     {
+        SetPassiveItem(Manager.Stage.GetUseItem());
         if (_applyCo == null)
             _applyCo = StartCoroutine(WaitAndApplyRoutine());
     }
@@ -41,40 +42,35 @@ public class PassiveBooster : MonoBehaviour
         }
     }
 
+    private void SetPassiveItem(List<bool> useItem)
+    {
+        if (useItem[0]) _useRoller = useItem[0];
+        if (useItem[1]) _useDonut = useItem[1];
+        if (useItem[2]) _useOven = useItem[2];
+    }
+
     private IEnumerator WaitAndApplyRoutine()
     {
+        Debug.Log("패시브 아이템 적용 대기 코루틴 시작");
         if (_board == null) yield break;
+        
+        // while (sp == null || sp.GameBoardData == null || sp.GameBoardData.BlockPlate == null || sp.GameBoardData.BlockArray == null)
+        // {
+        //     sp = _board.Spawner;
+        //     yield return null;
+        // }
 
-        var sp = _board.Spawner;
-        while (sp == null || sp.GameBoardData == null || sp.GameBoardData.BlockPlate == null || sp.GameBoardData.BlockArray == null)
-        {
-            sp = _board.Spawner;
-            yield return null;
-        }
+        yield return new WaitUntil(() => _board.IsReadyForStart);
 
-        int w = sp.GameBoardData.BlockPlate.BlockPlateWidth;
-        int h = sp.GameBoardData.BlockPlate.BlockPlateHeight;
+        int w = _board.Spawner.GameBoardData.BlockPlate.BlockPlateWidth;
+        int h = _board.Spawner.GameBoardData.BlockPlate.BlockPlateHeight;
 
-        bool filled = false;
-        while (!filled)
-        {
-            filled = true;
-            for (int y = 0; y < h && filled; y++)
-            {
-                for (int x = 0; x < w && filled; x++)
-                {
-                    var cell = sp.GameBoardData.BlockArray[y, x];
-                    if (cell == null || cell.BlockInstance == null)
-                        filled = false;
-                }
-            }
-            yield return null;
-        }
         ApplyOnStageStart();
     }
 
     public void ApplyOnStageStart()
     {
+        Debug.Log("패시브 아이템 적용 시작");
         if (_board == null) return;
 
         var sp = _board.Spawner;
@@ -122,6 +118,7 @@ public class PassiveBooster : MonoBehaviour
             sp.SpawnBlock(x, y, gemType, BoardManager.Instance.BlockMover);
 
             picked.Add(new Vector2Int(x, y));
+            Debug.Log($"Placed {gemType} at ({x},{y})");
             return true;
         }
         return false;

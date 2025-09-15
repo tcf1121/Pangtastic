@@ -23,7 +23,7 @@ public class IAPManager : Singleton<IAPManager>
     protected override void Awake()
     {
         base.Awake();
-        
+
         AsyncOperationHandle<ProductCatalogSO> handle = Addressables.LoadAssetAsync<ProductCatalogSO>("CatalogSO");
         handle.Completed += OnCatalogLoaded;
     }
@@ -176,7 +176,7 @@ public class IAPManager : Singleton<IAPManager>
 
             _lastTriedProductId = null;
 
-            
+
         }
     }
     private void OnPurchaseFailed(FailedOrder order)
@@ -263,7 +263,12 @@ public class IAPManager : Singleton<IAPManager>
 
     public bool CheckNonConsumableOwned(string id)
     {
-        return _owned.Contains(id);
+        Product product = _store.GetProductById(id);
+        if (product != null && product.definition.type == ProductType.NonConsumable)
+        {
+            return _owned.Contains(id);
+        }
+        return false;
     }
 
     private void GiveReward(string productId)

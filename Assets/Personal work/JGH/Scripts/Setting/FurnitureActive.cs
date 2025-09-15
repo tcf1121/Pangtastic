@@ -57,47 +57,47 @@ public class FurnitureActive : MonoBehaviour
 
     // private void Start()
     // {
-        // 코드에서 실행:
-        // FindObjectOfType<FurnitureActive>()
-            // .ActivateByNames("Donuts_16 Variant", "Donut_1", "Donut_2");
+    // 코드에서 실행:
+    // FindObjectOfType<FurnitureActive>()
+    // .ActivateByNames("Donuts_16 Variant", "Donut_1", "Donut_2");
     // }
 
     private void FurnitureLoadActiveDB(string name)
     {
-        string authJson = Manager.DB.GetAuthInfo();
-        DatabaseSystem.AuthInfo info = JsonUtility.FromJson<DatabaseSystem.AuthInfo>(authJson);
+        //string authJson = Manager.DB.GetAuthInfo();
+        // DatabaseSystem.AuthInfo info = JsonUtility.FromJson<DatabaseSystem.AuthInfo>(authJson);
 
-        Manager.DB.dbRef
-            .Child(info.type)
-            .Child(info.uid)
-            .Child("Furniture")
-            .GetValueAsync()
-            .ContinueWith(task =>
-            {
-                if (task.IsCompleted && task.Result.Exists)
-                {
-                    var s = task.Result;
-                    foreach (var child in s.Children)
-                    {
-                        Debug.Log($"가구 ID: {child.Key}, 데이터: {child.GetRawJsonValue()}");
-                    }
-                }
+        // Manager.DB.dbRef
+        //     .Child(info.type)
+        //     .Child(info.uid)
+        //     .Child("Furniture")
+        //     .GetValueAsync()
+        //     .ContinueWith(task =>
+        //     {
+        //         if (task.IsCompleted && task.Result.Exists)
+        //         {
+        //             var s = task.Result;
+        //             foreach (var child in s.Children)
+        //             {
+        //                 Debug.Log($"가구 ID: {child.Key}, 데이터: {child.GetRawJsonValue()}");
+        //             }
+        //         }
 
-            });
+        //     });
         // .Child("Donuts")
     }
 
     private void FurnitureSaveActiveDB(string parent, string name)
     {
-        string authJson = Manager.DB.GetAuthInfo();
-        DatabaseSystem.AuthInfo info = JsonUtility.FromJson<DatabaseSystem.AuthInfo>(authJson);
+        // string authJson = Manager.DB.GetAuthInfo();
+        // DatabaseSystem.AuthInfo info = JsonUtility.FromJson<DatabaseSystem.AuthInfo>(authJson);
 
-        Manager.DB.dbRef
-            .Child(info.type)
-            .Child(info.uid)
-            .Child("Furniture")
-            .Child($"{parent}")
-            .Child($"{name}")
-            .SetValueAsync(1);
+        // Manager.DB.dbRef
+        //     .Child(info.type)
+        //     .Child(info.uid)
+        //     .Child("Furniture")
+        //     .Child($"{parent}")
+        //     .Child($"{name}")
+        //     .SetValueAsync(1);
     }
 }

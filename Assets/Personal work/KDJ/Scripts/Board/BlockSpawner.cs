@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using SCR;
+using UnityEngine.SceneManagement;
 
 namespace KDJ
 {
@@ -43,6 +44,20 @@ namespace KDJ
         public void Initialize(BoardManager boardManager, BoardData loadedBoardData, BlockPlate blockPlate, BlockMover blockMover)
         {
             GameBoardData = new GameBoardData(blockPlate);
+
+            // 스테이지에 맞춰 블록 풀크기 조정
+            if (!boardManager.IsTest)
+            {
+                Debug.Log($"현재 스테이지: {Manager.User.GetStage()}");
+                if (Manager.User.GetStage() < 51)
+                {
+                    _spawnRangeMax = 5;
+                }
+                else
+                {
+                    _spawnRangeMax = 6;
+                }
+            }
 
             _blockWaitingQueue = new Queue<Block>[GameBoardData.Width];
             for (int i = 0; i < GameBoardData.Width; i++)
@@ -107,16 +122,6 @@ namespace KDJ
             DrawAllBlocks(blockMover);
             DrawAllOverlayBlocks(blockMover);
 
-            // 4. 현재 스테이지에 맞춰 스폰될 블록 종류 설정 
-            // if (Manager.User.GetStage() < 52)
-            // {
-            //     _spawnRangeMax = 5;
-            // }
-            // else
-            // {
-            //     _spawnRangeMax = 6;
-            // }
-
             // 테스트용 블록 교체 실행
             if (_test_blockOverrides != null && _test_blockOverrides.Count > 0)
             {
@@ -171,7 +176,7 @@ namespace KDJ
                 {
                     GameBoardData.BlockArray[y, x] = new Block()
                     {
-                        GemType = (GemType)Random.Range(0, 6),
+                        GemType = (GemType)Random.Range(0, _spawnRangeMax),
                     };
 
                     GameBoardData.BlockArray[y, x].IsNormal = false;
@@ -206,9 +211,19 @@ namespace KDJ
                     GameObject overlayPrefab = GetBlockPrefab((int)GemType.Ice);
                     if (overlayPrefab != null)
                         GameBoardData.OverlayArray[y, x].BlockInstance = Instantiate(overlayPrefab, position, Quaternion.identity);
+
                     GameObject blockPrefabIce = GetBlockPrefab((int)GameBoardData.BlockArray[y, x].GemType);
+                    SpriteRenderer spriteRenderer = blockPrefabIce.GetComponent<SpriteRenderer>();
+
                     if (blockPrefabIce != null)
-                        GameBoardData.BlockArray[y, x].BlockInstance = BlockPool.GetObject().gameObject;
+                    {
+                        GameBoardData.BlockArray[y, x].BlockInstance = Instantiate(blockPrefabIce, position, Quaternion.identity);
+                    }
+                    if (spriteRenderer != null && (int)gemType < normalBlockSprites.Count)
+                    {
+                        spriteRenderer.sprite = normalBlockSprites[(int)gemType];
+                    }
+
                     GameBoardData.BlockArray[y, x].BlockInstance.transform.position = position;
                 }
                 else
@@ -242,16 +257,6 @@ namespace KDJ
                             {
                                 GameBoardData.BlockArray[y, x].BlockInstance = Instantiate(blockPrefabSpecial, position, Quaternion.identity);
                             }
-                        }
-                    }
-
-                    if (GameBoardData.BlockArray[y, x].GemType == GemType.Ice)
-                    {
-                        Debug.Log("Ice블럭인가?" + (GameBoardData.BlockArray[y, x] is Ice));
-                        if (GameBoardData.BlockArray[y, x] is Ice iceBlock && iceBlock.BlockInstance != null)
-                        {
-                            iceBlock.IceObject = iceBlock.BlockInstance;
-                            Debug.Log("IceObject 설정됨:" + (iceBlock.IceObject != null));
                         }
                     }
 
@@ -297,13 +302,15 @@ namespace KDJ
                             {
                                 if (block.GemType == GemType.FlourBag)
                                 {
-                                    Debug.Log("FlourBag 생성");
                                     position += new Vector3(0.5f, 0.5f, 0); // FlourBag는 중앙 정렬이 아니므로 위치 보정
                                     block.BlockInstance = Instantiate(blockPrefabSpecial, position, Quaternion.identity);
+                                    SceneManager.MoveGameObjectToScene(block.BlockInstance, gameObject.scene);
+                                    position -= new Vector3(0.5f, 0.5f, 0);
                                 }
                                 else
                                 {
                                     block.BlockInstance = Instantiate(blockPrefabSpecial, position, Quaternion.identity);
+                                    SceneManager.MoveGameObjectToScene(block.BlockInstance, gameObject.scene);
                                 }
                             }
                         }
@@ -372,7 +379,9 @@ namespace KDJ
                         GameObject blockPrefab = GetBlockPrefab((int)block.GemType);
                         if (blockPrefab != null)
                         {
+                            Debug.Log($"{y}, {x}에 {block.GemType} 생성");
                             block.BlockInstance = Instantiate(blockPrefab, position, Quaternion.identity);
+                            SceneManager.MoveGameObjectToScene(block.BlockInstance, gameObject.scene);
                         }
                     }
                 }
@@ -396,6 +405,7 @@ namespace KDJ
 
         public IEnumerator RefillBoardCoroutine(BlockMover blockMover)
         {
+            Debug.Log("RefillBoardCoroutine 진입");
             if (_isRefilling) yield break;
             _isRefilling = true;
 
@@ -807,7 +817,7 @@ namespace KDJ
 
             foreach (Block block in boardManager.Spawner.GameBoardData.BlockArray)
             {
-                if (block != null && block.BlockInstance != null && block.IsNormal)
+                if (block != null && block.BlockInstance != null && block.IsNormal && block.GemType <= GemType.Sugar)
                 {
                     PooledObject pooledObject = block.BlockInstance.GetComponent<PooledObject>();
                     if (pooledObject != null)
@@ -846,7 +856,7 @@ namespace KDJ
                         if (GameBoardData.BlockPlate.BlockPlateArray[y, x])
                         {
                             Block block = GameBoardData.GetBlock(x, y);
-                            if (block != null && block.GemType <= GemType.Sugar)
+                            if (block != null && block.IsNormal && block.GemType <= GemType.Sugar)
                             {
                                 normalBlocks.Add(block);
                                 normalBlockPositions.Add(new Vector2Int(x, y));

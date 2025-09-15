@@ -2,6 +2,7 @@ using Firebase.Auth;
 using Firebase.Database;
 using Firebase.Extensions;
 using System;
+using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
@@ -20,28 +21,30 @@ namespace SCR
 
         void Awake()
         {
+            Application.targetFrameRate = 60;
             _logoutBtn.onClick.AddListener(Logout);
-            _enterBtn.onClick.AddListener(CheckBefore);
+            _enterBtn.onClick.AddListener(CheckBeforeAsync);
             _googlePlayBtn.onClick.AddListener(Manager.GPGS.AuthenticateUser);
             _guestBtn.onClick.AddListener(LoginAsGuest);
         }
 
-        private void CheckBefore()
+        private async void CheckBeforeAsync()
         {
-
-            FirebaseAuth auth = FirebaseAuth.DefaultInstance;
-            if (auth.CurrentUser != null)
-            {
-                HowToLoginAsync(auth.CurrentUser.IsAnonymous);
-            }
-            else
-                LoginAsGuest();
+            Manager.Data.SetUser();
+            await Manager.DB.InitFirebase();
+            SceneManager.LoadScene("Lobby Scene");
         }
 
         private void Logout()
         {
-            FirebaseAuth auth = FirebaseAuth.DefaultInstance;
-            if (auth.CurrentUser != null)
+            DeleteFB();
+            Manager.Data.DeleteSaveData();
+        }
+
+        private void DeleteFB()
+        {
+            FirebaseAuth auth = Manager.DB.auth;
+            if (auth != null)
             {
                 DatabaseReference dataToRemove = Manager.DB.GetUserPath(auth.CurrentUser.UserId);
                 dataToRemove.RemoveValueAsync().ContinueWith(task =>
@@ -56,9 +59,7 @@ namespace SCR
                     }
                 });
                 auth.SignOut();
-
             }
-
         }
 
         private async void HowToLoginAsync(bool isGuest)
@@ -74,8 +75,8 @@ namespace SCR
             {
                 Debug.Log($"이미 구글 플레이 로그인 상태: {auth.CurrentUser.UserId}");
             }
-            Manager.DB.user = auth.CurrentUser;
-            await Manager.Data.SetUser(auth.CurrentUser.UserId);
+            //Manager.DB.user = auth.CurrentUser;
+            //await Manager.Data.SetUser(auth.CurrentUser.UserId);
             SceneManager.LoadScene(2/*로비씬*/);
         }
 
@@ -99,10 +100,10 @@ namespace SCR
                 string uid = newUser.UserId;
                 Debug.LogFormat($"게스트 로그인 성공 : {newUser.UserId}");
 
-                await Manager.Data.NewUser(uid, DateTime.Now.ToString("O"));
+                //Manager.Data.NewUser(uid, );
                 // Manager.User.NewUser(uid, DateTime.Now.ToString("O"));
 
-                SceneManager.LoadScene("Lobby Scene");
+
             });
 
         }

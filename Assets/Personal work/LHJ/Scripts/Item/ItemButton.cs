@@ -1,8 +1,8 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using KDJ;
+using TMPro;
+using KDJ.States;
 
 namespace LHJ
 {
@@ -13,21 +13,34 @@ namespace LHJ
         [SerializeField] private BoardManager _board;
         [SerializeField] private ItemCheck _itemCheck;
         [SerializeField] private GameObject _lockGO;
+        [SerializeField] private TMP_Text _countText;
+        [SerializeField] private GameObject _textBG;
 
         private void Awake()
         {
             if (_button == null) _button = GetComponent<Button>();
             _button.onClick.AddListener(OnClick);
-            Lock();
+            SetItemState();
+        }
+
+        private void LateUpdate()
+        {
+            SetItemState();
         }
 
         private void OnClick()
         {
             if (_type == ItemType.DonutPan)
             {
-                if (_itemCheck != null)
-                    _itemCheck.UseDonutPan();
-                return;
+                if (BoardManager.Instance.CurrentState is ReadyState)
+                {
+                    if (_itemCheck != null)
+                        _itemCheck.UseDonutPan();
+
+                    Manager.User.UseItem(_type);
+                    SetItemState();
+                    return;
+                }
             }
 
             // 즉시 발동형: 커피
@@ -35,6 +48,8 @@ namespace LHJ
             {
                 if (_itemCheck != null)
                     _itemCheck.UseCoffee(30f);
+                Manager.User.UseItem(_type);
+                SetItemState();
                 return;
             }
 
@@ -46,8 +61,8 @@ namespace LHJ
                 _board.ClearItemSelection();
             else
                 _board.SelectItem(_type);
-            Lock();
         }
+        
 
         private void Lock()
         {
@@ -56,6 +71,47 @@ namespace LHJ
                 _button.interactable = false;
                 _lockGO.SetActive(true);
             }
+        }
+
+        public void SetItemState()
+        {
+            if (Manager.User.CanUseItem(_type))
+            {
+                _button.interactable = true;
+                int count = GetItemCount(_type);
+                if (_countText != null)
+                    _countText.text = count.ToString();
+                if (_textBG != null)
+                    _textBG.SetActive(true);
+                _lockGO.SetActive(false);
+            }
+            else
+            {
+                _button.interactable = false;
+                _countText.text = "";
+                if (_textBG != null)
+                    _textBG.SetActive(false);
+                _lockGO.SetActive(true);
+            }
+        }
+
+        public int GetItemCount(ItemType itemType)
+        {
+            if (itemType == _type)
+            {
+                int count = 0;
+                if (itemType == ItemType.Roller) count = Manager.User.GetItem().Roller;
+                else if (itemType == ItemType.DonutBox) count = Manager.User.GetItem().DonutBox;
+                else if (itemType == ItemType.Oven) count = Manager.User.GetItem().Oven;
+                else if (itemType == ItemType.Whisk) count = Manager.User.GetItem().Whisk;
+                else if (itemType == ItemType.Scissors) count = Manager.User.GetItem().Scissors;
+                else if (itemType == ItemType.DonutPan) count = Manager.User.GetItem().DonutPan;
+                else if (itemType == ItemType.Coffee) count = Manager.User.GetItem().Coffee;
+
+                return count;
+            }
+
+            return 0;
         }
     }
 }

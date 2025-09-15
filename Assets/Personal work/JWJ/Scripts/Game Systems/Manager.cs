@@ -4,18 +4,17 @@ public static class Manager
 {
     public static StageManager Stage => StageManager.GetInstance();
     public static UserInfoManager User => UserInfoManager.GetInstance();
-    public static AudioSystem Audio => AudioSystem.GetInstance();
+    public static AudioManager Audio => AudioManager.GetInstance();
 
     public static ScriptingSystem Scripting => ScriptingSystem.GetInstance();
 
     public static DataManager Data => DataManager.GetInstance();
 
-    public static DatabaseSystem DB => DatabaseSystem.GetInstance();
+    public static FirebaseManager DB => FirebaseManager.GetInstance();
     public static GPGSManager GPGS => GPGSManager.GetInstance();
     public static AdSystem Ad => AdSystem.GetInstance();
 
     public static EffectSystem Effect => EffectSystem.GetInstance();
-    public static CurrencySystem Currency => CurrencySystem.GetInstance();
     public static TimerManager Timer => TimerManager.GetInstance();
 
     public static IAPManager IAP => IAPManager.GetInstance();
@@ -27,12 +26,11 @@ public static class Manager
     {
         StageManager.CreateManager();
         UserInfoManager.CreateManager();
-        AudioSystem.CreateManager();
+        AudioManager.CreateManager();
         ScriptingSystem.CreateManager();
 
         DataManager.CreateManager();
-
-        DatabaseSystem.CreateManager();
+        FirebaseManager.CreateManager();
         GPGSManager.CreateManager();
         AdSystem.CreateManager();
         EffectSystem.CreateManager();
@@ -40,7 +38,5 @@ public static class Manager
         IAPManager.CreateManager();
 
         LanguageSystem.CreateManager();
-        CurrencySystem.CreateManager();
-        //HeartSystem.CreateManager();
     }
 }

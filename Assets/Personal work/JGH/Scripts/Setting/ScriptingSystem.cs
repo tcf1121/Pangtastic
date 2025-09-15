@@ -33,7 +33,7 @@ public class ScriptingSystem : Singleton<ScriptingSystem>
 
     private List<DialogLine> currentDialogList = new List<DialogLine>();
     private int currentIndex = 0;
-    
+
     // ===== 데이터 클래스 =====
     [Serializable]
     public class DialogData
@@ -44,13 +44,13 @@ public class ScriptingSystem : Singleton<ScriptingSystem>
 
         public string centerSpeakerId;
         public string centerSpeakerCheck;
-        
+
         public string leftSpeakerId;
         public string leftSpeakerCheck;
-        
+
         public string rightSpeakerId;
         public string rightSpeakerCheck;
-        
+
         public string dialogStringId;
         public string spritePath;
         public string bgmSoundId;
@@ -112,7 +112,7 @@ public class ScriptingSystem : Singleton<ScriptingSystem>
     protected override void Awake()
     {
         base.Awake();
-        
+
         // Addressables 즉시 로드
         dialogScript = LoadSO<SO_ScriptDialog>(dialogDBKey);
         stringScript = LoadSO<SO_ScriptString>(stringDBKey);
@@ -179,7 +179,7 @@ public class ScriptingSystem : Singleton<ScriptingSystem>
             string centerCharacter = "";
             string leftCharacter = "";
             string rightCharacter = "";
-            
+
             string leftSpeakerImgPath = "";
             string centerSpeakerImgPath = "";
             string rightSpeakerImgPath = "";
@@ -191,7 +191,7 @@ public class ScriptingSystem : Singleton<ScriptingSystem>
             string bgm = "";
             bool bgmLoop = false;
             float bgmVolume = 1;
-            
+
             string sfx = "";
             bool sfxLoop = false;
             float sfxVolume = 1;
@@ -235,7 +235,7 @@ public class ScriptingSystem : Singleton<ScriptingSystem>
                 sfxLoop = sfxSound.loopCheck;
                 sfxVolume = sfxSound.volume;
             }
-            
+
             // === 화자 표시 ===
             leftSpeakerOnOff = dialog_d.leftSpeakerCheck;
             centerSpeakerOnOff = dialog_d.centerSpeakerCheck;
@@ -265,13 +265,13 @@ public class ScriptingSystem : Singleton<ScriptingSystem>
 
         currentDialogList = dialogList;
         currentIndex = 0;
-        
+
         // 확인용
         foreach (var line in currentDialogList)
         {
             Debug.Log($"[DialogLine] {JsonUtility.ToJson(line, true)}");
         }
-        
+
 
         if (currentDialogList.Count > 0)
         {
@@ -333,7 +333,7 @@ public class ScriptingSystem : Singleton<ScriptingSystem>
         {
             Manager.Audio.SfxAudioSource.loop = line.sfxLoop;
             Manager.Audio.SfxAudioSource.volume = line.sfxVolume;
-            Manager.Audio.PlaySFXByName(line.sfx);
+            //Manager.Audio.PlaySFXByName(line.sfx);
         }
 
         // ===== BGM 실행 =====
@@ -341,10 +341,10 @@ public class ScriptingSystem : Singleton<ScriptingSystem>
         {
             Manager.Audio.BgmAudioSource.loop = line.bgmLoop;
             Manager.Audio.BgmAudioSource.volume = line.bgmVolume;
-            Manager.Audio.PlayBGMByName(line.bgm);
+            //Manager.Audio.PlayBGMByName(line.bgm);
         }
-        
-        
+
+
         // ===== 닉네임 왼족, 오른쪽 활성화
         SetChildActive("RightName", false);
         SetChildActive("LeftName", false);
@@ -353,19 +353,19 @@ public class ScriptingSystem : Singleton<ScriptingSystem>
             SetChildActive("RightName", true);
             RightNameText.text = line.centerCharacter;
         }
-        
+
         if (line.rightSpeakerOnOff.Trim().ToLower() == "true")
         {
             SetChildActive("RightName", true);
             RightNameText.text = line.rightCharacter;
         }
-        
-        if(line.leftSpeakerOnOff.Trim().ToLower() == "true")
+
+        if (line.leftSpeakerOnOff.Trim().ToLower() == "true")
         {
             SetChildActive("LeftName", true);
             LeftNameText.text = line.leftCharacter;
         }
-        
+
 
         // ===== 이미지 처리 =====
         UpdateSpeakerImage("CenterImg", line.centerSpeakerOnOff, line.centerSpeakerImgPath, line.centerCharacter, activeSpeakers);
@@ -377,7 +377,7 @@ public class ScriptingSystem : Singleton<ScriptingSystem>
         // ===== 대사 처리 =====
         dialogueText.text = line.script;
         // speakerNameText.text = activeSpeakerNames;
-        
+
 
         // Debug.Log($"[Dialogue] 화자: {activeSpeakerNames}, script: {line.script}");
         currentIndex++;
@@ -407,7 +407,7 @@ public class ScriptingSystem : Singleton<ScriptingSystem>
                 child.gameObject.SetActive(true);
             }
         });
-        
+
         if (state.Trim().ToLower() == "true")
         {
             img.color = Color.white;
@@ -436,7 +436,7 @@ public class ScriptingSystem : Singleton<ScriptingSystem>
         {
             if (op.Status == AsyncOperationStatus.Succeeded)
             {
-                Sprite  sp  = op.Result;
+                Sprite sp = op.Result;
                 onLoaded?.Invoke(sp);
             }
             else

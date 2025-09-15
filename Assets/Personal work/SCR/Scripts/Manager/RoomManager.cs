@@ -1,39 +1,64 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
 public class RoomManager : MonoBehaviour
 {
-    [SerializeField] private List<GameObject> lockedRooms;
+    [SerializeField] private List<Place> _places;
+    [SerializeField] private MenuUI menuUI;
     private MissonPlace curPlace;
     [SerializeField] MissionListSO missionList;
-    [SerializeField] private MissIonBtn missonBtn;
+    [SerializeField] private MissionBtn missonBtn;
+    Action clearPlace;
 
     void Awake()
     {
         curPlace = Manager.User.GetCurPlace();
-        for (int i = 0; i < lockedRooms.Count; i++)
+        for (int i = 0; i < _places.Count; i++)
         {
-            if (i <= (int)curPlace) lockedRooms[i].SetActive(false);
+            if (i < (int)curPlace) _places[i].AllClear();
+            else if (i == (int)curPlace) _places[i].CurrentClear();
         }
 
     }
 
-    public void ClearPlace()
+    public void ClearPlace(Action openPopup = null)
     {
         if (curPlace < MissonPlace.Greengrocery)
         {
             curPlace++;
             Manager.User.SetCurPlace(curPlace);
             Manager.User.NewMissionList(GetMaxMission());
-            lockedRooms[(int)curPlace].SetActive(true);
             missonBtn.Refresh();
+            menuUI.GoHome(() =>
+            {
+                menuUI.GoRoom(() =>
+                {
+                    openPopup?.Invoke();
+                });
+            });
+
+
         }
     }
 
-    public void ClearMission(int index)
+
+    public void ClearMission(int index, Action openPopup = null)
     {
         Manager.User.ClearCurMisson(index);
+        if (Manager.User.MissionAllClear())
+        {
+            _places[(int)curPlace].MissionClear(index, () => ClearPlace(openPopup));
+        }
+        else
+        {
+            _places[(int)curPlace].MissionClear(index, openPopup);
+            missonBtn.Refresh();
+        }
+
+
+
     }
 
     public int GetMaxMission()
@@ -43,6 +68,7 @@ public class RoomManager : MonoBehaviour
 
     public List<Mission> CreateMission(int num = 1)
     {
+        if (num == 0) return null;
         List<Mission> returnMission = new();
         List<bool> isclearMission = Manager.User.GetCurMisson().ToList();
         List<Mission> missionLists = missionList.Missions[(int)curPlace].Mission;
