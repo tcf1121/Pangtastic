@@ -11,6 +11,7 @@ GameObject:
   - component: {fileID: 4286639344965272409}
   - component: {fileID: 1758672047034941445}
   - component: {fileID: 9033285334601235807}
+  - component: {fileID: 3541647767567854440}
   m_Layer: 0
   m_Name: DonutBox
   m_TagString: Untagged
@@ -98,3 +99,19 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _destroySpecial: 1
+--- !u!114 &3541647767567854440
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4815146370632419231}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ee158225ee1e59f4791627785501d950, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  currentShaderType: 4
+  normalStrength: 5
+  normalSmoothing: 1
+  computingNormal: 0

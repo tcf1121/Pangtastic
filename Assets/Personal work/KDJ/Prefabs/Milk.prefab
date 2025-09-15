@@ -11,6 +11,7 @@ GameObject:
   - component: {fileID: 5762905594946680989}
   - component: {fileID: 8101032237440357732}
   - component: {fileID: -6374642464343984612}
+  - component: {fileID: -1811835242979070793}
   m_Layer: 0
   m_Name: Milk
   m_TagString: Untagged
@@ -103,3 +104,19 @@ MonoBehaviour:
   _chocolate: {fileID: 11400000, guid: c6e9d19501b290e4ab3ddb2602245434, type: 2}
   _blueberry: {fileID: 11400000, guid: afcdf0bf89f8f2947958b635b002a0d8, type: 2}
   _lavender: {fileID: 11400000, guid: 2996cf30a4e24b24bad373b1306eaa7d, type: 2}
+--- !u!114 &-1811835242979070793
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7340069888455589625}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ee158225ee1e59f4791627785501d950, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  currentShaderType: 4
+  normalStrength: 5
+  normalSmoothing: 1
+  computingNormal: 0

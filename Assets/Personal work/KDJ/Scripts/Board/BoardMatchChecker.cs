@@ -1,9 +1,9 @@
 using SCR;
-using SCR_O;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.Rendering;
-using UnityEngine.SocialPlatforms.Impl;
+using System.Linq;
+using System;
+using Unity.Mathematics;
 
 namespace KDJ
 {
@@ -86,17 +86,17 @@ namespace KDJ
             matchCount = possibleMoves.Count;
             return matchCount > 0;
         }
-        
+
         /// <summary>
         /// 힌트를 위해 최적의 매치 가능성을 찾아 리스트로 좌표를 반환합니다.
         /// </summary>
         /// <returns></returns>
-        private List<Vector2Int> OptimalMatchFind()
+        public List<Vector2Int> OptimalMatchFind()
         {
             List<Vector2Int> result = new List<Vector2Int>();
-            
+
             // 중복된 매치 가능성을 제외하기 위해 HashSet 사용
-            var possibleMoves = new HashSet<string>();
+            HashSet<Vector2Int> matchPos = new HashSet<Vector2Int>();
             var gameBoard = BoardManager.Instance.Spawner.GameBoardData;
 
             if (gameBoard == null) return null;
@@ -115,6 +115,21 @@ namespace KDJ
                 {
                     if (!gameBoard.BlockPlate.BlockPlateArray[y, x] || tempBlockArray[y, x] == null) continue;
 
+                    // 현재 블록이 특수 블록일 경우 상하좌우 탐색 후 해당 위치가 특수블록일 경우 최우선순위로 설정
+                    if (tempBlockArray[y, x].GemType > GemType.Sugar && tempBlockArray[y, x].GemType < GemType.Dust)
+                    {
+                        if (CheckCrossPosIsSpecial(tempBlockArray, x, y, out List<Vector2Int> specialPositions))
+                        {
+                            // 특수 블록끼리 인접해있다면 최우선순위로 설정
+                            matchList.Add((specialPositions, 1));
+                        }
+                        else
+                        {
+                            // 특수 블록이지만 인접한 특수 블록이 없다면, 4번째 우선순위로 설정
+                            matchList.Add((new List<Vector2Int> { new Vector2Int(x, y) }, 4));
+                        }
+                    }
+
                     // 가로 방향으로 인접한 블록과 스왑하여 매치 확인
                     if (x + 1 < width && gameBoard.BlockPlate.BlockPlateArray[y, x + 1] && tempBlockArray[y, x + 1] != null)
                     {
@@ -123,9 +138,32 @@ namespace KDJ
                         tempBlockArray[y, x] = tempBlockArray[y, x + 1];
                         tempBlockArray[y, x + 1] = temp;
 
-                        if (CheckForMatchAt(BoardManager.Instance, x, y, tempBlockArray) || CheckForMatchAt(BoardManager.Instance, x + 1, y, tempBlockArray))
+                        if (CheckForMatchAt(BoardManager.Instance, x, y, tempBlockArray, out int count, out int type, out HashSet<Vector2Int> matchedCoords))
                         {
-                            possibleMoves.Add($"({x},{y}):({x + 1},{y})");
+                            matchedCoords.Remove(new Vector2Int(x, y));
+                            matchedCoords.Add(new Vector2Int(x + 1, y));
+                            matchList.Add(CalculateBlockMatchWeight(x, y, type, tempBlockArray, new List<Vector2Int>(matchedCoords)));
+                        }
+
+                        if (CheckForMatchAt(BoardManager.Instance, x + 1, y, tempBlockArray, out count, out type, out matchedCoords))
+                        {
+                            matchedCoords.Remove(new Vector2Int(x + 1, y));
+                            matchedCoords.Add(new Vector2Int(x, y));
+                            matchList.Add(CalculateBlockMatchWeight(x + 1, y, type, tempBlockArray, new List<Vector2Int>(matchedCoords)));
+                        }
+
+                        if (CheckCubeMatchesAround(x, y, tempBlockArray, out matchedCoords))
+                        {
+                            matchedCoords.Remove(new Vector2Int(x, y));
+                            matchedCoords.Add(new Vector2Int(x + 1, y));
+                            matchList.Add(CalculateBlockMatchWeight(x, y, 2, tempBlockArray, new List<Vector2Int>(matchedCoords)));
+                        }
+
+                        if (CheckCubeMatchesAround(x + 1, y, tempBlockArray, out matchedCoords))
+                        {
+                            matchedCoords.Remove(new Vector2Int(x + 1, y));
+                            matchedCoords.Add(new Vector2Int(x, y));
+                            matchList.Add(CalculateBlockMatchWeight(x + 1, y, 2, tempBlockArray, new List<Vector2Int>(matchedCoords)));
                         }
 
                         // 스왑 원상 복구
@@ -142,9 +180,32 @@ namespace KDJ
                         tempBlockArray[y, x] = tempBlockArray[y + 1, x];
                         tempBlockArray[y + 1, x] = temp;
 
-                        if (CheckForMatchAt(BoardManager.Instance, x, y, tempBlockArray) || CheckForMatchAt(BoardManager.Instance, x, y + 1, tempBlockArray))
+                        if (CheckForMatchAt(BoardManager.Instance, x, y, tempBlockArray, out int count, out int type, out HashSet<Vector2Int> matchedCoords))
                         {
-                            possibleMoves.Add($"({x},{y}):({x},{y + 1})");
+                            matchedCoords.Remove(new Vector2Int(x, y)); // 현재 블록 좌표는 제외
+                            matchedCoords.Add(new Vector2Int(x, y + 1)); // 스왑된 블록 좌표도 포함
+                            matchList.Add(CalculateBlockMatchWeight(x, y, type, tempBlockArray, new List<Vector2Int>(matchedCoords)));
+                        }
+
+                        if (CheckForMatchAt(BoardManager.Instance, x, y + 1, tempBlockArray, out count, out type, out matchedCoords))
+                        {
+                            matchedCoords.Remove(new Vector2Int(x, y + 1)); // 현재 블록 좌표는 제외
+                            matchedCoords.Add(new Vector2Int(x, y)); // 스왑된 블록 좌표도 포함
+                            matchList.Add(CalculateBlockMatchWeight(x, y + 1, type, tempBlockArray, new List<Vector2Int>(matchedCoords)));
+                        }
+
+                        if (CheckCubeMatchesAround(x, y, tempBlockArray, out matchedCoords))
+                        {
+                            matchedCoords.Remove(new Vector2Int(x, y));
+                            matchedCoords.Add(new Vector2Int(x, y + 1));
+                            matchList.Add(CalculateBlockMatchWeight(x, y, 2, tempBlockArray, new List<Vector2Int>(matchedCoords)));
+                        }
+
+                        if (CheckCubeMatchesAround(x, y + 1, tempBlockArray, out matchedCoords))
+                        {
+                            matchedCoords.Remove(new Vector2Int(x, y + 1));
+                            matchedCoords.Add(new Vector2Int(x, y));
+                            matchList.Add(CalculateBlockMatchWeight(x, y + 1, 2, tempBlockArray, new List<Vector2Int>(matchedCoords)));
                         }
 
                         // 스왑 원상 복구
@@ -155,7 +216,83 @@ namespace KDJ
                 }
             }
 
+            // 가중치를 토대로 최적의 매치 리스트를 선택
+            if (matchList.Count > 0)
+            {
+                var optimalMatch = matchList.OrderBy(m => m.matchWeight).First();
+                result = optimalMatch.matchCoords;
+                return result;
+            }
+
             return result;
+        }
+
+        /// <summary>
+        /// 매치 가능한 블록이 요구재료인지 확인하고 가중치를 계산합니다.
+        /// </summary>
+        /// <param name="x"></param>
+        /// <param name="y"></param>
+        /// <param name="tempBlockArray"></param>
+        /// <param name="checkedPositions"></param>
+        /// <returns></returns>
+        private (List<Vector2Int> matchCoords, int matchWeight) CalculateBlockMatchWeight(int x, int y, int type, Block[,] tempBlockArray, List<Vector2Int> checkedPositions)
+        {
+            (List<Vector2Int> matchCoords, int matchWeight) matchResult = (new List<Vector2Int>(), 0);
+            List<GemType> targetTypes = InGameManager.GetTagetGem();
+
+            if (targetTypes != null && targetTypes.Contains(tempBlockArray[y, x].GemType))
+            {
+                matchResult.matchWeight = 2; // 요구 재료에 있다면 2순위
+            }
+            else
+            {
+                if (type == 1)
+                {
+                    if (checkedPositions.Count > 3)
+                        matchResult.matchWeight = 3; // 특수 블록이 생성 가능한 매치의 경우 3순위
+                    else if (checkedPositions.Count == 3)
+                        matchResult.matchWeight = 5; // 일반 3줄 매치의 경우 최하순위
+                }
+                else
+                {
+                    // 나머지 L/T, 2x2 매치의 경우 항상 특수 블록이 생성 되기에 3순위
+                    matchResult.matchWeight = 3;
+                }
+
+            }
+
+            matchResult.matchCoords = checkedPositions;
+            return matchResult;
+        }
+
+        /// <summary>
+        /// 매치 우선순위에 따른 가중치를 계산합니다.
+        /// 5줄 > L/T > 2x2 > 4줄 > 3줄
+        /// </summary>
+        /// <param name="type">1: 가로, 세로매치, 2: 2x2 매치, 3: L/T매치</param>
+        /// <param name="count"></param>
+        private int WeightCalculate(int type, int count)
+        {
+            int weight = 0;
+
+            if (type == 1)
+            {
+                if (count >= 5) weight = 1;
+                else if (count == 4) weight = 4;
+                else if (count == 3) weight = 5;
+            }
+            else if (type == 2)
+            {
+                // 2x2 매치가 되었다면 항상 3의 가중치 부여
+                weight = 3;
+            }
+            else if (type == 3)
+            {
+                // L/T 매치가 되었다면 항상 2의 가중치 부여
+                weight = 2;
+            }
+
+            return weight;
         }
 
         /// <summary>
@@ -321,13 +458,13 @@ namespace KDJ
                     {
                         if (specialMatchCoords != null && specialMatchCoords.Count > 0)
                         {
-                            int minX = int.MaxValue, maxY = int.MinValue;
+                            int minX = int.MaxValue, minY = int.MaxValue;
                             foreach (var coord in specialMatchCoords)
                             {
                                 if (coord.x < minX) minX = coord.x;
-                                if (coord.y > maxY) maxY = coord.y;
+                                if (coord.y < minY) minY = coord.y;
                             }
-                            specialSpawnPos = new Vector2Int(minX, maxY);
+                            specialSpawnPos = new Vector2Int(minX, minY);
                         }
                         else
                         {
@@ -363,7 +500,7 @@ namespace KDJ
                         damagedObstacles.Add(ice);
                         continue;
                     }
-                    
+
                     Block neighbor = gameBoard.GetBlock(coord.x, coord.y);
                     if (neighbor == null) continue;
 
@@ -393,10 +530,10 @@ namespace KDJ
             Block overlayBlock = gameBoard.GetOverlayBlock(x, y);
 
             if (overlayBlock is ObstacleBlock obstacle && !damagedObstacles.Contains(obstacle))
-                {
-                    obstacle.TakeDamage();
-                    damagedObstacles.Add(obstacle);
-                }
+            {
+                obstacle.TakeDamage();
+                damagedObstacles.Add(obstacle);
+            }
         }
         #endregion
 
@@ -431,6 +568,110 @@ namespace KDJ
             return false;
         }
 
+        private bool CheckCrossPosIsSpecial(Block[,] blockArray, int x, int y, out List<Vector2Int> specialPositions)
+        {
+            var block = blockArray[y, x];
+            if (block == null) { specialPositions = null; return false; }
+
+            specialPositions = new List<Vector2Int>();
+            List<Vector2Int> adjacentPositions = new List<Vector2Int>
+            {
+                new Vector2Int(x + 1, y),
+                new Vector2Int(x - 1, y),
+                new Vector2Int(x, y + 1),
+                new Vector2Int(x, y - 1)
+            };
+
+            specialPositions.Add(new Vector2Int(x, y)); // 현재 블록 위치 추가
+
+            foreach (var pos in adjacentPositions)
+            {
+                if (pos.x < 0 || pos.x >= blockArray.GetLength(1) || pos.y < 0 || pos.y >= blockArray.GetLength(0))
+                    continue;
+
+                var adjacentBlock = blockArray[pos.y, pos.x];
+                if (adjacentBlock != null && adjacentBlock.GemType > GemType.Sugar && adjacentBlock.GemType < GemType.Dust)
+                {
+                    specialPositions.Add(pos);
+                }
+            }
+            return specialPositions.Count > 1;
+        }
+
+        /// <summary>
+        /// 주어진 배열에서 특정 위치의 블록이 매치되는지 확인합니다.
+        /// 매치된 블록의 수를 Count로 반환하고, 매치 유형은 Type, 매치된 좌표들을 matchedCoords로 반환합니다.
+        /// </summary>
+        private bool CheckForMatchAt(BoardManager boardManager, int x, int y, Block[,] blockArray, out int count, out int type, out HashSet<Vector2Int> matchedCoords)
+        {
+            var gameBoard = boardManager.Spawner.GameBoardData;
+            if (!gameBoard.BlockPlate.BlockPlateArray[y, x])
+            {
+                count = 0;
+                type = 0;
+                matchedCoords = null;
+                return false;
+            }
+
+            var block = blockArray[y, x];
+            if (block == null || !block.IsNormal)
+            {
+                count = 0;
+                type = 0;
+                matchedCoords = null;
+                return false;
+            }
+
+            GemType gemType = block.GemType;
+            int height = gameBoard.Height;
+            int width = gameBoard.Width;
+            bool isVMatched = false;
+            bool isHMatched = false;
+            matchedCoords = new HashSet<Vector2Int>();
+            count = 0;
+            type = 0;
+
+            // 가로 매치 확인
+            HashSet<Vector2Int> matchedHCoords = new HashSet<Vector2Int> { new Vector2Int(x, y) };
+            for (int i = x - 1; i >= 0; i--) { var nextBlock = blockArray[y, i]; if (nextBlock != null && nextBlock.IsNormal && nextBlock.GemType == gemType) matchedHCoords.Add(new Vector2Int(i, y)); else break; }
+            for (int i = x + 1; i < width; i++) { var nextBlock = blockArray[y, i]; if (nextBlock != null && nextBlock.IsNormal && nextBlock.GemType == gemType) matchedHCoords.Add(new Vector2Int(i, y)); else break; }
+            if (matchedHCoords.Count >= 3)
+            {
+                isHMatched = true;
+                foreach (var coord in matchedHCoords) matchedCoords.Add(coord);
+            }
+
+            // 세로 매치 확인
+            HashSet<Vector2Int> matchedVCoords = new HashSet<Vector2Int> { new Vector2Int(x, y) };
+            for (int i = y - 1; i >= 0; i--) { var nextBlock = blockArray[i, x]; if (nextBlock != null && nextBlock.IsNormal && nextBlock.GemType == gemType) matchedVCoords.Add(new Vector2Int(x, i)); else break; }
+            for (int i = y + 1; i < height; i++) { var nextBlock = blockArray[i, x]; if (nextBlock != null && nextBlock.IsNormal && nextBlock.GemType == gemType) matchedVCoords.Add(new Vector2Int(x, i)); else break; }
+            if (matchedVCoords.Count >= 3)
+            {
+                isVMatched = true;
+                foreach (var coord in matchedVCoords) matchedCoords.Add(coord);
+            }
+
+            if (!isHMatched && !isVMatched)
+            {
+                count = 0;
+                type = 0;
+                matchedCoords = null;
+                return false;
+            }
+
+            if (isHMatched && isVMatched)
+            {
+                type = 3; // L/T 매치
+            }
+            else
+            {
+                type = 1; // 한줄 매치
+            }
+
+            count = matchedCoords.Count;
+            return true;
+        }
+
         /// <summary>
         /// 지정된 위치에서 2x2 큐브 매치가 완성되었는지 확인합니다.
         /// </summary>
@@ -452,6 +693,61 @@ namespace KDJ
                     {
                         return false;
                     }
+                }
+            }
+            return true;
+        }
+
+        private bool CheckCubeMatchesAround(int x, int y, Block[,] blockArray, out HashSet<Vector2Int> matchedCoords)
+        {
+            // (x,y)가 포함될 수 있는 4개의 2x2 영역을 확인합니다.
+            if (IsCubeMatched(BoardManager.Instance, blockArray, x, y, out matchedCoords)) return true;
+            if (IsCubeMatched(BoardManager.Instance, blockArray, x - 1, y, out matchedCoords)) return true;
+            if (IsCubeMatched(BoardManager.Instance, blockArray, x, y - 1, out matchedCoords)) return true;
+            if (IsCubeMatched(BoardManager.Instance, blockArray, x - 1, y - 1, out matchedCoords)) return true;
+
+            matchedCoords = new HashSet<Vector2Int>(); // No match found
+            return false;
+        }
+
+        /// <summary>
+        /// 지정된 위치에서 2x2 큐브 매치가 완성되었는지 확인합니다.
+        /// 매치된 블록의 수를 Count로 반환하고, 매치 유형은 Type, 매치된 좌표들을 matchedCoords로 반환합니다.
+        /// </summary>
+        private bool IsCubeMatched(BoardManager boardManager, Block[,] blockArray, int x, int y, out HashSet<Vector2Int> matchedCoords)
+        {
+            var gameBoard = boardManager.Spawner.GameBoardData;
+            matchedCoords = new HashSet<Vector2Int>();
+
+            // Check bounds to ensure we don't go out of the array
+            if (x < 0 || y < 0 || x >= gameBoard.Width - 1 || y >= gameBoard.Height - 1)
+            {
+                return false;
+            }
+
+            var startBlock = blockArray[y, x];
+            if (startBlock == null || !startBlock.IsNormal) return false;
+
+            var startGemType = startBlock.GemType;
+
+
+            for (int i = y; i < y + 2; i++)
+            {
+                for (int j = x; j < x + 2; j++)
+                {
+                    var currentBlock = blockArray[i, j];
+                    if (currentBlock == null || !currentBlock.IsNormal || currentBlock.GemType != startGemType)
+                    {
+                        return false;
+                    }
+                }
+            }
+
+            for (int i = y; i < y + 2; i++)
+            {
+                for (int j = x; j < x + 2; j++)
+                {
+                    matchedCoords.Add(new Vector2Int(j, i));
                 }
             }
             return true;
@@ -519,7 +815,7 @@ namespace KDJ
         public int CalculateScore(int score)
         {
             int finalScore = 0;
-            
+
             if (BoardManager.Instance.MatchCombo.CurCombo > 1)
             {
                 finalScore = (int)(score + BoardManager.Instance.MatchCombo.CurCombo * 0.5f * score);

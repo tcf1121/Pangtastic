@@ -11,6 +11,7 @@ GameObject:
   - component: {fileID: 4660908466930613591}
   - component: {fileID: 4293230544628788157}
   - component: {fileID: -1851087931309880765}
+  - component: {fileID: -1435168335750710576}
   m_Layer: 0
   m_Name: Roller_H
   m_TagString: Untagged
@@ -100,3 +101,19 @@ MonoBehaviour:
   _destroySpecial: 1
   _perTileDuration: 0.15
   _trailFadeTime: 0.3
+--- !u!114 &-1435168335750710576
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 426720338226107974}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ee158225ee1e59f4791627785501d950, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  currentShaderType: 4
+  normalStrength: 5
+  normalSmoothing: 1
+  computingNormal: 0
