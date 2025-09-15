@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using TMPro;
@@ -16,6 +17,7 @@ public class EnterInGamePanel : MonoBehaviour
     [SerializeField] Button enterBtn;
     [SerializeField] List<Image> recipeImages;
     [SerializeField] Sprite questionMarkImage;
+    [SerializeField] StringSO stringSO;
 
     private StageSO _curStage;
     private CustomerSO _curCustomer;
@@ -66,7 +68,7 @@ public class EnterInGamePanel : MonoBehaviour
 
     void OnEnable()
     {
-        _level.text = $"{Manager.Stage.CurrentStageIndex + 1}레벨";
+        _level.text = $"{Manager.Stage.CurrentStageIndex + 1}{stringSO.GetText(Manager.Language.GetLanguage())}";
         GetRecipe();
         _rollerNum.text = $"{Manager.User.GetItem().Roller}";
         _donutBoxNum.text = $"{Manager.User.GetItem().DonutBox}";

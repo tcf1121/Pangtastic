@@ -11,14 +11,18 @@ public class LoadingManager : MonoBehaviour
     public static int _nextScene;
     [SerializeField] TMP_Text _loadingText;
     [SerializeField] Image _fillBar;
+    [SerializeField] StringSO _readyOpen;
+    [SerializeField] StringSO _makingDonut;
 
     private void Start()
     {
+        _loadingText.text = _readyOpen.GetText(Manager.Language.GetLanguage());
         StartCoroutine(LoadScene());
     }
 
     public static void LoadScene(int sceneNum)
     {
+
         _nextScene = sceneNum;
         SceneManager.LoadScene(1/*로딩씬*/);
     }
@@ -39,7 +43,7 @@ public class LoadingManager : MonoBehaviour
         }
 
         _fillBar.fillAmount = 0f;
-        _loadingText.text = "도넛 만드는 중";
+        _loadingText.text = _makingDonut.GetText(Manager.Language.GetLanguage());
 
         Scene gameScene = SceneManager.GetSceneByName("Game Scene");
         // 씬의 모든 루트 오브젝트를 순회하며 BoardManager를 찾습니다.

@@ -23,7 +23,7 @@ RenderSettings:
   m_AmbientSkyColor: {r: 0.212, g: 0.227, b: 0.259, a: 1}
   m_AmbientEquatorColor: {r: 0.114, g: 0.125, b: 0.133, a: 1}
   m_AmbientGroundColor: {r: 0.047, g: 0.043, b: 0.035, a: 1}
-  m_AmbientIntensity: 2
+  m_AmbientIntensity: 2.8
   m_AmbientMode: 0
   m_SubtractiveShadowColor: {r: 0.42, g: 0.478, b: 0.627, a: 1}
   m_SkyboxMaterial: {fileID: 10304, guid: 0000000000000000f000000000000000, type: 0}
@@ -153,6 +153,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _loadingText: {fileID: 944524532}
   _fillBar: {fileID: 1460392449}
+  _readyOpen: {fileID: 11400000, guid: 8712500e95e33074b9996972d82e34a2, type: 2}
+  _makingDonut: {fileID: 11400000, guid: d37f7314545180648a7ef8e9b6f03f3a, type: 2}
 --- !u!4 &176660633
 Transform:
   m_ObjectHideFlags: 0
