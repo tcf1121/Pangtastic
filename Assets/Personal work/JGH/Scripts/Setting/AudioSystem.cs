@@ -1,3 +1,4 @@
+using System.Collections;
 using UnityEngine;
 using System.Collections.Generic;
 using UnityEngine.ResourceManagement.AsyncOperations;
@@ -12,6 +13,9 @@ public class AudioClipGroup
 
 public class AudioSystem : Singleton<AudioSystem>
 {
+    
+    private Coroutine fadeCoroutine;
+    
     //public static AudioSystem Instance { get; private set; }
 
     // [Header("BGM 클립들")]
@@ -170,6 +174,103 @@ public class AudioSystem : Singleton<AudioSystem>
         {
             Debug.LogWarning($"SFX 클립 '{clipName}'을 찾을 수 없습니다.");
         }
+        
     }
+    
+    /// <summary>
+    /// BGM 재생 (페이드 인)
+    /// </summary>
+    /// <param name="clipIndex"></param>
+    /// <param name="duration"></param>
+    public void FadeInBGM(int clipIndex, float duration = 1f, float targetVolume = 1f)
+    {
+        if (clipIndex >= 0 && clipIndex < audioClips._bgmClips.Count)
+        {
+            var clip = audioClips._bgmClips[clipIndex].audioClip;
+            if (clip != null && BgmAudioSource != null)
+            {
+                if (fadeCoroutine != null) StopCoroutine(fadeCoroutine);
+
+                BgmAudioSource.clip = clip;
+                BgmAudioSource.volume = 0f;
+                BgmAudioSource.Play();
+
+                fadeCoroutine = StartCoroutine(FadeVolume(BgmAudioSource, targetVolume, duration));
+            }
+        }
+    }
+
+    /// <summary>
+    /// 이름으로 BGM 재생 (페이드 인)
+    /// </summary>
+    public void FadeInBGMByName(string clipName, float duration = 1f, float targetVolume = 1f)
+    {
+        var clipGroup = audioClips._bgmClips.Find(g => g.name == clipName);
+        if (clipGroup != null && clipGroup.audioClip != null && BgmAudioSource != null)
+        {
+            if (fadeCoroutine != null) StopCoroutine(fadeCoroutine);
+
+            BgmAudioSource.clip = clipGroup.audioClip;
+            BgmAudioSource.volume = 0f;
+            BgmAudioSource.Play();
+
+            fadeCoroutine = StartCoroutine(FadeVolume(BgmAudioSource, targetVolume, duration));
+        }
+        else
+        {
+            Debug.LogWarning($"BGM 클립 '{clipName}'을 찾을 수 없습니다.");
+        }
+    }
+
+    /// <summary>
+    /// BGM 페이드 아웃 후 정지
+    /// </summary>
+    public void FadeOutBGM(float duration = 1f)
+    {
+        if (BgmAudioSource != null && BgmAudioSource.isPlaying)
+        {
+            if (fadeCoroutine != null) StopCoroutine(fadeCoroutine);
+
+            fadeCoroutine = StartCoroutine(FadeOutAndStop(BgmAudioSource, duration));
+        }
+    }
+
+    /// <summary>
+    /// 볼륨 점진적 변경
+    /// </summary>
+    private IEnumerator FadeVolume(AudioSource source, float targetVolume, float duration)
+    {
+        float startVolume = source.volume;
+        float time = 0f;
+
+        while (time < duration)
+        {
+            time += Time.deltaTime;
+            source.volume = Mathf.Lerp(startVolume, targetVolume, time / duration);
+            yield return null;
+        }
+
+        source.volume = targetVolume;
+    }
+
+    /// <summary>
+    /// 페이드 아웃 후 정지
+    /// </summary>
+    private IEnumerator FadeOutAndStop(AudioSource source, float duration)
+    {
+        float startVolume = source.volume;
+        float time = 0f;
+
+        while (time < duration)
+        {
+            time += Time.deltaTime;
+            source.volume = Mathf.Lerp(startVolume, 0f, time / duration);
+            yield return null;
+        }
+
+        source.volume = 0f;
+        source.Stop();
+    }
+
 
 }
