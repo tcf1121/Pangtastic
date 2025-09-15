@@ -24,7 +24,7 @@ namespace LHJ
         [Header("오븐")]
         [SerializeField] private GameObject _ovenFx;  
         [SerializeField] private Material _ovenStrokeMat;
-        [SerializeField] private GameObject _ovenLineFx;
+        [SerializeField] private Material _ovenLineMat;
 
         [Header("도넛상자")]
         [SerializeField] private GameObject _donutBurstFx;
@@ -355,7 +355,6 @@ namespace LHJ
             if (gameBoard == null || board == null) yield break;
             BeginEffect();
 
-            // 1) 타겟 타입 추론(스왑 상대 → 인접 일반젬)
             GemType? targetType = null;
             if (board.BlockMover != null)
             {
@@ -385,7 +384,6 @@ namespace LHJ
                 }
             }
 
-            // 2) 오븐 본체 FX
             Vector3 originWorld = GridToWorld(board, gameBoard, origin.x, origin.y);
             GameObject oven = Instantiate(_ovenFx, originWorld, Quaternion.identity, board.transform);
 
@@ -394,23 +392,17 @@ namespace LHJ
             float cellSize = Mathf.Abs(cell10.x - cell00.x);
             float baseScale = 1f;
 
-            SpriteRenderer ovenSR = null;
-            if (oven.TryGetComponent<SpriteRenderer>(out var sr))
+            if (oven.TryGetComponent<SpriteRenderer>(out var ovenSr))
             {
-                ovenSR = sr;
-                sr.sortingOrder = 9999;
-
-                float spriteSize = Mathf.Max(0.0001f, sr.bounds.size.x);
+                ovenSr.sortingOrder = 9999;
+                float spriteSize = Mathf.Max(0.0001f, ovenSr.bounds.size.x);
                 baseScale = cellSize / spriteSize;
                 oven.transform.localScale = Vector3.one * baseScale;
                 oven.transform.DOScale(Vector3.one * baseScale * 1.5f, 0.20f).SetEase(Ease.OutBack);
-
-                float shakeDur = 1.0f;
                 oven.transform.DORotate(new Vector3(0, 0, 15f), 0.083f)
-                    .SetLoops(Mathf.RoundToInt(shakeDur / 0.083f), LoopType.Yoyo);
+                    .SetLoops(Mathf.RoundToInt(1.0f / 0.083f), LoopType.Yoyo);
             }
 
-            // 3) 타겟 좌표 수집(같은 타입 전부 + 자신)
             List<Vector2Int> targets = new List<Vector2Int>(32) { origin };
             if (targetType.HasValue)
             {
@@ -428,72 +420,58 @@ namespace LHJ
             }
             ApplyStroke(gameBoard, targets);
 
-            // 4) 라인(선) 연출 — 길이/정렬 보정 포함
+            float lineWidth = cellSize * 0.30f;
+            List<GameObject> lines = new List<GameObject>(targets.Count);
+
             const float growTime = 0.40f;
             const float stayTime = 0.20f;
-            float thicknessWorld = cellSize * 0.18f;
 
             for (int i = 0; i < targets.Count; i++)
             {
                 var p = targets[i];
-                if (p.x == origin.x && p.y == origin.y) continue;
+                if (p == origin) continue;
 
                 Vector3 to = GridToWorld(board, gameBoard, p.x, p.y);
-                if (_ovenLineFx == null) continue;
 
-                GameObject lineFx = Instantiate(_ovenLineFx, originWorld, Quaternion.identity, board.transform);
-                SpriteRenderer lsr = lineFx.GetComponentInChildren<SpriteRenderer>(true);
-                Transform scaleTarget = (lsr != null) ? lsr.transform : lineFx.transform;
+                GameObject go = new GameObject("OvenTraceLine");
+                go.transform.SetParent(board.transform, false);
 
-                // (정렬) 보드에서 확실히 보이도록 오븐 SR 기준으로 레이어/오더 맞춤
-                if (lsr != null)
+                var lr = go.AddComponent<LineRenderer>();
+                lr.useWorldSpace = true;
+                lr.positionCount = 2;
+                lr.numCapVertices = 4;
+                lr.numCornerVertices = 4;
+                lr.startWidth = lr.endWidth = lineWidth;
+                lr.material = _ovenLineMat;
+                //lr.startColor = new Color(1f, 1f, 1f, 0.3f);
+                //lr.endColor = new Color(1f, 1f, 1f, 0.5f);
+
+
+                var rend = lr.GetComponent<Renderer>();
+                if (rend != null) { rend.sortingLayerName = "Effects"; rend.sortingOrder = 200; }
+
+                lr.SetPosition(0, originWorld);
+                lr.SetPosition(1, originWorld);
+                DOTween.To(
+                    () => 0f,
+                    v => lr.SetPosition(1, Vector3.Lerp(originWorld, to, v)),
+                    1f,
+                    growTime
+                ).SetEase(Ease.OutSine);
+
+                lines.Add(go);
+
+                var tb = gameBoard.GetBlock(p.x, p.y);
+                if (tb != null && tb.BlockInstance != null)
                 {
-                    lineFx.layer = oven.layer;
-                    if (ovenSR != null)
-                    {
-                        lsr.sortingLayerID = ovenSR.sortingLayerID;
-                        lsr.sortingOrder = ovenSR.sortingOrder + 1;
-                    }
-                    else
-                    {
-                        lsr.sortingOrder = 5000;
-                    }
+                    var t = tb.BlockInstance.transform;
+                    var s0 = t.localScale;
+                    t.DOScale(s0 * 1.2f, 0.2f).SetLoops(2, LoopType.Yoyo).SetEase(Ease.OutQuad);
                 }
-
-                // 방향/거리/회전
-                Vector3 dir = (to - originWorld);
-                float dist = dir.magnitude;
-                float ang = Mathf.Atan2(dir.y, dir.x) * Mathf.Rad2Deg;
-
-                Vector3 mid = originWorld + dir * 0.5f;
-                lineFx.transform.position = mid;
-                lineFx.transform.rotation = Quaternion.Euler(0f, 0f, ang);
-
-                // 스프라이트 단위 월드 크기
-                float unitWorldW = 1f, unitWorldH = 1f;
-                if (lsr != null && lsr.sprite != null)
-                {
-                    float lossX = Mathf.Max(0.0001f, lsr.transform.lossyScale.x);
-                    float lossY = Mathf.Max(0.0001f, lsr.transform.lossyScale.y);
-                    unitWorldW = Mathf.Max(0.0001f, lsr.bounds.size.x / lossX);
-                    unitWorldH = Mathf.Max(0.0001f, lsr.bounds.size.y / lossY);
-                }
-                float halfW = unitWorldW * 0.5f;
-                float overshoot = cellSize * 0.10f;          // 셀 10% 여유
-                float targetScaleX = (dist + halfW + overshoot) / unitWorldW;
-                float targetScaleY = thicknessWorld / unitWorldH;
-
-                Vector3 s0 = scaleTarget.localScale;
-                scaleTarget.localScale = new Vector3(0.01f, targetScaleY, s0.z);
-
-                var seq = DOTween.Sequence()
-                    .Append(scaleTarget.DOScaleX(targetScaleX, growTime).SetEase(Ease.OutSine))
-                    .AppendInterval(stayTime);
-
-                if (lsr != null) seq.Append(lsr.DOFade(0f, 0.18f));
-                seq.OnComplete(() => Destroy(lineFx));
             }
+
             yield return new WaitForSeconds(growTime + stayTime);
+            for (int i = 0; i < lines.Count; i++) Destroy(lines[i]);
 
             if (oven != null)
             {
@@ -591,6 +569,9 @@ namespace LHJ
                 var overlay = gameBoard.GetOverlayBlock(c.x, c.y);
                 if (overlay is ObstacleBlock overlayOb && overlay.BlockInstance != null)
                 {
+                    var baseBlock = gameBoard.GetBlock(c.x, c.y);  
+                    if (baseBlock != null && baseBlock.BlockInstance != null)   
+                        RevertStroke(baseBlock.BlockInstance);
                     overlayOb.TakeDamage();
                     continue;
                 }
@@ -600,8 +581,7 @@ namespace LHJ
                 {
                     if (b.GemType < GemType.Milk)
                         InGameManager.AddIngredientSta(b.GemType);
-                    DOTween.Kill(b.BlockInstance.transform, complete: true);
-                    RevertStroke(b.BlockInstance);
+                        RevertStroke(b.BlockInstance);
                     if (b is ObstacleBlock ob)
                     {
                         if (b.IsNormal != true)
@@ -932,7 +912,7 @@ namespace LHJ
                     tag.original = sr.material;
                     tag.hasOriginal = true;
                 }
-                sr.material = _ovenStrokeMat; // 스트로크 적용
+                sr.material = _ovenStrokeMat;
             }
         }
 
