@@ -88,6 +88,12 @@ public class AdSystem : Singleton<AdSystem>
                 action?.Invoke();
                 Debug.Log($"User earned reward: {reward.Amount} {reward.Type}");
             });
+
+            _rewardedInterstitialAd = null;
+        }
+        else
+        {
+            Debug.Log("광고 준비 안 됨!");
         }
     }
 }
