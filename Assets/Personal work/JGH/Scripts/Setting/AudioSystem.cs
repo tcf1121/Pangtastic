@@ -16,11 +16,7 @@ namespace JGH
 // <<<<<<< HEAD
     public class AudioSystem : MonoBehaviour
     {
-
-        private Coroutine fadeCoroutine;
-
         //public static AudioSystem Instance { get; private set; }
-
 
         [SerializeField] private AudioClips audioClips;
 
