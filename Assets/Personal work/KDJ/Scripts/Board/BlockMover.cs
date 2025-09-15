@@ -65,7 +65,7 @@ namespace KDJ
             blockB.BlockInstance.transform.position = startPosA;
         }
 
-        private bool ValidateAndSetPositions(BoardManager boardManager)
+        public bool ValidateAndSetPositions(BoardManager boardManager)
         {
             var gameBoard = boardManager.Spawner.GameBoardData;
             if (gameBoard == null) return false;
