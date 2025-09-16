@@ -160,6 +160,11 @@ public class ResidentController : MonoBehaviour
                     else
                     {
                         ChangeState(ResidentState.Interact);
+                        Vector3 dir = _currentDestination - transform.position;
+                        dir.y = 0f;
+
+                        Quaternion look = Quaternion.LookRotation(dir.normalized, Vector3.up);
+                        transform.rotation = look;
                         yield break;
                     }
                     

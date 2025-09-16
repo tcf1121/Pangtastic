@@ -5,22 +5,33 @@ using UnityEngine;
 [CreateAssetMenu(fileName = "ResidentConfig", menuName = "PangTasticSO/ResidentConfig")]
 public class ResidentConfigSO : ScriptableObject
 {
-    [Header("이동 관련")]
+    [Header("이동 속도")]
     public float MoveSpeed = 1f;
+    [Header("대기상태 시간")]
     public float IdleDuration = 2f;
+    [Header("이동 최대 시간")]
     public float MoveDuration = 20f;
+    [Header("목표지점에서 멈춤 거리")]
     public float StoppingDistance = 0.6f;
+    [Header("선호 지점 갈 확률")]
     [Range(0f, 1f)] public float PreferredWeight = 0.4f;
 
-    [Header("상호작용 시간")]
-    public float TouchCooldown = 0.5f;
+    [Header("상호작용 상태 시간")]
     public float InteractDuration = 10f;
+    [Header("운동 상태 시간")]
     public float WorkoutDuration = 10f;
+    [Header("인사 상태 시간")]
     public float GreetDuration = 1.2f;
+    [Header("이야기 상태 시간")]
     public float TalkDuration = 12f;
+    [Header("터치 상태 시간")]
     public float TouchDuration = 1.2f;
 
-    [Header("주민들끼리 상호작용")]
+    [Header("터치 쿨다운")]
+    public float TouchCooldown = 0.5f;
+
+    [Header("주민들끼리 인사 쿨다운")]
     public float GreetCooldown = 3f;
+    [Header("대화 확률")]
     [Range(0f, 1f)] public float TalkChance = 0.2f;
 }
