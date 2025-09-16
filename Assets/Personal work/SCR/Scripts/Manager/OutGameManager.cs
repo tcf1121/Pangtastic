@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.Localization.Settings;
@@ -13,6 +14,7 @@ public class OutGameManager : MonoBehaviour
     [SerializeField] private Button _stageStartButton;
     [SerializeField] private TMP_Text _stageButtonText;
     [SerializeField] private GameObject _accountLinkingPopup;
+    [SerializeField] private List<Button> _lobbyButtons;
 
     // 테스트용
     [SerializeField] private Button _settingBtn;
@@ -21,8 +23,10 @@ public class OutGameManager : MonoBehaviour
     void Awake()
     {
         instate = this;
-
         _settingBtn.onClick.AddListener(SetStage);
+        foreach (var btn in _lobbyButtons)
+            btn.onClick.AddListener(PushButton);
+
     }
 
     void Start()
@@ -51,5 +55,10 @@ public class OutGameManager : MonoBehaviour
     public void OpenAccountLinkingPopup()
     {
         _accountLinkingPopup.SetActive(true);
+    }
+
+    public void PushButton()
+    {
+        Manager.Audio.PlaySFX("Touch");
     }
 }
