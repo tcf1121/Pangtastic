@@ -6431,23 +6431,23 @@ PrefabInstance:
     - target: {fileID: 8579344169084250576, guid: a6c91df400f25084193b8dfb89592778, type: 3}
       propertyPath: _blockPrefabs.Array.data[6]
       value: 
-      objectReference: {fileID: 7340069888455589625, guid: 4a4202158c531544e8e48795f9ff10f2, type: 3}
+      objectReference: {fileID: 7340069888455589625, guid: ed7dcb7d9e3ef2a4fb7d0f8638ebbd00, type: 3}
     - target: {fileID: 8579344169084250576, guid: a6c91df400f25084193b8dfb89592778, type: 3}
       propertyPath: _blockPrefabs.Array.data[7]
       value: 
-      objectReference: {fileID: 7732103167370757450, guid: abaa78b1519a0f842a756a4b83a6cf6c, type: 3}
+      objectReference: {fileID: 7732103167370757450, guid: 1433dc6dd0e9bb744af8a254f9109847, type: 3}
     - target: {fileID: 8579344169084250576, guid: a6c91df400f25084193b8dfb89592778, type: 3}
       propertyPath: _blockPrefabs.Array.data[8]
       value: 
-      objectReference: {fileID: 426720338226107974, guid: 75a34cb5470028a4eb0d912416fb3f53, type: 3}
+      objectReference: {fileID: 426720338226107974, guid: 316925a292ffadd41bf9abe161515db3, type: 3}
     - target: {fileID: 8579344169084250576, guid: a6c91df400f25084193b8dfb89592778, type: 3}
       propertyPath: _blockPrefabs.Array.data[9]
       value: 
-      objectReference: {fileID: 4815146370632419231, guid: 1590408950eec9a4db41fc407895bd6e, type: 3}
+      objectReference: {fileID: 4815146370632419231, guid: 5fe45ede117168d47b02bd5c74b56477, type: 3}
     - target: {fileID: 8579344169084250576, guid: a6c91df400f25084193b8dfb89592778, type: 3}
       propertyPath: _blockPrefabs.Array.data[10]
       value: 
-      objectReference: {fileID: 8216247949329258546, guid: 110c05336d55fe74f8b9ea56c501a050, type: 3}
+      objectReference: {fileID: 8216247949329258546, guid: 60be342cb12723447b33a31ed115105f, type: 3}
     - target: {fileID: 8579344169084250576, guid: a6c91df400f25084193b8dfb89592778, type: 3}
       propertyPath: _blockPrefabs.Array.data[11]
       value: 
@@ -7098,13 +7098,18 @@ MonoBehaviour:
   _rollerVerticalFx: {fileID: 7732103167370757450, guid: abaa78b1519a0f842a756a4b83a6cf6c, type: 3}
   _rollerTrailFxH: {fileID: 5730566548226682007, guid: f8bb0f551f8d5504cb73e7d279bf608b, type: 3}
   _rollerTrailFxV: {fileID: 5256505135586146949, guid: f25bd44ffdbc1d243aa2055181ad194c, type: 3}
+  _rollerSound: {fileID: 8300000, guid: 080bc2c5c0792e3438408d13a6c9b907, type: 3}
   _milkDropFx: {fileID: 6599639827530494147, guid: 96cf646826781dc4eabb87786cc44ef2, type: 3}
   _milkSplashFx: {fileID: 1533138629959123385, guid: b14e68e3779225640b6c0c71912c8e56, type: 3}
   _milkFlyTime: 1
+  _milkSound: {fileID: 8300000, guid: 35add72301e108f40ad05e8e8790b59a, type: 3}
   _ovenFx: {fileID: 8216247949329258546, guid: 110c05336d55fe74f8b9ea56c501a050, type: 3}
   _ovenStrokeMat: {fileID: 2100000, guid: d957cb65e396860489d6bbbf89ca9c86, type: 2}
   _ovenLineMat: {fileID: 2100000, guid: c75f6c14bec8afa46a1cd568bd90d442, type: 2}
+  _ovenSound: {fileID: 8300000, guid: cbab16e1efccdf844a08ccb78d6e19a3, type: 3}
   _donutBurstFx: {fileID: 9157105887711914197, guid: c4f829cb7dd4b864caf8832ec5b1ee55, type: 3}
+  _donutSound: {fileID: 8300000, guid: 32bb1ed50e839aa4abde039b0a57f609, type: 3}
+  _sfxVolume: 50
 --- !u!114 &486154115
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -14320,6 +14325,58 @@ PrefabInstance:
       propertyPath: _copyBoard
       value: 
       objectReference: {fileID: 0}
+    - target: {fileID: 7085172997495155829, guid: e18bdeefcce5d304e84da3a5664879c5, type: 3}
+      propertyPath: _whiskFxMs
+      value: 1000
+      objectReference: {fileID: 0}
+    - target: {fileID: 7085172997495155829, guid: e18bdeefcce5d304e84da3a5664879c5, type: 3}
+      propertyPath: _scissorHFx
+      value: 
+      objectReference: {fileID: 8948550414140682282, guid: a3035a5245f618048ac6ee5670294929, type: 3}
+    - target: {fileID: 7085172997495155829, guid: e18bdeefcce5d304e84da3a5664879c5, type: 3}
+      propertyPath: _scissorVFx
+      value: 
+      objectReference: {fileID: 451048349482114044, guid: 28c46f7fb83183b4bb398dcabe34fb5a, type: 3}
+    - target: {fileID: 7085172997495155829, guid: e18bdeefcce5d304e84da3a5664879c5, type: 3}
+      propertyPath: _scissorFxMs
+      value: 2000
+      objectReference: {fileID: 0}
+    - target: {fileID: 7085172997495155829, guid: e18bdeefcce5d304e84da3a5664879c5, type: 3}
+      propertyPath: _whiskAreaFx
+      value: 
+      objectReference: {fileID: 1128856061811643905, guid: 97d74f73ddcbe5248af86f984860380a, type: 3}
+    - target: {fileID: 7085172997495155829, guid: e18bdeefcce5d304e84da3a5664879c5, type: 3}
+      propertyPath: _whiskTileFx
+      value: 
+      objectReference: {fileID: 1128856061811643905, guid: 97d74f73ddcbe5248af86f984860380a, type: 3}
+    - target: {fileID: 7085172997495155829, guid: e18bdeefcce5d304e84da3a5664879c5, type: 3}
+      propertyPath: _whiskCenterFx
+      value: 
+      objectReference: {fileID: 8364117961288194918, guid: 506e45c1cad7c3949a3f13ed220f5673, type: 3}
+    - target: {fileID: 7085172997495155829, guid: e18bdeefcce5d304e84da3a5664879c5, type: 3}
+      propertyPath: _whiskRotateMs
+      value: 1000
+      objectReference: {fileID: 0}
+    - target: {fileID: 7085172997495155829, guid: e18bdeefcce5d304e84da3a5664879c5, type: 3}
+      propertyPath: _whiskRotateMat
+      value: 
+      objectReference: {fileID: 2100000, guid: 2835f923f8f7c3744bb69b753cb4d98e, type: 2}
+    - target: {fileID: 7085172997495155829, guid: e18bdeefcce5d304e84da3a5664879c5, type: 3}
+      propertyPath: _whiskAreaFadeMs
+      value: 1000
+      objectReference: {fileID: 0}
+    - target: {fileID: 7085172997495155829, guid: e18bdeefcce5d304e84da3a5664879c5, type: 3}
+      propertyPath: _whiskTileFadeMs
+      value: 1000
+      objectReference: {fileID: 0}
+    - target: {fileID: 7085172997495155829, guid: e18bdeefcce5d304e84da3a5664879c5, type: 3}
+      propertyPath: _scissorFxPrefabH
+      value: 
+      objectReference: {fileID: 8948550414140682282, guid: a3035a5245f618048ac6ee5670294929, type: 3}
+    - target: {fileID: 7085172997495155829, guid: e18bdeefcce5d304e84da3a5664879c5, type: 3}
+      propertyPath: _scissorFxPrefabV
+      value: 
+      objectReference: {fileID: 451048349482114044, guid: 28c46f7fb83183b4bb398dcabe34fb5a, type: 3}
     - target: {fileID: 7085172997495155829, guid: e18bdeefcce5d304e84da3a5664879c5, type: 3}
       propertyPath: _specialPrefabs.Array.size
       value: 5
