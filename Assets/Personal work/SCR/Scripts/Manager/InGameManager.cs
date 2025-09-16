@@ -9,18 +9,18 @@ using UnityEngine.UI;
 
 public class InGameManager : MonoBehaviour
 {
-    [SerializeField] private PrefabList blockList;
-    [SerializeField] private List<IngredientSO> ingredientSOs;
-    [SerializeField] OrderStateController orderStateController;
-    [SerializeField] CustomerFlowController customerFlowController;
-    [SerializeField] GameObject clearUI;
-    [SerializeField] GameObject continueUI;
-    [SerializeField] GameObject retryUI;
-    [SerializeField] TMP_Text WinCoin;
-    [SerializeField] TMP_Text useCoinText;
-    [SerializeField] Button useCoinContinueButton;
-    [SerializeField] Button watchAddContinueButton;
-    [SerializeField] private List<Button> _gameButtons;
+    [SerializeField] private PrefabList _blockList;
+    [SerializeField] private List<IngredientSO> _ingredientSOs;
+    [SerializeField] OrderStateController _orderStateController;
+    [SerializeField] CustomerFlowController _customerFlowController;
+    [SerializeField] GameObject _clearUI;
+    [SerializeField] GameObject _continueUI;
+    [SerializeField] GameObject _retryUI;
+    [SerializeField] TMP_Text _winCoinText;
+    [SerializeField] TMP_Text _useCoinText;
+    [SerializeField] Button _useCoinContinueButton;
+    [SerializeField] Button _watchAddContinueButton;
+    [SerializeField] List<Button> _gameButtons;
 
     private static InGameManager instate;
     private int _score;
@@ -35,12 +35,11 @@ public class InGameManager : MonoBehaviour
         UserInfoUI.Instance.SetActive(false);
         Manager.User.UseHeart();
         instate = this;
-        useCoinText.text = $"{_useCoin}";
-        customerFlowController.OnStageCleared += StageClear;
-        customerFlowController.OnStageFailed += StageFail;
+        _customerFlowController.OnStageCleared += StageClear;
+        _customerFlowController.OnStageFailed += StageFail;
         _finishAD += ContinueGame;
-        useCoinContinueButton.onClick.AddListener(GoldContinueGame);
-        watchAddContinueButton.onClick.AddListener(AdContinueGame);
+        _useCoinContinueButton.onClick.AddListener(GoldContinueGame);
+        _watchAddContinueButton.onClick.AddListener(AdContinueGame);
         _score = 0;
         _coin = 0;
         Manager.Audio.PlayPuzzleBGM();
@@ -116,7 +115,7 @@ public class InGameManager : MonoBehaviour
 
     public static GameObject GetPrefab(GemType gemType)
     {
-        return instate.blockList.GetPrefab(gemType);
+        return instate._blockList.GetPrefab(gemType);
     }
 
     public static int GetCoin()
@@ -129,13 +128,13 @@ public class InGameManager : MonoBehaviour
     {
         if (instate == null) instate = GameObject.Find("InGameManager").GetComponent<InGameManager>();
         Debug.Log(ingredient);
-        instate.orderStateController.AddIngredientSta(instate.ingredientSOs[(int)ingredient]);
+        instate._orderStateController.AddIngredientSta(instate._ingredientSOs[(int)ingredient]);
     }
 
     public static void SpawnCustomer()
     {
         if (instate == null) instate = GameObject.Find("InGameManager").GetComponent<InGameManager>();
-        instate.customerFlowController.SpawnCustomer();
+        instate._customerFlowController.SpawnCustomer();
     }
 
     public static void StageClear()
@@ -144,8 +143,8 @@ public class InGameManager : MonoBehaviour
         Manager.Audio.PlaySFX("Stage_Clear");
         AddCoin(GetScore() / 10);
         KDJ.BoardManager.SetTouch(false);
-        instate.WinCoin.text = $"{GetCoin()}";
-        instate.clearUI.SetActive(true);
+        instate._winCoinText.text = $"{GetCoin()}";
+        instate._clearUI.SetActive(true);
     }
 
     public static void StageFail()
@@ -156,9 +155,9 @@ public class InGameManager : MonoBehaviour
         if (instate._firstfail)
         {
             instate._firstfail = false;
-            instate.continueUI.SetActive(true);
+            instate._continueUI.SetActive(true);
         }
-        else instate.retryUI.SetActive(true);
+        else instate._retryUI.SetActive(true);
     }
 
     private void AdContinueGame()
@@ -177,8 +176,8 @@ public class InGameManager : MonoBehaviour
 
     private void ContinueGame()
     {
-        orderStateController.AddPatience(50f);
-        continueUI.SetActive(false);
+        _orderStateController.AddPatience(50f);
+        _continueUI.SetActive(false);
         KDJ.BoardManager.SetTouch(true);
     }
 
@@ -203,17 +202,13 @@ public class InGameManager : MonoBehaviour
 
     public static List<GemType> GetTagetGem()
     {
-        List<GemType> gemTypes = instate.orderStateController.GetRequiredGem();
+        List<GemType> gemTypes = instate._orderStateController.GetRequiredGem();
 
         return gemTypes;
     }
 
-    public void ClearGame()
+    public static void ClearGame()
     {
-        Manager.User.AddCoin(GetCoin());
-        Manager.User.AddStar(1);
-        Manager.User.AddHeart();
-
         SceneManager.LoadScene(2/*로비씬*/);
     }
 
@@ -225,10 +220,5 @@ public class InGameManager : MonoBehaviour
     public void PushButton()
     {
         Manager.Audio.PlaySFX("Touch");
-    }
-
-    public void LockButton()
-    {
-        Manager.Audio.PlaySFX("Item_fail");
     }
 }

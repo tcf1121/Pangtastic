@@ -7,7 +7,7 @@ public class RoomManager : MonoBehaviour
 {
     [SerializeField] private List<Place> _places;
     [SerializeField] private MenuUI menuUI;
-    private MissonPlace curPlace;
+    private MissionPlace curPlace;
     [SerializeField] MissionListSO missionList;
     [SerializeField] private MissionBtn missonBtn;
     Action clearPlace;
@@ -25,7 +25,7 @@ public class RoomManager : MonoBehaviour
 
     public void ClearPlace(Action openPopup = null)
     {
-        if (curPlace < MissonPlace.Greengrocery)
+        if (curPlace < MissionPlace.Greengrocery)
         {
             curPlace++;
             Manager.User.SetCurPlace(curPlace);
@@ -56,9 +56,6 @@ public class RoomManager : MonoBehaviour
             _places[(int)curPlace].MissionClear(index, openPopup);
             missonBtn.Refresh();
         }
-
-
-
     }
 
     public int GetMaxMission()
@@ -88,7 +85,7 @@ public class RoomManager : MonoBehaviour
     }
 }
 
-public enum MissonPlace
+public enum MissionPlace
 {
     Donut,
     MiniCafe,

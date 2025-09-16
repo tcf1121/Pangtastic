@@ -23,6 +23,7 @@ namespace SCR
         {
             Application.targetFrameRate = 60;
             _logoutBtn.onClick.AddListener(Logout);
+            _enterBtn.onClick.AddListener(PushButton);
             _enterBtn.onClick.AddListener(CheckBeforeAsync);
             _googlePlayBtn.onClick.AddListener(Manager.GPGS.AuthenticateUser);
             _guestBtn.onClick.AddListener(LoginAsGuest);
@@ -106,6 +107,11 @@ namespace SCR
 
             });
 
+        }
+
+        public void PushButton()
+        {
+            Manager.Audio.PlaySFX("Touch");
         }
     }
 }
