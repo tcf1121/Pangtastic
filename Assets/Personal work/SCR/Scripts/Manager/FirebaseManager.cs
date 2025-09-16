@@ -25,17 +25,27 @@ public class FirebaseManager : Singleton<FirebaseManager>
     {
         if (pause)
         {
-            bool isGuest = user.IsAnonymous;
-            if (!isGuest)
-                await UploadUserData();
+            if (IsOnline())
+            {
+                bool isGuest = user.IsAnonymous;
+                if (!isGuest)
+                    await UploadUserData();
+                else
+                    await UploadGuestData();
+            }
         }
     }
 #if UNITY_EDITOR
     private async void OnApplicationQuit()
     {
-        bool isGuest = user.IsAnonymous;
-        if (!isGuest)
-            await UploadUserData();
+        if (IsOnline())
+        {
+            bool isGuest = user.IsAnonymous;
+            if (!isGuest)
+                await UploadUserData();
+            else
+                await UploadGuestData();
+        }
     }
 
 #endif
@@ -159,6 +169,24 @@ public class FirebaseManager : Singleton<FirebaseManager>
         string json = JsonConvert.SerializeObject(Manager.User.GetCurrentUserData());
 
         var task = dbRef.Child("users").Child(GetProviderIdentifier()).SetRawJsonValueAsync(json);
+        await task;
+
+        if (task.Exception != null)
+        {
+            Debug.LogError("Realtime Database 업로드 실패: " + task.Exception);
+        }
+        else
+        {
+            Debug.Log("Realtime Database 업로드 성공");
+        }
+    }
+
+    public async Task UploadGuestData()
+    {
+        Manager.User.SetLeaveTime(DateTime.Now.ToString("O"));
+        string json = JsonConvert.SerializeObject(Manager.User.GetCurrentUserData());
+
+        var task = dbRef.Child("guests").Child(GetProviderIdentifier()).SetRawJsonValueAsync(json);
         await task;
 
         if (task.Exception != null)

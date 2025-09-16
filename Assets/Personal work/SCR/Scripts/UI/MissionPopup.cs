@@ -64,6 +64,7 @@ public class MissionPopup : MonoBehaviour
 
     public void ClearMission(int index)
     {
+        Manager.Audio.PlaySFX("Mission_Clear");
         gameObject.transform.parent.gameObject.SetActive(false);
         ClearMissionList();
         _roomManager.ClearMission(index, OnPopup);

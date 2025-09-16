@@ -74,7 +74,7 @@ public class MissionImporter
         {
             Debug.Log("기존 미션SO 갱신: ");
         }
-        mission.Place = (MissonPlace)Enum.Parse(typeof(MissonPlace), place);
+        mission.Place = (MissionPlace)Enum.Parse(typeof(MissionPlace), place);
         mission.Mission = new();
         for (int i = startRow; i < lines.Length; i++) // 데이터 행부터 끝까지 순회
         {
