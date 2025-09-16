@@ -19,7 +19,7 @@ public class AudioClips : ScriptableObject
         return Puzzle;
     }
 
-    public AudioClip LobbyBGM(MissonPlace place = MissonPlace.Donut)
+    public AudioClip LobbyBGM(MissionPlace place = MissionPlace.Donut)
     {
         return Lobby[(int)place];
 

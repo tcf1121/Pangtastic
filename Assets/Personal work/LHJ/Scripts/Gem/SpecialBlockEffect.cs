@@ -13,7 +13,7 @@ namespace LHJ
         [Header("밀대")]
         [SerializeField] private GameObject _rollerHorizontalFx;
         [SerializeField] private GameObject _rollerVerticalFx;
-        [SerializeField] private GameObject _rollerTrailFxH;  // 가로 잔상 프리팹
+        [SerializeField] private GameObject _rollerTrailFxH;
         [SerializeField] private GameObject _rollerTrailFxV;
 
         [Header("우유")]
@@ -108,7 +108,7 @@ namespace LHJ
         {
             if (gameBoard == null || board == null) yield break;
             BeginEffect();
-
+            Manager.Audio.PlaySFX("Roller_Use");
             GameObject fxPrefab = isHorizontal ? _rollerHorizontalFx : _rollerVerticalFx;
             GameObject fx = Instantiate(fxPrefab, board.transform);
 
@@ -240,6 +240,7 @@ namespace LHJ
         {
             if (gameBoard == null || board == null) yield break;
             BeginEffect();
+            Manager.Audio.PlaySFX("Milk_Use");
             List<Vector2Int> targets = GetMilkTargets(gameBoard, count);
             if (targets.Count == 0) { EndEffect(); yield break; }
 
@@ -275,6 +276,7 @@ namespace LHJ
                         {
                             var splash = Instantiate(_milkSplashFx, targetWorld, Quaternion.identity, board.transform);
                             Destroy(splash, 0.5f);
+                            Manager.Audio.PlaySFX("Milk_Bubble");
                         }
 
                         var one = new List<Vector2Int>(1) { tg };
@@ -354,7 +356,7 @@ namespace LHJ
         {
             if (gameBoard == null || board == null) yield break;
             BeginEffect();
-
+            Manager.Audio.PlaySFX("Oven_Shake");
             GemType? targetType = null;
             if (board.BlockMover != null)
             {
@@ -418,6 +420,8 @@ namespace LHJ
                         }
                     }
             }
+            yield return new WaitForSeconds(1f);
+            Manager.Audio.PlaySFX("Oven_Use");
             ApplyStroke(gameBoard, targets);
 
             float lineWidth = cellSize * 0.30f;
@@ -491,7 +495,7 @@ namespace LHJ
         {
             if (gameBoard == null || board == null) yield break;
             BeginEffect();
-
+            Manager.Audio.PlaySFX("DonutBox_Use");
             Vector3 originWorld = GridToWorld(board, gameBoard, origin.x, origin.y);
             GameObject fx = null;
             if (_donutBurstFx != null)

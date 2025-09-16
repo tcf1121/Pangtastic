@@ -10,7 +10,7 @@ public class AudioManager : Singleton<AudioManager>
     [SerializeField] private AudioClips audioClips;
     [HideInInspector] public AudioSource BgmAudioSource;
     [HideInInspector] public AudioSource SfxAudioSource;
-    private MissonPlace curPlace;
+    private MissionPlace curPlace;
 
     protected override void Awake()
     {
@@ -50,7 +50,7 @@ public class AudioManager : Singleton<AudioManager>
         }
     }
 
-    public void SetLobbyPlace(MissonPlace place = MissonPlace.Donut)
+    public void SetLobbyPlace(MissionPlace place = MissionPlace.Donut)
     {
         curPlace = place;
     }
@@ -58,6 +58,16 @@ public class AudioManager : Singleton<AudioManager>
     public void PlayLobbyBGM()
     {
         var clip = audioClips.LobbyBGM(curPlace);
+        if (clip != null)
+        {
+            BgmAudioSource.clip = clip;
+            BgmAudioSource.Play();
+        }
+    }
+
+    public void PlayPlaceBGM(MissionPlace place)
+    {
+        var clip = audioClips.LobbyBGM(place);
         if (clip != null)
         {
             BgmAudioSource.clip = clip;
@@ -73,6 +83,12 @@ public class AudioManager : Singleton<AudioManager>
             BgmAudioSource.clip = clip;
             BgmAudioSource.Play();
         }
+    }
+
+    public string GetBGMName(int index)
+    {
+        Debug.Log(audioClips.Lobby[index].name);
+        return audioClips.Lobby[index].name;
     }
 
 
