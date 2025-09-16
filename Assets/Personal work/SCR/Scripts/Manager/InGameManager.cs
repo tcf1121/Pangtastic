@@ -20,6 +20,7 @@ public class InGameManager : MonoBehaviour
     [SerializeField] TMP_Text useCoinText;
     [SerializeField] Button useCoinContinueButton;
     [SerializeField] Button watchAddContinueButton;
+    [SerializeField] private List<Button> _gameButtons;
 
     private static InGameManager instate;
     private int _score;
@@ -43,6 +44,8 @@ public class InGameManager : MonoBehaviour
         _score = 0;
         _coin = 0;
         Manager.Audio.PlayPuzzleBGM();
+        foreach (var btn in _gameButtons)
+            btn.onClick.AddListener(PushButton);
     }
 
     public static void SetPuzzleSize(int xPos, int yPos, int xSize, int ySize)
@@ -219,4 +222,13 @@ public class InGameManager : MonoBehaviour
         SceneManager.LoadScene(2/*로비씬*/);
     }
 
+    public void PushButton()
+    {
+        Manager.Audio.PlaySFX("Touch");
+    }
+
+    public void LockButton()
+    {
+        Manager.Audio.PlaySFX("Item_fail");
+    }
 }
