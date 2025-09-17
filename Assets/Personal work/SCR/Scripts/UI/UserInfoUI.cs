@@ -85,24 +85,38 @@ public class UserInfoUI : MonoBehaviour
                 lastTime = DateTime.Parse(Manager.User.GetLeaveTime());
 
             TimeSpan diff = DateTime.Now - lastTime;
-            int lastHeartTime = Manager.User.GetHeartTime() - (int)diff.TotalSeconds;
+            int elapsed = (int)diff.TotalSeconds;
+
+            int lastHeartTime = Manager.User.GetHeartTime(); // 나갈 당시 남은 시간
+            int respawn = (int)_respwanTime; // 1800
             int recoveredHearts = 0;
-            if (lastHeartTime <= 0)
+
+            // 지난 시간으로 회복 계산
+            if (elapsed >= lastHeartTime)
             {
-                recoveredHearts = 1;
+                int totalPassed = elapsed - lastHeartTime;
+                recoveredHearts = 1 + (totalPassed / respawn); // 첫 회복 포함
 
-                int extraTime = -lastHeartTime;
-                recoveredHearts += extraTime / (int)_respwanTime;
-
-                lastHeartTime = (int)_respwanTime - (extraTime % (int)_respwanTime);
+                lastHeartTime = respawn - (totalPassed % respawn);
+                if (lastHeartTime == respawn) // 딱 맞아떨어진 경우
+                    lastHeartTime = 0;
             }
-            Instance._heartCor = StartCoroutine(Manager.Timer.StartTimer(Instance._heartCor,
+            else
+            {
+                lastHeartTime -= elapsed;
+            }
+
+            Instance._heartCor = StartCoroutine(
+                Manager.Timer.StartTimer(Instance._heartCor,
                 lastHeartTime, Instance._heartTimer, Instance._OnTimerFinished));
+
+
             while (Manager.User.GetHeart() < 5 && recoveredHearts > 0)
             {
-                recoveredHearts--;
                 Manager.User.AddHeart();
+                recoveredHearts--;
             }
+
         }
     }
 

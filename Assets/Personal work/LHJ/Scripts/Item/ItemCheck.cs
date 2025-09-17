@@ -4,7 +4,6 @@ using KDJ.States;
 using SCR;
 using System.Collections;
 using System.Collections.Generic;
-using UnityEditor.Localization.Plugins.XLIFF.V12;
 using UnityEngine;
 
 namespace LHJ
@@ -21,7 +20,7 @@ namespace LHJ
         [Header("거품기")]
         [SerializeField] private GameObject _whiskCenterFx;
         [SerializeField] private GameObject _whiskAreaFx;
-        [SerializeField] private float _whiskRotateMs;  
+        [SerializeField] private float _whiskRotateMs;
         [SerializeField] private float _whiskAreaFadeMs;
 
         [SerializeField] private Transform _boardRoot;
@@ -374,7 +373,7 @@ namespace LHJ
                     float cellW = Vector3.Distance(GridToWorld(pos.x + 1, pos.y), centerWorld);
                     float cellH = Vector3.Distance(GridToWorld(pos.x, pos.y + 1), centerWorld);
 
-                    Vector2 spriteSize = areaSr.sprite.bounds.size; 
+                    Vector2 spriteSize = areaSr.sprite.bounds.size;
                     float sx = (3f * cellW) / Mathf.Max(0.0001f, spriteSize.x);
                     float sy = (3f * cellH) / Mathf.Max(0.0001f, spriteSize.y);
                     areaFx.transform.localScale = new Vector3(sx, sy, 1f);

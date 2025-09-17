@@ -21,7 +21,7 @@ public class EncryptFileEditors
         if (!string.IsNullOrEmpty(folder))
             TextEncrypt(folder);
     }
-    
+
 
     private static void TextEncrypt(string outputFolder)
     {
@@ -33,7 +33,7 @@ public class EncryptFileEditors
         string outputPath = Path.Combine(outputFolder, $"{fileName}.bytes");
 
         // CryptoManager 사용
-        CryptoUtility.TextEncryptFile(inputPath, outputPath);
+        //CryptoUtility.TextEncryptFile(inputPath, outputPath);
         // Debug.Log($"암호화 완료 → {outputPath}");
         AssetDatabase.Refresh();
     }
@@ -64,7 +64,7 @@ public class EncryptFileEditors
         string fileName = Path.GetFileNameWithoutExtension(inputPath);
         string outputPath = Path.Combine(outputFolder, $"{fileName}.bytes");
 
-        byte[] encrypted = CryptoUtility.BinaryEncrypt(inputPath, outputPath);
+        //byte[] encrypted = CryptoUtility.BinaryEncrypt(inputPath, outputPath);
         // Debug.Log($"바이너리 암호화 완료 → {encrypted}");
         AssetDatabase.Refresh();
     }
