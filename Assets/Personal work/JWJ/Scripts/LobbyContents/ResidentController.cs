@@ -2,9 +2,7 @@ using System.Collections;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
 using UnityEngine.AI;
-using UnityEngine.Purchasing;
 using UnityEngine.ResourceManagement.AsyncOperations;
-using UnityEngine.UI;
 
 public enum ResidentState
 {
@@ -20,10 +18,8 @@ public enum ResidentState
 public class ResidentController : MonoBehaviour
 {
     [SerializeField] private ResidentSO _resident;
-    [SerializeField] private ResidentConfigSO _config;
-
-    [SerializeField] private Transform[] _allDestinations;
-    [SerializeField] private int _favoriteDestinationIndex;
+    private ResidentConfigSO _config;
+    private ResidentManager _manager;
 
     private NavMeshAgent _agent;
     private Animator _animator;
@@ -51,12 +47,11 @@ public class ResidentController : MonoBehaviour
         _agent = GetComponent<NavMeshAgent>();
         _animator = GetComponentInChildren<Animator>();
         _stateBubble = GetComponentInChildren<StateBubble>();
-
+        _manager = FindObjectOfType<ResidentManager>();
         _agent.autoBraking = true;
         _stateBubble.gameObject.SetActive(false);
 
-        _favoriteDestination = _allDestinations[_favoriteDestinationIndex];
-
+        _manager.RegisterResident(this);
 
         AsyncOperationHandle<ResidentConfigSO> handle = Addressables.LoadAssetAsync<ResidentConfigSO>("ResidentConfigSO");
         handle.Completed += ResidentConfigLoaded;
@@ -77,11 +72,6 @@ public class ResidentController : MonoBehaviour
         {
             Debug.LogError($"주민 세팅 로드 실패:{handle.OperationException}");
         }
-    }
-
-    private void Start()
-    {
-        //ChangeState(ResidentState.Idle);
     }
 
     private void ChangeState(ResidentState state)
@@ -128,7 +118,11 @@ public class ResidentController : MonoBehaviour
 
         SetMove(0f, true);
         yield return new WaitForSeconds(_config.IdleDuration);
-        PickNextDestination();
+        Transform nextDestination = _manager.PickNextDestination(_resident, _config);
+        _currentDestination = nextDestination.position;
+
+        DestinationPoint destination = nextDestination.GetComponent<DestinationPoint>();
+        _currentDestinationType = destination.Type;
         ChangeState(ResidentState.Move);
     }
 
@@ -138,6 +132,7 @@ public class ResidentController : MonoBehaviour
 
         SetMove(_config.MoveSpeed, false);
         _agent.SetDestination(_currentDestination);
+        Debug.Log($"{_resident.ResidentName} 이 {_currentDestination}로 이동");
 
         float timer = 0;
         while (true)
@@ -265,36 +260,6 @@ public class ResidentController : MonoBehaviour
             StopCoroutine(_curCo);
             _curCo = null;
         }
-    }
-
-    private void PickNextDestination()
-    {
-        bool pickPreferred = Random.value <= _config.PreferredWeight;
-        Transform target;
-
-        if (pickPreferred)
-        {
-            target = _allDestinations[_favoriteDestinationIndex];
-        }
-        else
-        {
-            int idx = Random.Range(0, _allDestinations.Length);
-            target = _allDestinations[idx];
-        }
-
-        _currentDestination = target.position;
-
-        DestinationPoint dp = target.GetComponent<DestinationPoint>();
-        if (dp != null)
-        {
-            _currentDestinationType = dp.Type;
-        }
-        else
-        {
-            Debug.LogError($"장소타입이 없음: {target.name}");
-        }
-
-        Debug.Log($"{_resident.ResidentName} 목표 지점: {target.name}, 타입: {_currentDestinationType}");
     }
 
     private void SetMove(float speed, bool stop)
