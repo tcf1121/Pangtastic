@@ -30,6 +30,7 @@ namespace KDJ
 
         private IEnumerator BrokenAnimation(int x, int y)
         {
+            Manager.Audio.PlaySFX("DonutBag");
             BoardManager.Instance.IsWaitingForAnimation = true;
             GameObject blockObject = BoardManager.Instance.Spawner.GameBoardData.GetBlock(x, y).BlockInstance;
             float timer = 0f;

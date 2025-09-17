@@ -101,6 +101,7 @@ namespace LHJ
         private void UseCell(Vector2Int pos, ItemType type)
         {
             int destroyed = 0;
+            BoardManager.Instance.HintManager.StopHintTimer();
             switch (type)
             {
                 case ItemType.Scissors:

@@ -315,29 +315,6 @@ namespace KDJ
                             }
                         }
 
-
-                        if (block.GemType > GemType.Oven)
-                        {
-                            // 방해 블록일때 설정
-                            block.IsObstacle = true;
-                            block.IsNormal = false;
-
-                            if (block.GemType == GemType.Coin || block.GemType == GemType.GiftBox)
-                            {
-                                block.CanMove = true;
-                            }
-                            else
-                            {
-                                block.CanMove = false;
-                            }
-                        }
-                        else if (block.GemType < GemType.Dust && block.GemType > GemType.Sugar)
-                        {
-                            // 특수 블록일때 설정
-                            block.IsObstacle = false;
-                            block.IsNormal = false;
-                        }
-
                         // 블록 마스크 그리기
                         if (_blockMaskPrefab != null)
                         {

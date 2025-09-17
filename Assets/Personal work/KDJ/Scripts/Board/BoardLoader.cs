@@ -170,7 +170,7 @@ namespace KDJ
                     if (boardData.BlockArray[y, x].GemType > GemType.Sugar)
                         boardData.BlockArray[y, x].IsNormal = false;
 
-                    if (boardData.BlockArray[y, x].GemType == GemType.Egg || boardData.BlockArray[y, x].GemType == GemType.Coin)
+                    if (boardData.BlockArray[y, x].GemType == GemType.Egg || boardData.BlockArray[y, x].GemType == GemType.Coin || boardData.BlockArray[y, x].GemType == GemType.GiftBox)
                     {
                         // 코인과 알은 이동은 가능
                         boardData.BlockArray[y, x].IsObstacle = true;

@@ -5,8 +5,6 @@ using UnityEngine.UI;
 
 public class MatchCombo : MonoBehaviour
 {
-    [SerializeField] private TMP_Text _comboCount;
-    [SerializeField] private Slider _comboSlider;
     [SerializeField] private ComboNum _comboNum;
 
     public int CurCombo { get; private set; } = 0;
@@ -43,10 +41,5 @@ public class MatchCombo : MonoBehaviour
     {
         CurCombo = 0;
         _comboNum.SetCombo(CurCombo);
-    }
-
-    private void SetSliderValue()
-    {
-        _comboSlider.value = _timer / 3f;
     }
 }
