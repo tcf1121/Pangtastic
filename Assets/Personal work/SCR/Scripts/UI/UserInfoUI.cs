@@ -16,6 +16,7 @@ public class UserInfoUI : MonoBehaviour
     [SerializeField] GameObject _ui;
     Action<float> _heartTimer;
     Action _OnTimerFinished;
+    Action _OnInfinityFinished;
     Coroutine _heartCor;
 
     void Awake()
@@ -39,12 +40,14 @@ public class UserInfoUI : MonoBehaviour
         Manager.User.OnChangedStar += Instance.SetStar;
         Manager.User.OnChangedProfile += Instance.SetProfile;
         Manager.User.OnUseHeart += Instance.StartHeartTimer;
+        Manager.User.OnInfinityHeart += Instance.StartInfinityHeart;
         Debug.Log(Manager.User.GetCurrentUserData());
         _coin.text = $"{Manager.User.GetCoin()}";
         _heart.text = $"{Manager.User.GetHeart()}";
         _star.text = $"{Manager.User.GetStar()}";
         _heartTimer += Instance.HeartTimer;
         _OnTimerFinished += Instance.FinishHeartTimeCor;
+        _OnInfinityFinished += Instance.FinishInfinity;
         if (Manager.User.GetHeart() == 5)
             _heartTime.text = _heartSO.GetText(Manager.Language.GetLanguage());
         else
@@ -58,7 +61,22 @@ public class UserInfoUI : MonoBehaviour
 
     public void SetHeartTime()
     {
-        if (Manager.User.GetHeart() == 5)
+        if (Manager.User.GetHeart() == 6)
+        {
+            DateTime lastTime = DateTime.MinValue;
+            if (!string.IsNullOrEmpty(Manager.User.GetLeaveTime()))
+                lastTime = DateTime.Parse(Manager.User.GetLeaveTime());
+
+            TimeSpan diff = DateTime.Now - lastTime;
+            int TotalSeconds = Manager.User.GetHeartTime() - (int)diff.TotalSeconds;
+            if (TotalSeconds <= 0) Manager.User.InfinityHeart(0, true);
+            else
+            {
+                Instance._heartCor = StartCoroutine(Manager.Timer.StartTimer(Instance._heartCor,
+             TotalSeconds, Instance._heartTimer, Instance._OnInfinityFinished));
+            }
+        }
+        else if (Manager.User.GetHeart() == 5)
             Manager.User.SetHeartTime(0);
         else
         {
@@ -67,29 +85,37 @@ public class UserInfoUI : MonoBehaviour
                 lastTime = DateTime.Parse(Manager.User.GetLeaveTime());
 
             TimeSpan diff = DateTime.Now - lastTime;
-            int TotalSeconds = (int)(_respwanTime - Manager.User.GetHeartTime()) + (int)diff.TotalSeconds;
-            int recoveredHearts = TotalSeconds / (int)_respwanTime;
+            int lastHeartTime = Manager.User.GetHeartTime() - (int)diff.TotalSeconds;
+            int recoveredHearts = 0;
+            if (lastHeartTime <= 0)
+            {
+                recoveredHearts = 1;
+
+                int extraTime = -lastHeartTime;
+                recoveredHearts += extraTime / (int)_respwanTime;
+
+                lastHeartTime = (int)_respwanTime - (extraTime % (int)_respwanTime);
+            }
+            Instance._heartCor = StartCoroutine(Manager.Timer.StartTimer(Instance._heartCor,
+                lastHeartTime, Instance._heartTimer, Instance._OnTimerFinished));
             while (Manager.User.GetHeart() < 5 && recoveredHearts > 0)
             {
                 recoveredHearts--;
                 Manager.User.AddHeart();
             }
-            if (Manager.User.GetHeart() < 5)
-            {
-                float leftTime = TotalSeconds % (int)_respwanTime;
-                Instance._heartCor = StartCoroutine(Manager.Timer.StartTimer(Instance._heartCor,
-                _respwanTime, leftTime, Instance._heartTimer, Instance._OnTimerFinished));
-            }
-
         }
     }
 
     private void FinishHeartTimeCor()
     {
         if (Instance == null) Instance = FindObjectOfType<UserInfoUI>();
+        if (Instance._heartCor != null)
+        {
+            StopCoroutine(Instance._heartCor);
+            Instance._heartCor = null;
+            SetHeartTimer(0);
+        }
         Manager.User.AddHeart();
-        if (Manager.User.GetHeart() < 5)
-            StartHeartTimer();
     }
 
 
@@ -99,13 +125,43 @@ public class UserInfoUI : MonoBehaviour
         if (Instance._heartCor == null)
         {
             Instance._heartCor = StartCoroutine(Manager.Timer.StartTimer(Instance._heartCor,
-             _respwanTime, 0, Instance._heartTimer, Instance._OnTimerFinished));
+             _respwanTime, Instance._heartTimer, Instance._OnTimerFinished));
         }
+    }
+
+    private void StartInfinityHeart(float hour)
+    {
+        float fullTime = hour * 3600;
+        if (Instance == null) Instance = FindObjectOfType<UserInfoUI>();
+
+        if (Instance._heartCor != null)
+        {
+            StopCoroutine(Instance._heartCor);
+            Instance._heartCor = null;
+            SetHeartTimer(0);
+        }
+
+        if (Instance._heartCor == null)
+        {
+            Instance._heartCor = StartCoroutine(Manager.Timer.StartTimer(Instance._heartCor,
+             fullTime, Instance._heartTimer, Instance._OnInfinityFinished));
+        }
+    }
+
+    private void FinishInfinity()
+    {
+        if (Instance._heartCor != null)
+        {
+            StopCoroutine(Instance._heartCor);
+            Instance._heartCor = null;
+            SetHeartTimer(0);
+        }
+        Manager.User.InfinityHeart(0, true);
     }
 
     private void HeartTimer(float leftTime)
     {
-        Manager.User.SetHeartTime((int)(_respwanTime - leftTime));
+        Manager.User.SetHeartTime((int)(leftTime));
     }
 
     private void SetHeart(int value)
@@ -120,7 +176,7 @@ public class UserInfoUI : MonoBehaviour
                 SetHeartTimer(0);
             }
         }
-        else
+        else if (value < 5)
         {
             StartHeartTimer();
         }

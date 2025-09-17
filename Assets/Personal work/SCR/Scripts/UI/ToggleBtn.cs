@@ -6,21 +6,21 @@ using UnityEngine.UI;
 [RequireComponent(typeof(Toggle))]
 public class ToggleBtn : MonoBehaviour
 {
-    private enum ToggleType
-    {
-        BGM,
-        SFX,
-        Vibration,
-        Alarm
-    }
+
     private Toggle _toggle;
+    private string DROPDOWN_KEY = "Setting_";
     [SerializeField] ToggleType _type;
     [SerializeField] GameObject _on;
     [SerializeField] GameObject _off;
+    private bool _currentOption;
     void Awake()
     {
+        DROPDOWN_KEY = $"{DROPDOWN_KEY}{_type.ToString()}";
+        if (PlayerPrefs.HasKey(DROPDOWN_KEY) == false) _currentOption = true;
+        else _currentOption = PlayerPrefs.GetInt(DROPDOWN_KEY) == 0 ? false : true;
         _toggle = GetComponent<Toggle>();
         _toggle.onValueChanged.AddListener(CheckToggle);
+        _toggle.isOn = _currentOption;
     }
 
     void OnEnable()
@@ -35,6 +35,8 @@ public class ToggleBtn : MonoBehaviour
     {
         _on.SetActive(value);
         _off.SetActive(!value);
+        if (value) PlayerPrefs.SetInt(DROPDOWN_KEY, 1);
+        else PlayerPrefs.SetInt(DROPDOWN_KEY, 0);
     }
 
     private void CheckToggle(bool value)
@@ -45,4 +47,12 @@ public class ToggleBtn : MonoBehaviour
         else if (_type == ToggleType.SFX)
             Manager.Audio.SetSFX(value);
     }
+}
+
+public enum ToggleType
+{
+    BGM,
+    SFX,
+    Vibration,
+    Alarm
 }

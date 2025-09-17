@@ -32,7 +32,6 @@ public class InGameManager : MonoBehaviour
     void Awake()
     {
         Manager.Ad.LoadAD();
-        UserInfoUI.Instance.SetActive(false);
         Manager.User.UseHeart();
         instate = this;
         _customerFlowController.OnStageCleared += StageClear;
