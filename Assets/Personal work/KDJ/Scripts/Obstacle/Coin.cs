@@ -22,8 +22,7 @@ namespace KDJ
 
         public override void Broken()
         {
-            // InGameManager.AddCoin(1);
-            // 테스트용 코인 상승 넣을거임
+            InGameManager.AddCoin(1);
             base.Broken();
         }
 

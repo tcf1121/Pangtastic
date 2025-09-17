@@ -1,11 +1,8 @@
-using AllIn1SpriteShader;
 using KDJ.States;
-using LHJ;
 using SCR;
 using System.Collections;
 using System.Collections.Generic;
 using TMPro;
-using UnityEditor.Localization.Plugins.XLIFF.V12;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -373,12 +370,12 @@ namespace KDJ
                         {
                             int score = MatchChecker.CalculateScore(block.Score);
                             InGameManager.AddScore(score);
-                            //InGameManager.AddIngredientSta(block.GemType);
+                            InGameManager.AddIngredientSta(block.GemType);
                             pooledObj.ReturnToPool();
                         }
                         else
                         {
-                            //InGameManager.AddIngredientSta(block.GemType);
+                            InGameManager.AddIngredientSta(block.GemType);
                             Destroy(block.BlockInstance);
                         }
                     }

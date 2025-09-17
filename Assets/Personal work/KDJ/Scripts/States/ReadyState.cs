@@ -15,7 +15,7 @@ namespace KDJ.States
         {
             Debug.Log("입력 준비 상태");
             boardManager.InitialSwapPosition = null;
-            boardManager.BlockMover.ResetPos();
+            boardManager.BlockMover.ResetCoordMoved();
             _isSwapping = false;
 
             // HintManager가 타이머를 자체적으로 관리하므로,
@@ -46,7 +46,11 @@ namespace KDJ.States
             if (_isSwapping) return;
 
             BlockCheck(boardManager);
+#if UNITY_EDITOR
+            TestUserInput(boardManager);
+#else
             UserInput(boardManager);
+#endif
         }
 
         public void OnExit(BoardManager boardManager)
@@ -65,29 +69,83 @@ namespace KDJ.States
 
         private void UserInput(BoardManager boardManager)
         {
-            if (Input.GetMouseButtonDown(0))
+            if (Input.GetTouch(0).phase == TouchPhase.Began)
             {
+                Debug.Log("터치 시작");
                 // 사용자가 입력을 시작하면 힌트 타이머를 중단합니다.
                 boardManager.HintManager.ResetHintTimer();
 
                 Vector3 mousePosition = Input.mousePosition;
                 mousePosition.z = -Camera.main.transform.position.z;
-                boardManager.BlockMover.StartPos = Camera.main.ScreenToWorldPoint(mousePosition);
+                boardManager.BlockMover.SetStartPos(Camera.main.ScreenToWorldPoint(mousePosition));
                 TestBlockInfo(boardManager);
             }
-
-            if (Input.GetMouseButtonUp(0))
+            else if (Input.GetTouch(0).phase == TouchPhase.Moved)
             {
-                boardManager.ResetUI();
-                if (boardManager.BlockMover.StartPos != Vector2.zero)
+                Debug.Log("터치 이동");
+                Vector3 mousePosition = Input.mousePosition;
+                mousePosition.z = -Camera.main.transform.position.z;
+                boardManager.BlockMover.UpdateCoord(Camera.main.ScreenToWorldPoint(mousePosition));
+                Debug.Log($"StartPos: {boardManager.BlockMover.StartBlockPos}, EndPos: {boardManager.BlockMover.EndBlockPos}");
+                if (boardManager.BlockMover.IsCoordMoved && !_isSwapping)
                 {
                     boardManager.StartCoroutine(SwapAndChangeState(boardManager));
+                    _isSwapping = true;
+                }
+            }
+            else if (Input.GetTouch(0).phase == TouchPhase.Ended)
+            {
+                Debug.Log("터치 종료");
+                // boardManager.ResetUI();
+                if (!boardManager.BlockMover.IsCoordMoved)
+                {
+                    // 뗏을때 아무것도 안 움직였다면 좌표 초기화
+                    boardManager.BlockMover.ResetPos();
+                }
+            }
+
+        }
+
+        private void TestUserInput(BoardManager boardManager)
+        {
+            if (Input.GetMouseButtonDown(0) && !_isSwapping)
+            {
+                Debug.Log("마우스 클릭 시작");
+                // 사용자가 입력을 시작하면 힌트 타이머를 중단합니다.
+                boardManager.HintManager.ResetHintTimer();
+
+                Vector3 mousePosition = Input.mousePosition;
+                mousePosition.z = -Camera.main.transform.position.z;
+                boardManager.BlockMover.SetStartPos(Camera.main.ScreenToWorldPoint(mousePosition));
+                TestBlockInfo(boardManager);
+            }
+            else if (Input.GetMouseButton(0) && !_isSwapping)
+            {
+                Debug.Log("마우스 클릭 이동");
+                Vector3 mousePosition = Input.mousePosition;
+                mousePosition.z = -Camera.main.transform.position.z;
+                boardManager.BlockMover.UpdateCoord(Camera.main.ScreenToWorldPoint(mousePosition));
+                Debug.Log($"StartPos: {boardManager.BlockMover.StartBlockPos}, EndPos: {boardManager.BlockMover.EndBlockPos}");
+                if (boardManager.BlockMover.IsCoordMoved && !_isSwapping)
+                {
+                    boardManager.StartCoroutine(SwapAndChangeState(boardManager));
+                }
+            }
+            else if (Input.GetMouseButtonUp(0))
+            {
+                Debug.Log("마우스 클릭 종료");
+                // boardManager.ResetUI();
+                if (!boardManager.BlockMover.IsCoordMoved)
+                {
+                    // 뗏을때 아무것도 안 움직였다면 좌표 초기화
+                    boardManager.BlockMover.ResetPos();
                 }
             }
         }
 
         private IEnumerator SwapAndChangeState(BoardManager boardManager)
         {
+            Debug.Log("스왑 시도 및 상태 전환");
             _isSwapping = true;
 
             Vector3 mousePosition = Input.mousePosition;

@@ -108,6 +108,7 @@ public class InGameManager : MonoBehaviour
     public static void AddCoin(int num)
     {
         if (instate == null) instate = GameObject.Find("InGameManager").GetComponent<InGameManager>();
+        Debug.Log($"코인 {num}개 획득");
         instate._coin += num;
     }
 

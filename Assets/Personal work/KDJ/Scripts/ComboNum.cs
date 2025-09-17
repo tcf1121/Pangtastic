@@ -45,12 +45,13 @@ public class ComboNum : MonoBehaviour
             _comboXPrefab.transform.localScale = Vector3.zero;
         }
 
-        _scaleCoroutine = StartCoroutine(ComboScaleCoroutine());
+        if (combo != 0 && (combo == 2 || combo == 3 || combo == 7 || combo % 5 == 0))
+            _scaleCoroutine = StartCoroutine(ComboScaleCoroutine());
     }
 
     public void SetActiveDigit(int combo)
     {
-        if (combo == 2 || combo == 3 || combo == 7 || combo % 5 == 0)
+        if (combo != 0 && (combo == 2 || combo == 3 || combo == 7 || combo % 5 == 0))
         {
             if (combo / 1000 > 0)
             {

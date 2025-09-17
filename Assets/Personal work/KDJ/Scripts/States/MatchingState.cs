@@ -92,6 +92,7 @@ namespace KDJ.States
                     boardManager.CurHintPositions.Clear();
                 }
                 // 애니메이션 후 리필 상태로 이동
+                boardManager.BlockMover.ResetCoordMoved();
                 yield return boardManager.StartCoroutine(boardManager.AnimateAndDestroyMatches(coordsToDestroy, specialToCreate, specialSpawnPos, boardManager.InitialSwapPosition));
             }
             else if (usedSpecial)
@@ -99,6 +100,7 @@ namespace KDJ.States
                 // 특수 블록만 사용되었으면 refill 상태로 이동
                 Debug.Log("특수 블록 사용");
                 boardManager.HintManager.ResetHintTimer();
+                boardManager.BlockMover.ResetCoordMoved();
                 boardManager.ChangeState(new RefillState());
             }
             else if (wasSwap)

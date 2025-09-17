@@ -10,14 +10,36 @@ namespace KDJ
         public Vector2 EndPos { get; set; }
         public Vector2Int StartBlockPos { get; private set; }
         public Vector2Int EndBlockPos { get; private set; }
+        public bool IsCoordMoved { get; private set; }
 
         private const float SWAP_DURATION = 0.1f;
+        private int _width = BoardManager.Instance != null ? BoardManager.Instance.Spawner.GameBoardData.Width : 0;
+        private int _height = BoardManager.Instance != null ? BoardManager.Instance.Spawner.GameBoardData.Height : 0;
 
+        public void ResetCoordMoved()
+        {
+            IsCoordMoved = false;
+            StartPos = Vector2.zero;
+            EndPos = Vector2.zero;
+            StartBlockPos = Vector2Int.zero;
+            EndBlockPos = Vector2Int.zero;
+        }
 
-        // TODO: 터치 감도 개선 필요
-        // LateUpdate 안에서 Input.GetTouch(0).phase == TouchPhase.Moved 인 경우에만 좌표 계산 및 스왑 로직을 처리하면,     
-        // 손가락이 움직이지 않고 가만히 있을 때는 불필요한 계산을 줄여서 성능을 더 최적화할 수 있습니다.
-        // 해당 부분을 잘 이용해서 성능 최적화.
+        public void SetStartPos(Vector2 inputPos)
+        {
+            StartPos = inputPos;
+            StartBlockPos = WorldToGrid(StartPos, _width, _height);
+        }
+
+        public void UpdateCoord(Vector2 inputPos)
+        {
+            EndPos = inputPos;
+            EndBlockPos = WorldToGrid(EndPos, _width, _height);
+            if (StartPos != Vector2.zero && EndPos != Vector2.zero && StartBlockPos != EndBlockPos)
+            {
+                IsCoordMoved = true;
+            }
+        }
 
         public IEnumerator TrySwap(BoardManager boardManager, Action<bool> onResult)
         {
