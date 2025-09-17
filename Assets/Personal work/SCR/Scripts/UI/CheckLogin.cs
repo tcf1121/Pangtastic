@@ -18,6 +18,8 @@ namespace SCR
         [SerializeField] Button _logoutBtn;
         [SerializeField] GameObject _enterPanel;
         [SerializeField] GameObject _loginPanel;
+        [SerializeField] private GameObject _infoPopup;
+        private DateTime targetDate = new DateTime(2026, 4, 2);
 
         void Awake()
         {
@@ -25,14 +27,20 @@ namespace SCR
             _logoutBtn.onClick.AddListener(Logout);
             _enterBtn.onClick.AddListener(PushButton);
             _enterBtn.onClick.AddListener(CheckBeforeAsync);
-            _googlePlayBtn.onClick.AddListener(Manager.GPGS.AuthenticateUser);
-            _guestBtn.onClick.AddListener(LoginAsGuest);
         }
 
         private void Start()
         {
             HistorySetting();
+            DateTime now = DateTime.Now;
+
+            if (now >= targetDate)
+            {
+                ShowPopup();
+            }
         }
+
+
 
         private async void CheckBeforeAsync()
         {
@@ -45,6 +53,11 @@ namespace SCR
         {
             DeleteFB();
             Manager.Data.DeleteSaveData();
+        }
+
+        void ShowPopup()
+        {
+            _infoPopup.SetActive(true);
         }
 
         private void DeleteFB()
@@ -66,52 +79,6 @@ namespace SCR
                 });
                 auth.SignOut();
             }
-        }
-
-        private async void HowToLoginAsync(bool isGuest)
-        {
-            FirebaseAuth auth = FirebaseAuth.DefaultInstance;
-            // 게스트로 로그인 했을 경우
-            if (isGuest)
-            {
-                Debug.Log($"이미 게스트 로그인 상태: {auth.CurrentUser.UserId}");
-            }
-            // 구글로 로그인 했을 경우
-            else
-            {
-                Debug.Log($"이미 구글 플레이 로그인 상태: {auth.CurrentUser.UserId}");
-            }
-            //Manager.DB.user = auth.CurrentUser;
-            //await Manager.Data.SetUser(auth.CurrentUser.UserId);
-            SceneManager.LoadScene(2/*로비씬*/);
-        }
-
-        private void LoginAsGuest()
-        {
-            Debug.Log("버튼눌림");
-            FirebaseAuth auth = FirebaseAuth.DefaultInstance;
-            auth.SignInAnonymouslyAsync().ContinueWithOnMainThread(async task =>
-            {
-                if (task.IsCanceled)
-                {
-                    Debug.LogError("익명 로그인 취소");
-                    return;
-                }
-                if (task.IsFaulted)
-                {
-                    Debug.LogError($"익명 로그인 실패 : {task.Exception}");
-                    return;
-                }
-                FirebaseUser newUser = task.Result.User;
-                string uid = newUser.UserId;
-                Debug.LogFormat($"게스트 로그인 성공 : {newUser.UserId}");
-
-                //Manager.Data.NewUser(uid, );
-                // Manager.User.NewUser(uid, DateTime.Now.ToString("O"));
-
-
-            });
-
         }
 
         public void PushButton()
