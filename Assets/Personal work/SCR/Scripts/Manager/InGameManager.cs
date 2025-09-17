@@ -110,6 +110,7 @@ public class InGameManager : MonoBehaviour
     {
         if (instate == null) instate = GameObject.Find("InGameManager").GetComponent<InGameManager>();
         instate._coin += num;
+        Debug.Log($"현재 코인: {instate._coin}");
     }
 
     public static GameObject GetPrefab(GemType gemType)
