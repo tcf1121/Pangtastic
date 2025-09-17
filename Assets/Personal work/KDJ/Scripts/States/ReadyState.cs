@@ -18,9 +18,7 @@ namespace KDJ.States
             boardManager.BlockMover.ResetCoordMoved();
             _isSwapping = false;
 
-            // HintManager가 타이머를 자체적으로 관리하므로,
-            // ReadyState에 진입 시 이전 힌트를 정리하고 타이머를 리셋합니다.
-            boardManager.HintManager.ResetHintTimer();
+            boardManager.HintManager.StartHintTimer();
 
             // 매칭되는 블럭이 있을 경우 매칭 상태로 전환
             if (boardManager.MatchChecker.AllBlockMatchCheck(boardManager))
@@ -38,8 +36,8 @@ namespace KDJ.States
             // 사용자 입력이나 특정 조건 발생 시 힌트를 중단합니다.
             if (SpecialBlockEffect.effectRunning || boardManager.IsUseItem || (boardManager.IsItemSelected && !BoardManager.CanTouch))
             {
-                boardManager.HintManager.ResetHintTimer();
                 if (boardManager.IsUseItem) boardManager.IsUseItem = false;
+                boardManager.HintManager.StopHintTimer();
                 return;
             }
 
@@ -57,8 +55,6 @@ namespace KDJ.States
         {
             Debug.Log("입력 준비 상태 종료");
 
-            // 상태를 나갈 때 힌트 타이머를 리셋합니다.
-            boardManager.HintManager.ResetHintTimer();
 
             if (_matchDelayCoroutine != null)
             {
@@ -72,8 +68,6 @@ namespace KDJ.States
             if (Input.GetTouch(0).phase == TouchPhase.Began)
             {
                 Debug.Log("터치 시작");
-                // 사용자가 입력을 시작하면 힌트 타이머를 중단합니다.
-                boardManager.HintManager.ResetHintTimer();
 
                 Vector3 mousePosition = Input.mousePosition;
                 mousePosition.z = -Camera.main.transform.position.z;
@@ -111,8 +105,6 @@ namespace KDJ.States
             if (Input.GetMouseButtonDown(0) && !_isSwapping)
             {
                 Debug.Log("마우스 클릭 시작");
-                // 사용자가 입력을 시작하면 힌트 타이머를 중단합니다.
-                boardManager.HintManager.ResetHintTimer();
 
                 Vector3 mousePosition = Input.mousePosition;
                 mousePosition.z = -Camera.main.transform.position.z;
@@ -134,7 +126,7 @@ namespace KDJ.States
             else if (Input.GetMouseButtonUp(0))
             {
                 Debug.Log("마우스 클릭 종료");
-                // boardManager.ResetUI();
+                boardManager.ResetUI();
                 if (!boardManager.BlockMover.IsCoordMoved)
                 {
                     // 뗏을때 아무것도 안 움직였다면 좌표 초기화
@@ -147,6 +139,25 @@ namespace KDJ.States
         {
             Debug.Log("스왑 시도 및 상태 전환");
             _isSwapping = true;
+            bool isHintPosSwap = false;
+
+            if (boardManager.CurHintPositions.Count > 0)
+            {
+                foreach (var pos in boardManager.CurHintPositions)
+                {
+                    if (boardManager.BlockMover.ValidateAndSetPositions(boardManager) && (pos == boardManager.BlockMover.StartBlockPos || pos == boardManager.BlockMover.EndBlockPos))
+                    {
+                        isHintPosSwap = true;
+                        break;
+                    }
+                }
+            }
+
+            if (isHintPosSwap)
+            {
+                boardManager.HintManager.StopHintTimer();
+                boardManager.CurHintPositions.Clear();
+            }
 
             Vector3 mousePosition = Input.mousePosition;
             mousePosition.z = -Camera.main.transform.position.z;

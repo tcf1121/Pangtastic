@@ -6,44 +6,23 @@ using UnityEngine.UI;
 public class StateBubble : MonoBehaviour
 {
     [SerializeField] private Image image;
+    private ResidentManager _manager;
 
-    [SerializeField] private Sprite _greet;
-    [SerializeField] private Sprite _workout;
-    [SerializeField] private Sprite _lookAround;
-    [SerializeField] private Sprite _talking;
+    private ResidentState _curState;
+
+    private void Awake()
+    {
+        _manager = FindObjectOfType<ResidentManager>();
+        if (image == null)
+        {
+            image = GetComponent<Image>();
+        }
+    }
 
     public void SetSprite(ResidentState state)
     {
-        switch (state)
-        {
-            case ResidentState.Idle:
-                image.sprite = _greet;
-                break;
-
-            case ResidentState.Move:
-                image.sprite = _greet;
-                break;
-
-            case ResidentState.Interact:
-                image.sprite = _lookAround;
-                break;
-
-            case ResidentState.Greet:
-                image.sprite = _greet;
-                break;
-
-            case ResidentState.Talk:
-                image.sprite = _talking;
-                break;
-
-            case ResidentState.Workout:
-                image.sprite = _workout;
-                break;
-
-            case ResidentState.Touched:
-                image.sprite = _greet;
-                break;
-        }
+        image.sprite = _manager.GetSpriteByState(state);
+        _curState = state;
     }
 }
 

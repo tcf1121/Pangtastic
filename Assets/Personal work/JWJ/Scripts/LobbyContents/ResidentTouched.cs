@@ -30,6 +30,7 @@ public class ResidentTouched : MonoBehaviour
             }
 
             GameObject target = hit.collider.gameObject;
+            //Debug.Log($"{target.name} 터치");
             ResidentController resident = target.GetComponent<ResidentController>();
 
             if (resident == null)
@@ -37,6 +38,7 @@ public class ResidentTouched : MonoBehaviour
                 return;
             }
             resident.OnTouched();
+            
         }
     }
 }

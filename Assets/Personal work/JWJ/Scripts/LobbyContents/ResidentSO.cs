@@ -7,9 +7,12 @@ public class ResidentSO : ScriptableObject
 {
     public string ResidentName;
 
-    //public Transform FavoriteDestination;
+    public bool IsUnlocked;
+    public int UnlockStage;
 
-    public ResidentSO FavoriteResident;
+    public DestinationType FavoriteDestination;
 
     public RewardType RewardType;
+    public int RewardAmount;
+    public int RewardIntervalSeconds;
 }
