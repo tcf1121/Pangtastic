@@ -11,6 +11,7 @@ public class UserInfoManager : Singleton<UserInfoManager>
     public Action<int> OnChangedCoin;
     public Action<int> OnChangedProfile;
     public Action OnUseHeart;
+    public Action<float> OnInfinityHeart;
 
     public void SetUser(UserData user)
     {
@@ -63,6 +64,8 @@ public class UserInfoManager : Singleton<UserInfoManager>
     public void AddCoin(int value)
     {
         currentData.UserInfo.Coin += value;
+        if (currentData.UserInfo.Coin > 10000000)
+            currentData.UserInfo.Coin = 10000000;
         OnChangedCoin?.Invoke(currentData.UserInfo.Coin);
     }
 
@@ -89,8 +92,19 @@ public class UserInfoManager : Singleton<UserInfoManager>
         return currentData.UserInfo.Heart.currentHeart;
     }
 
+    public void InfinityHeart(float time, bool finish = false)
+    {
+        if (!finish)
+        {
+            currentData.UserInfo.Heart.currentHeart = 6;
+            OnInfinityHeart?.Invoke(time);
+        }
+        else currentData.UserInfo.Heart.currentHeart = 5;
+    }
+
     public void AddHeart()
     {
+        if (currentData.UserInfo.Heart.currentHeart == 6) return;
         if (currentData.UserInfo.Heart.currentHeart < 5)
         {
             currentData.UserInfo.Heart.currentHeart++;
@@ -101,6 +115,7 @@ public class UserInfoManager : Singleton<UserInfoManager>
 
     public void UseHeart()
     {
+        if (currentData.UserInfo.Heart.currentHeart == 6) return;
         if (currentData.UserInfo.Heart.currentHeart > 0)
         {
             currentData.UserInfo.Heart.currentHeart--;
@@ -166,13 +181,48 @@ public class UserInfoManager : Singleton<UserInfoManager>
 
     public void AddItem(ItemType item, int num = 1)
     {
-        if (item == ItemType.Roller) currentData.ItemInfo.Roller += num;
-        else if (item == ItemType.DonutBox) currentData.ItemInfo.DonutBox += num;
-        else if (item == ItemType.Oven) currentData.ItemInfo.Oven += num;
-        else if (item == ItemType.Whisk) currentData.ItemInfo.Whisk += num;
-        else if (item == ItemType.Scissors) currentData.ItemInfo.Scissors += num;
-        else if (item == ItemType.DonutPan) currentData.ItemInfo.DonutPan += num;
-        else currentData.ItemInfo.Coffee += num;
+        if (item == ItemType.Roller)
+        {
+            currentData.ItemInfo.Roller += num;
+            if (currentData.ItemInfo.Roller >= 99)
+                currentData.ItemInfo.Roller = 99;
+        }
+        else if (item == ItemType.DonutBox)
+        {
+            currentData.ItemInfo.DonutBox += num;
+            if (currentData.ItemInfo.DonutBox >= 99)
+                currentData.ItemInfo.DonutBox = 99;
+        }
+        else if (item == ItemType.Oven)
+        {
+            currentData.ItemInfo.Oven += num;
+            if (currentData.ItemInfo.Oven >= 99)
+                currentData.ItemInfo.Oven = 99;
+        }
+        else if (item == ItemType.Whisk)
+        {
+            currentData.ItemInfo.Whisk += num;
+            if (currentData.ItemInfo.Whisk >= 99)
+                currentData.ItemInfo.Whisk = 99;
+        }
+        else if (item == ItemType.Scissors)
+        {
+            currentData.ItemInfo.Scissors += num;
+            if (currentData.ItemInfo.Scissors >= 99)
+                currentData.ItemInfo.Scissors = 99;
+        }
+        else if (item == ItemType.DonutPan)
+        {
+            currentData.ItemInfo.DonutPan += num;
+            if (currentData.ItemInfo.DonutPan >= 99)
+                currentData.ItemInfo.DonutPan = 99;
+        }
+        else
+        {
+            currentData.ItemInfo.Coffee += num;
+            if (currentData.ItemInfo.Coffee >= 99)
+                currentData.ItemInfo.Coffee = 99;
+        }
     }
 
     public void SetName(string name)

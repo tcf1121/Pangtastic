@@ -6,16 +6,16 @@ using UnityEngine;
 public class TimerManager : Singleton<TimerManager>
 {
 
-    public IEnumerator StartTimer(Coroutine cor, float CycleTime, float currnetTime = 0,
+    public IEnumerator StartTimer(Coroutine cor, float CycleTime,
      Action<float> onCorTimer = null, Action onTimerFinished = null)
     {
         float _cycle = CycleTime;
         while (true)
         {
-            if (currnetTime < _cycle)
+            if (_cycle > 0)
             {
-                currnetTime += Time.unscaledDeltaTime;
-                onCorTimer?.Invoke(currnetTime);
+                _cycle -= Time.unscaledDeltaTime;
+                onCorTimer?.Invoke(_cycle);
                 yield return null;
             }
             else

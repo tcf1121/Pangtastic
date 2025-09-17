@@ -29,6 +29,11 @@ namespace SCR
             _guestBtn.onClick.AddListener(LoginAsGuest);
         }
 
+        private void Start()
+        {
+            HistorySetting();
+        }
+
         private async void CheckBeforeAsync()
         {
             Manager.Data.SetUser();
@@ -112,6 +117,24 @@ namespace SCR
         public void PushButton()
         {
             Manager.Audio.PlaySFX("Touch");
+        }
+
+        private void HistorySetting()
+        {
+            string DROPDOWN_KEY;
+            bool historyOption;
+            foreach (ToggleType type in Enum.GetValues(typeof(ToggleType)))
+            {
+                DROPDOWN_KEY = $"Setting_{type.ToString()}";
+                if (PlayerPrefs.HasKey(DROPDOWN_KEY) == false) historyOption = true;
+                else historyOption = PlayerPrefs.GetInt(DROPDOWN_KEY) == 0 ? false : true;
+
+                if (type == ToggleType.BGM)
+                    Manager.Audio.SetBGM(historyOption);
+                else if (type == ToggleType.SFX)
+                    Manager.Audio.SetSFX(historyOption);
+            }
+
         }
     }
 }
