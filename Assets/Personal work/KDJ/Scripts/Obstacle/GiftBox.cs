@@ -38,12 +38,14 @@ namespace KDJ
 
             if (CurrentHP > 0)
             {
+                Manager.Audio.PlaySFX("GiftBox_Damage");
                 _damageCoroutine = BoardManager.Instance.StartCoroutine(DamageAnimation(X, Y));
             }
 
             if (CurrentHP <= 0)
             {
                 Debug.Log("파괴됨");
+                Manager.Audio.PlaySFX("GiftBox_Broken");
                 Broken();
             }
             else if (CurrentHP <= 2)

@@ -51,6 +51,7 @@ namespace KDJ
         public List<Vector2Int> CurHintPositions = new List<Vector2Int>();
 
         private Coroutine _hintCoroutine;
+        private List<Material> _activeHintShaders = new List<Material>();
 
 
         private void Awake()
@@ -328,6 +329,11 @@ namespace KDJ
             // 2단계: 폭발 이펙트 생성
             SpriteRenderer[] renderers = new SpriteRenderer[blocksToAnimate.Count];
 
+            if (specialToCreate.HasValue)
+                Manager.Audio.PlaySFX("Block_MakeSpecial");
+            else
+                Manager.Audio.PlaySFX("Block_Match");
+
             foreach (var block in blocksToAnimate)
             {
                 Vector3 blockPos = block.BlockInstance.transform.position;
@@ -422,58 +428,43 @@ namespace KDJ
 
         private IEnumerator HintCoroutine(List<Vector2Int> hintPositions)
         {
-            List<Material> shaders = new List<Material>();
-            try
+            _activeHintShaders.Clear();
+            // 힌트 셰이더 활성화
+            foreach (var pos in hintPositions)
             {
-                // 힌트 셰이더 활성화
-                foreach (var pos in hintPositions)
+                Block block = Spawner.GameBoardData.GetBlock(pos.x, pos.y);
+                if (block != null && block.BlockInstance != null)
                 {
-                    Block block = Spawner.GameBoardData.GetBlock(pos.x, pos.y);
-                    if (block != null && block.BlockInstance != null)
-                    {
-                        Material shader = block.BlockInstance.GetComponent<SpriteRenderer>().material;
-                        if (shader != null)
-                        {
-                            shaders.Add(shader);
-                            shader.EnableKeyword("SHINE_ON");
-                            shader.EnableKeyword("SHAKEUV_ON");
-                            shader.SetFloat("_ShakeSpeed", 3.5f);
-                            shader.SetFloat("_XMultiplier", 2f);
-                            shader.SetFloat("_YMultiplier", 2f);
-                        }
-                    }
-                }
-
-                // 힌트 애니메이션
-                float timer = 0f;
-                float alpha = 1f;
-                while (timer < 3f) // 3초 지속
-                {
-                    timer += Time.deltaTime;
-                    if (alpha <= 0) alpha = 1f;
-                    alpha -= Time.deltaTime;
-                    foreach (var shader in shaders)
-                    {
-                        shader.SetFloat("_ShineLocation", alpha);
-                    }
-                    yield return null;
-                }
-            }
-            finally
-            {
-                // 이 블록은 코루틴이 중지되더라도 항상 실행됩니다.
-                // 힌트 셰이더 비활성화
-                foreach (var shader in shaders)
-                {
+                    Material shader = block.BlockInstance.GetComponent<SpriteRenderer>().material;
                     if (shader != null)
                     {
-                        shader.SetFloat("_ShineLocation", 1);
-                        shader.DisableKeyword("SHINE_ON");
-                        shader.DisableKeyword("SHAKEUV_ON");
+                        _activeHintShaders.Add(shader);
+                        shader.EnableKeyword("SHINE_ON");
+                        shader.EnableKeyword("SHAKEUV_ON");
+                        shader.SetFloat("_ShakeSpeed", 3.5f);
+                        shader.SetFloat("_XMultiplier", 2f);
+                        shader.SetFloat("_YMultiplier", 2f);
                     }
                 }
-                 _hintCoroutine = null; // 코루틴 핸들 초기화
             }
+
+            // 힌트 애니메이션
+            float timer = 0f;
+            float alpha = 1f;
+            while (timer < 3f) // 3초 지속
+            {
+                timer += Time.deltaTime;
+                if (alpha <= 0) alpha = 1f;
+                alpha -= Time.deltaTime;
+                foreach (var shader in _activeHintShaders)
+                {
+                    shader.SetFloat("_ShineLocation", alpha);
+                }
+                yield return null;
+            }
+
+            HideHint();
+            _hintCoroutine = null;
         }
 
         public void HideHint()
@@ -481,7 +472,20 @@ namespace KDJ
             if (_hintCoroutine != null)
             {
                 StopCoroutine(_hintCoroutine);
-                // HintCoroutine의 'finally' 블록이 정리를 처리합니다.
+            }
+            CleanupHintEffect();
+        }
+
+        public void CleanupHintEffect()
+        {
+            foreach (var shader in _activeHintShaders)
+            {
+                if (shader != null)
+                {
+                    shader.SetFloat("_ShineLocation", 1);
+                    shader.DisableKeyword("SHINE_ON");
+                    shader.DisableKeyword("SHAKEUV_ON");
+                }
             }
         }
 

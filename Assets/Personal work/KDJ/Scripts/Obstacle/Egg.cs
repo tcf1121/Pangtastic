@@ -39,10 +39,12 @@ namespace KDJ
             if (CurrentHP <= 0)
             {
                 Debug.Log("파괴됨");
+                Manager.Audio.PlaySFX("Egg_Broken");
                 Broken();
             }
             else
             {
+                Manager.Audio.PlaySFX("Egg_Damage");
                 BlockInstance.GetComponent<SpriteRenderer>().sprite = _currentImage;
             }
 

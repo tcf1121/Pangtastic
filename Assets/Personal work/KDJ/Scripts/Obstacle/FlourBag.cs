@@ -58,6 +58,7 @@ namespace KDJ
             if (CurrentHP <= 0)
             {
                 Debug.Log("파괴됨");
+                Manager.Audio.PlaySFX("FlourBag_Broken");
                 if (_brokenCoroutine == null)
                 {
                     _brokenCoroutine = BoardManager.Instance.StartCoroutine(BrokenAnimation(X, Y));
@@ -65,6 +66,7 @@ namespace KDJ
             }
             else
             {
+                Manager.Audio.PlaySFX("FlourBag_Damage");
                 BlockInstance.GetComponent<SpriteRenderer>().sprite = _currentImage;
 
                 if (_damageCoroutine == null)
