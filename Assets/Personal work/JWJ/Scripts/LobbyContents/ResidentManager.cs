@@ -2,6 +2,8 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.AddressableAssets;
+using UnityEngine.ResourceManagement.AsyncOperations;
 
 public class ResidentManager : MonoBehaviour
 {
@@ -13,9 +15,30 @@ public class ResidentManager : MonoBehaviour
     [SerializeField] private Sprite _lookAround;
     [SerializeField] private Sprite _talking;
 
+    [SerializeField] private ResidentConfigSO _config;
+    public ResidentConfigSO Config { get { return _config; } }
+
     private void Awake()
     {
         BuildDestinationMap();
+        LoadConfig();
+    }
+    private void LoadConfig()
+    {
+        AsyncOperationHandle<ResidentConfigSO> handle = Addressables.LoadAssetAsync<ResidentConfigSO>("ResidentConfigSO");
+        handle.Completed += OnConfigLoaded;
+    }
+    private void OnConfigLoaded(AsyncOperationHandle<ResidentConfigSO> handle)
+    {
+        if (handle.Status == AsyncOperationStatus.Succeeded) //추가됨!!! 성공 여부 체크
+        {
+            _config = handle.Result;
+            Debug.Log("ResidentConfigSO 로드 완료");
+        }
+        else
+        {
+            Debug.LogError($"ResidentConfigSO 로드 실패: {handle.OperationException}");
+        }
     }
 
     private void BuildDestinationMap()
@@ -57,6 +80,11 @@ public class ResidentManager : MonoBehaviour
 
     public Transform GetRandomDestination()
     {
+        if (_destByType.Count == 0)
+        {
+            return null;
+        }
+
         Transform[] transforms = new Transform[_destByType.Count];
         _destByType.Values.CopyTo(transforms, 0);
 
@@ -73,17 +101,25 @@ public class ResidentManager : MonoBehaviour
         return null;
     }
 
-    public Transform PickNextDestination(ResidentSO resident, ResidentConfigSO config)
+    public Transform PickNextDestination(ResidentSO resident)
     {
-        bool pickPreferred = UnityEngine.Random.value <= config.PreferredWeight;
-
-        if (pickPreferred == true)
+        if (resident == null)
         {
-            Transform fav = GetDestinationByType(resident.FavoriteDestination);
-            if (fav != null)
+            return GetRandomDestination();
+        }
+
+        if (_config != null) //추가됨!!! 설정 로드 완료 시
+        {
+            bool pickPreferred = UnityEngine.Random.value <= _config.PreferredWeight;
+
+            if (pickPreferred == true)
             {
-                //Debug.Log($"{resident.ResidentName} 선호장소 {resident.FavoriteDestination}로 이동");
-                return fav;
+                Transform fav = GetDestinationByType(resident.FavoriteDestination);
+                if (fav != null)
+                {
+                    //Debug.Log($"{resident.ResidentName} 선호장소 {resident.FavoriteDestination}로 이동");
+                    return fav;
+                }
             }
         }
         
