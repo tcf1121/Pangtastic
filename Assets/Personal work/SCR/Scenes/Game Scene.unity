@@ -421,8 +421,7 @@ RectTransform:
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
-  m_Children:
-  - {fileID: 203640824}
+  m_Children: []
   m_Father: {fileID: 108943105}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
@@ -12807,11 +12806,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _coin: {fileID: 1708712312}
-  _heart: {fileID: 194385705}
+  _heart: {fileID: 0}
   _heartTime: {fileID: 1196403622}
   _heartSO: {fileID: 11400000, guid: 3211c2ace76d77b49946c2e51d712d14, type: 2}
   _star: {fileID: 1453676800}
-  _profileImage: {fileID: 203640826}
+  _profileImage: {fileID: 0}
   _respwanTime: 1800
   _ui: {fileID: 2147469691}
 --- !u!114 &884408202
@@ -21853,7 +21852,6 @@ RectTransform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
-  - {fileID: 194385703}
   - {fileID: 2005453723}
   m_Father: {fileID: 1990880460}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -21995,10 +21993,6 @@ RectTransform:
   - {fileID: 396983010}
   - {fileID: 1031755624}
   - {fileID: 1767346693}
-  - {fileID: 2094938343}
-  - {fileID: 104491624}
-  - {fileID: 1773060063}
-  - {fileID: 881177893}
   - {fileID: 1835533381}
   m_Father: {fileID: 574744994}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -25082,11 +25076,11 @@ RectTransform:
   - {fileID: 327312138}
   m_Father: {fileID: 1668023298}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0.5}
-  m_AnchorMax: {x: 0, y: 0.5}
-  m_AnchoredPosition: {x: -30, y: 0}
+  m_AnchorMin: {x: 0.5, y: 0.5}
+  m_AnchorMax: {x: 0.5, y: 0.5}
+  m_AnchoredPosition: {x: -80, y: 0}
   m_SizeDelta: {x: 100, y: 100}
-  m_Pivot: {x: 0, y: 0.5}
+  m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1741731096
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -26758,7 +26752,7 @@ MonoBehaviour:
   - {fileID: 1084135749}
   - {fileID: 75464020}
   - {fileID: 774707685}
-  - {fileID: 877731246}
+  - {fileID: 0}
   - {fileID: 361052776}
   - {fileID: 361052775}
   - {fileID: 1455856201}
