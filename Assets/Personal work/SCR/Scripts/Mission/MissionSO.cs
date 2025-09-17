@@ -5,7 +5,7 @@ using UnityEngine;
 [CreateAssetMenu(fileName = "New Missions", menuName = "PangTasticSO/Missions")]
 public class MissionSO : ScriptableObject
 {
-    public MissonPlace Place;
+    public MissionPlace Place;
     public List<Mission> Mission;
 }
 

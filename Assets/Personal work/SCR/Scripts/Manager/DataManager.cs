@@ -1,9 +1,6 @@
-using Firebase.Auth;
-using Firebase.Database;
 using Newtonsoft.Json;
 using System;
 using System.IO;
-using System.Threading.Tasks;
 using UnityEngine;
 
 public class DataManager : Singleton<DataManager>

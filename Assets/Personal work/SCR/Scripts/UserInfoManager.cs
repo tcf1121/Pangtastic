@@ -190,7 +190,7 @@ public class UserInfoManager : Singleton<UserInfoManager>
         return currentData;
     }
 
-    public void SetCurPlace(MissonPlace curPlace)
+    public void SetCurPlace(MissionPlace curPlace)
     {
         currentData.PlaceInfo.CurPlace = (int)curPlace;
     }
@@ -204,9 +204,9 @@ public class UserInfoManager : Singleton<UserInfoManager>
         }
     }
 
-    public MissonPlace GetCurPlace()
+    public MissionPlace GetCurPlace()
     {
-        return (MissonPlace)currentData.PlaceInfo.CurPlace;
+        return (MissionPlace)currentData.PlaceInfo.CurPlace;
     }
 
     public void ClearCurMisson(int index)

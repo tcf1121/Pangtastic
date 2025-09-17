@@ -6,7 +6,7 @@ using System;
 
 public class Place : MonoBehaviour
 {
-    [SerializeField] MissonPlace _place;
+    [SerializeField] MissionPlace _place;
     [SerializeField] GameObject openObject;
     [SerializeField] List<GameObject> missionObjects;
 

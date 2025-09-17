@@ -21,7 +21,7 @@ public class MissionBtn : MonoBehaviour
 
     public void Refresh()
     {
-        _currentRoom.text = $"{Enum.GetName(typeof(MissonPlace), Manager.User.GetCurPlace())}";
+        _currentRoom.text = $"{Enum.GetName(typeof(MissionPlace), Manager.User.GetCurPlace())}";
         _progressSlider.minValue = 0;
         _progressSlider.maxValue = Manager.User.GetCurMisson().Length;
         _progressSlider.value = Array.FindAll(Manager.User.GetCurMisson(), n => n == true).ToList().Count;
