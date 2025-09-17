@@ -15,6 +15,7 @@ public class DestinationPoint : MonoBehaviour
         if (_showGizmos)
         {
             Gizmos.color = Color.green;
+            //Gizmos.DrawSphere(transform.position, _radius);
             Gizmos.DrawWireSphere(transform.position, _radius);
         }
     }

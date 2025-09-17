@@ -34,6 +34,10 @@ public class ResidentController : MonoBehaviour
 
     private bool _isGreeting = false;
     private bool _isTalking = false;
+    private bool _isLookingAround = false;
+    private bool _isWorkout = false;
+    private bool _isTouched = false;
+
     private float _lastTouchTime = -999f;
     private float _lastGreetTime = -999f;
     private int _activePeerId = 0;
@@ -82,6 +86,8 @@ public class ResidentController : MonoBehaviour
 
     private void ChangeState(ResidentState state)
     {
+        ClearBools();
+
         StopRunningCoroutine();
         _lastState = _curState;
         _curState = state;
@@ -134,12 +140,10 @@ public class ResidentController : MonoBehaviour
 
     private IEnumerator MoveRoutine()
     {
-        //Debug.Log($"현재상태 : {_curState}");
-
         SetMove(_manager.Config.MoveSpeed, false);
         _agent.SetDestination(_currentDestination);
         //Debug.Log($"{_resident.ResidentName} 이 {_currentDestinationType}로 이동");
-
+     
         float timer = 0;
         while (true)
         {
@@ -160,12 +164,13 @@ public class ResidentController : MonoBehaviour
                     }
                     else
                     {
-                        ChangeState(ResidentState.Interact);
                         Vector3 dir = _currentDestination - transform.position;
                         dir.y = 0f;
 
                         Quaternion look = Quaternion.LookRotation(dir.normalized, Vector3.up);
                         transform.rotation = look;
+
+                        ChangeState(ResidentState.Interact);
                         yield break;
                     }
                     
@@ -178,7 +183,7 @@ public class ResidentController : MonoBehaviour
 
     private IEnumerator InteractRoutine()
     {
-        //Debug.Log($"현재상태 : {_curState}");
+        _isLookingAround = true;
 
         SetMove(0f, true);
         _stateBubble.gameObject.SetActive(true);
@@ -186,6 +191,7 @@ public class ResidentController : MonoBehaviour
         _stateBubble.gameObject.SetActive(false);
 
         ChangeState(ResidentState.Idle);
+        
     }
 
     private IEnumerator GreetRoutine()
@@ -200,7 +206,6 @@ public class ResidentController : MonoBehaviour
 
 
         //Debug.Log($"{_resident.ResidentName} 인사 종료");
-        _isGreeting = false;
 
         if (_lastState == ResidentState.Move)
         {
@@ -224,7 +229,6 @@ public class ResidentController : MonoBehaviour
         _stateBubble.gameObject.SetActive(true);
 
         //Debug.Log($"{_resident.ResidentName} 대화 종료"); 
-        _isTalking = false;
         _peerTransform = null;
         _activePeerId = 0;
 
@@ -235,6 +239,7 @@ public class ResidentController : MonoBehaviour
     {
         SetMove(0f, true);
         //Debug.Log("운동중");
+        _isWorkout = true;
         _stateBubble.gameObject.SetActive(true);
         yield return new WaitForSeconds(_manager.Config.WorkoutDuration);
         _stateBubble.gameObject.SetActive(false);
@@ -245,6 +250,8 @@ public class ResidentController : MonoBehaviour
     private IEnumerator TouchedRoutine()
     {
         SetMove(0f, true);
+        _isTouched = true;
+
         _stateBubble.gameObject.SetActive(true);
         yield return new WaitForSeconds(_manager.Config.TouchDuration);
         _stateBubble.gameObject.SetActive(false);
@@ -421,5 +428,39 @@ public class ResidentController : MonoBehaviour
             transform.rotation = look;
             return;
         }
+    }
+
+    private void Update()
+    {
+        bool isMoving = false;
+        if (_agent != null)
+        {
+            if (_agent.isStopped == false)
+            {
+                if (_agent.velocity.sqrMagnitude > 0.01f)
+                {
+                    isMoving = true;
+                }
+            }
+        }
+
+        _animator.SetBool("IsMove", isMoving); 
+
+        bool isWaving = (_isGreeting == true) || (_isTouched == true);
+        _animator.SetBool("IsWaving", isWaving);
+
+        _animator.SetBool("IsJumpingJack", _isWorkout);
+        //_animator.SetBool("IsPushUp", _isWorkout);
+        _animator.SetBool("IsTalking", _isTalking);
+        _animator.SetBool("IsLookAround", _isLookingAround);
+    }
+
+    private void ClearBools()
+    {
+        _isGreeting = false;
+        _isTalking = false;
+        _isLookingAround = false;
+        _isWorkout = false;
+        _isTouched = false;
     }
 }
