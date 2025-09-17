@@ -22,7 +22,7 @@ namespace KDJ
 
         public override void Broken()
         {
-            InGameManager.AddCoin(1);
+            InGameManager.AddCoin(10);
             base.Broken();
         }
 
