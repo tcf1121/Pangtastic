@@ -23,6 +23,16 @@ namespace LHJ
         [SerializeField] private GameObject _whiskAreaFx;
         [SerializeField] private float _whiskRotateMs;  
         [SerializeField] private float _whiskAreaFadeMs;
+
+        [SerializeField] private Transform _boardRoot;
+        [SerializeField] private Transform _poolsRoot;
+
+        [Header("커피")]
+        [SerializeField] private RectTransform _coffeeIconRt;
+        [SerializeField] private GameObject _coffeeFx; 
+        [SerializeField] private float _coffeeDurationMs = 2000f;
+        [SerializeField] private float _coffeeZigzagHeight = 260f;
+        [SerializeField] private float _coffeeZigzagAmp = 60f;
         private void Update()
         {
             if (_board == null || !_board.IsItemSelected || !(BoardManager.Instance.CurrentState is ReadyState)) return;
@@ -69,19 +79,7 @@ namespace LHJ
             var order = FindObjectOfType<OrderStateController>();
 
             order.AddPatience(amount);
-
-            //if (order == null || order._curPatience <= 0f) return;
-            //
-            //// 현재 진행률 기반으로 남은 시간 추정
-            //float progress = 1f - (order._curPatience / 100f);
-            //float estimatedTimeToZero = (progress > 0.001f) ? (order._elapsed / progress) : 60f;
-            //
-            //// 인내심 증가
-            //float newCur = Mathf.Min(order._curPatience + amount, 100f);
-            //order._curPatience = newCur;
-            //
-            //float newProgress = 1f - (newCur / 100f);
-            //order._elapsed = Mathf.Clamp(newProgress * estimatedTimeToZero, 0f, estimatedTimeToZero);
+            PlayCoffeeFxFromButton();
         }
 
         // 좌표 확인
@@ -452,14 +450,26 @@ namespace LHJ
         // 보드를 초기화 후 특수 블록 하나 생성하는 루틴
         private IEnumerator RegenSpecialBlockRoutine()
         {
-            var sp = _board.Spawner;
-            sp.Shuffle(_board);
-            yield return null;
+            float moveDuration = 2.0f;
+            float moveDist = 10f;
 
+            Vector3 boardStart = _boardRoot.localPosition;
+            Vector3 poolStart = _poolsRoot.localPosition;
+
+            var down = DOTween.Sequence()
+                .Join(_boardRoot.DOLocalMoveY(boardStart.y - moveDist, moveDuration))
+                .Join(_poolsRoot.DOLocalMoveY(poolStart.y - moveDist, moveDuration));
+            yield return down.WaitForCompletion();
+
+            _board.Spawner.Shuffle(_board);
+            yield return null;
             _board.ChangeState(new RefillState());
             InjectRandomSpecial();
 
-            yield break;
+            var up = DOTween.Sequence()
+                .Join(_boardRoot.DOLocalMove(boardStart, moveDuration))
+                .Join(_poolsRoot.DOLocalMove(poolStart, moveDuration));
+            yield return up.WaitForCompletion();
         }
 
         // 랜덤 위치에 특수 블록 생성
@@ -480,13 +490,13 @@ namespace LHJ
                     if (blk == null || blk.IsObstacle) continue;
                     if (ovl != null && ovl.GemType == GemType.Ice) continue;
 
-                    bool isSpecial = (blk.GemType > SCR.GemType.Sugar && blk.GemType < SCR.GemType.Dust);
+                    bool isSpecial = (blk.GemType > GemType.Sugar && blk.GemType < GemType.Dust);
                     if (!isSpecial) candidates.Add(new Vector2Int(x, y));
                 }
             }
             if (candidates.Count == 0) return;
 
-            Vector2Int pick = candidates[UnityEngine.Random.Range(0, candidates.Count)];
+            Vector2Int pick = candidates[Random.Range(0, candidates.Count)];
 
             var cur = sp.GameBoardData.BlockArray[pick.y, pick.x];
             if (cur?.BlockInstance != null)
@@ -510,8 +520,41 @@ namespace LHJ
 
             var gb = _board.Spawner.GameBoardData;
             var hits = new List<Vector2Int>();
-            sbe.UseSpecial(p, t, gb, hits);                 // 특수 연출/데미지 좌표 수집
-            if (hits.Count > 0) sbe.ApplyDamageAndScore(_board, hits);  // 데미지/점수 적용
+            sbe.UseSpecial(p, t, gb, hits);                
+            if (hits.Count > 0) sbe.ApplyDamageAndScore(_board, hits);  
+        }
+        private void PlayCoffeeFxFromButton()
+        {
+            if (_coffeeFx == null || _coffeeIconRt == null) return;
+            var parent = _coffeeIconRt.parent as RectTransform;
+            var go = Instantiate(_coffeeFx, parent);
+
+            var fxRt = go.GetComponent<RectTransform>();
+            fxRt.anchoredPosition3D = _coffeeIconRt.anchoredPosition3D; 
+            fxRt.localScale = Vector3.one;
+
+            CanvasGroup cg = go.GetComponent<CanvasGroup>();
+            if (cg == null) cg = go.AddComponent<CanvasGroup>();
+            cg.alpha = 1f;
+
+            float dur = Mathf.Max(0.01f, _coffeeDurationMs * 0.001f);
+
+            Vector2 p0 = fxRt.anchoredPosition;
+            Vector2 p1 = p0 + new Vector2(+_coffeeZigzagAmp, _coffeeZigzagHeight * 0.33f);
+            Vector2 p2 = p0 + new Vector2(-_coffeeZigzagAmp, _coffeeZigzagHeight * 0.66f);
+            Vector2 p3 = p0 + new Vector2(+_coffeeZigzagAmp, _coffeeZigzagHeight);
+
+            var seq = DG.Tweening.DOTween.Sequence();
+            seq.Append(fxRt.DOAnchorPos(p1, dur / 3f).SetEase(Ease.Linear));
+            seq.Append(fxRt.DOAnchorPos(p2, dur / 3f).SetEase(Ease.Linear));
+            seq.Append(fxRt.DOAnchorPos(p3, dur / 3f).SetEase(Ease.Linear));
+
+            cg.DOFade(0f, dur);
+
+            seq.OnComplete(() =>
+            {
+                if (go != null) Destroy(go);
+            });
         }
     }
 }
