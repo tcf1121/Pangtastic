@@ -82,12 +82,10 @@ namespace KDJ.States
             // 3. 후속 처리
             if (coordsToDestroy.Count > 0)
             {
-                // 매치가 발생 시 힌트가 아직 남아있다면 힌트 숨기기
-                if (boardManager.CurHintPositions.Count > 0)
-                {
-                    boardManager.HintManager.StopHintTimer();
-                    boardManager.CurHintPositions.Clear();
-                }
+                // 매치가 발생 시 힌트 숨기기
+                boardManager.HintManager.StopHintTimer();
+                boardManager.CurHintPositions.Clear();
+
                 // 애니메이션 후 리필 상태로 이동
                 boardManager.BlockMover.ResetCoordMoved();
                 yield return boardManager.StartCoroutine(boardManager.AnimateAndDestroyMatches(coordsToDestroy, specialToCreate, specialSpawnPos, boardManager.InitialSwapPosition));

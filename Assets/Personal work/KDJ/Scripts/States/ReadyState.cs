@@ -126,7 +126,7 @@ namespace KDJ.States
             else if (Input.GetMouseButtonUp(0))
             {
                 Debug.Log("마우스 클릭 종료");
-                // boardManager.ResetUI();
+                boardManager.ResetUI();
                 if (!boardManager.BlockMover.IsCoordMoved)
                 {
                     // 뗏을때 아무것도 안 움직였다면 좌표 초기화
