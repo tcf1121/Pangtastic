@@ -30,7 +30,7 @@ public class LoadingManager : MonoBehaviour
     IEnumerator LoadScene()
     {
         yield return null;
-
+        UserInfoUI.Instance.SetActive(false);
         AsyncOperation asyncLoad = SceneManager.LoadSceneAsync(_nextScene, LoadSceneMode.Additive);
 
         while (!asyncLoad.isDone)

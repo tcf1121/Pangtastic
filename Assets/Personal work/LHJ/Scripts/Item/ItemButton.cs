@@ -34,7 +34,7 @@ namespace LHJ
             {
                 if (BoardManager.Instance.CurrentState is ReadyState)
                 {
-                    BoardManager.Instance.HideHint(BoardManager.Instance.CurHintPositions);
+                    BoardManager.Instance.HideHint();
 
                     if (_itemCheck != null)
                         _itemCheck.UseDonutPan();

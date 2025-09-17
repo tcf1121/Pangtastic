@@ -1,6 +1,4 @@
-using AllIn1SpriteShader;
 using KDJ.States;
-using LHJ;
 using SCR;
 using System.Collections;
 using System.Collections.Generic;
@@ -36,6 +34,7 @@ namespace KDJ
         public BlockMover BlockMover { get; private set; }
         public MatchCombo MatchCombo { get; set; }
         public BoardLoader BoardLoader { get; set; }
+        public HintManager HintManager { get; private set; }
         public TestStageManager TestStageManager { get; set; }
         public int Score { get; private set; } = 0;
         public int CurStage;
@@ -70,6 +69,7 @@ namespace KDJ
                 BlockMover = GetComponent<BlockMover>();
                 MatchCombo = GetComponent<MatchCombo>();
                 BoardLoader = GetComponent<BoardLoader>();
+                HintManager = GetComponent<HintManager>();
                 TestStageManager = FindObjectOfType<TestStageManager>();
             }
         }
@@ -96,6 +96,7 @@ namespace KDJ
             BlockMover = GetComponent<BlockMover>();
             MatchCombo = GetComponent<MatchCombo>();
             BoardLoader = GetComponent<BoardLoader>();
+            HintManager = GetComponent<HintManager>();
             TestStageManager = FindObjectOfType<TestStageManager>();
             CanTouch = false;
             IsReadyForStart = false;
@@ -411,67 +412,59 @@ namespace KDJ
 
         public void ShowHint(List<Vector2Int> hintPositions)
         {
-            if (_hintCoroutine == null)
-                _hintCoroutine = StartCoroutine(HintCoroutine(hintPositions));
-
+            // 이미 실행 중인 힌트가 있다면, 새 힌트를 시작하기 전에 중지시킵니다.
+            if (_hintCoroutine != null)
+            {
+                StopCoroutine(_hintCoroutine);
+            }
+            _hintCoroutine = StartCoroutine(HintCoroutine(hintPositions));
         }
 
         private IEnumerator HintCoroutine(List<Vector2Int> hintPositions)
         {
-
-            float timer = 0f;
-            float alpha = 1f;
             List<Material> shaders = new List<Material>();
-            foreach (var pos in hintPositions)
+            try
             {
-                Block block = Spawner.GameBoardData.GetBlock(pos.x, pos.y);
-                if (block != null && block.BlockInstance != null)
+                // 힌트 셰이더 활성화
+                foreach (var pos in hintPositions)
                 {
-                    Material shader = block.BlockInstance.GetComponent<SpriteRenderer>().material;
-                    if (shader != null)
+                    Block block = Spawner.GameBoardData.GetBlock(pos.x, pos.y);
+                    if (block != null && block.BlockInstance != null)
                     {
-                        shaders.Add(shader);
-                        shader.EnableKeyword("SHINE_ON");
-                        shader.EnableKeyword("SHAKEUV_ON");
-                        shader.SetFloat("_ShakeSpeed", 3.5f);
-                        shader.SetFloat("_XMultiplier", 2f);
-                        shader.SetFloat("_YMultiplier", 2f);
-                        shader.SetFloat("_ShineLocation", 1f);
+                        Material shader = block.BlockInstance.GetComponent<SpriteRenderer>().material;
+                        if (shader != null)
+                        {
+                            shaders.Add(shader);
+                            shader.EnableKeyword("SHINE_ON");
+                            shader.EnableKeyword("SHAKEUV_ON");
+                            shader.SetFloat("_ShakeSpeed", 3.5f);
+                            shader.SetFloat("_XMultiplier", 2f);
+                            shader.SetFloat("_YMultiplier", 2f);
+                        }
                     }
                 }
-            }           
 
-            while (timer < 3f)
-            {
-                if (alpha <= 0f)
+                // 힌트 애니메이션
+                float timer = 0f;
+                float alpha = 1f;
+                while (timer < 3f) // 3초 지속
                 {
-                    alpha = 1f;
+                    timer += Time.deltaTime;
+                    if (alpha <= 0) alpha = 1f;
+                    alpha -= Time.deltaTime;
+                    foreach (var shader in shaders)
+                    {
+                        shader.SetFloat("_ShineLocation", alpha);
+                    }
+                    yield return null;
                 }
-
-                timer += Time.deltaTime;
-                alpha -= Time.deltaTime;
+            }
+            finally
+            {
+                // 이 블록은 코루틴이 중지되더라도 항상 실행됩니다.
+                // 힌트 셰이더 비활성화
                 foreach (var shader in shaders)
                 {
-                    shader.SetFloat("_ShineLocation", alpha);
-                }
-                yield return null;
-            }
-        }
-
-        public void HideHint(List<Vector2Int> hintPositions)
-        {
-            if (_hintCoroutine != null)
-            {
-                StopCoroutine(_hintCoroutine);
-                _hintCoroutine = null;
-            }
-
-            foreach (var pos in hintPositions)
-            {
-                Block block = Spawner.GameBoardData.GetBlock(pos.x, pos.y);
-                if (block != null && block.BlockInstance != null)
-                {
-                    Material shader = block.BlockInstance.GetComponent<SpriteRenderer>().material;
                     if (shader != null)
                     {
                         shader.SetFloat("_ShineLocation", 1);
@@ -479,6 +472,16 @@ namespace KDJ
                         shader.DisableKeyword("SHAKEUV_ON");
                     }
                 }
+                 _hintCoroutine = null; // 코루틴 핸들 초기화
+            }
+        }
+
+        public void HideHint()
+        {
+            if (_hintCoroutine != null)
+            {
+                StopCoroutine(_hintCoroutine);
+                // HintCoroutine의 'finally' 블록이 정리를 처리합니다.
             }
         }
 

@@ -239,7 +239,7 @@ namespace KDJ
                         }
 
                         pooledObject.transform.position = position;
-                        pooledObject.transform.SetParent(null);
+                        // pooledObject.transform.SetParent(null);
                         GameBoardData.BlockArray[y, x].BlockInstance = pooledObject.gameObject;
                     }
                     else
@@ -292,7 +292,7 @@ namespace KDJ
                             }
 
                             pooledObject.transform.position = position;
-                            pooledObject.transform.SetParent(null);
+                            // pooledObject.transform.SetParent(null);
                             block.BlockInstance = pooledObject.gameObject;
                         }
                         else
@@ -627,7 +627,7 @@ namespace KDJ
                             spriteRenderer.sprite = normalBlockSprites[(int)newBlock.GemType];
                         }
                         newBlock.BlockInstance = pooledObject.gameObject;
-                        pooledObject.transform.SetParent(null);
+                        // pooledObject.transform.SetParent(null);
                         newBlock.BlockInstance.transform.position = position;
                     }
                     else
@@ -745,7 +745,7 @@ namespace KDJ
                     spriteRenderer.sprite = normalBlockSprites[(int)gemType];
                 }
                 pooledObject.transform.position = position;
-                pooledObject.transform.SetParent(null);
+                // pooledObject.transform.SetParent(null);
                 newBlock.BlockInstance = pooledObject.gameObject;
             }
             else
@@ -1055,7 +1055,7 @@ namespace KDJ
                     spriteRenderer.sprite = normalBlockSprites[(int)gemType];
                 }
                 pooledObject.transform.position = position;
-                pooledObject.transform.SetParent(null);
+                // pooledObject.transform.SetParent(null);
                 newBlock.BlockInstance = pooledObject.gameObject;
             }
             else

@@ -47,38 +47,46 @@ namespace KDJ
                     if (x + 1 < width && gameBoard.BlockPlate.BlockPlateArray[y, x + 1] && tempBlockArray[y, x + 1] != null)
                     {
                         // 임시 스왑
-                        var temp = tempBlockArray[y, x];
-                        tempBlockArray[y, x] = tempBlockArray[y, x + 1];
-                        tempBlockArray[y, x + 1] = temp;
-
-                        if (CheckForMatchAt(boardManager, x, y, tempBlockArray) || CheckForMatchAt(boardManager, x + 1, y, tempBlockArray))
+                        // 스왑할 두 블록이 일반 블록인 경우에만 매치 체크
+                        if (tempBlockArray[y, x].IsNormal && tempBlockArray[y, x + 1].IsNormal)
                         {
-                            possibleMoves.Add($"({x},{y}):({x + 1},{y})");
-                        }
+                            var temp = tempBlockArray[y, x];
+                            tempBlockArray[y, x] = tempBlockArray[y, x + 1];
+                            tempBlockArray[y, x + 1] = temp;
 
-                        // 스왑 원상 복구
-                        temp = tempBlockArray[y, x];
-                        tempBlockArray[y, x] = tempBlockArray[y, x + 1];
-                        tempBlockArray[y, x + 1] = temp;
+                            if (CheckForMatchAt(boardManager, x, y, tempBlockArray) || CheckForMatchAt(boardManager, x + 1, y, tempBlockArray))
+                            {
+                                possibleMoves.Add($"({x},{y}):({x + 1},{y})");
+                            }
+
+                            // 스왑 원상 복구
+                            temp = tempBlockArray[y, x];
+                            tempBlockArray[y, x] = tempBlockArray[y, x + 1];
+                            tempBlockArray[y, x + 1] = temp;
+                        }
                     }
 
                     // 세로 방향으로 인접한 블록과 스왑하여 매치 확인
                     if (y + 1 < height && gameBoard.BlockPlate.BlockPlateArray[y + 1, x] && tempBlockArray[y + 1, x] != null)
                     {
                         // 임시 스왑
-                        var temp = tempBlockArray[y, x];
-                        tempBlockArray[y, x] = tempBlockArray[y + 1, x];
-                        tempBlockArray[y + 1, x] = temp;
-
-                        if (CheckForMatchAt(boardManager, x, y, tempBlockArray) || CheckForMatchAt(boardManager, x, y + 1, tempBlockArray))
+                        // 스왑할 두 블록이 일반 블록인 경우에만 매치 체크
+                        if (tempBlockArray[y, x].IsNormal && tempBlockArray[y + 1, x].IsNormal)
                         {
-                            possibleMoves.Add($"({x},{y}):({x},{y + 1})");
-                        }
+                            var temp = tempBlockArray[y, x];
+                            tempBlockArray[y, x] = tempBlockArray[y + 1, x];
+                            tempBlockArray[y + 1, x] = temp;
 
-                        // 스왑 원상 복구
-                        temp = tempBlockArray[y, x];
-                        tempBlockArray[y, x] = tempBlockArray[y + 1, x];
-                        tempBlockArray[y + 1, x] = temp;
+                            if (CheckForMatchAt(boardManager, x, y, tempBlockArray) || CheckForMatchAt(boardManager, x, y + 1, tempBlockArray))
+                            {
+                                possibleMoves.Add($"({x},{y}):({x},{y + 1})");
+                            }
+
+                            // 스왑 원상 복구
+                            temp = tempBlockArray[y, x];
+                            tempBlockArray[y, x] = tempBlockArray[y + 1, x];
+                            tempBlockArray[y + 1, x] = temp;
+                        }
                     }
                 }
             }
@@ -138,32 +146,36 @@ namespace KDJ
                         tempBlockArray[y, x] = tempBlockArray[y, x + 1];
                         tempBlockArray[y, x + 1] = temp;
 
-                        if (CheckForMatchAt(BoardManager.Instance, x, y, tempBlockArray, out int count, out int type, out HashSet<Vector2Int> matchedCoords))
+                        // 스왑할 두 블록이 일반 블록인 경우에만 매치 체크
+                        if (tempBlockArray[y, x].IsNormal && tempBlockArray[y, x + 1].IsNormal)
                         {
-                            matchedCoords.Remove(new Vector2Int(x, y));
-                            matchedCoords.Add(new Vector2Int(x + 1, y));
-                            matchList.Add(CalculateBlockMatchWeight(x, y, type, tempBlockArray, new List<Vector2Int>(matchedCoords)));
-                        }
+                            if (CheckForMatchAt(BoardManager.Instance, x, y, tempBlockArray, out int count, out int type, out HashSet<Vector2Int> matchedCoords))
+                            {
+                                matchedCoords.Remove(new Vector2Int(x, y));
+                                matchedCoords.Add(new Vector2Int(x + 1, y));
+                                matchList.Add(CalculateBlockMatchWeight(x, y, type, tempBlockArray, new List<Vector2Int>(matchedCoords)));
+                            }
 
-                        if (CheckForMatchAt(BoardManager.Instance, x + 1, y, tempBlockArray, out count, out type, out matchedCoords))
-                        {
-                            matchedCoords.Remove(new Vector2Int(x + 1, y));
-                            matchedCoords.Add(new Vector2Int(x, y));
-                            matchList.Add(CalculateBlockMatchWeight(x + 1, y, type, tempBlockArray, new List<Vector2Int>(matchedCoords)));
-                        }
+                            if (CheckForMatchAt(BoardManager.Instance, x + 1, y, tempBlockArray, out count, out type, out matchedCoords))
+                            {
+                                matchedCoords.Remove(new Vector2Int(x + 1, y));
+                                matchedCoords.Add(new Vector2Int(x, y));
+                                matchList.Add(CalculateBlockMatchWeight(x + 1, y, type, tempBlockArray, new List<Vector2Int>(matchedCoords)));
+                            }
 
-                        if (CheckCubeMatchesAround(x, y, tempBlockArray, out matchedCoords))
-                        {
-                            matchedCoords.Remove(new Vector2Int(x, y));
-                            matchedCoords.Add(new Vector2Int(x + 1, y));
-                            matchList.Add(CalculateBlockMatchWeight(x, y, 2, tempBlockArray, new List<Vector2Int>(matchedCoords)));
-                        }
+                            if (CheckCubeMatchesAround(x, y, tempBlockArray, out matchedCoords))
+                            {
+                                matchedCoords.Remove(new Vector2Int(x, y));
+                                matchedCoords.Add(new Vector2Int(x + 1, y));
+                                matchList.Add(CalculateBlockMatchWeight(x, y, 2, tempBlockArray, new List<Vector2Int>(matchedCoords)));
+                            }
 
-                        if (CheckCubeMatchesAround(x + 1, y, tempBlockArray, out matchedCoords))
-                        {
-                            matchedCoords.Remove(new Vector2Int(x + 1, y));
-                            matchedCoords.Add(new Vector2Int(x, y));
-                            matchList.Add(CalculateBlockMatchWeight(x + 1, y, 2, tempBlockArray, new List<Vector2Int>(matchedCoords)));
+                            if (CheckCubeMatchesAround(x + 1, y, tempBlockArray, out matchedCoords))
+                            {
+                                matchedCoords.Remove(new Vector2Int(x + 1, y));
+                                matchedCoords.Add(new Vector2Int(x, y));
+                                matchList.Add(CalculateBlockMatchWeight(x + 1, y, 2, tempBlockArray, new List<Vector2Int>(matchedCoords)));
+                            }
                         }
 
                         // 스왑 원상 복구
@@ -179,33 +191,37 @@ namespace KDJ
                         var temp = tempBlockArray[y, x];
                         tempBlockArray[y, x] = tempBlockArray[y + 1, x];
                         tempBlockArray[y + 1, x] = temp;
-
-                        if (CheckForMatchAt(BoardManager.Instance, x, y, tempBlockArray, out int count, out int type, out HashSet<Vector2Int> matchedCoords))
+                        
+                        // 스왑할 두 블록이 일반 블록인 경우에만 매치 체크
+                        if (tempBlockArray[y, x].IsNormal && tempBlockArray[y + 1, x].IsNormal)
                         {
-                            matchedCoords.Remove(new Vector2Int(x, y)); // 현재 블록 좌표는 제외
-                            matchedCoords.Add(new Vector2Int(x, y + 1)); // 스왑된 블록 좌표도 포함
-                            matchList.Add(CalculateBlockMatchWeight(x, y, type, tempBlockArray, new List<Vector2Int>(matchedCoords)));
-                        }
+                            if (CheckForMatchAt(BoardManager.Instance, x, y, tempBlockArray, out int count, out int type, out HashSet<Vector2Int> matchedCoords))
+                            {
+                                matchedCoords.Remove(new Vector2Int(x, y)); // 현재 블록 좌표는 제외
+                                matchedCoords.Add(new Vector2Int(x, y + 1)); // 스왑된 블록 좌표도 포함
+                                matchList.Add(CalculateBlockMatchWeight(x, y, type, tempBlockArray, new List<Vector2Int>(matchedCoords)));
+                            }
 
-                        if (CheckForMatchAt(BoardManager.Instance, x, y + 1, tempBlockArray, out count, out type, out matchedCoords))
-                        {
-                            matchedCoords.Remove(new Vector2Int(x, y + 1)); // 현재 블록 좌표는 제외
-                            matchedCoords.Add(new Vector2Int(x, y)); // 스왑된 블록 좌표도 포함
-                            matchList.Add(CalculateBlockMatchWeight(x, y + 1, type, tempBlockArray, new List<Vector2Int>(matchedCoords)));
-                        }
+                            if (CheckForMatchAt(BoardManager.Instance, x, y + 1, tempBlockArray, out count, out type, out matchedCoords))
+                            {
+                                matchedCoords.Remove(new Vector2Int(x, y + 1)); // 현재 블록 좌표는 제외
+                                matchedCoords.Add(new Vector2Int(x, y)); // 스왑된 블록 좌표도 포함
+                                matchList.Add(CalculateBlockMatchWeight(x, y + 1, type, tempBlockArray, new List<Vector2Int>(matchedCoords)));
+                            }
 
-                        if (CheckCubeMatchesAround(x, y, tempBlockArray, out matchedCoords))
-                        {
-                            matchedCoords.Remove(new Vector2Int(x, y));
-                            matchedCoords.Add(new Vector2Int(x, y + 1));
-                            matchList.Add(CalculateBlockMatchWeight(x, y, 2, tempBlockArray, new List<Vector2Int>(matchedCoords)));
-                        }
+                            if (CheckCubeMatchesAround(x, y, tempBlockArray, out matchedCoords))
+                            {
+                                matchedCoords.Remove(new Vector2Int(x, y));
+                                matchedCoords.Add(new Vector2Int(x, y + 1));
+                                matchList.Add(CalculateBlockMatchWeight(x, y, 2, tempBlockArray, new List<Vector2Int>(matchedCoords)));
+                            }
 
-                        if (CheckCubeMatchesAround(x, y + 1, tempBlockArray, out matchedCoords))
-                        {
-                            matchedCoords.Remove(new Vector2Int(x, y + 1));
-                            matchedCoords.Add(new Vector2Int(x, y));
-                            matchList.Add(CalculateBlockMatchWeight(x, y + 1, 2, tempBlockArray, new List<Vector2Int>(matchedCoords)));
+                            if (CheckCubeMatchesAround(x, y + 1, tempBlockArray, out matchedCoords))
+                            {
+                                matchedCoords.Remove(new Vector2Int(x, y + 1));
+                                matchedCoords.Add(new Vector2Int(x, y));
+                                matchList.Add(CalculateBlockMatchWeight(x, y + 1, 2, tempBlockArray, new List<Vector2Int>(matchedCoords)));
+                            }
                         }
 
                         // 스왑 원상 복구
