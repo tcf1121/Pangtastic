@@ -19,7 +19,10 @@ public class ComboNum : MonoBehaviour
     [SerializeField] private float _scaleDuration = 0.2f;
     private List<Image> _images = new List<Image>();
     private List<RectTransform> _rectTransforms = new List<RectTransform>();
+    private RectTransform _redBangRect;
+    private RectTransform _orangeBangRect;
     private Coroutine _scaleCoroutine;
+    private Vector2 _bangResetAnchoredPos;
 
     private void Awake()
     {
@@ -28,7 +31,10 @@ public class ComboNum : MonoBehaviour
             _images.Add(prefab.GetComponent<Image>());
             _rectTransforms.Add(prefab.GetComponent<RectTransform>());
         }
+        _redBangRect = _redBangPrefab.GetComponent<RectTransform>();
+        _orangeBangRect = _orangeBangPrefab.GetComponent<RectTransform>();
 
+        _bangResetAnchoredPos = _redBangRect.anchoredPosition;
         _comboXPrefab.SetActive(true);
         _comboXPrefab.transform.localScale = Vector3.zero;
     }
@@ -56,54 +62,42 @@ public class ComboNum : MonoBehaviour
         {
             _comboEffectPrefab.SetActive(true);
             _comboEffectPrefab.GetComponent<ParticleSystem>().Play();
-            if (combo / 1000 > 0)
+
+            string comboStr = combo.ToString();
+            int digitCount = comboStr.Length;
+
+            // 콤보 길이에 따라 숫자 활성화/비활성화
+            for (int i = 0; i < _rectTransforms.Count; i++)
             {
-                // 네자리 전부 켜기
-                for (int i = 0; i < _comboPrefabs.Count; i++)
-                {
-                    _comboPrefabs[i].SetActive(true);
-                }
+                _rectTransforms[i].gameObject.SetActive(i < digitCount);
             }
-            else if (combo / 100 > 0)
+
+            // ! 위치 설정
+            Vector2 bangPosition;
+            if (digitCount > 0 && digitCount < _rectTransforms.Count)
             {
-                // 세자리 켜기
-                for (int i = 0; i < _comboPrefabs.Count - 1; i++)
-                {
-                    _comboPrefabs[i].SetActive(true);
-                }
-                _comboPrefabs[_comboPrefabs.Count - 1].SetActive(false);
+                // !를 다음 숫자 위치에 배치 (예: 2자리 콤보일 경우 3번째 자리에 배치)
+                bangPosition = _rectTransforms[digitCount].anchoredPosition;
             }
-            else if (combo / 10 > 0)
+            else
             {
-                // 두자리 켜기
-                for (int i = 0; i < _comboPrefabs.Count - 2; i++)
-                {
-                    _comboPrefabs[i].SetActive(true);
-                }
-                for (int i = _comboPrefabs.Count - 2; i < _comboPrefabs.Count; i++)
-                {
-                    _comboPrefabs[i].SetActive(false);
-                }
+                // 0 또는 4자리 이상일 경우 중앙으로 초기화
+                bangPosition = _bangResetAnchoredPos;
             }
-            else if (combo % 10 > 0)
-            {
-                // 한자리 켜기
-                _comboPrefabs[0].SetActive(true);
-                for (int i = 1; i < _comboPrefabs.Count; i++)
-                {
-                    _comboPrefabs[i].SetActive(false);
-                }
-            }
+            _redBangRect.anchoredPosition = bangPosition;
+            _orangeBangRect.anchoredPosition = bangPosition;
         }
         else
         {
-            // 모두 끄기
+            // 콤보가 표시되지 않는 경우, 모든 것을 끔
             _comboEffectPrefab.SetActive(false);
 
-            for (int i = 0; i < _comboPrefabs.Count; i++)
+            for (int i = 0; i < _rectTransforms.Count; i++)
             {
-                _comboPrefabs[i].SetActive(false);
+                _rectTransforms[i].gameObject.SetActive(false);
             }
+            _redBangRect.anchoredPosition = _bangResetAnchoredPos;
+            _orangeBangRect.anchoredPosition = _bangResetAnchoredPos;
         }
     }
 
@@ -203,7 +197,7 @@ public class ComboNum : MonoBehaviour
     private IEnumerator ComboScaleCoroutine()
     {
         float timer = 0f;
-        _comboEffectPrefab.transform.position = new Vector3 (_comboEffectPrefab.transform.position.x, Camera.main.ScreenToWorldPoint(_orangeComboPrefab.transform.position).y,0);
+        _comboEffectPrefab.transform.position = new Vector3(_comboEffectPrefab.transform.position.x, Camera.main.ScreenToWorldPoint(_orangeComboPrefab.transform.position).y, 0);
         Vector3 effectScale = _comboEffectPrefab.transform.localScale;
         while (timer < _scaleDuration)
         {

@@ -10,6 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 6823904056426768018}
   - component: {fileID: 2895292844725595011}
+  - component: {fileID: 9150751156662669165}
   m_Layer: 0
   m_Name: Coin
   m_TagString: Untagged
@@ -84,3 +85,57 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 1
   m_SpriteSortPoint: 0
+--- !u!114 &9150751156662669165
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4311203844512484936}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d9b3894349883094b9fc970b0c3b20b3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  CoinSprites:
+  - {fileID: 21300000, guid: dd3364f546683264dbfb678e2adbc08b, type: 3}
+  - {fileID: 21300000, guid: e7dbf7ff0ba6e6243bb42a7faab6f8df, type: 3}
+  - {fileID: 21300000, guid: 233b9647dcfcb3c4fbbde22bf0b0153d, type: 3}
+  - {fileID: 21300000, guid: dfb2b8ae9f36546418d37040fa59f213, type: 3}
+  - {fileID: 21300000, guid: fa8ca25f7b54b124eb64db1ad4ae07a9, type: 3}
+  - {fileID: 21300000, guid: 36bd1f2ae864ca14a8201fe73989a82a, type: 3}
+  - {fileID: 21300000, guid: 380ead180b6b73f4d85cea7b54361bde, type: 3}
+  - {fileID: 21300000, guid: dd3364f546683264dbfb678e2adbc08b, type: 3}
+  FadeCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 1
+      inSlope: 0.0000011493574
+      outSlope: 0.0000011493574
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 0.75012493
+      value: 0.77084506
+      inSlope: -0.71207494
+      outSlope: -0.71207494
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.19101413
+    - serializedVersion: 3
+      time: 1
+      value: 0
+      inSlope: -2.2786903
+      outSlope: -2.2786903
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4

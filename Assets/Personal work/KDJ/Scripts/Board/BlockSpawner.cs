@@ -733,6 +733,7 @@ namespace KDJ
                 GameObject blockPrefabSpecial = GetBlockPrefab((int)gemType);
                 if (blockPrefabSpecial == null) return;
                 GameObject blockInstanceSpecial = Instantiate(blockPrefabSpecial, position, Quaternion.identity);
+                blockInstanceSpecial.transform.SetParent(gameObject.transform);
                 newBlock.BlockInstance = blockInstanceSpecial;
             }
 

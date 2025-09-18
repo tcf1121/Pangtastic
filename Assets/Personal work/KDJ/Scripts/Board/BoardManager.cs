@@ -49,6 +49,7 @@ namespace KDJ
         public bool IsUseItem { get; set; } = false;
         public Vector2Int? InitialSwapPosition { get; set; } // 한 턴의 스왑 시작 위치를 기억
         public List<Vector2Int> CurHintPositions = new List<Vector2Int>();
+        public ObjectPool CoinTextPool;
 
         private Coroutine _hintCoroutine;
         private List<Material> _activeHintShaders = new List<Material>();
