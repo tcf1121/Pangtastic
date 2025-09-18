@@ -190,15 +190,15 @@ public class OrderStateController : MonoBehaviour
 
         if (_curCustomer != null && _curCustomer.Type == CustomerType.Normal)
         {
-            timeToReachZero = 60f;
+            timeToReachZero = 135f;
         }
         else if (_curCustomer != null && _curCustomer.Type == CustomerType.Unique)
         {
-            timeToReachZero = 50f;
+            timeToReachZero = 110f;
         }
         else if (_curCustomer != null && _curCustomer.Type == CustomerType.Special)
         {
-            timeToReachZero = 30f;
+            timeToReachZero = 60f;
         }
         else
         {
