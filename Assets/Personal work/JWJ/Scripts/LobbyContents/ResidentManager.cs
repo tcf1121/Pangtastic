@@ -7,7 +7,6 @@ using UnityEngine.ResourceManagement.AsyncOperations;
 public class ResidentManager : MonoBehaviour
 {
     private Dictionary<DestinationType, Transform> _destByType = new Dictionary<DestinationType, Transform>();
-    private List<ResidentController> _residents = new List<ResidentController>();
 
     [SerializeField] private Sprite _greet;
     [SerializeField] private Sprite _workout;
@@ -21,12 +20,6 @@ public class ResidentManager : MonoBehaviour
     {
         BuildDestinationMap();
         LoadConfig();
-    }
-
-    private void Start()
-    {
-        int curStage = Manager.Stage.CurrentStageIndex + 1;
- 
     }
 
     private void LoadConfig()
@@ -72,15 +65,23 @@ public class ResidentManager : MonoBehaviour
         }
     }
 
-    public void RegisterResident(ResidentController controller)
+    public void CheckResident(ResidentController resident)
     {
-        if (controller == null)
+        Debug.Log("주민 체크 시작");
+
+        if (resident == null)
         {
+            Debug.LogError("주민없음");
             return;
         }
-        if (_residents.Contains(controller) == false)
+
+        int curStageLevel = Manager.Stage.CurrentStageIndex + 1;
+
+        if (resident.Resident.UnlockStage > curStageLevel)
         {
-            _residents.Add(controller);
+            Debug.Log($"{resident.Resident.ResidentName}의 해금 레벨 {resident.Resident.UnlockStage}, 현재 스테이지 레벨 {curStageLevel}. 주민 비활성화");
+            
+            resident.gameObject.SetActive(false);
         }
     }
 

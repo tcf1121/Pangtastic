@@ -54,15 +54,24 @@ public class ResidentController : MonoBehaviour
 
         if (_manager != null)
         {
-            _manager.RegisterResident(this);
-            StartCoroutine(WaitForConfigAndStart());
+            _manager.CheckResident(this);
+
+            if (gameObject.activeInHierarchy != false)
+            {
+                StartCoroutine(WaitForConfigAndStart());
+            }
+            
         }
         else
         {
             Debug.LogError("ResidentManager 없음");
         }
-
     }
+
+   //private void OnEnable()
+   //{
+   //    StartCoroutine(WaitForConfigAndStart());
+   //}
 
     private IEnumerator WaitForConfigAndStart()
     {
