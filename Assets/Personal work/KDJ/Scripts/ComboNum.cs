@@ -14,6 +14,7 @@ public class ComboNum : MonoBehaviour
     [SerializeField] private GameObject _redBangPrefab;
     [SerializeField] private GameObject _orangeComboPrefab;
     [SerializeField] private GameObject _orangeBangPrefab;
+    [SerializeField] private GameObject _comboEffectPrefab;
     [SerializeField] private AnimationCurve _scaleCurve;
     [SerializeField] private float _scaleDuration = 0.2f;
     private List<Image> _images = new List<Image>();
@@ -53,6 +54,8 @@ public class ComboNum : MonoBehaviour
     {
         if (combo != 0 && (combo == 2 || combo == 3 || combo == 7 || combo % 5 == 0))
         {
+            _comboEffectPrefab.SetActive(true);
+            _comboEffectPrefab.GetComponent<ParticleSystem>().Play();
             if (combo / 1000 > 0)
             {
                 // 네자리 전부 켜기
@@ -95,6 +98,8 @@ public class ComboNum : MonoBehaviour
         else
         {
             // 모두 끄기
+            _comboEffectPrefab.SetActive(false);
+
             for (int i = 0; i < _comboPrefabs.Count; i++)
             {
                 _comboPrefabs[i].SetActive(false);
@@ -144,6 +149,7 @@ public class ComboNum : MonoBehaviour
         }
         else
         {
+            _comboEffectPrefab.SetActive(false);
             _orangeComboPrefab.SetActive(false);
             _orangeBangPrefab.SetActive(false);
             _redComboPrefab.SetActive(false);
@@ -197,16 +203,21 @@ public class ComboNum : MonoBehaviour
     private IEnumerator ComboScaleCoroutine()
     {
         float timer = 0f;
+        _comboEffectPrefab.transform.position = new Vector3 (_comboEffectPrefab.transform.position.x, Camera.main.ScreenToWorldPoint(_orangeComboPrefab.transform.position).y,0);
+        Vector3 effectScale = _comboEffectPrefab.transform.localScale;
         while (timer < _scaleDuration)
         {
             float scale = _scaleCurve.Evaluate(timer / _scaleDuration);
             _comboXPrefab.transform.localScale = new Vector3(scale, scale, 1f);
+            _comboEffectPrefab.transform.localScale = effectScale * scale;
             timer += Time.deltaTime;
             yield return null;
         }
         _comboXPrefab.transform.localScale = Vector3.one;
+        _comboEffectPrefab.transform.localScale = effectScale;
 
         yield return new WaitForSeconds(3f - _scaleDuration);
+        _comboEffectPrefab.SetActive(false);
         _comboXPrefab.transform.localScale = Vector3.zero;
         _scaleCoroutine = null;
     }
