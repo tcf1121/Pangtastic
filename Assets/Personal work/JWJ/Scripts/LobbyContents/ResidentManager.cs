@@ -1,5 +1,4 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
@@ -78,52 +77,50 @@ public class ResidentManager : MonoBehaviour
         }
     }
 
-    public Transform GetRandomDestination()
+    public Transform PickNextDestination(ResidentSO resident, DestinationType lastDestination)
     {
-        if (_destByType.Count == 0)
+        List<Transform> candidates = new List<Transform>();
+
+        if (resident == null)
         {
+            Debug.Log("주민이 없음");
+            return null;
+        }
+        if (_config == null)
+        {
+            Debug.Log("config 없음");
             return null;
         }
 
-        Transform[] transforms = new Transform[_destByType.Count];
-        _destByType.Values.CopyTo(transforms, 0);
+        bool pickPreferred = UnityEngine.Random.value <= _config.PreferredWeight;
 
-        int rand = UnityEngine.Random.Range(0, transforms.Length);
-        return transforms[rand];
-    }
-
-    public Transform GetDestinationByType(DestinationType type)
-    {
-        if (_destByType.ContainsKey(type) == true)
+        if (pickPreferred)
         {
-            return _destByType[type];
-        }
-        return null;
-    }
-
-    public Transform PickNextDestination(ResidentSO resident)
-    {
-        if (resident == null)
-        {
-            return GetRandomDestination();
-        }
-
-        if (_config != null) //추가됨!!! 설정 로드 완료 시
-        {
-            bool pickPreferred = UnityEngine.Random.value <= _config.PreferredWeight;
-
-            if (pickPreferred == true)
+            foreach (DestinationType type in resident.FavoriteDestinations)
             {
-                Transform fav = GetDestinationByType(resident.FavoriteDestination);
-                if (fav != null)
+                if (_destByType.ContainsKey(type) && type != lastDestination)
                 {
-                    //Debug.Log($"{resident.ResidentName} 선호장소 {resident.FavoriteDestination}로 이동");
-                    return fav;
+                    candidates.Add(_destByType[type]);
                 }
             }
         }
-        
-        return GetRandomDestination();
+
+        if (candidates.Count == 0 || !pickPreferred)
+        {
+            foreach (KeyValuePair<DestinationType, Transform> kvp in _destByType)
+            {
+                if (kvp.Key != lastDestination)
+                {
+                    if (kvp.Value != null)
+                    {
+                        candidates.Add(kvp.Value);
+                    }
+                }
+            }
+        }
+
+        int rand = UnityEngine.Random.Range(0, candidates.Count);
+        return candidates[rand];
     }
 
     public Sprite GetSpriteByState(ResidentState state)
@@ -153,4 +150,34 @@ public class ResidentManager : MonoBehaviour
         }
         return _greet;
     }
+
+    //public Transform GetRandomDestination()
+    //{
+    //    if (_destByType.Count == 0)
+    //    {
+    //        Debug.LogError("딕셔너리 비었음");
+    //        return null;
+    //    }
+    //
+    //    Transform[] transforms = new Transform[_destByType.Count];
+    //    _destByType.Values.CopyTo(transforms, 0);
+    //
+    //    int rand = UnityEngine.Random.Range(0, transforms.Length);
+    //    return transforms[rand];
+    //}
+    //
+    //public Transform GetDestinationByType(DestinationType[] type)
+    //{
+    //    int rand = UnityEngine.Random.Range(0, type.Length);
+    //
+    //    if (_destByType.ContainsKey(type[rand]) == true)
+    //    {
+    //        return _destByType[type[rand]];
+    //    }
+    //    else
+    //    {
+    //        Debug.LogError("장소 타입이 없음");
+    //    }
+    //    return null;
+    //}
 }

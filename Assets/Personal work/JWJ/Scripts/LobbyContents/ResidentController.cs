@@ -30,7 +30,8 @@ public class ResidentController : MonoBehaviour
     private Coroutine _curCo;
 
     private Vector3 _currentDestination;
-    private DestinationType _currentDestinationType;
+    private DestinationType _currentDestinationType = DestinationType.None;
+
 
     private bool _isGreeting = false;
     private bool _isTalking = false;
@@ -130,10 +131,11 @@ public class ResidentController : MonoBehaviour
 
         SetMove(0f, true);
         yield return new WaitForSeconds(_manager.Config.IdleDuration);
-        Transform nextDestination = _manager.PickNextDestination(_resident);
+        Transform nextDestination = _manager.PickNextDestination(_resident, _currentDestinationType);
         _currentDestination = nextDestination.position;
 
         DestinationPoint destination = nextDestination.GetComponent<DestinationPoint>();
+
         _currentDestinationType = destination.Type;
         ChangeState(ResidentState.Move);
     }
@@ -203,7 +205,6 @@ public class ResidentController : MonoBehaviour
         _stateBubble.gameObject.SetActive(true);
         yield return new WaitForSeconds(_manager.Config.GreetDuration);
         _stateBubble.gameObject.SetActive(false);
-
 
         //Debug.Log($"{_resident.ResidentName} 인사 종료");
 
@@ -411,13 +412,13 @@ public class ResidentController : MonoBehaviour
             return;
         }
 
-        if (_isGreeting == true)
-        {
-            Debug.Log("인사 중이라 바쁨");
-            return;
-        }
+        //if (_isGreeting == true)
+        //{
+        //    Debug.Log("인사 중이라 바쁨");
+        //    return;
+        //}
 
-        if (_curState == ResidentState.Move || _curState == ResidentState.Idle)
+        if (_curState != ResidentState.Talk)
         {
             ChangeState(ResidentState.Touched);
 

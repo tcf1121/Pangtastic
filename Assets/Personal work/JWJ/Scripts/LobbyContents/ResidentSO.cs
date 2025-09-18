@@ -5,14 +5,15 @@ using UnityEngine;
 [CreateAssetMenu(fileName = "New Resident", menuName = "PangTasticSO/Resident")]
 public class ResidentSO : ScriptableObject
 {
+    [Header("이름")]
     public string ResidentName;
 
-    public bool IsUnlocked;
+    [Header("해금 스테이지")]
     public int UnlockStage;
 
-    public DestinationType FavoriteDestination;
+    [Header("선호장소 목록")]
+    public DestinationType[] FavoriteDestinations;
 
-    public RewardType RewardType;
-    public int RewardAmount;
-    public int RewardIntervalSeconds;
+    [Header("터치시 대사")]
+    public StringSO[] DialogueTouched;
 }

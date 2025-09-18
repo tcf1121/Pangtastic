@@ -1,5 +1,6 @@
 public enum DestinationType
 {
+    None,
     Store1,
     Store2,
     Store3,
