@@ -20,8 +20,8 @@ jobs:
           labels: |
             검토 요청
             완료된 사항
-            작업 요청
+            수정 요청
         if: >
           github.event.label.name == '검토 요청' ||
           github.event.label.name == '완료된 사항' ||
-          github.event.label.name == '작업 요청'
+          github.event.label.name == '수정 요청'
