@@ -70,21 +70,21 @@ namespace KDJ
         {
             if (blockA == null || blockB == null || blockA.BlockInstance == null || blockB.BlockInstance == null) yield break;
 
-            Vector3 startPosA = blockA.BlockInstance.transform.position;
-            Vector3 startPosB = blockB.BlockInstance.transform.position;
+            Vector3 startPosA = blockA.BlockInstance.transform.localPosition;
+            Vector3 startPosB = blockB.BlockInstance.transform.localPosition;
             float elapsedTime = 0f;
 
             while (elapsedTime < SWAP_DURATION)
             {
                 elapsedTime += Time.deltaTime;
                 float t = Mathf.Clamp01(elapsedTime / SWAP_DURATION);
-                blockA.BlockInstance.transform.position = Vector3.Lerp(startPosA, startPosB, t);
-                blockB.BlockInstance.transform.position = Vector3.Lerp(startPosB, startPosA, t);
+                blockA.BlockInstance.transform.localPosition = Vector3.Lerp(startPosA, startPosB, t);
+                blockB.BlockInstance.transform.localPosition = Vector3.Lerp(startPosB, startPosA, t);
                 yield return null;
             }
 
-            blockA.BlockInstance.transform.position = startPosB;
-            blockB.BlockInstance.transform.position = startPosA;
+            blockA.BlockInstance.transform.localPosition = startPosB;
+            blockB.BlockInstance.transform.localPosition = startPosA;
         }
 
         public bool ValidateAndSetPositions(BoardManager boardManager)

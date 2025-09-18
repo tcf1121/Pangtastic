@@ -1,8 +1,6 @@
-using LHJ;
 using SCR;
+using System.Collections;
 using UnityEngine;
-using UnityEngine.AddressableAssets;
-using UnityEngine.ResourceManagement.AsyncOperations;
 
 namespace KDJ
 {
@@ -21,22 +19,7 @@ namespace KDJ
             IsObstacle = true;
             CanMove = false;
             DountType = (GemType)Random.Range(0, 6);
-            // string path = $"Assets/Imports/Image/Donut/Iced_{DountType}.png";
-            //Debug.Log(path);
-            //AsyncOperationHandle<Sprite> handle = Addressables.LoadAssetAsync<Sprite>(path);
-            //handle.Completed += OnSpriteLoadCompleted;
         }
-
-        // private void OnSpriteLoadCompleted(AsyncOperationHandle<Sprite> handle)
-        // {
-        //     if (handle.Status == AsyncOperationStatus.Succeeded)
-        //     {
-        //         Debug.Log("가져오기 완료");
-        //         iceSprite = handle.Result;
-        //         SetSprite();
-        //         Debug.Log(iceSprite);
-        //     }
-        // }
 
         public void SetSprite()
         {
@@ -44,12 +27,6 @@ namespace KDJ
             {
                 IceObject.GetComponent<SpriteRenderer>().sprite = iceSprite;
             }
-        }
-
-        public Sprite GetIceImage()
-        {
-            Debug.Log($"파일명{iceSprite}");
-            return iceSprite;
         }
 
         public override void SplashDamage(GemType type)
@@ -63,9 +40,29 @@ namespace KDJ
 
         public override void Broken()
         {
-            Object.Destroy(BlockInstance);
-            BoardManager.Instance.Spawner.GameBoardData.BlockArray[Y, X].IsNormal = true;
-            BoardManager.Instance.Spawner.GameBoardData.BlockArray[Y, X].CanMove = true;
+            _brokenCoroutine = BoardManager.Instance.StartCoroutine(BrokenAnimation(X, Y));
+            BoardManager.Instance.Spawner.GameBoardData.SetOverlayBlock(X, Y, null);
+        }
+
+        private IEnumerator BrokenAnimation(int x, int y)
+        {
+            BoardManager.Instance.IsWaitingForAnimation = true;
+            GameObject blockObject = BoardManager.Instance.Spawner.GameBoardData.GetOverlayBlock(x, y).BlockInstance;
+            float timer = 0f;
+            while (timer < 0.15f)
+            {
+                timer += Time.deltaTime;
+                blockObject.transform.localScale = Vector3.Lerp(Vector3.one, Vector3.zero, timer / 0.1f);
+                yield return null;
+            }
+
+            if (blockObject != null)
+                Object.Destroy(blockObject);
+            
+            BoardManager.Instance.Spawner.GameBoardData.BlockArray[y, x].IsNormal = true;
+            BoardManager.Instance.Spawner.GameBoardData.BlockArray[y, x].CanMove = true;
+            BoardManager.Instance.IsWaitingForAnimation = false;
+            _brokenCoroutine = null;
         }
     }
 }

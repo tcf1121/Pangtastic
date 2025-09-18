@@ -25,19 +25,5 @@ namespace KDJ
             InGameManager.AddCoin(10);
             base.Broken();
         }
-
-        // public override Block Clone()
-        // {
-        //     return new Coin(Pos.x, Pos.y)
-        //     {
-        //         CurrentHP = this.CurrentHP,
-        //         Pos = this.Pos,
-        //         Score = this.Score,
-        //         BlockInstance = this.BlockInstance,
-        //         GemType = this.GemType,
-        //         IsObstacle = this.IsObstacle,
-        //         CanMove = this.CanMove,
-        //     };
-        // }
     }
 }

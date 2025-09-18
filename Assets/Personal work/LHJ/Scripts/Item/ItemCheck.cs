@@ -23,8 +23,10 @@ namespace LHJ
         [SerializeField] private float _whiskRotateMs;
         [SerializeField] private float _whiskAreaFadeMs;
 
+        [Header("도넛판")]
         [SerializeField] private Transform _boardRoot;
         [SerializeField] private Transform _poolsRoot;
+        [SerializeField] private float _donutMoveDist;
 
         [Header("커피")]
         [SerializeField] private RectTransform _coffeeIconRt;
@@ -78,6 +80,7 @@ namespace LHJ
             var order = FindObjectOfType<OrderStateController>();
 
             order.AddPatience(amount);
+            Manager.Audio.PlaySFX("Coffe_Use");
             PlayCoffeeFxFromButton();
         }
 
@@ -124,6 +127,7 @@ namespace LHJ
         // 가위: 선택 지점의 가로+세로 제거
         private IEnumerator ApplyScissor(Vector2Int pos)
         {
+            Manager.Audio.PlaySFX("Sciccors_Use");
             var sp = _board.Spawner;
             int w = sp.GameBoardData.BlockPlate.BlockPlateWidth;
             int h = sp.GameBoardData.BlockPlate.BlockPlateHeight;
@@ -310,12 +314,13 @@ namespace LHJ
 
             if (destroyedCount > 0)
                 _board.UpdateUI(destroyedCount * 10);
-            yield return new WaitUntil(() => LHJ.SpecialBlockEffect.effectRunning == false);
+            yield return new WaitUntil(() => SpecialBlockEffect.effectRunning == false);
             _board.ChangeState(new RefillState());
         }
 
         private IEnumerator ApplyWhisk(Vector2Int pos)
         {
+            Manager.Audio.PlaySFX("Whisk_Use");
             var sp = _board.Spawner;
             int w = sp.GameBoardData.BlockPlate.BlockPlateWidth;
             int h = sp.GameBoardData.BlockPlate.BlockPlateHeight;
@@ -435,7 +440,7 @@ namespace LHJ
             }
 
             if (destroyedCount > 0) _board.UpdateUI(destroyedCount * 10);
-            yield return new WaitUntil(() => LHJ.SpecialBlockEffect.effectRunning == false);
+            yield return new WaitUntil(() => SpecialBlockEffect.effectRunning == false);
             _board.ChangeState(new RefillState());
         }
 
@@ -443,21 +448,22 @@ namespace LHJ
         public void UseDonutPan()
         {
             if (_board != null) _board.ClearItemSelection();
+            BoardManager.Instance.HintManager.StopHintTimer();
             StartCoroutine(RegenSpecialBlockRoutine());
         }
 
         // 보드를 초기화 후 특수 블록 하나 생성하는 루틴
         private IEnumerator RegenSpecialBlockRoutine()
         {
+            Manager.Audio.PlaySFX("DonutPan_Use");
             float moveDuration = 2.0f;
-            float moveDist = 10f;
 
             Vector3 boardStart = _boardRoot.localPosition;
-            Vector3 poolStart = _poolsRoot.localPosition;
+            Vector3 poolStart = _poolsRoot.position;
 
             var down = DOTween.Sequence()
-                .Join(_boardRoot.DOLocalMoveY(boardStart.y - moveDist, moveDuration))
-                .Join(_poolsRoot.DOLocalMoveY(poolStart.y - moveDist, moveDuration));
+                .Join(_boardRoot.DOLocalMoveY(boardStart.y - _donutMoveDist, moveDuration))
+                .Join(_poolsRoot.DOLocalMoveY(poolStart.y - _donutMoveDist, moveDuration));
             yield return down.WaitForCompletion();
 
             _board.Spawner.Shuffle(_board);
@@ -465,10 +471,13 @@ namespace LHJ
             _board.ChangeState(new RefillState());
             InjectRandomSpecial();
 
+            Manager.Audio.PlaySFX("DonutPan_Use");
             var up = DOTween.Sequence()
                 .Join(_boardRoot.DOLocalMove(boardStart, moveDuration))
                 .Join(_poolsRoot.DOLocalMove(poolStart, moveDuration));
             yield return up.WaitForCompletion();
+            BoardManager.Instance.HintManager.StopHintTimer();
+            BoardManager.Instance.ChangeState(new ReadyState());
         }
 
         // 랜덤 위치에 특수 블록 생성
@@ -509,12 +518,22 @@ namespace LHJ
             GemType special = (GemType)Random.Range(min, max + 1);
 
 
-            // 데이터+프리팹 동시 생성
             sp.SpawnBlock(pick.x, pick.y, special, _board.BlockMover);
+            var cell = sp.GameBoardData.BlockArray[pick.y, pick.x];
+            if (cell != null && cell.BlockInstance != null)
+            {
+                Transform t = cell.BlockInstance.transform;
+
+                if (_poolsRoot != null && !t.IsChildOf(_poolsRoot) && !_boardRoot.IsChildOf(t))
+                {
+                    t.SetParent(_poolsRoot, true);
+                }
+                t.localPosition = new Vector3(t.localPosition.x, t.localPosition.y - _donutMoveDist, t.localPosition.z);
+            }
         }
         private void TriggerSpecial(Vector2Int p, GemType t)
         {
-            var sbe = FindObjectOfType<LHJ.SpecialBlockEffect>();
+            var sbe = FindObjectOfType<SpecialBlockEffect>();
             if (sbe == null) return;
 
             var gb = _board.Spawner.GameBoardData;
@@ -543,7 +562,7 @@ namespace LHJ
             Vector2 p2 = p0 + new Vector2(-_coffeeZigzagAmp, _coffeeZigzagHeight * 0.66f);
             Vector2 p3 = p0 + new Vector2(+_coffeeZigzagAmp, _coffeeZigzagHeight);
 
-            var seq = DG.Tweening.DOTween.Sequence();
+            var seq = DOTween.Sequence();
             seq.Append(fxRt.DOAnchorPos(p1, dur / 3f).SetEase(Ease.Linear));
             seq.Append(fxRt.DOAnchorPos(p2, dur / 3f).SetEase(Ease.Linear));
             seq.Append(fxRt.DOAnchorPos(p3, dur / 3f).SetEase(Ease.Linear));
