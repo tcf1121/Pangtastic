@@ -53,7 +53,8 @@ public class ClearUI : MonoBehaviour
     {
         MoveUIItem(star, target, () =>
         {
-            Manager.User.AddStar(1);
+            Manager.User.AddStar(Manager.Stage.CurrentStage.LevelValue);
+            Manager.Stage.AdvanceStage();
             Manager.Audio.PlaySFX("Star_Add");
             star.gameObject.SetActive(false);
             completedCount++;
