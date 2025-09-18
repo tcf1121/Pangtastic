@@ -21,6 +21,9 @@ public class StageSO : ScriptableObject
     [Header("주문 수")]
     [Min(1)] public int OrderCount;
 
+    [Header("레벨 수치")]
+    public int LevelValue;
+
     [Header("스테이지 등장 레시피 목록")]
     public RecipeSO[] StageRecipes;
 

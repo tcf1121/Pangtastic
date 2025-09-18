@@ -67,7 +67,7 @@ public class CustomerFlowController : MonoBehaviour
 
     private void OnOrderSegmentCleared(CustomerSO curCustomer, float percentage)
     {
-        if(curCustomer.Type != CustomerType.Special)
+        if (curCustomer.Type != CustomerType.Special)
         {
             return;
         }
@@ -118,8 +118,6 @@ public class CustomerFlowController : MonoBehaviour
         int percent = Mathf.FloorToInt(percentage); //int 로 변경
 
         Debug.Log($"스테이지 클리어. 보상 기준 인내심{percent}");
-
-        Manager.Stage.AdvanceStage();
 
         List<GemType> rewardGive = new();
         int num = 0;

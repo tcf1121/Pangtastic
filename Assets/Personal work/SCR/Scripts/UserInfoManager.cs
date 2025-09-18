@@ -276,6 +276,20 @@ public class UserInfoManager : Singleton<UserInfoManager>
         return currentData.PlaceInfo.CurMisson;
     }
 
+    public int[] GetCat()
+    {
+        int[] cat = new int[2];
+        cat[0] = currentData.UserInfo.Body;
+        cat[1] = currentData.UserInfo.Face;
+
+        return cat;
+    }
+
+    public void SetCat(int body, int face)
+    {
+        currentData.UserInfo.Body = body;
+        currentData.UserInfo.Face = face;
+    }
 
 }
 public enum ItemType
@@ -305,7 +319,8 @@ public class UserInfo
     public HeartInfo Heart { get; set; } = new HeartInfo();
     public int Coin { get; set; } = 0;
     public int Star { get; set; } = 0;
-    public int Profile { get; set; } = 0;
+    public int Body { get; set; } = 0;
+    public int Face { get; set; } = 0;
 }
 
 [Serializable]
