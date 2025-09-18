@@ -8,12 +8,22 @@ public class AdSystem : Singleton<AdSystem>
 {
     //public static AdSystem Instance { get; private set; }
 
+    // ===================== Rewarded Interstitial (보상형) =====================
     private RewardedInterstitialAd _rewardedInterstitialAd;
     
-    private AppOpenAd appOpenAd;
-    private DateTime appOpenAdLoadTime;
-    private bool hasShownAtStartup = false; // 앱을 처음 시작했는지 체크
-
+    
+    // ===================== App Open Event Ad (오프닝) =====================
+    private AppOpenAd _appOpenAd;
+    private DateTime _appOpenAdLoadTime;
+    private bool _hasShownAtStartup = false; // 앱을 처음 시작했는지 체크
+    
+    // ===================== Interstitial Ad (전면) =====================
+    private InterstitialAd _interstitialAd;
+    
+    
+    // ===================== Banner Ad (배너) =====================
+    private BannerView _bannerView;
+    
     protected override void Awake()
     {
         base.Awake();
@@ -21,7 +31,6 @@ public class AdSystem : Singleton<AdSystem>
 
     private void Start()
     {
-        // ===================== Rewarded Interstitial =====================
         MobileAds.Initialize((InitializationStatus initstatus) =>
         {
             if (initstatus == null)
@@ -29,16 +38,24 @@ public class AdSystem : Singleton<AdSystem>
                 Debug.LogError("Google Mobile Ads initialization failed.");
                 return;
             }
-
-            LoadAD();
             Debug.Log("Google Mobile Ads initialization complete.");
+            
+            // ===================== Rewarded Interstitial =====================
+            LoadAD();
+            
+            // ===================== App Open Ad =====================
+            LoadAppOpenAd();
+            
+            // ===================== Interstitial Ad =====================
+            LoadInterstitialAd();
+            
+            // ===================== Banner Ad =====================
+            BannerCreateView();
         });
         
         // ===================== App Open Event Ad =====================
-        LoadAppOpenAd();
         AppStateEventNotifier.AppStateChanged += OnAppStateChanged;
     }
-    
 
     // ===================== Rewarded Interstitial =====================
     /// <summary>
@@ -113,10 +130,10 @@ public class AdSystem : Singleton<AdSystem>
     public void LoadAppOpenAd()
     {
         // Clean up the old ad before loading a new one.
-        if (appOpenAd != null)
+        if (_appOpenAd != null)
         {
-            appOpenAd.Destroy();
-            appOpenAd = null;
+            _appOpenAd.Destroy();
+            _appOpenAd = null;
         }
 
         Debug.Log("Loading the app open ad.");
@@ -139,20 +156,20 @@ public class AdSystem : Singleton<AdSystem>
                 Debug.Log("App open ad loaded with response : "
                           + ad.GetResponseInfo());
 
-                appOpenAd = ad;
-                appOpenAdLoadTime = DateTime.UtcNow;
-                RegisterEventHandlers(ad);
+                _appOpenAd = ad;
+                _appOpenAdLoadTime = DateTime.UtcNow;
+                OpenAdRegisterEventHandlers(ad);
                 
                 // 앱 처음 시작에서만 적용
-                if (!hasShownAtStartup)
+                if (!_hasShownAtStartup)
                 {
-                    hasShownAtStartup = true;
+                    _hasShownAtStartup = true;
                     ShowAppOpenAd();
                 }
             });
     }
     
-    private void RegisterEventHandlers(AppOpenAd ad)
+    private void OpenAdRegisterEventHandlers(AppOpenAd ad)
     {
         // Raised when the ad is estimated to have earned money.
         // 수익 발생시
@@ -188,8 +205,8 @@ public class AdSystem : Singleton<AdSystem>
         ad.OnAdFullScreenContentClosed += () =>
         {
             Debug.Log("App open ad full screen content closed.");
-            appOpenAd.Destroy();
-            appOpenAd = null;
+            _appOpenAd.Destroy();
+            _appOpenAd = null;
             LoadAppOpenAd();
         };
         // Raised when the ad failed to open full screen content.
@@ -198,8 +215,8 @@ public class AdSystem : Singleton<AdSystem>
         {
             Debug.LogError("App open ad failed to open full screen content " +
                            "with error : " + error);
-            appOpenAd.Destroy();
-            appOpenAd = null;
+            _appOpenAd.Destroy();
+            _appOpenAd = null;
             LoadAppOpenAd();
         };
     }
@@ -228,17 +245,17 @@ public class AdSystem : Singleton<AdSystem>
     }
     private bool IsAppOpenAdAvailable()
     {
-        return appOpenAd != null
-               && appOpenAd.CanShowAd()
-               && (DateTime.UtcNow - appOpenAdLoadTime).TotalHours < 4; // 만료 방지
+        return _appOpenAd != null
+               && _appOpenAd.CanShowAd()
+               && (DateTime.UtcNow - _appOpenAdLoadTime).TotalHours < 4; // 만료 방지
     }
     
     public void ShowAppOpenAd()
     {
-        if (appOpenAd != null && appOpenAd.CanShowAd())
+        if (_appOpenAd != null && _appOpenAd.CanShowAd())
         {
             Debug.Log("Showing app open ad.");
-            appOpenAd.Show();
+            _appOpenAd.Show();
         }
         else
         {
@@ -246,5 +263,152 @@ public class AdSystem : Singleton<AdSystem>
             LoadAppOpenAd();
         }
     }
+    
+    // ===================== Interstitial Ad =====================
+    public void LoadInterstitialAd()
+    {
+        if (_interstitialAd != null)
+        {
+            _interstitialAd.Destroy();
+            _interstitialAd = null;
+        }
 
+        Debug.Log("Loading interstitial ad...");
+
+        var adRequest = new AdRequest();
+        InterstitialAd.Load("ca-app-pub-3940256099942544/1033173712", adRequest,
+            (InterstitialAd ad, LoadAdError error) =>
+            {
+                if (error != null || ad == null)
+                {
+                    Debug.LogError("Interstitial failed to load: " + error);
+                    return;
+                }
+                // The ad loaded successfully.
+                Debug.Log("Interstitial loaded.");
+                _interstitialAd = ad;
+
+                // 이벤트 등록
+                InterstitialListenToAdEvents(ad);
+            });
+    }
+    
+    public void ShowInterstitialAd()
+    {
+        if (_interstitialAd != null && _interstitialAd.CanShowAd())
+        {
+            Debug.Log("Showing interstitial ad.");
+            _interstitialAd.Show();
+            _interstitialAd = null; 
+        }
+        else
+        {
+            Debug.LogWarning("Interstitial ad not ready.");
+            LoadInterstitialAd();
+        }
+    }
+    
+    void InterstitialListenToAdEvents(InterstitialAd interstitialAd)
+    {
+        // [START ad_events]
+        interstitialAd.OnAdPaid += (AdValue adValue) =>
+        {
+            // Raised when the ad is estimated to have earned money.
+        };
+        interstitialAd.OnAdImpressionRecorded += () =>
+        {
+            // Raised when an impression is recorded for an ad.
+        };
+        interstitialAd.OnAdClicked += () =>
+        {
+            // Raised when a click is recorded for an ad.
+        };
+        interstitialAd.OnAdFullScreenContentOpened += () =>
+        {
+            // Raised when the ad opened full screen content.
+        };
+        interstitialAd.OnAdFullScreenContentClosed += () =>
+        {
+            LoadInterstitialAd();
+        };
+        interstitialAd.OnAdFullScreenContentFailed += (AdError error) =>
+        {
+            LoadInterstitialAd();
+        };
+        // [END ad_events]]
+    }
+    
+    // ===================== Banner Ad (배너) =====================
+    public void BannerCreateView()
+    {
+        Debug.Log("Creating banner view");
+
+        // If we already have a banner, destroy the old one.
+        if (_bannerView != null)
+        {
+            BannerDestroyAd();
+        }
+
+        // Create a 320x50 banner at top of the screen
+        _bannerView = new BannerView("ca-app-pub-3940256099942544/6300978111", AdSize.Banner, AdPosition.Bottom);
+        BannerListenToAdEvents();
+        
+        var adRequest = new AdRequest();
+        _bannerView.LoadAd(adRequest);
+    }
+    
+    private void BannerListenToAdEvents()
+    {
+        // Raised when an ad is loaded into the banner view.
+        _bannerView.OnBannerAdLoaded += () =>
+        {
+            Debug.Log("Banner view loaded an ad with response : "
+                      + _bannerView.GetResponseInfo());
+        };
+        // Raised when an ad fails to load into the banner view.
+        _bannerView.OnBannerAdLoadFailed += (LoadAdError error) =>
+        {
+            Debug.LogError("Banner view failed to load an ad with error : "
+                           + error);
+        };
+        // Raised when the ad is estimated to have earned money.
+        _bannerView.OnAdPaid += (AdValue adValue) =>
+        {
+            Debug.Log(String.Format("Banner view paid {0} {1}.",
+                adValue.Value,
+                adValue.CurrencyCode));
+        };
+        // Raised when an impression is recorded for an ad.
+        _bannerView.OnAdImpressionRecorded += () =>
+        {
+            Debug.Log("Banner view recorded an impression.");
+        };
+        // Raised when a click is recorded for an ad.
+        _bannerView.OnAdClicked += () =>
+        {
+            Debug.Log("Banner view was clicked.");
+        };
+        // Raised when an ad opened full screen content.
+        _bannerView.OnAdFullScreenContentOpened += () =>
+        {
+            BannerCreateView();
+            Debug.Log("Banner view full screen content opened.");
+        };
+        // Raised when the ad closed full screen content.
+        _bannerView.OnAdFullScreenContentClosed += () =>
+        {
+            BannerCreateView();
+            Debug.Log("Banner view full screen content closed.");
+        };
+    }
+    
+    public void BannerDestroyAd()
+    {
+        if (_bannerView != null)
+        {
+            Debug.Log("Destroying banner view.");
+            _bannerView.Destroy();
+            _bannerView = null;
+        }
+    }
 }
