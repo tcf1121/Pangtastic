@@ -8,6 +8,7 @@ public class MenuUI : MonoBehaviour
 {
     [SerializeField] private List<Button> menuBtns;
     [SerializeField] private List<GameObject> menuPanels;
+    [SerializeField] private GameObject shopMenu;
     [SerializeField] private MapMover mapMover;
     [SerializeField] private List<Transform> _roomCameraPosList;
 
@@ -27,6 +28,9 @@ public class MenuUI : MonoBehaviour
     {
         for (int i = 0; i < menuBtns.Count; i++)
         {
+            if (i == 0) shopMenu.SetActive(true);
+            else shopMenu.SetActive(false);
+
             if (i == index)
             {
                 menuPanels[i].SetActive(true);

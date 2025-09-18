@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using TMPro;
+using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.Localization.Settings;
 using UnityEngine.UI;
@@ -25,6 +26,7 @@ public class OutGameManager : MonoBehaviour
     void Awake()
     {
         instate = this;
+        Manager.Ad.BannerCreateView();
         _settingBtn.onClick.AddListener(SetStage);
         foreach (var btn in _lobbyButtons)
             btn.onClick.AddListener(PushButton);

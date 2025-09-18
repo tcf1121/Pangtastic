@@ -73,7 +73,7 @@ public class FirebaseManager : Singleton<FirebaseManager>
     {
         if (user != null)
         {
-            return user.DisplayName;
+            return user.UserId;
         }
         return null;
     }
@@ -131,7 +131,7 @@ public class FirebaseManager : Singleton<FirebaseManager>
     public async Task DownloadUserData()
     {
 
-        var task = Manager.DB.GetUserPath(GetProviderIdentifier()).GetValueAsync();
+        var task = Manager.DB.GetUserPath(GetUid()).GetValueAsync();
 
         await task;
 
@@ -168,7 +168,7 @@ public class FirebaseManager : Singleton<FirebaseManager>
         Manager.User.SetLeaveTime(DateTime.Now.ToString("O"));
         string json = JsonConvert.SerializeObject(Manager.User.GetCurrentUserData());
 
-        var task = dbRef.Child("users").Child(GetProviderIdentifier()).SetRawJsonValueAsync(json);
+        var task = dbRef.Child("users").Child(GetUid()).SetRawJsonValueAsync(json);
         await task;
 
         if (task.Exception != null)
@@ -186,7 +186,7 @@ public class FirebaseManager : Singleton<FirebaseManager>
         Manager.User.SetLeaveTime(DateTime.Now.ToString("O"));
         string json = JsonConvert.SerializeObject(Manager.User.GetCurrentUserData());
 
-        var task = dbRef.Child("guests").Child(GetProviderIdentifier()).SetRawJsonValueAsync(json);
+        var task = dbRef.Child("guests").Child(GetUid()).SetRawJsonValueAsync(json);
         await task;
 
         if (task.Exception != null)
