@@ -2,6 +2,7 @@ using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 using KDJ.States;
+using LHJ;
 
 namespace KDJ
 {
@@ -38,7 +39,7 @@ namespace KDJ
         {
             while (true)
             {
-                if (!(_boardManager.CurrentState is ReadyState) || _boardManager.MatchCombo.CurCombo != 0)
+                if (!(_boardManager.CurrentState is ReadyState) || _boardManager.MatchCombo.CurCombo != 0 || SpecialBlockEffect.effectRunning)
                 {
                     yield return null;
                     continue;
