@@ -22,6 +22,12 @@ public class ResidentManager : MonoBehaviour
         BuildDestinationMap();
         LoadConfig();
     }
+
+    private void Start()
+    {
+        
+    }
+
     private void LoadConfig()
     {
         AsyncOperationHandle<ResidentConfigSO> handle = Addressables.LoadAssetAsync<ResidentConfigSO>("ResidentConfigSO");

@@ -22,8 +22,6 @@ public class ResidentConfigSO : ScriptableObject
     public float InteractDuration = 5f;
     [Header("운동 상태 시간")]
     public float WorkoutDuration = 7f;
-    [Header("인사 상태 시간")]
-    public float GreetDuration = 1.2f;
     [Header("이야기 상태 시간")]
     public float TalkDuration = 5f;
     [Header("터치 상태 시간")]
@@ -31,9 +29,6 @@ public class ResidentConfigSO : ScriptableObject
 
     [Header("터치 쿨다운")]
     public float TouchCooldown = 1f;
-
-    [Header("주민들끼리 인사 쿨다운")]
-    public float GreetCooldown = 3f;
 
     [Header("주민들끼리 대화 쿨다운")]
     public float TalkCooldown = 3f;
