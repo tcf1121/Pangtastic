@@ -119,6 +119,7 @@ public class StageImporter
             }
 
             stage.StageID = stage_id;
+            stage.LevelValue = level_id;
             stage.MaxGoldGain = max_gold_gain;
 
             string customerSOPath = customerSoDir + "/Customer_" + customer_id + ".asset"; // 손님 SO 경로

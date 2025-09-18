@@ -23,6 +23,7 @@ namespace LHJ
         [SerializeField] private float _whiskRotateMs;
         [SerializeField] private float _whiskAreaFadeMs;
 
+        [Header("도넛판")]
         [SerializeField] private Transform _boardRoot;
         [SerializeField] private Transform _poolsRoot;
         [SerializeField] private float _donutMoveDist;
@@ -79,6 +80,7 @@ namespace LHJ
             var order = FindObjectOfType<OrderStateController>();
 
             order.AddPatience(amount);
+            Manager.Audio.PlaySFX("Coffe_Use");
             PlayCoffeeFxFromButton();
         }
 
@@ -125,6 +127,7 @@ namespace LHJ
         // 가위: 선택 지점의 가로+세로 제거
         private IEnumerator ApplyScissor(Vector2Int pos)
         {
+            Manager.Audio.PlaySFX("Sciccors_Use");
             var sp = _board.Spawner;
             int w = sp.GameBoardData.BlockPlate.BlockPlateWidth;
             int h = sp.GameBoardData.BlockPlate.BlockPlateHeight;
@@ -311,12 +314,13 @@ namespace LHJ
 
             if (destroyedCount > 0)
                 _board.UpdateUI(destroyedCount * 10);
-            yield return new WaitUntil(() => LHJ.SpecialBlockEffect.effectRunning == false);
+            yield return new WaitUntil(() => SpecialBlockEffect.effectRunning == false);
             _board.ChangeState(new RefillState());
         }
 
         private IEnumerator ApplyWhisk(Vector2Int pos)
         {
+            Manager.Audio.PlaySFX("Whisk_Use");
             var sp = _board.Spawner;
             int w = sp.GameBoardData.BlockPlate.BlockPlateWidth;
             int h = sp.GameBoardData.BlockPlate.BlockPlateHeight;
@@ -451,6 +455,7 @@ namespace LHJ
         // 보드를 초기화 후 특수 블록 하나 생성하는 루틴
         private IEnumerator RegenSpecialBlockRoutine()
         {
+            Manager.Audio.PlaySFX("DonutPan_Use");
             float moveDuration = 2.0f;
 
             Vector3 boardStart = _boardRoot.localPosition;
@@ -466,6 +471,7 @@ namespace LHJ
             _board.ChangeState(new RefillState());
             InjectRandomSpecial();
 
+            Manager.Audio.PlaySFX("DonutPan_Use");
             var up = DOTween.Sequence()
                 .Join(_boardRoot.DOLocalMove(boardStart, moveDuration))
                 .Join(_poolsRoot.DOLocalMove(poolStart, moveDuration));
