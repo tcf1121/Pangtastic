@@ -51,7 +51,6 @@ public class ResidentController : MonoBehaviour
         _stateBubble = GetComponentInChildren<StateBubble>();
         _manager = FindObjectOfType<ResidentManager>();
         _agent.autoBraking = true;
-        _stateBubble.gameObject.SetActive(false);
 
         if (_manager != null)
         {
@@ -127,7 +126,11 @@ public class ResidentController : MonoBehaviour
         //Debug.Log($"현재상태 : {_curState}");
 
         SetMove(0f, true);
+
+        _stateBubble.IconUI(true);
         yield return new WaitForSeconds(_manager.Config.IdleDuration);
+        _stateBubble.IconUI(false);
+
         Transform nextDestination = _manager.PickNextDestination(_resident, _currentDestinationType);
         _currentDestination = nextDestination.position;
 
@@ -185,9 +188,9 @@ public class ResidentController : MonoBehaviour
         _isLookingAround = true;
 
         SetMove(0f, true);
-        _stateBubble.gameObject.SetActive(true);
+        _stateBubble.IconUI(true);
         yield return new WaitForSeconds(_manager.Config.InteractDuration);
-        _stateBubble.gameObject.SetActive(false);
+        _stateBubble.IconUI(false);
 
         ChangeState(ResidentState.Idle);
         
@@ -200,9 +203,9 @@ public class ResidentController : MonoBehaviour
         //Debug.Log($" {_resident.ResidentName} 대화 시작");
 
         LookAtEachOther();
-        _stateBubble.gameObject.SetActive(true);
+        _stateBubble.IconUI(true);
         yield return new WaitForSeconds(_manager.Config.TalkDuration);
-        _stateBubble.gameObject.SetActive(false);
+        _stateBubble.IconUI(false);
 
         //Debug.Log($"{_resident.ResidentName} 대화 종료"); 
         _peerTransform = null;
@@ -215,9 +218,9 @@ public class ResidentController : MonoBehaviour
         SetMove(0f, true);
         //Debug.Log("운동중");
         _isWorkout = true;
-        _stateBubble.gameObject.SetActive(true);
+        _stateBubble.IconUI(true);
         yield return new WaitForSeconds(_manager.Config.WorkoutDuration);
-        _stateBubble.gameObject.SetActive(false);
+        _stateBubble.IconUI(false);
 
         ChangeState(ResidentState.Idle);
     }
@@ -227,9 +230,9 @@ public class ResidentController : MonoBehaviour
         SetMove(0f, true);
         _isTouched = true;
 
-        //_stateBubble.gameObject.SetActive(true);
+        _stateBubble.ChatUI(_resident ,true);
         yield return new WaitForSeconds(_manager.Config.TouchDuration);
-        //_stateBubble.gameObject.SetActive(false);
+        _stateBubble.ChatUI(_resident, false);
 
         if (_lastState == ResidentState.Move)
         {

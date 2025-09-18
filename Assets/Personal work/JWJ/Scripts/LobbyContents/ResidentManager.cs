@@ -25,7 +25,8 @@ public class ResidentManager : MonoBehaviour
 
     private void Start()
     {
-        
+        int curStage = Manager.Stage.CurrentStageIndex + 1;
+ 
     }
 
     private void LoadConfig()
@@ -156,34 +157,4 @@ public class ResidentManager : MonoBehaviour
         }
         return _greet;
     }
-
-    //public Transform GetRandomDestination()
-    //{
-    //    if (_destByType.Count == 0)
-    //    {
-    //        Debug.LogError("딕셔너리 비었음");
-    //        return null;
-    //    }
-    //
-    //    Transform[] transforms = new Transform[_destByType.Count];
-    //    _destByType.Values.CopyTo(transforms, 0);
-    //
-    //    int rand = UnityEngine.Random.Range(0, transforms.Length);
-    //    return transforms[rand];
-    //}
-    //
-    //public Transform GetDestinationByType(DestinationType[] type)
-    //{
-    //    int rand = UnityEngine.Random.Range(0, type.Length);
-    //
-    //    if (_destByType.ContainsKey(type[rand]) == true)
-    //    {
-    //        return _destByType[type[rand]];
-    //    }
-    //    else
-    //    {
-    //        Debug.LogError("장소 타입이 없음");
-    //    }
-    //    return null;
-    //}
 }
