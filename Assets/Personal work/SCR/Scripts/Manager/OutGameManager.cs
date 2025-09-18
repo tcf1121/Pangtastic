@@ -14,6 +14,7 @@ public class OutGameManager : MonoBehaviour
     [SerializeField] private TMP_Text _stageButtonText;
     [SerializeField] private GameObject _accountLinkingPopup;
     [SerializeField] private List<Button> _lobbyButtons;
+    [SerializeField] private GameObject _adPanel;
     private string DROPDOWN_KEY = "BGM_Setting";
     private int _currentPlace;
 

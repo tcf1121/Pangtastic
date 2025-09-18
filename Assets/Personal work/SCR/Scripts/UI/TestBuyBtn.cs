@@ -22,11 +22,7 @@ public class TestBuyBtn : MonoBehaviour
         }
         else if (_itemType == TestBuyType.Heart)
         {
-            Manager.User.AddHeart();
-            Manager.User.AddHeart();
-            Manager.User.AddHeart();
-            Manager.User.AddHeart();
-            Manager.User.AddHeart();
+            Manager.User.InfinityHeart(0.5f);
         }
         else if (_itemType == TestBuyType.ItemPack)
         {
