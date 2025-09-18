@@ -2,32 +2,36 @@ using GoogleMobileAds.Api;
 using GoogleMobileAds.Common;
 using System;
 using UnityEngine;
-using AdSize = GoogleMobileAds.Api.AdSize;
+//using AdSize = GoogleMobileAds.Api.AdSize;
 
 
 public class AdSystem : Singleton<AdSystem>
 {
     //public static AdSystem Instance { get; private set; }
-
+    private const string RemoveAD = "RemoveAD";
+    public bool RemovedAD { get { return _removedAD; } }
+    private bool _removedAD;
     // ===================== Rewarded Interstitial (보상형) =====================
     private RewardedInterstitialAd _rewardedInterstitialAd;
-    
-    
+
+
     // ===================== App Open Event Ad (오프닝) =====================
     private AppOpenAd _appOpenAd;
     private DateTime _appOpenAdLoadTime;
     private bool _hasShownAtStartup = false; // 앱을 처음 시작했는지 체크
-    
+
     // ===================== Interstitial Ad (전면) =====================
     private InterstitialAd _interstitialAd;
-    
-    
+
+
     // ===================== Banner Ad (배너) =====================
     private BannerView _bannerView;
-    
+    public float bannerHeight;
+
     protected override void Awake()
     {
         base.Awake();
+        CheckRemoveAD();
     }
 
     private void Start()
@@ -40,23 +44,33 @@ public class AdSystem : Singleton<AdSystem>
                 return;
             }
             Debug.Log("Google Mobile Ads initialization complete.");
-            
+
             // ===================== Rewarded Interstitial =====================
             LoadAD();
-            
+
             // ===================== App Open Ad =====================
-            LoadAppOpenAd();
-            
+            // 로그인 화면에서 불러옴
+            //LoadAppOpenAd();
+
             // ===================== Interstitial Ad =====================
             LoadInterstitialAd();
-            
+
             // ===================== Banner Ad =====================
-            BannerCreateView();
+            // 로비와 게임 화면에서 불러옴
+            //BannerCreateView();
         });
-        
+
         // ===================== App Open Event Ad =====================
         AppStateEventNotifier.AppStateChanged += OnAppStateChanged;
     }
+
+    void CheckRemoveAD()
+    {
+        int AD = PlayerPrefs.GetInt(RemoveAD);
+        if (AD == 1) _removedAD = true;
+        else _removedAD = false;
+    }
+
 
     // ===================== Rewarded Interstitial =====================
     /// <summary>
@@ -126,7 +140,7 @@ public class AdSystem : Singleton<AdSystem>
             Debug.Log("광고 준비 안 됨!");
         }
     }
-    
+
     // ===================== App Open Ad =====================
     public void LoadAppOpenAd()
     {
@@ -160,7 +174,7 @@ public class AdSystem : Singleton<AdSystem>
                 _appOpenAd = ad;
                 _appOpenAdLoadTime = DateTime.UtcNow;
                 OpenAdRegisterEventHandlers(ad);
-                
+
                 // 앱 처음 시작에서만 적용
                 if (!_hasShownAtStartup)
                 {
@@ -169,7 +183,7 @@ public class AdSystem : Singleton<AdSystem>
                 }
             });
     }
-    
+
     private void OpenAdRegisterEventHandlers(AppOpenAd ad)
     {
         // Raised when the ad is estimated to have earned money.
@@ -225,11 +239,11 @@ public class AdSystem : Singleton<AdSystem>
     {
         // Always unlisten to events when complete.
         AppStateEventNotifier.AppStateChanged -= OnAppStateChanged;
-    } 
-    
+    }
+
     private void OnAppStateChanged(AppState state)
     {
-        Debug.Log("App State changed to : "+ state);
+        Debug.Log("App State changed to : " + state);
 
         // if the app is Foregrounded and the ad is available, show it.
         if (state == AppState.Foreground)
@@ -250,7 +264,7 @@ public class AdSystem : Singleton<AdSystem>
                && _appOpenAd.CanShowAd()
                && (DateTime.UtcNow - _appOpenAdLoadTime).TotalHours < 4; // 만료 방지
     }
-    
+
     public void ShowAppOpenAd()
     {
         if (_appOpenAd != null && _appOpenAd.CanShowAd())
@@ -264,7 +278,7 @@ public class AdSystem : Singleton<AdSystem>
             LoadAppOpenAd();
         }
     }
-    
+
     // ===================== Interstitial Ad =====================
     public void LoadInterstitialAd()
     {
@@ -293,14 +307,14 @@ public class AdSystem : Singleton<AdSystem>
                 InterstitialListenToAdEvents(ad);
             });
     }
-    
+
     public void ShowInterstitialAd()
     {
         if (_interstitialAd != null && _interstitialAd.CanShowAd())
         {
             Debug.Log("Showing interstitial ad.");
             _interstitialAd.Show();
-            _interstitialAd = null; 
+            _interstitialAd = null;
         }
         else
         {
@@ -308,7 +322,7 @@ public class AdSystem : Singleton<AdSystem>
             LoadInterstitialAd();
         }
     }
-    
+
     void InterstitialListenToAdEvents(InterstitialAd interstitialAd)
     {
         // [START ad_events]
@@ -338,7 +352,7 @@ public class AdSystem : Singleton<AdSystem>
         };
         // [END ad_events]]
     }
-    
+
     // ===================== Banner Ad (배너) =====================
     public void BannerCreateView()
     {
@@ -354,19 +368,27 @@ public class AdSystem : Singleton<AdSystem>
         // int width = Screen.width / (int)(Screen.dpi / 160f);
         // 적응형 배너 크기 얻기
         // AdSize adaptiveSize = AdSize.GetCurrentOrientationAnchoredAdaptiveBannerAdSizeWithWidth(width);
-        AdSize adaptiveSize = new AdSize(320, 100);
+        AdSize adaptiveSize = new AdSize(320, 50);
+        bannerHeight = DipsToPixels(adaptiveSize.Height);
 
         // 배너 생성
         // _bannerView = new BannerView("ca-app-pub-3940256099942544/6300978111", AdSize.Banner, AdPosition.Bottom);
         _bannerView = new BannerView("ca-app-pub-3940256099942544/6300978111", adaptiveSize, AdPosition.Bottom);
-        
+
         BannerListenToAdEvents();
-        
+
         // 보이기
         var adRequest = new AdRequest();
         _bannerView.LoadAd(adRequest);
     }
-    
+
+    public float DipsToPixels(float dips)
+    {
+        Debug.Log($"dips:{dips}");
+        Debug.Log($"Pixels: {dips * Screen.dpi / 160f}");
+        return dips * Screen.dpi / 160f;
+    }
+
     private void BannerListenToAdEvents()
     {
         // Raised when an ad is loaded into the banner view.
@@ -411,7 +433,7 @@ public class AdSystem : Singleton<AdSystem>
             Debug.Log("Banner view full screen content closed.");
         };
     }
-    
+
     public void BannerDestroyAd()
     {
         if (_bannerView != null)

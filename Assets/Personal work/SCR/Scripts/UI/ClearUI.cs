@@ -31,6 +31,7 @@ public class ClearUI : MonoBehaviour
 
     public void ClearGame()
     {
+        Manager.Stage.AdvanceStage();
         InGameManager.ClearGame();
     }
 
@@ -54,7 +55,6 @@ public class ClearUI : MonoBehaviour
         MoveUIItem(star, target, () =>
         {
             Manager.User.AddStar(Manager.Stage.CurrentStage.LevelValue);
-            Manager.Stage.AdvanceStage();
             Manager.Audio.PlaySFX("Star_Add");
             star.gameObject.SetActive(false);
             completedCount++;
@@ -67,7 +67,11 @@ public class ClearUI : MonoBehaviour
     {
         MoveUIItem(coin, target, () =>
         {
-            Manager.User.AddCoin(InGameManager.GetCoin());
+            int stageCoin = InGameManager.GetCoin();
+            int maxCoin = Manager.Stage.CurrentStage.MaxGoldGain;
+            if (stageCoin > maxCoin)
+                stageCoin = maxCoin;
+            Manager.User.AddCoin(stageCoin);
             Manager.Audio.PlaySFX("Coin_Add");
             coin.gameObject.SetActive(false);
             completedCount++;

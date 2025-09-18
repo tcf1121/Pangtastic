@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using TMPro;
+using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.Localization.Settings;
 using UnityEngine.UI;
@@ -14,6 +15,7 @@ public class OutGameManager : MonoBehaviour
     [SerializeField] private TMP_Text _stageButtonText;
     [SerializeField] private GameObject _accountLinkingPopup;
     [SerializeField] private List<Button> _lobbyButtons;
+    [SerializeField] private GameObject _adPanel;
     private string DROPDOWN_KEY = "BGM_Setting";
     private int _currentPlace;
 
@@ -24,6 +26,12 @@ public class OutGameManager : MonoBehaviour
     void Awake()
     {
         instate = this;
+        if (!Manager.Ad.RemovedAD)
+        {
+            _adPanel.SetActive(true);
+            Manager.Ad.BannerCreateView();
+        }
+
         _settingBtn.onClick.AddListener(SetStage);
         foreach (var btn in _lobbyButtons)
             btn.onClick.AddListener(PushButton);

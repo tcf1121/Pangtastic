@@ -1,5 +1,5 @@
 using System;
-using System.Diagnostics;
+using UnityEngine;
 
 public class UserInfoManager : Singleton<UserInfoManager>
 {
@@ -12,6 +12,55 @@ public class UserInfoManager : Singleton<UserInfoManager>
     public Action<int> OnChangedProfile;
     public Action OnUseHeart;
     public Action<float> OnInfinityHeart;
+    private const string LastPurchaseDateKey = "LastPurchaseDate";
+    private const string RemoveAD = "RemoveAD";
+    private const string DailyCountKey = "DailyCount";
+    private const int MaxDailyCount = 5;
+
+    void Start()
+    {
+        CheckDailyReset();
+    }
+
+    void CheckDailyReset()
+    {
+        string lastDateStr = PlayerPrefs.GetString(LastPurchaseDateKey, "");
+        string today = DateTime.Now.ToString("yyyyMMdd");
+
+        if (lastDateStr != today)
+        {
+            // 날짜가 다르면 카운트 초기화
+            PlayerPrefs.SetInt(DailyCountKey, 0);
+            PlayerPrefs.SetString(LastPurchaseDateKey, today);
+            PlayerPrefs.Save();
+            if (!Manager.Ad.RemovedAD)
+                Manager.Ad.LoadAppOpenAd();
+        }
+    }
+
+    public bool CanPurchase()
+    {
+        int count = PlayerPrefs.GetInt(DailyCountKey, 0);
+        return count < MaxDailyCount;
+    }
+
+    public void Purchase()
+    {
+        if (CanPurchase())
+        {
+            int count = PlayerPrefs.GetInt(DailyCountKey, 0);
+            PlayerPrefs.SetInt(DailyCountKey, count + 1);
+            PlayerPrefs.Save();
+
+            Debug.Log("구매 완료! 오늘 구매 횟수: " + (count + 1));
+        }
+        else
+        {
+            Debug.Log("오늘은 더 이상 구매할 수 없습니다.");
+        }
+    }
+
+
 
     public void SetUser(UserData user)
     {

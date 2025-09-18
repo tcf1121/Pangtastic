@@ -120,7 +120,7 @@ public class StageImporter
 
             stage.StageID = stage_id;
             stage.LevelValue = level_id;
-            stage.MaxGoldGain = max_gold_gain;
+            stage.MaxGoldGain = order_count * 25;
 
             string customerSOPath = customerSoDir + "/Customer_" + customer_id + ".asset"; // 손님 SO 경로
             CustomerSO customerSO = AssetDatabase.LoadAssetAtPath<CustomerSO>(customerSOPath); // 손님 SO 로드

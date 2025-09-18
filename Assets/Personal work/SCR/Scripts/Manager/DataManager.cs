@@ -68,7 +68,15 @@ public class DataManager : Singleton<DataManager>
 
     public void HistoryUser()
     {
-        Manager.User.SetUser(Load());
+        UserData loadData = Load();
+        if (loadData != null)
+            Manager.User.SetUser(Load());
+        else
+        {
+            Debug.Log("데이터가 손상되었습니다.");
+            NewUser();
+        }
+
     }
 
     public void Save()
@@ -86,6 +94,7 @@ public class DataManager : Singleton<DataManager>
             string encrypted = File.ReadAllText(path);
             string json = Crypto.Decrypt(encrypted);
             Debug.Log("저장된 데이터 확인");
+            Debug.Log(JsonConvert.DeserializeObject<UserData>(json));
             return JsonConvert.DeserializeObject<UserData>(json);
         }
         else
@@ -95,3 +104,4 @@ public class DataManager : Singleton<DataManager>
         }
     }
 }
+

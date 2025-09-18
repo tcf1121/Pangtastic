@@ -21,6 +21,7 @@ public class InGameManager : MonoBehaviour
     [SerializeField] Button _useCoinContinueButton;
     [SerializeField] Button _watchAddContinueButton;
     [SerializeField] List<Button> _gameButtons;
+    [SerializeField] GameObject _adPanel;
 
     private static InGameManager instate;
     private int _score;
@@ -31,7 +32,12 @@ public class InGameManager : MonoBehaviour
 
     void Awake()
     {
-        Manager.Ad.LoadAD();
+        if (!Manager.Ad.RemovedAD)
+        {
+            _adPanel.SetActive(true);
+            Manager.Ad.BannerCreateView();
+            Manager.Ad.LoadAD();
+        }
         Manager.User.UseHeart();
         instate = this;
         _customerFlowController.OnStageCleared += StageClear;
@@ -141,7 +147,7 @@ public class InGameManager : MonoBehaviour
     {
         if (instate == null) instate = GameObject.Find("InGameManager").GetComponent<InGameManager>();
         Manager.Audio.PlaySFX("Stage_Clear");
-        AddCoin(GetScore() / 10);
+        AddCoin(GetScore() / 100);
         KDJ.BoardManager.SetTouch(false);
         instate._winCoinText.text = $"{GetCoin()}";
         instate._clearUI.SetActive(true);
