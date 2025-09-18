@@ -26,7 +26,12 @@ public class OutGameManager : MonoBehaviour
     void Awake()
     {
         instate = this;
-        Manager.Ad.BannerCreateView();
+        if (!Manager.Ad.RemovedAD)
+        {
+            _adPanel.SetActive(true);
+            Manager.Ad.BannerCreateView();
+        }
+
         _settingBtn.onClick.AddListener(SetStage);
         foreach (var btn in _lobbyButtons)
             btn.onClick.AddListener(PushButton);

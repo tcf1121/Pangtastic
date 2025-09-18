@@ -8,7 +8,9 @@ using UnityEngine;
 public class AdSystem : Singleton<AdSystem>
 {
     //public static AdSystem Instance { get; private set; }
-
+    private const string RemoveAD = "RemoveAD";
+    public bool RemovedAD { get { return _removedAD; } }
+    private bool _removedAD;
     // ===================== Rewarded Interstitial (보상형) =====================
     private RewardedInterstitialAd _rewardedInterstitialAd;
 
@@ -29,6 +31,7 @@ public class AdSystem : Singleton<AdSystem>
     protected override void Awake()
     {
         base.Awake();
+        CheckRemoveAD();
     }
 
     private void Start()
@@ -46,18 +49,28 @@ public class AdSystem : Singleton<AdSystem>
             LoadAD();
 
             // ===================== App Open Ad =====================
+            // 로그인 화면에서 불러옴
             //LoadAppOpenAd();
 
             // ===================== Interstitial Ad =====================
             LoadInterstitialAd();
 
             // ===================== Banner Ad =====================
+            // 로비와 게임 화면에서 불러옴
             //BannerCreateView();
         });
 
         // ===================== App Open Event Ad =====================
         AppStateEventNotifier.AppStateChanged += OnAppStateChanged;
     }
+
+    void CheckRemoveAD()
+    {
+        int AD = PlayerPrefs.GetInt(RemoveAD);
+        if (AD == 1) _removedAD = true;
+        else _removedAD = false;
+    }
+
 
     // ===================== Rewarded Interstitial =====================
     /// <summary>

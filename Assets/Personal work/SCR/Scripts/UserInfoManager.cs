@@ -13,6 +13,7 @@ public class UserInfoManager : Singleton<UserInfoManager>
     public Action OnUseHeart;
     public Action<float> OnInfinityHeart;
     private const string LastPurchaseDateKey = "LastPurchaseDate";
+    private const string RemoveAD = "RemoveAD";
     private const string DailyCountKey = "DailyCount";
     private const int MaxDailyCount = 5;
 
@@ -32,7 +33,8 @@ public class UserInfoManager : Singleton<UserInfoManager>
             PlayerPrefs.SetInt(DailyCountKey, 0);
             PlayerPrefs.SetString(LastPurchaseDateKey, today);
             PlayerPrefs.Save();
-            Manager.Ad.LoadAppOpenAd();
+            if (!Manager.Ad.RemovedAD)
+                Manager.Ad.LoadAppOpenAd();
         }
     }
 

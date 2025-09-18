@@ -32,7 +32,12 @@ public class InGameManager : MonoBehaviour
 
     void Awake()
     {
-        Manager.Ad.LoadAD();
+        if (!Manager.Ad.RemovedAD)
+        {
+            _adPanel.SetActive(true);
+            Manager.Ad.BannerCreateView();
+            Manager.Ad.LoadAD();
+        }
         Manager.User.UseHeart();
         instate = this;
         _customerFlowController.OnStageCleared += StageClear;
