@@ -239,10 +239,6 @@ public class AdSystem : Singleton<AdSystem>
         {
             Debug.Log("Showing app open ad.");
             appOpenAd.Show();
-            
-            appOpenAd = null;
-            
-            LoadAppOpenAd();
         }
         else
         {
