@@ -453,7 +453,7 @@ namespace LHJ
             float moveDist = 10f;
 
             Vector3 boardStart = _boardRoot.localPosition;
-            Vector3 poolStart = _poolsRoot.localPosition;
+            Vector3 poolStart = _poolsRoot.position;
 
             var down = DOTween.Sequence()
                 .Join(_boardRoot.DOLocalMoveY(boardStart.y - moveDist, moveDuration))
