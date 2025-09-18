@@ -1,4 +1,4 @@
-name: Exclusive Labels
+name: Enforce Exclusive Labels
 
 on:
   issues:
@@ -10,18 +10,37 @@ permissions:
   issues: write
 
 jobs:
-  enforce-exclusive-labels:
+  exclusive-labels:
     runs-on: ubuntu-latest
     steps:
-      - name: Remove conflicting labels
-        uses: actions-ecosystem/action-remove-labels@v1
+      - name: Ensure only one of the exclusive labels remains
+        uses: actions/github-script@v6
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          labels: |
-            검토 요청
-            완료된 사항
-            수정 요청
-        if: >
-          github.event.label.name == '검토 요청' ||
-          github.event.label.name == '완료된 사항' ||
-          github.event.label.name == '수정 요청'
+          script: |
+            const exclusive = ['수정 요청', '완료된 사항', '검토 요청'];
+            const addedLabel = context.payload.label && context.payload.label.name ? context.payload.label.name : null;
+
+            if (!addedLabel) return;
+
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+            const issue_number = context.payload.issue ? context.payload.issue.number
+                                : context.payload.pull_request ? context.payload.pull_request.number
+                                : null;
+            if (!issue_number) return;
+
+            // 현재 이슈/PR에 붙은 라벨 가져오기
+            const { data: labels } = await github.rest.issues.listLabelsOnIssue({
+              owner, repo, issue_number
+            });
+
+            for (const l of labels) {
+              // 추가된 라벨은 남기고, 나머지 exclusive 라벨 제거
+              if (exclusive.includes(l.name) && l.name !== addedLabel) {
+                await github.rest.issues.removeLabel({
+                  owner, repo, issue_number,
+                  name: l.name
+                });
+                console.log(`Removed label: ${l.name}`);
+              }
+            }
