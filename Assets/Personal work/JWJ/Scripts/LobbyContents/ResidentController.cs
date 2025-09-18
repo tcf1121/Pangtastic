@@ -30,17 +30,16 @@ public class ResidentController : MonoBehaviour
     private Coroutine _curCo;
 
     private Vector3 _currentDestination;
-    private DestinationType _currentDestinationType;
+    private DestinationType _currentDestinationType = DestinationType.None;
 
-    private bool _isGreeting = false;
     private bool _isTalking = false;
     private bool _isLookingAround = false;
     private bool _isWorkout = false;
     private bool _isTouched = false;
 
     private float _lastTouchTime = -999f;
-    private float _lastGreetTime = -999f;
-    private int _activePeerId = 0;
+    private float _lastTalkTime = -999f;
+
     private Transform _peerTransform = null;
 
     public ResidentSO Resident { get { return _resident; } }
@@ -52,19 +51,27 @@ public class ResidentController : MonoBehaviour
         _stateBubble = GetComponentInChildren<StateBubble>();
         _manager = FindObjectOfType<ResidentManager>();
         _agent.autoBraking = true;
-        _stateBubble.gameObject.SetActive(false);
 
         if (_manager != null)
         {
-            _manager.RegisterResident(this);
-            StartCoroutine(WaitForConfigAndStart());
+            _manager.CheckResident(this);
+
+            if (gameObject.activeInHierarchy != false)
+            {
+                StartCoroutine(WaitForConfigAndStart());
+            }
+            
         }
         else
         {
             Debug.LogError("ResidentManager 없음");
         }
-
     }
+
+   //private void OnEnable()
+   //{
+   //    StartCoroutine(WaitForConfigAndStart());
+   //}
 
     private IEnumerator WaitForConfigAndStart()
     {
@@ -92,7 +99,10 @@ public class ResidentController : MonoBehaviour
         _lastState = _curState;
         _curState = state;
 
-        _stateBubble.SetSprite(state);
+        if (state != ResidentState.Touched)
+        {
+            _stateBubble.SetSprite(state);
+        }
 
         if (state == ResidentState.Idle)
         {
@@ -105,10 +115,6 @@ public class ResidentController : MonoBehaviour
         else if (state == ResidentState.Interact)
         {
             _curCo = StartCoroutine(InteractRoutine());
-        }
-        else if (state == ResidentState.Greet)
-        {
-            _curCo = StartCoroutine(GreetRoutine());
         }
         else if (state == ResidentState.Talk)
         {
@@ -129,11 +135,16 @@ public class ResidentController : MonoBehaviour
         //Debug.Log($"현재상태 : {_curState}");
 
         SetMove(0f, true);
+
+        _stateBubble.IconUI(true);
         yield return new WaitForSeconds(_manager.Config.IdleDuration);
-        Transform nextDestination = _manager.PickNextDestination(_resident);
+        _stateBubble.IconUI(false);
+
+        Transform nextDestination = _manager.PickNextDestination(_resident, _currentDestinationType);
         _currentDestination = nextDestination.position;
 
         DestinationPoint destination = nextDestination.GetComponent<DestinationPoint>();
+
         _currentDestinationType = destination.Type;
         ChangeState(ResidentState.Move);
     }
@@ -186,35 +197,12 @@ public class ResidentController : MonoBehaviour
         _isLookingAround = true;
 
         SetMove(0f, true);
-        _stateBubble.gameObject.SetActive(true);
+        _stateBubble.IconUI(true);
         yield return new WaitForSeconds(_manager.Config.InteractDuration);
-        _stateBubble.gameObject.SetActive(false);
+        _stateBubble.IconUI(false);
 
         ChangeState(ResidentState.Idle);
         
-    }
-
-    private IEnumerator GreetRoutine()
-    {
-        SetMove(_manager.Config.MoveSpeed, false);
-        _isGreeting = true;
-        //Debug.Log($"{_resident.ResidentName} 인사 시작");
-
-        _stateBubble.gameObject.SetActive(true);
-        yield return new WaitForSeconds(_manager.Config.GreetDuration);
-        _stateBubble.gameObject.SetActive(false);
-
-
-        //Debug.Log($"{_resident.ResidentName} 인사 종료");
-
-        if (_lastState == ResidentState.Move)
-        {
-            ChangeState(ResidentState.Move);
-        }
-        else
-        {
-            ChangeState(ResidentState.Idle);
-        }
     }
 
     private IEnumerator TalkRoutine()
@@ -224,13 +212,12 @@ public class ResidentController : MonoBehaviour
         //Debug.Log($" {_resident.ResidentName} 대화 시작");
 
         LookAtEachOther();
-        _stateBubble.gameObject.SetActive(true);
+        _stateBubble.IconUI(true);
         yield return new WaitForSeconds(_manager.Config.TalkDuration);
-        _stateBubble.gameObject.SetActive(true);
+        _stateBubble.IconUI(false);
 
         //Debug.Log($"{_resident.ResidentName} 대화 종료"); 
         _peerTransform = null;
-        _activePeerId = 0;
 
         ChangeState(ResidentState.Idle);
     }
@@ -240,9 +227,9 @@ public class ResidentController : MonoBehaviour
         SetMove(0f, true);
         //Debug.Log("운동중");
         _isWorkout = true;
-        _stateBubble.gameObject.SetActive(true);
+        _stateBubble.IconUI(true);
         yield return new WaitForSeconds(_manager.Config.WorkoutDuration);
-        _stateBubble.gameObject.SetActive(false);
+        _stateBubble.IconUI(false);
 
         ChangeState(ResidentState.Idle);
     }
@@ -252,9 +239,9 @@ public class ResidentController : MonoBehaviour
         SetMove(0f, true);
         _isTouched = true;
 
-        _stateBubble.gameObject.SetActive(true);
+        _stateBubble.ChatUI(_resident ,true);
         yield return new WaitForSeconds(_manager.Config.TouchDuration);
-        _stateBubble.gameObject.SetActive(false);
+        _stateBubble.ChatUI(_resident, false);
 
         if (_lastState == ResidentState.Move)
         {
@@ -294,7 +281,6 @@ public class ResidentController : MonoBehaviour
         //Debug.Log($"{gameObject.name} 콜라이더 충돌 : {other.name}");
         ResidentController otherResident;
         otherResident = other.GetComponentInParent<ResidentController>();
-        //other.TryGetComponent<ResidentController>(out otherResident);
 
         if (otherResident != null)
         {
@@ -304,71 +290,55 @@ public class ResidentController : MonoBehaviour
 
             if (myId < otherId)
             {
-                TryToSayHi(otherResident);
+                bool willTalk = Random.value <= _manager.Config.TalkChance;
+                if (willTalk)
+                {
+                    TryToTalk(otherResident);
+                }
             }
         }
     }
 
-    private bool CanGreetNow()
+    private bool CanTalkNow()
     {
-        if (_curState != ResidentState.Move)
+        if (_curState != ResidentState.Move && _curState != ResidentState.Idle)
         {
             return false;
         }
-        if (_isGreeting || _isTalking)
+        if (_isTalking)
         {
             return false;
         }
-        if (Time.time - _lastGreetTime < _manager.Config.GreetCooldown)
+        if (Time.time - _lastTalkTime < _manager.Config.TalkCooldown)
         {
             return false;
         }
         return true;
     }
 
-    private void TryToSayHi(ResidentController other)
+    private void TryToTalk(ResidentController other)
     {
         if (other == null)
         {
             return;
         }
-        if (!CanGreetNow())
+        if (!CanTalkNow())
         {
             return;
         }
-        if (!other.CanGreetNow())
+        if (!other.CanTalkNow())
         {
             return;
         }
 
-        _activePeerId = other.GetInstanceID();
-        other._activePeerId = GetInstanceID();
-        _lastGreetTime = Time.time;
-        other._lastGreetTime = Time.time;
+        _lastTalkTime = Time.time;
+        other._lastTalkTime = Time.time;
 
         _peerTransform = other.transform;
         other._peerTransform = this.transform;
 
-        //Debug.Log($"{_resident.ResidentName} 와 {other._resident.ResidentName} 인사 합의됨");
-
-        StartGreet();
-        other.StartGreet();
-
-        bool willTalk = Random.value <= _manager.Config.TalkChance;
-        if (willTalk)
-        {
-            //Debug.Log($"{_resident.ResidentName} 와 {other._resident.ResidentName} 대화 합의됨");
-            StartTalkBoth(other);
-        }
-        else
-        {
-            //Debug.Log($"{_resident.ResidentName} 와 {other._resident.ResidentName} 대화 합의 안됨");
-        }
-    }
-
-    private void StartGreet()
-    {
-        ChangeState(ResidentState.Greet);
+        
+        StartTalkBoth(other);
     }
 
     private void StartTalkBoth(ResidentController other)
@@ -411,13 +381,7 @@ public class ResidentController : MonoBehaviour
             return;
         }
 
-        if (_isGreeting == true)
-        {
-            Debug.Log("인사 중이라 바쁨");
-            return;
-        }
-
-        if (_curState == ResidentState.Move || _curState == ResidentState.Idle)
+        if (_curState != ResidentState.Talk)
         {
             ChangeState(ResidentState.Touched);
 
@@ -444,20 +408,18 @@ public class ResidentController : MonoBehaviour
             }
         }
 
-        _animator.SetBool("IsMove", isMoving); 
+        _animator.SetBool("IsMove", isMoving);
 
-        bool isWaving = (_isGreeting == true) || (_isTouched == true);
+        bool isWaving = (_isTouched == true);
         _animator.SetBool("IsWaving", isWaving);
 
         _animator.SetBool("IsJumpingJack", _isWorkout);
-        //_animator.SetBool("IsPushUp", _isWorkout);
         _animator.SetBool("IsTalking", _isTalking);
         _animator.SetBool("IsLookAround", _isLookingAround);
     }
 
     private void ClearBools()
     {
-        _isGreeting = false;
         _isTalking = false;
         _isLookingAround = false;
         _isWorkout = false;

@@ -291,7 +291,7 @@ namespace KDJ
                                 spriteRenderer.sprite = normalBlockSprites[(int)block.GemType];
                             }
 
-                            pooledObject.transform.position = position;
+                            pooledObject.transform.localPosition = position;
                             // pooledObject.transform.SetParent(null);
                             block.BlockInstance = pooledObject.gameObject;
                         }
@@ -305,12 +305,14 @@ namespace KDJ
                                     position += new Vector3(0.5f, 0.5f, 0); // FlourBag는 중앙 정렬이 아니므로 위치 보정
                                     block.BlockInstance = Instantiate(blockPrefabSpecial, position, Quaternion.identity);
                                     SceneManager.MoveGameObjectToScene(block.BlockInstance, gameObject.scene);
+                                    block.BlockInstance.transform.SetParent(gameObject.transform);
                                     position -= new Vector3(0.5f, 0.5f, 0);
                                 }
                                 else
                                 {
                                     block.BlockInstance = Instantiate(blockPrefabSpecial, position, Quaternion.identity);
                                     SceneManager.MoveGameObjectToScene(block.BlockInstance, gameObject.scene);
+                                    block.BlockInstance.transform.SetParent(gameObject.transform);
                                 }
                             }
                         }
@@ -359,6 +361,7 @@ namespace KDJ
                             Debug.Log($"{y}, {x}에 {block.GemType} 생성");
                             block.BlockInstance = Instantiate(blockPrefab, position, Quaternion.identity);
                             SceneManager.MoveGameObjectToScene(block.BlockInstance, gameObject.scene);
+                            block.BlockInstance.transform.SetParent(gameObject.transform);
                         }
                     }
                 }
@@ -634,16 +637,16 @@ namespace KDJ
         private IEnumerator MoveBlockCoroutine(Block block, Vector3 targetPosition, float duration)
         {
             if (block == null || block.BlockInstance == null) yield break;
-            Vector3 startPosition = block.BlockInstance.transform.position;
+            Vector3 startPosition = block.BlockInstance.transform.localPosition;
             float time = 0;
             while (time < duration)
             {
                 if (block.BlockInstance == null) yield break;
-                block.BlockInstance.transform.position = Vector3.Lerp(startPosition, targetPosition, time / duration);
+                block.BlockInstance.transform.localPosition = Vector3.Lerp(startPosition, targetPosition, time / duration);
                 time += Time.deltaTime;
                 yield return null;
             }
-            if (block.BlockInstance != null) block.BlockInstance.transform.position = targetPosition;
+            if (block.BlockInstance != null) block.BlockInstance.transform.localPosition = targetPosition;
         }
 
         public void CheckAndClearDestroyedBlocks()
@@ -730,6 +733,7 @@ namespace KDJ
                 GameObject blockPrefabSpecial = GetBlockPrefab((int)gemType);
                 if (blockPrefabSpecial == null) return;
                 GameObject blockInstanceSpecial = Instantiate(blockPrefabSpecial, position, Quaternion.identity);
+                blockInstanceSpecial.transform.SetParent(gameObject.transform);
                 newBlock.BlockInstance = blockInstanceSpecial;
             }
 
