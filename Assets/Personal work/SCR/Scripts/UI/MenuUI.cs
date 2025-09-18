@@ -51,13 +51,13 @@ public class MenuUI : MonoBehaviour
 
     public void GoHome(Action onComplete = null)
     {
-        MoveCameraDOTween(new Vector3(0, 9, 5), Quaternion.Euler(45, 0, 0), 10, 1f, onComplete);
+        MoveCameraDOTween(new Vector3(0, 20, -6.5f), Quaternion.Euler(45, 0, 0), 10, 1f, onComplete);
     }
 
     private void GoHome()
     {
         mapMover.isMove = true;
-        MoveCameraDOTween(new Vector3(0, 9, 5), Quaternion.Euler(45, 0, 0), 10, 1f, () => mapMover.isMove = false);
+        MoveCameraDOTween(new Vector3(0, 20, -6.5f), Quaternion.Euler(45, 0, 0), 10, 1f, () => mapMover.isMove = false);
     }
 
     public void GoRoom(Action onComplete = null)

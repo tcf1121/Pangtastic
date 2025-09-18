@@ -16,8 +16,8 @@ public class MapMover : MonoBehaviour
     [SerializeField] private float _maxZoom = 10f;
 
     [Header("맵 범위 제한")]
-    private Vector2 _minBounds = new(-10.9f, 0);
-    private Vector2 _maxBounds = new(10.9f, 10);
+    private Vector2 _minBounds = new(-11.5f, -13);
+    private Vector2 _maxBounds = new(11.4f, 0);
 
     private Vector2 _lastWorldPos;
     private Vector3 _targetPos;
