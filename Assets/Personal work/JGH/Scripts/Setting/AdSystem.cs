@@ -2,6 +2,7 @@ using GoogleMobileAds.Api;
 using GoogleMobileAds.Common;
 using System;
 using UnityEngine;
+using AdSize = GoogleMobileAds.Api.AdSize;
 
 
 public class AdSystem : Singleton<AdSystem>
@@ -349,10 +350,19 @@ public class AdSystem : Singleton<AdSystem>
             BannerDestroyAd();
         }
 
-        // Create a 320x50 banner at top of the screen
-        _bannerView = new BannerView("ca-app-pub-3940256099942544/6300978111", AdSize.Banner, AdPosition.Bottom);
+        // 화면 폭(dp 단위) 구하기
+        // int width = Screen.width / (int)(Screen.dpi / 160f);
+        // 적응형 배너 크기 얻기
+        // AdSize adaptiveSize = AdSize.GetCurrentOrientationAnchoredAdaptiveBannerAdSizeWithWidth(width);
+        AdSize adaptiveSize = new AdSize(320, 100);
+
+        // 배너 생성
+        // _bannerView = new BannerView("ca-app-pub-3940256099942544/6300978111", AdSize.Banner, AdPosition.Bottom);
+        _bannerView = new BannerView("ca-app-pub-3940256099942544/6300978111", adaptiveSize, AdPosition.Bottom);
+        
         BannerListenToAdEvents();
         
+        // 보이기
         var adRequest = new AdRequest();
         _bannerView.LoadAd(adRequest);
     }
