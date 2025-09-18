@@ -470,6 +470,8 @@ namespace LHJ
                 .Join(_boardRoot.DOLocalMove(boardStart, moveDuration))
                 .Join(_poolsRoot.DOLocalMove(poolStart, moveDuration));
             yield return up.WaitForCompletion();
+            BoardManager.Instance.HintManager.StopHintTimer();
+            BoardManager.Instance.ChangeState(new ReadyState());
         }
 
         // 랜덤 위치에 특수 블록 생성
