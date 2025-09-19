@@ -51,7 +51,7 @@ public class AdSystem : Singleton<AdSystem>
 
             // ===================== App Open Ad =====================
             // 로그인 화면에서 불러옴
-            //LoadAppOpenAd();
+            LoadAppOpenAd();
 
             // ===================== Interstitial Ad =====================
             LoadInterstitialAd();

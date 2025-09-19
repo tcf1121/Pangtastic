@@ -22,6 +22,14 @@ public class UserInfoUI : MonoBehaviour
     Coroutine _infinityCor;
     float _leftTime;
 
+    private void OnApplicationPause(bool pause)
+    {
+        if (!pause)
+        {
+            SetHeartTime();
+        }
+    }
+
     void Awake()
     {
         if (Instance == null)
@@ -115,12 +123,8 @@ public class UserInfoUI : MonoBehaviour
                 Manager.Timer.StartTimer(Instance._heartCor,
                 lastHeartTime, Instance._heartTimer, Instance._OnTimerFinished));
 
-
-            while (Manager.User.GetHeart() < 5 && recoveredHearts > 0)
-            {
-                Manager.User.AddHeart();
-                recoveredHearts--;
-            }
+            if (recoveredHearts > 0)
+                Manager.User.AddHeart(recoveredHearts);
 
         }
     }

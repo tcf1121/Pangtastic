@@ -11,6 +11,7 @@ public class DataManager : Singleton<DataManager>
     {
         base.Awake();
         path = Path.Combine(Application.persistentDataPath, "userdata.json");
+        Debug.Log($"userdata.json 주소 : {path}");
     }
 
 

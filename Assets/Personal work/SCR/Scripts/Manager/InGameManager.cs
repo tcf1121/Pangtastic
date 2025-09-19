@@ -27,8 +27,7 @@ public class InGameManager : MonoBehaviour
     private int _score;
     private int _coin;
     private bool _firstfail = true;
-    private bool _showInterstitialAd;
-    private Action _finishAD;
+    [SerializeField] private bool _showInterstitialAd;
     [SerializeField] private int _useCoin;
 
     void Awake()
@@ -40,8 +39,8 @@ public class InGameManager : MonoBehaviour
             Manager.Ad.BannerCreateView();
             Manager.Ad.LoadAD();
             Manager.Ad.LoadInterstitialAd();
-            Manager.Timer.StartGame();
             Manager.Timer.ADFin += ReadyShowAD;
+            Manager.Timer.StartGame();
             Manager.Ad.OnRewardAdClosed += ContinueGame;
             Manager.Ad.OnInterstitialAdClosed += GoLobby;
         }
@@ -251,6 +250,7 @@ public class InGameManager : MonoBehaviour
 
     private void GoLobby()
     {
+        Manager.Timer.EndGame();
         SceneManager.LoadScene(2/*로비씬*/);
     }
 

@@ -16,26 +16,28 @@ public class TestBuyBtn : MonoBehaviour
     {
         if (_itemType == TestBuyType.Coin)
         {
-            Manager.User.AddCoin(1000);
+            OutGameManager.AddReward(Goods.Gold, 1000);
         }
         else if (_itemType == TestBuyType.Heart)
         {
-            Manager.User.InfinityHeart(0.5f);
+            OutGameManager.AddIHReward(0.5f);
         }
         else if (_itemType == TestBuyType.ItemPack)
         {
-            Manager.User.AddItem(ItemType.Roller);
-            Manager.User.AddItem(ItemType.DonutBox);
-            Manager.User.AddItem(ItemType.Oven);
-            Manager.User.AddItem(ItemType.Whisk);
-            Manager.User.AddItem(ItemType.Scissors);
-            Manager.User.AddItem(ItemType.DonutPan);
-            Manager.User.AddItem(ItemType.Coffee);
+            OutGameManager.AddReward(Goods.Roller, 1);
+            OutGameManager.AddReward(Goods.DonutBox, 1);
+            OutGameManager.AddReward(Goods.Oven, 1);
+            OutGameManager.AddReward(Goods.Whisk, 1);
+            OutGameManager.AddReward(Goods.Scissors, 1);
+            OutGameManager.AddReward(Goods.DonutPan, 1);
+            OutGameManager.AddReward(Goods.Coffee, 1);
         }
         else if (_itemType == TestBuyType.Star)
         {
             Manager.User.AddStar(1);
         }
+
+        OutGameManager.ShowRewardPopup();
     }
     private enum TestBuyType
     {

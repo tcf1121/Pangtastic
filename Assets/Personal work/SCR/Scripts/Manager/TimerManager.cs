@@ -8,6 +8,7 @@ public class TimerManager : Singleton<TimerManager>
     public Coroutine ADCor;
     public Action ADFin;
     private bool _isGame;
+    [SerializeField] float _adcycle;
 
     protected override void Awake()
     {
@@ -37,7 +38,7 @@ public class TimerManager : Singleton<TimerManager>
     public void StartGame()
     {
         _isGame = true;
-        if (ADCor == null) StartADTimer(180, ADFin);
+        if (ADCor == null) ADCor = StartCoroutine(StartADTimer(90, ADFin));
     }
 
     public void EndGame()
@@ -57,14 +58,14 @@ public class TimerManager : Singleton<TimerManager>
     private IEnumerator StartADTimer(float CycleTime,
      Action onTimerFinished = null)
     {
-        float _cycle = CycleTime;
+        _adcycle = CycleTime;
         while (true)
         {
-            if (_cycle > 0)
+            if (_adcycle > 0)
             {
                 if (_isGame)
                 {
-                    _cycle -= Time.unscaledDeltaTime;
+                    _adcycle -= Time.unscaledDeltaTime;
                 }
                 yield return null;
             }
