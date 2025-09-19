@@ -29,6 +29,8 @@ namespace KDJ.States
                 }
                 _matchDelayCoroutine = boardManager.StartCoroutine(MatchDelayCoroutine(boardManager));
             }
+
+            BoardManager.SetTouch(true);
         }
 
         public void OnUpdate(BoardManager boardManager)

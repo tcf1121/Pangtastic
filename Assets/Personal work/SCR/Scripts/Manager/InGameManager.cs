@@ -1,8 +1,11 @@
 using SCR;
 using SCR_B;
 using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using TMPro;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
@@ -201,9 +204,19 @@ public class InGameManager : MonoBehaviour
         KDJ.BoardManager.SetTouch(true);
     }
 
-    public static void RewardGem(List<GemType> gemList)
+    public static async Task RewardGem(List<GemType> gemList)
     {
         //보드판에 추가해라
+        var tcs = new TaskCompletionSource<bool>();
+        instate.StartCoroutine(instate.RewardGemWrapperRoutine(gemList, tcs));
+        Debug.Log("보상 종료");
+        await tcs.Task;
+    }
+
+    private IEnumerator RewardGemWrapperRoutine(List<GemType> gemList, TaskCompletionSource<bool> tcs)
+    {
+        yield return StartCoroutine(KDJ.BoardManager.Instance.ClearRewardAnimation(gemList));
+        tcs.SetResult(true);
     }
 
     public static List<GemType> GetTagetGem()

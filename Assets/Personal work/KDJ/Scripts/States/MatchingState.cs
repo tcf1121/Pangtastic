@@ -13,6 +13,7 @@ namespace KDJ.States
         public void OnEnter(BoardManager boardManager)
         {
             Debug.Log("블럭 매칭 상태");
+            BoardManager.SetTouch(false);
             if (_matchingCoroutine != null)
             {
                 boardManager.StopCoroutine(_matchingCoroutine);

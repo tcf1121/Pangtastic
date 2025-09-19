@@ -1,4 +1,5 @@
 using KDJ.States;
+using LHJ;
 using SCR;
 using System.Collections;
 using System.Collections.Generic;
@@ -48,6 +49,8 @@ namespace KDJ
         public bool IsWaitingForAnimation { get; set; } = false;
         public bool IsReadyForStart { get; set; } = false;
         public bool IsUseItem { get; set; } = false;
+        public bool IsClearSpecialTime { get; set; } = false;
+        public bool CanSwapBlocks => !IsWaitingForAnimation && !SpecialBlockEffect.effectRunning && !IsUseItem && !MatchChecker.AllBlockMatchCheck(this);
         public Vector2Int? InitialSwapPosition { get; set; } // 한 턴의 스왑 시작 위치를 기억
         public List<Vector2Int> CurHintPositions = new List<Vector2Int>();
         public ObjectPool CoinTextPool;
@@ -199,6 +202,8 @@ namespace KDJ
                 CurrentState.OnUpdate(this);
                 //Debug.Log($"Current State: {CurrentState.GetType().Name}");
             }
+
+            Debug.Log($"터치 상태 : {CanTouch}");
         }
 
         public void ChangeState(IGameState newState)
@@ -491,14 +496,125 @@ namespace KDJ
             }
         }
 
-        public IEnumerator ClearRewardAnimation()
+        public IEnumerator RewardRoutine(List<GemType> rewards)
         {
-            yield return new WaitForSeconds(1f);
+            foreach (var reward in rewards)
+            {
+                yield return ClearRewardAnimation(rewards);
+            }
         }
 
-        public void UseSpecialBlock(int x, int y)
+        public IEnumerator ClearRewardAnimation(List<GemType> rewards)
         {
+            float timer1 = 0f;
+            float timer2 = 0f;
+            float duration = 0.3f;
+            List<Vector2Int> specialPositions = new List<Vector2Int>();
+            Instance.HintManager.StopHintTimer();
+            IsClearSpecialTime = true;
 
+            yield return new WaitForSeconds(1f);
+
+            yield return new WaitUntil(() => CurrentState is ReadyState && CanTouch);
+
+            for (int i = 0; i < rewards.Count; i++)
+            {
+                Vector2Int randPos = new Vector2Int(Random.Range(0, Spawner.GameBoardData.Width), Random.Range(0, Spawner.GameBoardData.Height));
+                timer1 = 0f;
+                timer2 = 0f;
+
+                while (true)
+                {
+                    if (Spawner.GameBoardData.BlockPlate.BlockPlateArray[randPos.y, randPos.x] && Spawner.GameBoardData.GetBlock(randPos.x, randPos.y).IsNormal)
+                    {
+                        break;
+                    }
+
+                    randPos = new Vector2Int(Random.Range(0, Spawner.GameBoardData.Width), Random.Range(0, Spawner.GameBoardData.Height));
+                    yield return null;
+                }
+
+                Block oldBlock = Spawner.GameBoardData.GetBlock(randPos.x, randPos.y);
+
+                // 기존 블록 축소
+                while (timer1 < 0.2f)
+                {
+                    timer1 += Time.deltaTime;
+                    // 축소는 커브 안쓰고 그냥 작게 사라지도록
+                    float scale = Mathf.Lerp(1f, 0f, timer1 / 0.2f);
+                    if (oldBlock.BlockInstance != null)
+                    {
+                        oldBlock.BlockInstance.transform.localScale = Vector3.one * scale;
+                    }
+                    yield return null;
+                }
+                Spawner.GameBoardData.SetBlock(randPos.x, randPos.y, null);
+
+                // 보상 블록 생성
+                Debug.Log($"보상 블록 생성: {rewards[i]} at ({randPos.x}, {randPos.y})");
+                Spawner.SpawnBlock(randPos.x, randPos.y, rewards[i], BlockMover);
+                Block newBlock = Spawner.GameBoardData.GetBlock(randPos.x, randPos.y);
+                if (newBlock != null && newBlock.BlockInstance != null)
+                {
+                    newBlock.BlockInstance.transform.localScale = Vector3.zero;
+                }
+
+                while (timer2 < duration)
+                {
+                    timer2 += Time.deltaTime;
+                    float progress = Mathf.Clamp01(timer2 / duration);
+                    float scale = _specialBlockCreateCurve.Evaluate(progress);
+                    if (newBlock != null && newBlock.BlockInstance != null)
+                    {
+                        newBlock.BlockInstance.transform.localScale = Vector3.one * scale;
+                    }
+                    yield return null;
+                }
+
+                specialPositions.Add(randPos);
+            }
+
+            yield return new WaitUntil(() => CurrentState is ReadyState && CanTouch);
+
+            yield return new WaitForSeconds(1f);
+
+            UseSpecialBlock(GetComponent<SpecialBlockEffect>());
+
+            yield return new WaitForSeconds(0.5f);
+
+            yield return new WaitUntil(() => CurrentState is ReadyState && CanTouch && !SpecialBlockEffect.effectRunning);
+
+            yield return new WaitForSeconds(1f);
+
+            IsClearSpecialTime = false;
+            Debug.Log("특수 시간 종료");
+        }
+
+        public void UseSpecialBlock(SpecialBlockEffect effect)
+        {
+            Debug.Log("특수 블록 사용 진입");
+            CanTouch = false;
+            List<Block> blocks = new List<Block>();
+            foreach (var b in Spawner.GameBoardData.BlockArray)
+            {
+                if (b != null && b.BlockInstance != null && b.GemType > GemType.Sugar && b.GemType < GemType.Dust)
+                {
+                    blocks.Add(b);
+                }
+            }
+
+            foreach (var b in blocks)
+            {
+                if (b != null && b.BlockInstance != null)
+                {
+                    Vector3 pos = BlockMover.WorldToArrayPosition(b.BlockInstance.transform.position, Spawner.GameBoardData.Width, Spawner.GameBoardData.Height);
+                    Debug.Log($"위치 {pos.x}, {pos.y}의 특수블록 {b.GemType} 사용");
+                    Vector2Int gridPos = new Vector2Int(Mathf.RoundToInt(pos.x), Mathf.RoundToInt(pos.y));
+                    effect.UseSpecial(gridPos, Spawner.GameBoardData.GetBlock(gridPos.x, gridPos.y).GemType, Spawner.GameBoardData, new List<Vector2Int>());
+                }
+            }
+
+            ChangeState(new RefillState());
         }
 
         private void ShowScoreForMatches(List<HashSet<Vector2Int>> matchGroups)
