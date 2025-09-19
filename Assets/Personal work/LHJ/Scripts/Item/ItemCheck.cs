@@ -119,7 +119,7 @@ namespace LHJ
 
             if (destroyed > 0)
             {
-                _board.UpdateUI(destroyed * 10);
+                InGameManager.AddScore(destroyed * 10);
                 _board.ChangeState(new RefillState());
             }
         }
@@ -313,7 +313,7 @@ namespace LHJ
             }
 
             if (destroyedCount > 0)
-                _board.UpdateUI(destroyedCount * 10);
+                InGameManager.AddScore(destroyedCount * 10);
             yield return new WaitUntil(() => SpecialBlockEffect.effectRunning == false);
             _board.ChangeState(new RefillState());
         }
@@ -439,7 +439,7 @@ namespace LHJ
                 destroyedCount++;
             }
 
-            if (destroyedCount > 0) _board.UpdateUI(destroyedCount * 10);
+            if (destroyedCount > 0) InGameManager.AddScore(destroyedCount * 10);
             yield return new WaitUntil(() => SpecialBlockEffect.effectRunning == false);
             _board.ChangeState(new RefillState());
         }
