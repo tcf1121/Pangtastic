@@ -616,7 +616,7 @@ namespace LHJ
             if (destroyedCount > 0)
             {
                 int score = destroyedCount * 10;
-                board.UpdateUI(score);
+                InGameManager.AddScore(score);
             }
             if (board.MatchCombo != null)
                 board.MatchCombo.ResetTimer();
