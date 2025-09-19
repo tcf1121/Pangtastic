@@ -109,7 +109,7 @@ namespace LHJ
             if (gameObject != null) Destroy(gameObject);
 
             if (destroyedCount > 0)
-                board.UpdateUI(destroyedCount * 10);
+                //board.UpdateUI(destroyedCount * 10);
 
             if (board.MatchCombo != null)
                 board.MatchCombo.ResetTimer();
