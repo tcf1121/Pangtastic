@@ -29,6 +29,12 @@ namespace KDJ
         [SerializeField] private AnimationCurve _explosionAlphaCurve;
         [SerializeField] private AnimationCurve _specialBlockCreateCurve;
 
+        [Header("가위 선택 UI")]
+        [SerializeField] private GameObject _scissorUseUI;
+
+        [Header("거품기 선택 UI")]
+        [SerializeField] private GameObject _whiskUseUI;
+
         public IGameState CurrentState { get; private set; }
         public BlockSpawner Spawner { get; private set; }
         public BoardMatchChecker MatchChecker { get; private set; }
@@ -48,6 +54,7 @@ namespace KDJ
         public bool IsWaitingForAnimation { get; set; } = false;
         public bool IsReadyForStart { get; set; } = false;
         public bool IsUseItem { get; set; } = false;
+        public bool IsItemEffectRunning { get; set; }
         public Vector2Int? InitialSwapPosition { get; set; } // 한 턴의 스왑 시작 위치를 기억
         public List<Vector2Int> CurHintPositions = new List<Vector2Int>();
         public ObjectPool CoinTextPool;
@@ -216,12 +223,20 @@ namespace KDJ
         {
             SelectedItemType = type;
             IsItemSelected = true;
+            if (type == ItemType.Scissors && _scissorUseUI != null)
+                _scissorUseUI.SetActive(true);
+            if (type == ItemType.Whisk && _whiskUseUI != null)
+                _whiskUseUI.SetActive(true);
         }
 
         // 아이템 선택 해제
         public void ClearItemSelection()
         {
             IsItemSelected = false;
+            if (_scissorUseUI != null)
+                _scissorUseUI.SetActive(false);
+            if (_whiskUseUI != null)
+                _whiskUseUI.SetActive(false);
         }
 
         public static void SetTouch(bool canTouch)

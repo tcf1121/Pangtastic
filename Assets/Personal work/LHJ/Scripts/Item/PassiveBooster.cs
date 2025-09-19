@@ -105,6 +105,9 @@ public class PassiveBooster : MonoBehaviour
             if (cell.IsObstacle) continue;
             if (cell.GemType > GemType.Sugar) continue;
 
+            var overlay = sp.GameBoardData.OverlayArray[y, x];
+            if (overlay != null) continue;
+
             bool ok = true;
             for (int i = 0; i < picked.Count; i++)
             {
