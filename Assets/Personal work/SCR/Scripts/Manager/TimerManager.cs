@@ -6,14 +6,14 @@ using UnityEngine;
 public class TimerManager : Singleton<TimerManager>
 {
     public Coroutine ADCor;
-    private Action _adFin;
+    public Action ADFin;
     private bool _isGame;
 
     protected override void Awake()
     {
         base.Awake();
         _isGame = false;
-        _adFin += EndADTime;
+        ADFin += EndADTime;
     }
 
     public IEnumerator StartTimer(Coroutine cor, float CycleTime,
@@ -37,7 +37,7 @@ public class TimerManager : Singleton<TimerManager>
     public void StartGame()
     {
         _isGame = true;
-        if (ADCor == null) StartADTimer(180, _adFin);
+        if (ADCor == null) StartADTimer(180, ADFin);
     }
 
     public void EndGame()
