@@ -113,9 +113,15 @@ public class InGameManager : MonoBehaviour
 
     }
 
+    public static bool GetStageClear()
+    {
+        if (instate == null) instate = GameObject.Find("InGameManager").GetComponent<InGameManager>();
+        return instate._orderStateController.IsAllComplete();
+    }
+
     public static void AddScore(int score)
     {
-        if (instate == null) GameObject.Find("InGameManager").GetComponent<InGameManager>();
+        if (instate == null) instate = GameObject.Find("InGameManager").GetComponent<InGameManager>();
         instate._score += score;
 
         Debug.Log($"현재 점수: {instate._score}");

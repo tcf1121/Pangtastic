@@ -19,6 +19,18 @@ namespace KDJ
             public Vector2Int? SwapPosition { get; set; }
         }
 
+        public bool IsBoardBusy
+        {
+            get
+            {
+                return IsWaitingForAnimation ||
+                SpecialBlockEffect.effectRunning ||
+                IsItemEffectRunning ||
+                !(CurrentState is ReadyState) ||
+                MatchChecker.AllBlockMatchCheck(this);
+            }
+        }
+
         [SerializeField] private TMP_Text _blockInfo;
         [SerializeField] private TMP_Text _scoreInfo;
         public bool IsTest = false;
@@ -113,6 +125,7 @@ namespace KDJ
             TestStageManager = FindObjectOfType<TestStageManager>();
             CanTouch = false;
             IsReadyForStart = false;
+            IsClearSpecialTime = false;
             progress.fillAmount = 0.25f;
 
             yield return new WaitForSeconds(0.1f);
@@ -209,8 +222,6 @@ namespace KDJ
                 CurrentState.OnUpdate(this);
                 //Debug.Log($"Current State: {CurrentState.GetType().Name}");
             }
-
-            Debug.Log($"터치 상태 : {CanTouch}");
         }
 
         public void ChangeState(IGameState newState)
@@ -527,11 +538,21 @@ namespace KDJ
             List<Vector2Int> specialPositions = new List<Vector2Int>();
             Instance.HintManager.StopHintTimer();
             IsClearSpecialTime = true;
+            CanTouch = false;
 
-            yield return new WaitForSeconds(1f);
+            yield return new WaitForSeconds(0.5f);
 
-            yield return new WaitUntil(() => CurrentState is ReadyState && CanTouch);
+            // 기존 매치 및 특수 블록 처리
+            while (IsBoardBusy)
+            {
+                yield return new WaitUntil(() => CurrentState is ReadyState && CanTouch && !SpecialBlockEffect.effectRunning);
 
+                yield return new WaitForSeconds(0.1f);
+            }
+
+            yield return new WaitForSeconds(0.5f);
+
+            // 보상 블록 생성
             for (int i = 0; i < rewards.Count; i++)
             {
                 Vector2Int randPos = new Vector2Int(Random.Range(0, Spawner.GameBoardData.Width), Random.Range(0, Spawner.GameBoardData.Height));
@@ -589,43 +610,69 @@ namespace KDJ
                 specialPositions.Add(randPos);
             }
 
-            yield return new WaitUntil(() => CurrentState is ReadyState && CanTouch);
+            if (!InGameManager.GetStageClear())
+            {
+                // 클리어가 아니라면 특수 블록 사용은 건너뜀
+                IsClearSpecialTime = false;
+                CanTouch = true;
+                yield break;
+            }  
 
             yield return new WaitForSeconds(1f);
 
-            UseSpecialBlock(GetComponent<SpecialBlockEffect>());
+            // 특수 블록 처리
+            while (IsAnySpecialBlockOnBoard() || IsBoardBusy)
+            {
+                if (IsAnySpecialBlockOnBoard())
+                {
+                    UseSpecialBlock(GetComponent<SpecialBlockEffect>());
+                }
+
+                yield return new WaitUntil(() => CurrentState is ReadyState && CanTouch && !SpecialBlockEffect.effectRunning);
+
+                yield return new WaitForSeconds(0.1f);
+            }
 
             yield return new WaitForSeconds(0.5f);
 
-            yield return new WaitUntil(() => CurrentState is ReadyState && CanTouch && !SpecialBlockEffect.effectRunning);
-
-            yield return new WaitForSeconds(1f);
-
             IsClearSpecialTime = false;
+            CanTouch = true;
             Debug.Log("특수 시간 종료");
+        }
+
+        private bool IsAnySpecialBlockOnBoard()
+        {
+            foreach (var block in Spawner.GameBoardData.BlockArray)
+            {
+                if (block != null && block.BlockInstance != null && block.GemType > GemType.Sugar && block.GemType < GemType.Dust)
+                {
+                    return true;
+                }
+            }
+            return false;
         }
 
         public void UseSpecialBlock(SpecialBlockEffect effect)
         {
             Debug.Log("특수 블록 사용 진입");
-            CanTouch = false;
-            List<Block> blocks = new List<Block>();
+            
+            List<Vector2Int> positions = new List<Vector2Int>();
             foreach (var b in Spawner.GameBoardData.BlockArray)
             {
                 if (b != null && b.BlockInstance != null && b.GemType > GemType.Sugar && b.GemType < GemType.Dust)
                 {
-                    blocks.Add(b);
+                    Vector3 pos = BlockMover.WorldToArrayPosition(b.BlockInstance.transform.position, Spawner.GameBoardData.Width, Spawner.GameBoardData.Height);
+                    positions.Add(new Vector2Int(Mathf.RoundToInt(pos.x), Mathf.RoundToInt(pos.y)));
                 }
             }
 
-            foreach (var b in blocks)
+            foreach (var p in positions)
             {
-                if (b != null && b.BlockInstance != null)
+                Block block = Spawner.GameBoardData.GetBlock(p.x, p.y);
+                if (block != null)
                 {
-                    Vector3 pos = BlockMover.WorldToArrayPosition(b.BlockInstance.transform.position, Spawner.GameBoardData.Width, Spawner.GameBoardData.Height);
-                    Debug.Log($"위치 {pos.x}, {pos.y}의 특수블록 {b.GemType} 사용");
-                    Vector2Int gridPos = new Vector2Int(Mathf.RoundToInt(pos.x), Mathf.RoundToInt(pos.y));
-                    effect.UseSpecial(gridPos, Spawner.GameBoardData.GetBlock(gridPos.x, gridPos.y).GemType, Spawner.GameBoardData, new List<Vector2Int>());
+                    Debug.Log($"위치 {p.x}, {p.y}의 특수블록 {block.GemType} 사용");
+                    effect.UseSpecial(p, block.GemType, Spawner.GameBoardData, new List<Vector2Int>());
                 }
             }
 

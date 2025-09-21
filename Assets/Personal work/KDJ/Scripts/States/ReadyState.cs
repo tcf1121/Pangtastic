@@ -43,6 +43,9 @@ namespace KDJ.States
                 return;
             }
 
+            // 입력 중단 처리 부분
+            if (!BoardManager.CanTouch || boardManager.IsClearSpecialTime) return;
+
             if (_isSwapping) return;
 
             BlockCheck(boardManager);
