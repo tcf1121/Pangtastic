@@ -474,13 +474,27 @@ namespace KDJ
                     {
                         if (specialMatchCoords != null && specialMatchCoords.Count > 0)
                         {
-                            int minX = int.MaxValue, minY = int.MaxValue;
+                            // 올바른 '좌하단' 위치를 찾기 위한 로직
+                            // 1. 가장 아래쪽 행(minY)을 찾습니다.
+                            // 2. 해당 행에 있는 블록들 중 가장 왼쪽(minX)을 찾습니다.
+                            Vector2Int bottomLeft = new Vector2Int(int.MaxValue, int.MaxValue);
                             foreach (var coord in specialMatchCoords)
                             {
-                                if (coord.x < minX) minX = coord.x;
-                                if (coord.y < minY) minY = coord.y;
+                                if (coord.y < bottomLeft.y)
+                                {
+                                    // 더 아래에 있는 행을 발견하면, 좌하단 후보를 이 좌표로 초기화합니다.
+                                    bottomLeft = coord;
+                                }
+                                else if (coord.y == bottomLeft.y)
+                                {
+                                    // 같은 행이라면, 더 왼쪽에 있는지 확인합니다.
+                                    if (coord.x < bottomLeft.x)
+                                    {
+                                        bottomLeft.x = coord.x;
+                                    }
+                                }
                             }
-                            specialSpawnPos = new Vector2Int(minX, minY);
+                            specialSpawnPos = bottomLeft;
                         }
                         else
                         {
