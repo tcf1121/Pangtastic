@@ -11,9 +11,10 @@ public class AdSystem : Singleton<AdSystem>
     private const string RemoveAD = "RemoveAD";
     public bool RemovedAD { get { return _removedAD; } }
     private bool _removedAD;
+
     // ===================== Rewarded Interstitial (보상형) =====================
     private RewardedInterstitialAd _rewardedInterstitialAd;
-
+    public Action OnRewardAdClosed;
 
     // ===================== App Open Event Ad (오프닝) =====================
     private AppOpenAd _appOpenAd;
@@ -22,7 +23,7 @@ public class AdSystem : Singleton<AdSystem>
 
     // ===================== Interstitial Ad (전면) =====================
     private InterstitialAd _interstitialAd;
-
+    public Action OnInterstitialAdClosed;
 
     // ===================== Banner Ad (배너) =====================
     private BannerView _bannerView;
@@ -50,7 +51,7 @@ public class AdSystem : Singleton<AdSystem>
 
             // ===================== App Open Ad =====================
             // 로그인 화면에서 불러옴
-            //LoadAppOpenAd();
+            LoadAppOpenAd();
 
             // ===================== Interstitial Ad =====================
             LoadInterstitialAd();
@@ -123,13 +124,14 @@ public class AdSystem : Singleton<AdSystem>
         });
 
     }
-    public void ShowAD(Action action = null)
+
+    public void ShowAD()
     {
         if (_rewardedInterstitialAd != null && _rewardedInterstitialAd.CanShowAd())
         {
+            _rewardedInterstitialAd.OnAdFullScreenContentClosed += ShowAdClosed;
             _rewardedInterstitialAd.Show((Reward reward) =>
             {
-                action?.Invoke();
                 Debug.Log($"User earned reward: {reward.Amount} {reward.Type}");
             });
 
@@ -138,6 +140,19 @@ public class AdSystem : Singleton<AdSystem>
         else
         {
             Debug.Log("광고 준비 안 됨!");
+        }
+    }
+
+    public void ShowAdClosed()
+    {
+        Debug.Log("RewardAdClosed ad closed. Notifying subscribers.");
+        // 광고 닫힘 이벤트를 외부에 알림
+        OnRewardAdClosed?.Invoke();
+
+        // 이벤트 핸들러 해제 (중복 호출 방지)
+        if (_interstitialAd != null)
+        {
+            _interstitialAd.OnAdFullScreenContentClosed -= ShowAdClosed;
         }
     }
 
@@ -313,6 +328,7 @@ public class AdSystem : Singleton<AdSystem>
         if (_interstitialAd != null && _interstitialAd.CanShowAd())
         {
             Debug.Log("Showing interstitial ad.");
+            _interstitialAd.OnAdFullScreenContentClosed += InterstitialAdClosed;
             _interstitialAd.Show();
             _interstitialAd = null;
         }
@@ -320,6 +336,19 @@ public class AdSystem : Singleton<AdSystem>
         {
             Debug.LogWarning("Interstitial ad not ready.");
             LoadInterstitialAd();
+        }
+    }
+
+    private void InterstitialAdClosed()
+    {
+        Debug.Log("Interstitial ad closed. Notifying subscribers.");
+        // 광고 닫힘 이벤트를 외부에 알림
+        OnInterstitialAdClosed?.Invoke();
+
+        // 이벤트 핸들러 해제 (중복 호출 방지)
+        if (_interstitialAd != null)
+        {
+            _interstitialAd.OnAdFullScreenContentClosed -= InterstitialAdClosed;
         }
     }
 

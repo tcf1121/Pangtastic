@@ -30,22 +30,27 @@ public class InGameManager : MonoBehaviour
     private int _score;
     private int _coin;
     private bool _firstfail = true;
-    private Action _finishAD;
+    [SerializeField] private bool _showInterstitialAd;
     [SerializeField] private int _useCoin;
 
     void Awake()
     {
+        _showInterstitialAd = false;
         if (!Manager.Ad.RemovedAD)
         {
             _adPanel.SetActive(true);
             Manager.Ad.BannerCreateView();
             Manager.Ad.LoadAD();
+            Manager.Ad.LoadInterstitialAd();
+            Manager.Timer.ADFin += ReadyShowAD;
+            Manager.Timer.StartGame();
+            Manager.Ad.OnRewardAdClosed += ContinueGame;
+            Manager.Ad.OnInterstitialAdClosed += GoLobby;
         }
         Manager.User.UseHeart();
         instate = this;
         _customerFlowController.OnStageCleared += StageClear;
         _customerFlowController.OnStageFailed += StageFail;
-        _finishAD += ContinueGame;
         _useCoinContinueButton.onClick.AddListener(GoldContinueGame);
         _watchAddContinueButton.onClick.AddListener(AdContinueGame);
         _score = 0;
@@ -53,6 +58,21 @@ public class InGameManager : MonoBehaviour
         Manager.Audio.PlayPuzzleBGM();
         foreach (var btn in _gameButtons)
             btn.onClick.AddListener(PushButton);
+    }
+
+    void OnDestroy()
+    {
+        if (!Manager.Ad.RemovedAD)
+        {
+            Manager.Timer.ADFin -= ReadyShowAD;
+            Manager.Ad.OnRewardAdClosed -= ContinueGame;
+            Manager.Ad.OnInterstitialAdClosed -= GoLobby;
+        }
+    }
+
+    private void ReadyShowAD()
+    {
+        _showInterstitialAd = true;
     }
 
     public static void SetPuzzleSize(int xPos, int yPos, int xSize, int ySize)
@@ -171,7 +191,9 @@ public class InGameManager : MonoBehaviour
 
     private void AdContinueGame()
     {
-        Manager.Ad.ShowAD(_finishAD);
+        if (!Manager.Ad.RemovedAD)
+            Manager.Ad.ShowAD();
+        else ContinueGame();
     }
 
     private void GoldContinueGame()
@@ -228,11 +250,20 @@ public class InGameManager : MonoBehaviour
 
     public static void ClearGame()
     {
-        SceneManager.LoadScene(2/*로비씬*/);
+        if (instate == null) instate = GameObject.Find("InGameManager").GetComponent<InGameManager>();
+        if (instate._showInterstitialAd) Manager.Ad.ShowInterstitialAd();
+        else instate.GoLobby();
     }
 
     public void QuitGame()
     {
+        if (_showInterstitialAd) Manager.Ad.ShowInterstitialAd();
+        else GoLobby();
+    }
+
+    private void GoLobby()
+    {
+        Manager.Timer.EndGame();
         SceneManager.LoadScene(2/*로비씬*/);
     }
 
