@@ -3,6 +3,7 @@ using SCR;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -65,7 +66,9 @@ public class CustomerFlowController : MonoBehaviour
         Debug.Log($"현재 스테이지 {curStage.StageID}");
     }
 
-    private void OnOrderSegmentCleared(CustomerSO curCustomer, float percentage) //스페셜 손님 전용. 주문 하나 완료 할때마다 호출
+    // 250919 김동진 수정
+    // async/await 패턴 적용 그외에 수정 없음
+    private async void OnOrderSegmentCleared(CustomerSO curCustomer, float percentage) //스페셜 손님 전용. 주문 하나 완료 할때마다 호출
     {
         if (curCustomer.Type != CustomerType.Special) //스페셜손님 아니면 리턴
         {
@@ -105,7 +108,7 @@ public class CustomerFlowController : MonoBehaviour
                 rewardGive.Add(GemType.Roller_h);
             }
         }
-        InGameManager.RewardGem(rewardGive);  //보상 제공
+        await InGameManager.RewardGem(rewardGive);  //보상 제공
     }
 
     private void OnCustomerFail()
@@ -113,7 +116,9 @@ public class CustomerFlowController : MonoBehaviour
         StageFail();
     }
 
-    private void OnStageClear(CustomerSO customer, float percentage)  // 스테이지 클리어시 호출
+    // 250919 김동진 수정
+    // async/await 패턴 적용 그외에 수정 없음
+    private async void OnStageClear(CustomerSO customer, float percentage)  // 스테이지 클리어시 호출
     {
         int percent = Mathf.FloorToInt(percentage); //int 로 변경
 
@@ -149,7 +154,7 @@ public class CustomerFlowController : MonoBehaviour
             rewardGive.Add((GemType)UnityEngine.Random.Range(6, 10));
         }
 
-        InGameManager.RewardGem(rewardGive);
+        await InGameManager.RewardGem(rewardGive);
         InGameManager.AddScore(percent * 10); //인내심기준 점수 전송
 
         OnStageCleared?.Invoke(); //스테이지 클리어 이벤트

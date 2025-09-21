@@ -29,6 +29,8 @@ namespace KDJ.States
                 }
                 _matchDelayCoroutine = boardManager.StartCoroutine(MatchDelayCoroutine(boardManager));
             }
+
+            BoardManager.SetTouch(true);
         }
 
         public void OnUpdate(BoardManager boardManager)
@@ -40,6 +42,9 @@ namespace KDJ.States
                 boardManager.HintManager.StopHintTimer();
                 return;
             }
+
+            // 입력 중단 처리 부분
+            if (!BoardManager.CanTouch || boardManager.IsClearSpecialTime) return;
 
             if (_isSwapping) return;
 

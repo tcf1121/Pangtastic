@@ -1,4 +1,5 @@
 using KDJ.States;
+using LHJ;
 using SCR;
 using System.Collections;
 using System.Collections.Generic;
@@ -16,6 +17,18 @@ namespace KDJ
             public (Vector2Int pos, int type)? SpecialToCreate { get; set; }
             public Vector2Int? SpecialSpawnPos { get; set; }
             public Vector2Int? SwapPosition { get; set; }
+        }
+
+        public bool IsBoardBusy
+        {
+            get
+            {
+                return IsWaitingForAnimation ||
+                SpecialBlockEffect.effectRunning ||
+                IsItemEffectRunning ||
+                !(CurrentState is ReadyState) ||
+                MatchChecker.AllBlockMatchCheck(this);
+            }
         }
 
         [SerializeField] private TMP_Text _blockInfo;
@@ -54,6 +67,8 @@ namespace KDJ
         public bool IsWaitingForAnimation { get; set; } = false;
         public bool IsReadyForStart { get; set; } = false;
         public bool IsUseItem { get; set; } = false;
+        public bool IsClearSpecialTime { get; set; } = false;
+        public bool CanSwapBlocks => !IsWaitingForAnimation && !SpecialBlockEffect.effectRunning && !IsUseItem && !MatchChecker.AllBlockMatchCheck(this);
         public bool IsItemEffectRunning { get; set; }
         public Vector2Int? InitialSwapPosition { get; set; } // 한 턴의 스왑 시작 위치를 기억
         public List<Vector2Int> CurHintPositions = new List<Vector2Int>();
@@ -110,6 +125,7 @@ namespace KDJ
             TestStageManager = FindObjectOfType<TestStageManager>();
             CanTouch = false;
             IsReadyForStart = false;
+            IsClearSpecialTime = false;
             progress.fillAmount = 0.25f;
 
             yield return new WaitForSeconds(0.1f);
@@ -506,14 +522,161 @@ namespace KDJ
             }
         }
 
-        public IEnumerator ClearRewardAnimation()
+        public IEnumerator RewardRoutine(List<GemType> rewards)
         {
-            yield return new WaitForSeconds(1f);
+            foreach (var reward in rewards)
+            {
+                yield return ClearRewardAnimation(rewards);
+            }
         }
 
-        public void UseSpecialBlock(int x, int y)
+        public IEnumerator ClearRewardAnimation(List<GemType> rewards)
         {
+            float timer1 = 0f;
+            float timer2 = 0f;
+            float duration = 0.3f;
+            List<Vector2Int> specialPositions = new List<Vector2Int>();
+            Instance.HintManager.StopHintTimer();
+            IsClearSpecialTime = true;
+            CanTouch = false;
 
+            yield return new WaitForSeconds(0.5f);
+
+            // 기존 매치 및 특수 블록 처리
+            while (IsBoardBusy)
+            {
+                yield return new WaitUntil(() => CurrentState is ReadyState && CanTouch && !SpecialBlockEffect.effectRunning);
+
+                yield return new WaitForSeconds(0.1f);
+            }
+
+            yield return new WaitForSeconds(0.5f);
+
+            // 보상 블록 생성
+            for (int i = 0; i < rewards.Count; i++)
+            {
+                Vector2Int randPos = new Vector2Int(Random.Range(0, Spawner.GameBoardData.Width), Random.Range(0, Spawner.GameBoardData.Height));
+                timer1 = 0f;
+                timer2 = 0f;
+
+                while (true)
+                {
+                    if (Spawner.GameBoardData.BlockPlate.BlockPlateArray[randPos.y, randPos.x] && Spawner.GameBoardData.GetBlock(randPos.x, randPos.y).IsNormal)
+                    {
+                        break;
+                    }
+
+                    randPos = new Vector2Int(Random.Range(0, Spawner.GameBoardData.Width), Random.Range(0, Spawner.GameBoardData.Height));
+                    yield return null;
+                }
+
+                Block oldBlock = Spawner.GameBoardData.GetBlock(randPos.x, randPos.y);
+
+                // 기존 블록 축소
+                while (timer1 < 0.2f)
+                {
+                    timer1 += Time.deltaTime;
+                    // 축소는 커브 안쓰고 그냥 작게 사라지도록
+                    float scale = Mathf.Lerp(1f, 0f, timer1 / 0.2f);
+                    if (oldBlock.BlockInstance != null)
+                    {
+                        oldBlock.BlockInstance.transform.localScale = Vector3.one * scale;
+                    }
+                    yield return null;
+                }
+                Spawner.GameBoardData.SetBlock(randPos.x, randPos.y, null);
+
+                // 보상 블록 생성
+                Debug.Log($"보상 블록 생성: {rewards[i]} at ({randPos.x}, {randPos.y})");
+                Spawner.SpawnBlock(randPos.x, randPos.y, rewards[i], BlockMover);
+                Block newBlock = Spawner.GameBoardData.GetBlock(randPos.x, randPos.y);
+                if (newBlock != null && newBlock.BlockInstance != null)
+                {
+                    newBlock.BlockInstance.transform.localScale = Vector3.zero;
+                }
+
+                while (timer2 < duration)
+                {
+                    timer2 += Time.deltaTime;
+                    float progress = Mathf.Clamp01(timer2 / duration);
+                    float scale = _specialBlockCreateCurve.Evaluate(progress);
+                    if (newBlock != null && newBlock.BlockInstance != null)
+                    {
+                        newBlock.BlockInstance.transform.localScale = Vector3.one * scale;
+                    }
+                    yield return null;
+                }
+
+                specialPositions.Add(randPos);
+            }
+
+            if (!InGameManager.GetStageClear())
+            {
+                // 클리어가 아니라면 특수 블록 사용은 건너뜀
+                IsClearSpecialTime = false;
+                CanTouch = true;
+                yield break;
+            }  
+
+            yield return new WaitForSeconds(1f);
+
+            // 특수 블록 처리
+            while (IsAnySpecialBlockOnBoard() || IsBoardBusy)
+            {
+                if (IsAnySpecialBlockOnBoard())
+                {
+                    UseSpecialBlock(GetComponent<SpecialBlockEffect>());
+                }
+
+                yield return new WaitUntil(() => CurrentState is ReadyState && CanTouch && !SpecialBlockEffect.effectRunning);
+
+                yield return new WaitForSeconds(0.1f);
+            }
+
+            yield return new WaitForSeconds(0.5f);
+
+            IsClearSpecialTime = false;
+            CanTouch = true;
+            Debug.Log("특수 시간 종료");
+        }
+
+        private bool IsAnySpecialBlockOnBoard()
+        {
+            foreach (var block in Spawner.GameBoardData.BlockArray)
+            {
+                if (block != null && block.BlockInstance != null && block.GemType > GemType.Sugar && block.GemType < GemType.Dust)
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        public void UseSpecialBlock(SpecialBlockEffect effect)
+        {
+            Debug.Log("특수 블록 사용 진입");
+            
+            List<Vector2Int> positions = new List<Vector2Int>();
+            foreach (var b in Spawner.GameBoardData.BlockArray)
+            {
+                if (b != null && b.BlockInstance != null && b.GemType > GemType.Sugar && b.GemType < GemType.Dust)
+                {
+                    Vector3 pos = BlockMover.WorldToArrayPosition(b.BlockInstance.transform.position, Spawner.GameBoardData.Width, Spawner.GameBoardData.Height);
+                    positions.Add(new Vector2Int(Mathf.RoundToInt(pos.x), Mathf.RoundToInt(pos.y)));
+                }
+            }
+
+            foreach (var p in positions)
+            {
+                Block block = Spawner.GameBoardData.GetBlock(p.x, p.y);
+                if (block != null)
+                {
+                    Debug.Log($"위치 {p.x}, {p.y}의 특수블록 {block.GemType} 사용");
+                    effect.UseSpecial(p, block.GemType, Spawner.GameBoardData, new List<Vector2Int>());
+                }
+            }
+
+            ChangeState(new RefillState());
         }
 
         private void ShowScoreForMatches(List<HashSet<Vector2Int>> matchGroups)
