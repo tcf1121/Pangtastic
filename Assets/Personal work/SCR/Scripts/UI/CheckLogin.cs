@@ -62,8 +62,10 @@ namespace SCR
 
         private void Logout()
         {
-            Manager.DB.DeleteFB();
+            Manager.Data.OffTest();
             Manager.Data.DeleteSaveData();
+            Manager.DB.DeleteFB();
+            _logoutBtn.gameObject.SetActive(false);
         }
 
         void ShowPopup()
@@ -73,14 +75,7 @@ namespace SCR
 
         public void PushButton()
         {
-            if (Application.isMobilePlatform)
-            {
-                Handheld.Vibrate();
-            }
-            else
-            {
-                Manager.Audio.PlaySFX("Touch");
-            }
+            Manager.Audio.PlaySFX("Touch");
         }
 
         private void HistorySetting()
@@ -97,6 +92,8 @@ namespace SCR
                     Manager.Audio.SetBGM(historyOption);
                 else if (type == ToggleType.SFX)
                     Manager.Audio.SetSFX(historyOption);
+                else if (type == ToggleType.Vibration)
+                    Manager.Audio.SetVibrate(historyOption);
             }
 
         }

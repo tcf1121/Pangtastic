@@ -48,14 +48,17 @@ public class AdSystem : Singleton<AdSystem>
 
             // ===================== Rewarded Interstitial =====================
             LoadAD();
+            // 2일 이상부터만 적용
+            if (Manager.Date.LoginStreak > 1)
+            {
+                // ===================== App Open Ad =====================
+                // 로그인 화면에서 불러옴
 
-            // ===================== App Open Ad =====================
-            // 로그인 화면에서 불러옴
-            LoadAppOpenAd();
+                LoadAppOpenAd();
 
-            // ===================== Interstitial Ad =====================
-            LoadInterstitialAd();
-
+                // ===================== Interstitial Ad =====================
+                LoadInterstitialAd();
+            }
             // ===================== Banner Ad =====================
             // 로비와 게임 화면에서 불러옴
             //BannerCreateView();
@@ -146,11 +149,9 @@ public class AdSystem : Singleton<AdSystem>
 
     public bool CheckDays(int day)
     {
-        UserData dataInfo = Manager.Data.Load();
-        
         // Json 저장 데이터 
-        DateTime startDay = DateTime.Parse(dataInfo.StartUtcDay);
-        
+        DateTime startDay = DateTime.Parse(Manager.Date.GetDate());
+
         // 현재 UTC → 한국시간(+9)
         DateTime kstNow = DateTime.UtcNow.AddHours(9);
 
@@ -165,7 +166,7 @@ public class AdSystem : Singleton<AdSystem>
         Debug.Log($"dddddd {day}일 지났는가? {isOverDays}");
 
         return isOverDays;
-     }
+    }
 
     public void ShowAdClosed()
     {
@@ -223,18 +224,18 @@ public class AdSystem : Singleton<AdSystem>
                 }
             });
     }
-    
+
     public void ShowAppOpenAd()
     {
         // 설치 후 2일 지나지 않음
         if (!CheckDays(2))
             return;
-        
+
         if (_appOpenAd != null && _appOpenAd.CanShowAd())
         {
             Debug.Log("Showing app open ad.");
-            
-            
+
+
             _appOpenAd.Show();
         }
         else

@@ -7,6 +7,7 @@ public class DataManager : Singleton<DataManager>
 {
     private string path;
     private bool _isNewData;
+    private bool _isTest;
     private const string NewUserKey = "NewUserData";
 
     protected override void Awake()
@@ -14,6 +15,7 @@ public class DataManager : Singleton<DataManager>
         base.Awake();
         string lastDateStr = PlayerPrefs.GetString(NewUserKey, "");
         _isNewData = string.IsNullOrEmpty(lastDateStr);
+        _isTest = PlayerPrefs.GetInt("Test", 0) == 0 ? false : true;
         path = Path.Combine(Application.persistentDataPath, "userdata.json");
         Debug.Log($"userdata.json 주소 : {path}");
     }
@@ -34,6 +36,23 @@ public class DataManager : Singleton<DataManager>
 
 #endif
 
+    public void OnTest()
+    {
+        _isTest = true;
+        PlayerPrefs.SetInt("Test", 1);
+    }
+
+    public void OffTest()
+    {
+        _isTest = false;
+        PlayerPrefs.SetInt("Test", 0);
+    }
+
+    public bool GetTest()
+    {
+        return _isTest;
+    }
+
     public void SetUser()
     {
         if (_isNewData) NewUser();
@@ -47,6 +66,7 @@ public class DataManager : Singleton<DataManager>
 
     public void DeleteSaveData()
     {
+        PlayerPrefs.DeleteAll();
         if (File.Exists(path))
         {
             File.Delete(path);
@@ -63,24 +83,11 @@ public class DataManager : Singleton<DataManager>
     // 새로운 유저가 접속할 때 새로운 정보를 만듦
     public void NewUser()
     {
-        // 기존 저장 데이터 확인
-        var savedData = Load();
-        
         var newUserData = new UserData();
         newUserData.PlayerName = "guest";
         newUserData.UserInfo.Heart.currentHeart = 5;
         newUserData.UserInfo.Heart.lastSaveTime = DateTime.Now.ToString("O");
-        
-        // 최초 한번만 실행 - 광고에서 사용하기 위해 추가
-        if (!string.IsNullOrEmpty(savedData.StartUtcDay))
-        {
-            newUserData.StartUtcDay = savedData.StartUtcDay;
-        }
-        else
-        {
-            newUserData.StartUtcDay = DateTime.UtcNow.AddHours(9).ToString("yyyy-MM-dd HH:mm:ss");
-        }
-        
+
         Manager.User.SetUser(newUserData);
         Manager.User.NewMissionList(16);
         PlayerPrefs.SetString(NewUserKey, "newUser");

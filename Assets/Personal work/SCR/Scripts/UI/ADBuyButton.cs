@@ -15,7 +15,7 @@ public class ADBuyButton : MonoBehaviour
 
     void Awake()
     {
-        count = Manager.User.GetPurchaseIndex();
+        count = Manager.Date.GetPurchaseIndex();
         SetADButton();
         _buyButton.onClick.AddListener(BuyFree);
     }
@@ -38,14 +38,14 @@ public class ADBuyButton : MonoBehaviour
     {
         if (count == 0)
         {
-            ItemType item = Manager.User.LoadNumbers(count);
+            ItemType item = Manager.Date.LoadNumbers(count);
             OutGameManager.AddReward((Goods)Enum.Parse(typeof(Goods), item.ToString()), 1);
             GetADReward();
         }
         else if (count < 4)
         {
             Manager.Ad.OnRewardAdClosed += GetADReward;
-            ItemType item = Manager.User.LoadNumbers(count);
+            ItemType item = Manager.Date.LoadNumbers(count);
             OutGameManager.AddReward((Goods)Enum.Parse(typeof(Goods), item.ToString()), 1);
             Manager.Ad.ShowAD();
         }
@@ -64,8 +64,8 @@ public class ADBuyButton : MonoBehaviour
     private void GetADReward()
     {
         OutGameManager.ShowRewardPopup();
-        Manager.User.Purchase();
-        count = Manager.User.GetPurchaseIndex();
+        Manager.Date.Purchase();
+        count = Manager.Date.GetPurchaseIndex();
         SetADButton();
     }
 }

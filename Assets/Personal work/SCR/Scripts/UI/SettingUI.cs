@@ -1,19 +1,27 @@
+using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class SettingUI : MonoBehaviour
 {
     [SerializeField] TMP_Text _currentLanguge;
     [SerializeField] TMP_Text _userID;
+    [SerializeField] List<GameObject> _testCode;
+    [SerializeField] TMP_InputField _testCodeInputField;
 
     private void Awake()
     {
         _userID.text = $"{Manager.DB.GetUid()}";
+        _testCodeInputField.onEndEdit.AddListener(OnInputEnd);
     }
 
     private void OnEnable()
     {
         SetLanguageBtn();
+        foreach (var obj in _testCode)
+            obj.SetActive(false);
+        _testCode[0].SetActive(true);
     }
 
     private void SetLanguageBtn()
@@ -62,6 +70,16 @@ public class SettingUI : MonoBehaviour
                 _currentLanguge.text = $"Português";
                 break;
 
+        }
+    }
+
+    private void OnInputEnd(string value)
+    {
+        if (value == "ruddlf0922") // 특정 값 체크
+        {
+            Debug.Log("특정 값을 입력했습니다!");
+            Manager.Data.OnTest();
+            SceneManager.LoadScene(0);
         }
     }
 }

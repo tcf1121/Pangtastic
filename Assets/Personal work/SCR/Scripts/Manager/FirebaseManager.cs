@@ -200,7 +200,6 @@ public class FirebaseManager : Singleton<FirebaseManager>
 
     public void DeleteFB()
     {
-        FirebaseAuth auth = Manager.DB.auth;
         if (auth != null)
         {
             DatabaseReference dataToRemove = Manager.DB.GetUserPath(auth.CurrentUser.UserId);
@@ -209,13 +208,24 @@ public class FirebaseManager : Singleton<FirebaseManager>
                 if (task.IsCompleted)
                 {
                     Debug.Log("데이터 삭제 성공!");
+                    auth.CurrentUser.DeleteAsync().ContinueWith(deleteTask =>
+                    {
+                        if (deleteTask.IsCompleted && !deleteTask.IsFaulted)
+                        {
+                            Debug.Log("계정 삭제 성공!");
+                            auth.SignOut(); // 3. 세션 정리
+                        }
+                        else
+                        {
+                            Debug.LogError("계정 삭제 실패: " + deleteTask.Exception);
+                        }
+                    });
                 }
                 else if (task.IsFaulted)
                 {
                     Debug.LogError("데이터 삭제 실패: " + task.Exception);
                 }
             });
-            auth.SignOut();
         }
     }
 }

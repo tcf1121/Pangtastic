@@ -38,10 +38,14 @@ public class InGameManager : MonoBehaviour
             _adPanel.SetActive(true);
             Manager.Ad.BannerCreateView();
             Manager.Ad.LoadAD();
-            Manager.Ad.LoadInterstitialAd();
-            Manager.Timer.ADFin += ReadyShowAD;
-            Manager.Timer.StartGame();
-            Manager.Ad.OnInterstitialAdClosed += GoLobby;
+            // 2일 이상부터만 적용
+            if (Manager.Date.LoginStreak > 1)
+            {
+                Manager.Ad.LoadInterstitialAd();
+                Manager.Timer.ADFin += ReadyShowAD;
+                Manager.Timer.StartGame();
+                Manager.Ad.OnInterstitialAdClosed += GoLobby;
+            }
         }
         Manager.User.UseHeart();
         instate = this;

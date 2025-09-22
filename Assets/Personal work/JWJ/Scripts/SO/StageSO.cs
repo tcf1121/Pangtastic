@@ -37,7 +37,7 @@ public class StageSO : ScriptableObject
     public int MaxGoldGain;
 
     [Header("재료 배수")]
-    public IngredientAdjustment[] IngredientAdjustments;
+    public float StageMultiplier;
 
     [System.Serializable]
     public struct IngredientAdjustment
