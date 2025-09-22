@@ -18,6 +18,9 @@ public class UserInfoManager : Singleton<UserInfoManager>
     private const string DailyGoodsListKey = "MyNumbers";
     private const int MaxDailyCount = 5;
 
+    // log 쌓는데 게임 시작한 시간만 로그만 쌓도록
+    public bool IsStartGame = false;
+
     void Start()
     {
         CheckDailyReset();
@@ -392,9 +395,22 @@ public class UserInfoManager : Singleton<UserInfoManager>
     }
 
     // 광고에서 시작이 기준으로 광고 표시하는거 있어서 추가 :: S
-    public string GetUtcStartDay()
+    // public string GetUtcStartDay()
+    // {
+    //     return currentData.StartUtcDay;
+    // }
+    public void SetLogAccessDates()
     {
-        return currentData.StartUtcDay;
+        if (!Manager.User.IsStartGame)
+        {
+            string today = DateTime.UtcNow.AddHours(9).ToString("yyyy-MM-dd HH:mm:ss");
+            currentData.Logs.AccessDays.Add(today);
+        }
+    }
+    
+    public List<string> GetLogAccessDates()
+    {
+        return currentData.Logs.AccessDays;
     }
     // 광고에서 시작이 기준으로 광고 표시하는거 있어서 추가 :: E
 }
@@ -420,9 +436,21 @@ public class UserData
     public PlaceInfo PlaceInfo { get; set; } = new PlaceInfo();
     
     // 광고에서 시작이 기준으로 광고 표시하는거 있어서 추가 :: S
-    public string StartUtcDay { get; set; } = "";
+    // public string StartUtcDay { get; set; } = "";
+    // public Logs Logs { get; set; } = new Logs();
+    public Logs Logs = new Logs();
     // 광고에서 시작이 기준으로 광고 표시하는거 있어서 추가 :: E
+
 }
+
+[Serializable]
+public class Logs
+{
+    // public List<string> AccessDays { get; set; } = new List<string>();
+    public List<string> AccessDays = new List<string>();
+}
+
+
 
 [Serializable]
 public class UserInfo
