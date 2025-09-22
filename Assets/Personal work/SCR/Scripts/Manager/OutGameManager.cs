@@ -47,9 +47,6 @@ public class OutGameManager : MonoBehaviour
         else _currentPlace = PlayerPrefs.GetInt(DROPDOWN_KEY);
         Manager.Audio.SetLobbyPlace((MissionPlace)_currentPlace);
         Manager.Audio.PlayLobbyBGM();
-        
-        // log 쌓는데 게임 시작한 시간만 로그만 쌓도록
-        Manager.User.SetLogAccessDates();
     }
 
     public static void UpdateStageStartButton()

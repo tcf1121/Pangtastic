@@ -15,8 +15,8 @@ public class StageSetting : MonoBehaviour
     public void SetStage(StageSO stage) //스테이지 세팅 변경
     {
         CurStage = stage;
-       //TotalCustomerCount = CurStage.CustomerList.Length;
-       //StageClearCustomerCount = CurStage.StageClearCustomerCount;
+        //TotalCustomerCount = CurStage.CustomerList.Length;
+        //StageClearCustomerCount = CurStage.StageClearCustomerCount;
     }
 
     public void InitStageRecipe() //레시피에 스테이지 재료 증감치 적용
@@ -27,14 +27,14 @@ public class StageSetting : MonoBehaviour
         {
             _finalRecipe[_req.Ingredient] = _req.Amount;
         }
-            
-        foreach (var _adj in CurStage.IngredientAdjustments) //추가된 재료를 더해서 딕셔너리 업데이트
-        {
-            if (_finalRecipe.ContainsKey(_adj.Ingredient))
-            {
-                //_finalRecipe[_adj.Ingredient] += _adj.ExtraAmount;//새로운 스크립트에 더하기에서 곱하기로 바꿔서 주석처리. 더이상 안씀
-            }
-        } 
+
+        // foreach (var _adj in CurStage.IngredientAdjustments) //추가된 재료를 더해서 딕셔너리 업데이트
+        // {
+        //     if (_finalRecipe.ContainsKey(_adj.Ingredient))
+        //     {
+        //         //_finalRecipe[_adj.Ingredient] += _adj.ExtraAmount;//새로운 스크립트에 더하기에서 곱하기로 바꿔서 주석처리. 더이상 안씀
+        //     }
+        // } 
     }
 
     public Dictionary<IngredientSO, int> GetRequiredIngs() //재료 증감치 적용된 레시피 딕셔너리 반환

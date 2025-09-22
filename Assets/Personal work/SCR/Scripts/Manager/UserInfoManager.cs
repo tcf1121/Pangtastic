@@ -1,7 +1,4 @@
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using UnityEngine;
 
 public class UserInfoManager : Singleton<UserInfoManager>
 {
@@ -297,65 +294,6 @@ public class UserInfoManager : Singleton<UserInfoManager>
         currentData.UserInfo.Body = body;
         currentData.UserInfo.Face = face;
     }
-
-    // 광고에서 시작이 기준으로 광고 표시하는거 있어서 추가 :: S
-    // public string GetUtcStartDay()
-    // {
-    //     return currentData.StartUtcDay;
-    // }
-    public void SetLogAccessDates()
-    {
-        if (!IsStartGame)
-        {
-            IsStartGame = true;
-            string today = DateTime.UtcNow.AddHours(9).ToString("yyyy-MM-dd HH:mm:ss");
-            // 새로운 로그 객체 생성
-            LogEntry entry = new LogEntry
-            {
-                AccessDay = today,
-                OpenAd = false   // 상황에 맞게 true/false
-            };
-
-            // 리스트에 추가
-            currentData.Logs.Add(entry);
-        }
-    }
-
-    public List<string> GetLogAccessDates()
-    {
-        List<string> result = new List<string>();
-
-        foreach (var log in currentData.Logs)
-        {
-            result.Add(log.AccessDay);
-        }
-
-        return result;
-    }
-
-    public void SetLastArrOpenAd(bool value)
-    {
-        if (currentData.Logs.Count > 0)
-        {
-            currentData.Logs[currentData.Logs.Count - 1].OpenAd = value;
-        }
-    }
-
-    public bool GetLastArrOpenAd()
-    {
-        if (currentData.Logs.Count > 0)
-        {
-            return currentData.Logs[currentData.Logs.Count - 1].OpenAd;
-        }
-
-        return false; // 로그가 비어있을 경우 기본값
-    }
-
-    public LogEntry GetSearchOpenAdLogs()
-    {
-        return currentData.Logs.LastOrDefault(log => log.OpenAd);
-    }
-    // 광고에서 시작이 기준으로 광고 표시하는거 있어서 추가 :: E
 }
 
 public enum ItemType
@@ -377,31 +315,7 @@ public class UserData
     public string PlayerName { get; set; } = "";
     public ItemInfo ItemInfo { get; set; } = new ItemInfo();
     public PlaceInfo PlaceInfo { get; set; } = new PlaceInfo();
-
-    // 광고에서 시작이 기준으로 광고 표시하는거 있어서 추가 :: S
-    // public string StartUtcDay { get; set; } = "";
-    // public Logs Logs { get; set; } = new Logs();
-    // public Logs Logs = new Logs();
-    public List<LogEntry> Logs = new List<LogEntry>();
-    // 광고에서 시작이 기준으로 광고 표시하는거 있어서 추가 :: E
-
 }
-
-[Serializable]
-public class LogEntry
-{
-    public string AccessDay;
-    public bool OpenAd;
-}
-
-// [Serializable]
-// public class Logs
-// {
-//     // public List<string> AccessDays { get; set; } = new List<string>();
-//     public List<string> AccessDays = new List<string>();
-// }
-
-
 
 [Serializable]
 public class UserInfo

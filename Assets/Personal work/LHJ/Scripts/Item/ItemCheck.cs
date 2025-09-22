@@ -36,7 +36,7 @@ namespace LHJ
         [SerializeField] private float _coffeeZigzagAmp = 60f;
         private void Update()
         {
-            if (_board == null || !_board.IsItemSelected || !(BoardManager.Instance.CurrentState is ReadyState) || _board.IsItemEffectRunning || BoardManager.Instance.IsClearSpecialTime || InGameManager.GetStageClear()) 
+            if (_board == null || !_board.IsItemSelected || !(BoardManager.Instance.CurrentState is ReadyState) || _board.IsItemEffectRunning) 
                 return;
 
             if (Input.GetMouseButtonDown(0))
@@ -76,16 +76,13 @@ namespace LHJ
         }
 
         // 커피 아이템
-        public bool UseCoffee(float amount = 30f)
+        public void UseCoffee(float amount = 30f)
         {
-            if (BoardManager.Instance.IsClearSpecialTime || InGameManager.GetStageClear())
-                return false;
             var order = FindObjectOfType<OrderStateController>();
 
             order.AddPatience(amount);
             Manager.Audio.PlaySFX("Coffe_Use");
             PlayCoffeeFxFromButton();
-            return true;
         }
 
         // 좌표 확인
@@ -454,8 +451,7 @@ namespace LHJ
         {
             if (_board == null) return false;
             if (!(BoardManager.Instance.CurrentState is ReadyState)) return false;
-            if (_board.IsItemEffectRunning) return false;
-            if (BoardManager.Instance.IsClearSpecialTime || InGameManager.GetStageClear()) return false;
+            if (_board.IsItemEffectRunning) return false; 
 
             _board.ClearItemSelection();
             BoardManager.Instance.HintManager.StopHintTimer();

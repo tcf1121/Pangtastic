@@ -128,16 +128,16 @@ public static class RecipeRule
         foreach (var ing in recipe.Ingredients)
         {
             int baseAmount = ing.Amount;
-            float multiplier = 1f;
+            float multiplier = stage.StageMultiplier;
 
-            foreach (var adj in stage.IngredientAdjustments) //스테이지의 재료 증감 배열 순회 
-            {
-                if (adj.Ingredient == ing.Ingredient) //주문 레시피의 재료가있으면
-                {
-                    multiplier = adj.MuliflyBy; //배수
-                    break;
-                }
-            }
+            // foreach (var adj in stage.IngredientAdjustments) //스테이지의 재료 증감 배열 순회 
+            // {
+            //     if (adj.Ingredient == ing.Ingredient) //주문 레시피의 재료가있으면
+            //     {
+            //         multiplier = adj.MuliflyBy; //배수
+            //         break;
+            //     }
+            // }
 
             int finalAmount = Mathf.FloorToInt(baseAmount * multiplier); //곱한 후 수량 int로 바꿔줌
 

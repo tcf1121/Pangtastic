@@ -2,8 +2,6 @@ using UnityEngine;
 using UnityEngine.ResourceManagement.AsyncOperations;
 using UnityEngine.AddressableAssets;
 
-
-
 public class AudioManager : Singleton<AudioManager>
 {
 
@@ -11,7 +9,11 @@ public class AudioManager : Singleton<AudioManager>
     [HideInInspector] public AudioSource BgmAudioSource;
     [HideInInspector] public AudioSource SfxAudioSource;
     private MissionPlace curPlace;
-
+    public bool OnVibrate { get { return _onVibrate; } }
+    private bool _onVibrate;
+#if UNITY_ANDROID
+    private static AndroidJavaObject vibrator;
+#endif
     protected override void Awake()
     {
         base.Awake();
@@ -48,6 +50,11 @@ public class AudioManager : Singleton<AudioManager>
         {
             Debug.LogError($"StageSO 로드 실패:{handle.OperationException}");
         }
+    }
+
+    public void SetVibrate(bool value)
+    {
+        _onVibrate = value;
     }
 
     public void SetLobbyPlace(MissionPlace place = MissionPlace.Donut)
@@ -153,6 +160,14 @@ public class AudioManager : Singleton<AudioManager>
     /// <param name="clipName"></param>
     public void PlaySFX(string clipName)
     {
+#if UNITY_ANDROID
+        if (_onVibrate)
+            if (clipName == "Block_Match" ||
+            clipName == "Block_MakeSpecial")
+            {
+                Vibration();
+            }
+#endif
         var clipGroup = audioClips.SFX.Find(g => g.name == clipName);
         if (clipGroup != null)
         {
@@ -162,6 +177,16 @@ public class AudioManager : Singleton<AudioManager>
         {
             Debug.LogWarning($"SFX 클립 '{clipName}'을 찾을 수 없습니다.");
         }
+    }
+
+    private void Vibration()
+    {
+#if UNITY_ANDROID
+        Handheld.Vibrate();
+#else
+        
+        Debug.Log("진동하는 중");
+#endif
     }
 
 }

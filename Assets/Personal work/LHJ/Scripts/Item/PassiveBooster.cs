@@ -119,22 +119,11 @@ public class PassiveBooster : MonoBehaviour
             Object.Destroy(cell.BlockInstance);
             sp.GameBoardData.BlockArray[y, x] = null;
             sp.SpawnBlock(x, y, gemType, BoardManager.Instance.BlockMover);
-            StartCoroutine(DelayAndPulseStroke(sp, x, y));
 
             picked.Add(new Vector2Int(x, y));
             Debug.Log($"Placed {gemType} at ({x},{y})");
             return true;
         }
         return false;
-    }
-    private IEnumerator DelayAndPulseStroke(BlockSpawner sp, int x, int y)
-    {
-        yield return null; 
-        var effect = FindObjectOfType<LHJ.SpecialBlockEffect>();
-        if (effect != null)
-        {
-            var one = new List<Vector2Int>(1) { new Vector2Int(x, y) };
-            yield return StartCoroutine(effect.StrokePulseRoutine(sp.GameBoardData, one, 3f, includeSpecial: true));
-        }
     }
 }

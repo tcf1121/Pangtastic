@@ -18,6 +18,7 @@ public class EnterInGamePanel : MonoBehaviour
     [SerializeField] List<Image> recipeImages;
     [SerializeField] Sprite questionMarkImage;
     [SerializeField] StringSO stringSO;
+    [SerializeField] GameObject _fallHeartPopup;
 
     private StageSO _curStage;
     private CustomerSO _curCustomer;
@@ -135,7 +136,10 @@ public class EnterInGamePanel : MonoBehaviour
 
             LoadingManager.LoadScene(3);
         }
-
+        else
+        {
+            _fallHeartPopup.SetActive(true);
+        }
     }
 
 
