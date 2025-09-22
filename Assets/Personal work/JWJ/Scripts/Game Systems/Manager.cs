@@ -13,7 +13,7 @@ public static class Manager
 
     public static FirebaseManager DB => FirebaseManager.GetInstance();
     public static GPGSManager GPGS => GPGSManager.GetInstance();
-    public static AdSystem Ad => AdSystem.GetInstance();
+    public static ADManager Ad => ADManager.GetInstance();
 
     public static EffectSystem Effect => EffectSystem.GetInstance();
     public static TimerManager Timer => TimerManager.GetInstance();
@@ -34,7 +34,7 @@ public static class Manager
         DateManager.CreateManager();
         FirebaseManager.CreateManager();
         GPGSManager.CreateManager();
-        AdSystem.CreateManager();
+        ADManager.CreateManager();
         EffectSystem.CreateManager();
         TimerManager.CreateManager();
         IAPManager.CreateManager();
