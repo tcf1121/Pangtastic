@@ -1,11 +1,8 @@
 using SCR;
-using SCR_B;
-using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using TMPro;
-using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
@@ -44,7 +41,6 @@ public class InGameManager : MonoBehaviour
             Manager.Ad.LoadInterstitialAd();
             Manager.Timer.ADFin += ReadyShowAD;
             Manager.Timer.StartGame();
-            Manager.Ad.OnRewardAdClosed += ContinueGame;
             Manager.Ad.OnInterstitialAdClosed += GoLobby;
         }
         Manager.User.UseHeart();
@@ -190,6 +186,7 @@ public class InGameManager : MonoBehaviour
         if (instate._firstfail)
         {
             instate._firstfail = false;
+            Manager.Ad.OnRewardAdClosed += instate.ContinueGame;
             instate._continueUI.SetActive(true);
         }
         else instate._retryUI.SetActive(true);
@@ -213,6 +210,7 @@ public class InGameManager : MonoBehaviour
 
     private void ContinueGame()
     {
+        Manager.Ad.OnRewardAdClosed = null;
         _orderStateController.AddPatience(50f);
         _continueUI.SetActive(false);
         KDJ.BoardManager.SetTouch(true);

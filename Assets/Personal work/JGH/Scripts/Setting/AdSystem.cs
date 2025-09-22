@@ -148,7 +148,7 @@ public class AdSystem : Singleton<AdSystem>
         Debug.Log("RewardAdClosed ad closed. Notifying subscribers.");
         // 광고 닫힘 이벤트를 외부에 알림
         OnRewardAdClosed?.Invoke();
-
+        OnRewardAdClosed = null;
         // 이벤트 핸들러 해제 (중복 호출 방지)
         if (_interstitialAd != null)
         {
@@ -344,7 +344,7 @@ public class AdSystem : Singleton<AdSystem>
         Debug.Log("Interstitial ad closed. Notifying subscribers.");
         // 광고 닫힘 이벤트를 외부에 알림
         OnInterstitialAdClosed?.Invoke();
-
+        OnInterstitialAdClosed = null;
         // 이벤트 핸들러 해제 (중복 호출 방지)
         if (_interstitialAd != null)
         {

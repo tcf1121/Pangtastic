@@ -908,8 +908,8 @@ MonoBehaviour:
   _logoutBtn: {fileID: 1719089598}
   _enterPanel: {fileID: 1125020421}
   _infoPopup: {fileID: 237371143}
-  loadingUI: {fileID: 0}
-  loadingBar: {fileID: 0}
+  loadingUI: {fileID: 1012879125}
+  loadingBar: {fileID: 2073944017}
 --- !u!4 &885565586
 Transform:
   m_ObjectHideFlags: 0
@@ -1435,12 +1435,12 @@ GameObject:
   - component: {fileID: 1012879128}
   - component: {fileID: 1012879127}
   m_Layer: 5
-  m_Name: Image
+  m_Name: LoadingBar
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &1012879126
 RectTransform:
   m_ObjectHideFlags: 0
@@ -2888,7 +2888,7 @@ GameObject:
   - component: {fileID: 2073944018}
   - component: {fileID: 2073944017}
   m_Layer: 5
-  m_Name: Image (1)
+  m_Name: Fill
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
