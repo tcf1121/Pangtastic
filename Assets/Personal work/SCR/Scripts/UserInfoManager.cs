@@ -19,7 +19,7 @@ public class UserInfoManager : Singleton<UserInfoManager>
     private const int MaxDailyCount = 5;
 
     // log 쌓는데 게임 시작한 시간만 로그만 쌓도록
-    public bool IsStartGame = false;
+    public static bool IsStartGame = false;
 
     void Start()
     {
@@ -401,8 +401,9 @@ public class UserInfoManager : Singleton<UserInfoManager>
     // }
     public void SetLogAccessDates()
     {
-        if (!Manager.User.IsStartGame)
+        if (!IsStartGame)
         {
+            IsStartGame = true;
             string today = DateTime.UtcNow.AddHours(9).ToString("yyyy-MM-dd HH:mm:ss");
             currentData.Logs.AccessDays.Add(today);
         }
