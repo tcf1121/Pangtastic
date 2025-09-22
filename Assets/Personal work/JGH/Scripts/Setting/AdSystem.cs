@@ -5,7 +5,7 @@ using UnityEngine;
 //using AdSize = GoogleMobileAds.Api.AdSize;
 
 
-public class AdSystem : Singleton<AdSystem>
+public class AdSystem : MonoBehaviour
 {
     //public static AdSystem Instance { get; private set; }
     private const string RemoveAD = "RemoveAD";
@@ -29,9 +29,8 @@ public class AdSystem : Singleton<AdSystem>
     private BannerView _bannerView;
     public float bannerHeight;
 
-    protected override void Awake()
+    void Awake()
     {
-        base.Awake();
         CheckRemoveAD();
     }
 

@@ -296,7 +296,7 @@ public class ADManager : Singleton<ADManager>
             LoadAppOpenAd();
         };
     }
-    private void OnDestroy()
+    protected override void OnDestroy()
     {
         // Always unlisten to events when complete.
         AppStateEventNotifier.AppStateChanged -= OnAppStateChanged;

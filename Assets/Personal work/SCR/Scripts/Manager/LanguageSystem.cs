@@ -8,7 +8,7 @@ using UnityEngine.SceneManagement;
 public class LanguageSystem : Singleton<LanguageSystem>
 {
     private LanguageList languageList;
-    private readonly string excludeTag = "NoFontChange"; // 제외 태그
+    //private readonly string excludeTag = "NoFontChange"; // 제외 태그
     private Language currentLang;
 
     protected override void Awake()
