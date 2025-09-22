@@ -35,4 +35,7 @@ public class ResidentConfigSO : ScriptableObject
 
     [Header("대화 확률")]
     [Range(0f, 1f)] public float TalkChance = 0.4f;
+
+    [Header("선호 지역 특별 애니메이션 확률")]
+    [Range(0f, 1f)] public float SpecialAnimation = 0.3f;
 }

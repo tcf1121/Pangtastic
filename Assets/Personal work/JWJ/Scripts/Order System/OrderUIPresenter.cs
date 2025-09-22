@@ -184,7 +184,7 @@ public class OrderUIPresenter : MonoBehaviour
         }
         else if (percent <= 50f)
         {
-            StringSO stringSO = curCustomer.DialogueLeft;
+            StringSO stringSO = curCustomer.DialogueMid;
 
             if (stringSO == null)
             {
@@ -197,7 +197,7 @@ public class OrderUIPresenter : MonoBehaviour
         }
         else
         {
-            StringSO stringSO = curCustomer.DialogueLeft;
+            StringSO stringSO = curCustomer.DialogueHigh;
 
             if (stringSO == null)
             {
