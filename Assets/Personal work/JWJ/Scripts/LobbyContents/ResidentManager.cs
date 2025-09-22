@@ -8,7 +8,7 @@ public class ResidentManager : MonoBehaviour
 {
     private Dictionary<DestinationType, Transform> _destByType = new Dictionary<DestinationType, Transform>();
 
-    [SerializeField] private Sprite _greet;
+    //[SerializeField] private Sprite _greet;
     [SerializeField] private Sprite _workout;
     [SerializeField] private Sprite _lookAround;
     [SerializeField] private Sprite _talking;
@@ -136,16 +136,13 @@ public class ResidentManager : MonoBehaviour
         switch (state)
         {
             case ResidentState.Idle:
-                return _greet;
+                return null;
 
             case ResidentState.Move:
-                return _greet;
+                return null;
 
             case ResidentState.Interact:
                 return _lookAround;
-
-            case ResidentState.Greet:
-                return _greet;
 
             case ResidentState.Talk:
                 return _talking;
@@ -154,8 +151,8 @@ public class ResidentManager : MonoBehaviour
                 return _workout;
 
             case ResidentState.Touched:
-                return _greet;
+                return null;
         }
-        return _greet;
+        return null;
     }
 }

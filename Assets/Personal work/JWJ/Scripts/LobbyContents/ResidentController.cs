@@ -9,7 +9,6 @@ public enum ResidentState
     Idle,
     Move,
     Interact,
-    Greet,
     Talk,
     Workout,
     Touched
@@ -137,9 +136,9 @@ public class ResidentController : MonoBehaviour
 
         SetMove(0f, true);
 
-        _stateBubble.IconUI(true);
+        //_stateBubble.IconUI(true);
         yield return new WaitForSeconds(_manager.Config.IdleDuration);
-        _stateBubble.IconUI(false);
+        //_stateBubble.IconUI(false);
 
         Transform nextDestination = _manager.PickNextDestination(_resident, _currentDestinationType);
         _currentDestination = nextDestination.position;
