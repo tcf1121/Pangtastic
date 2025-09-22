@@ -143,6 +143,30 @@ public class AdSystem : Singleton<AdSystem>
         }
     }
 
+
+    public bool CheckDays(int day)
+    {
+        UserData dataInfo = Manager.Data.Load();
+        
+        // Json 저장 데이터 
+        DateTime startDay = DateTime.Parse(dataInfo.StartUtcDay);
+        
+        // 현재 UTC → 한국시간(+9)
+        DateTime kstNow = DateTime.UtcNow.AddHours(9);
+
+        // 기준일을 00시로 맞춤
+        DateTime baseDate = new DateTime(startDay.Year, startDay.Month, startDay.Day, 0, 0, 0);
+
+        // 2일(48시간) 경과 여부 체크
+        bool isOverDays = (kstNow - baseDate).TotalDays >= day;
+
+        Debug.Log($"dddddd 기준일: {baseDate:yyyy-MM-dd HH:mm:ss}");
+        Debug.Log($"dddddd 현재 한국 시간: {kstNow:yyyy-MM-dd HH:mm:ss}");
+        Debug.Log($"dddddd {day}일 지났는가? {isOverDays}");
+
+        return isOverDays;
+     }
+
     public void ShowAdClosed()
     {
         Debug.Log("RewardAdClosed ad closed. Notifying subscribers.");
@@ -154,6 +178,7 @@ public class AdSystem : Singleton<AdSystem>
         {
             _interstitialAd.OnAdFullScreenContentClosed -= ShowAdClosed;
         }
+
     }
 
     // ===================== App Open Ad =====================
@@ -197,6 +222,26 @@ public class AdSystem : Singleton<AdSystem>
                     ShowAppOpenAd();
                 }
             });
+    }
+    
+    public void ShowAppOpenAd()
+    {
+        // 설치 후 2일 지나지 않음
+        if (!CheckDays(2))
+            return;
+        
+        if (_appOpenAd != null && _appOpenAd.CanShowAd())
+        {
+            Debug.Log("Showing app open ad.");
+            
+            
+            _appOpenAd.Show();
+        }
+        else
+        {
+            Debug.LogError("App open ad is not ready yet.");
+            LoadAppOpenAd();
+        }
     }
 
     private void OpenAdRegisterEventHandlers(AppOpenAd ad)
@@ -280,19 +325,6 @@ public class AdSystem : Singleton<AdSystem>
                && (DateTime.UtcNow - _appOpenAdLoadTime).TotalHours < 4; // 만료 방지
     }
 
-    public void ShowAppOpenAd()
-    {
-        if (_appOpenAd != null && _appOpenAd.CanShowAd())
-        {
-            Debug.Log("Showing app open ad.");
-            _appOpenAd.Show();
-        }
-        else
-        {
-            Debug.LogError("App open ad is not ready yet.");
-            LoadAppOpenAd();
-        }
-    }
 
     // ===================== Interstitial Ad =====================
     public void LoadInterstitialAd()
