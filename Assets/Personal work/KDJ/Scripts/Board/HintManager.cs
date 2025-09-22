@@ -39,7 +39,7 @@ namespace KDJ
         {
             while (true)
             {
-                if (!(_boardManager.CurrentState is ReadyState) || _boardManager.MatchCombo.CurCombo != 0 || SpecialBlockEffect.effectRunning)
+                if (!(_boardManager.CurrentState is ReadyState) || _boardManager.MatchCombo.CurCombo != 0 || SpecialBlockEffect.effectRunning || _boardManager.IsClearSpecialTime)
                 {
                     yield return null;
                     continue;

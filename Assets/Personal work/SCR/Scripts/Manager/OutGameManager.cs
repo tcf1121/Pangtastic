@@ -16,6 +16,8 @@ public class OutGameManager : MonoBehaviour
     private string DROPDOWN_KEY = "BGM_Setting";
     private int _currentPlace;
 
+    [SerializeField] RewardPopup _rewardPopup;
+
     // 테스트용
     [SerializeField] private Button _settingBtn;
     [SerializeField] private TMP_InputField _settingInputField;
@@ -70,5 +72,23 @@ public class OutGameManager : MonoBehaviour
         Manager.Audio.PlaySFX("Touch");
     }
 
+    public static void AddReward(Goods goods, int index)
+    {
+        instate._rewardPopup.AddReward(goods, index);
+    }
 
+    public static void AddIHReward(float index)
+    {
+        instate._rewardPopup.AddIHReward(index);
+    }
+
+    public static void AddMusic()
+    {
+        instate._rewardPopup.AddMusic();
+    }
+
+    public static void ShowRewardPopup()
+    {
+        instate._rewardPopup.gameObject.SetActive(true);
+    }
 }

@@ -13,11 +13,8 @@ namespace SCR
     public class CheckLogin : MonoBehaviour
     {
         [SerializeField] Button _enterBtn;
-        [SerializeField] Button _googlePlayBtn;
-        [SerializeField] Button _guestBtn;
         [SerializeField] Button _logoutBtn;
         [SerializeField] GameObject _enterPanel;
-        [SerializeField] GameObject _loginPanel;
         [SerializeField] private GameObject _infoPopup;
         private DateTime targetDate = new DateTime(2026, 4, 2);
 

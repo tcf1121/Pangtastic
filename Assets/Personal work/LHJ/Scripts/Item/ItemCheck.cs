@@ -36,7 +36,8 @@ namespace LHJ
         [SerializeField] private float _coffeeZigzagAmp = 60f;
         private void Update()
         {
-            if (_board == null || !_board.IsItemSelected || !(BoardManager.Instance.CurrentState is ReadyState)) return;
+            if (_board == null || !_board.IsItemSelected || !(BoardManager.Instance.CurrentState is ReadyState) || _board.IsItemEffectRunning) 
+                return;
 
             if (Input.GetMouseButtonDown(0))
             {
@@ -112,14 +113,11 @@ namespace LHJ
                     StartCoroutine(ApplyWhisk(pos));
                     Manager.User.UseItem(type);
                     break;
-                case ItemType.DonutPan:
-                    StartCoroutine(RegenSpecialBlockRoutine());
-                    break;
             }
 
             if (destroyed > 0)
             {
-                _board.UpdateUI(destroyed * 10);
+                InGameManager.AddScore(destroyed * 10);
                 _board.ChangeState(new RefillState());
             }
         }
@@ -127,6 +125,7 @@ namespace LHJ
         // 가위: 선택 지점의 가로+세로 제거
         private IEnumerator ApplyScissor(Vector2Int pos)
         {
+            _board.IsItemEffectRunning = true;
             Manager.Audio.PlaySFX("Sciccors_Use");
             var sp = _board.Spawner;
             int w = sp.GameBoardData.BlockPlate.BlockPlateWidth;
@@ -313,13 +312,15 @@ namespace LHJ
             }
 
             if (destroyedCount > 0)
-                _board.UpdateUI(destroyedCount * 10);
+                InGameManager.AddScore(destroyedCount * 10);
             yield return new WaitUntil(() => SpecialBlockEffect.effectRunning == false);
+            _board.IsItemEffectRunning = false;
             _board.ChangeState(new RefillState());
         }
 
         private IEnumerator ApplyWhisk(Vector2Int pos)
         {
+            _board.IsItemEffectRunning = true;
             Manager.Audio.PlaySFX("Whisk_Use");
             var sp = _board.Spawner;
             int w = sp.GameBoardData.BlockPlate.BlockPlateWidth;
@@ -439,22 +440,30 @@ namespace LHJ
                 destroyedCount++;
             }
 
-            if (destroyedCount > 0) _board.UpdateUI(destroyedCount * 10);
+            if (destroyedCount > 0) InGameManager.AddScore(destroyedCount * 10);
             yield return new WaitUntil(() => SpecialBlockEffect.effectRunning == false);
+            _board.IsItemEffectRunning = false;
             _board.ChangeState(new RefillState());
         }
 
         // 도넛판 아이템 실행
-        public void UseDonutPan()
+        public bool UseDonutPan()
         {
-            if (_board != null) _board.ClearItemSelection();
+            if (_board == null) return false;
+            if (!(BoardManager.Instance.CurrentState is ReadyState)) return false;
+            if (_board.IsItemEffectRunning) return false; 
+
+            _board.ClearItemSelection();
             BoardManager.Instance.HintManager.StopHintTimer();
+
             StartCoroutine(RegenSpecialBlockRoutine());
+            return true;
         }
 
         // 보드를 초기화 후 특수 블록 하나 생성하는 루틴
         private IEnumerator RegenSpecialBlockRoutine()
         {
+            _board.IsItemEffectRunning = true;
             Manager.Audio.PlaySFX("DonutPan_Use");
             float moveDuration = 2.0f;
 
@@ -477,6 +486,7 @@ namespace LHJ
                 .Join(_poolsRoot.DOLocalMove(poolStart, moveDuration));
             yield return up.WaitForCompletion();
             BoardManager.Instance.HintManager.StopHintTimer();
+            _board.IsItemEffectRunning = false;
             BoardManager.Instance.ChangeState(new ReadyState());
         }
 

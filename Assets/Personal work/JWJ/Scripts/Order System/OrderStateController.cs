@@ -144,7 +144,9 @@ public class OrderStateController : MonoBehaviour
         }
     }
 
-    private bool IsAllComplete()
+    // 250921 김동진 수정
+    // public으로 변경하여 외부에서도 클리어 여부를 확인하도록 변경
+    public bool IsAllComplete()
     {
         foreach (var recipe in _orderRecipes) //주문 레시피 목록 순회
         {

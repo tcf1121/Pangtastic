@@ -1,5 +1,7 @@
 using DG.Tweening;
 using System;
+using System.Collections;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -10,6 +12,10 @@ public class ClearUI : MonoBehaviour
     [SerializeField] private RectTransform coin;    // 움직일 코인
     [SerializeField] private RectTransform targetCoin;  // 목표 위치 (코인 카운트 아이콘)
     [SerializeField] private Button button;
+    [SerializeField] private GameObject RewardObj;
+    [SerializeField] private GameObject textObj;
+    [SerializeField] private TMP_Text coinText;
+    [SerializeField] private Button rewardDubbleButton;
     private int completedCount = 0;
     private int totalToComplete = 2;
     private Action finMove;
@@ -20,10 +26,28 @@ public class ClearUI : MonoBehaviour
 
         button.onClick.AddListener(MoveUI);
         finMove += ClearGame;
+        if (!Manager.Ad.RemovedAD)
+        {
+            Manager.Ad.OnRewardAdClosed += DoubleGold;
+            rewardDubbleButton.onClick.AddListener(DoubleRewardButton);
+        }
+        else
+        {
+            coinText.text = $"{InGameManager.GetCoin()} x2";
+            InGameManager.AddCoin(InGameManager.GetCoin());
+            rewardDubbleButton.gameObject.SetActive(false);
+        }
+    }
+
+    void OnDestroy()
+    {
+        Manager.Ad.OnRewardAdClosed -= DoubleGold;
     }
 
     public void MoveUI()
     {
+        RewardObj.SetActive(false);
+        textObj.SetActive(false);
         UserInfoUI.Instance.SetActive(true);
         AddGold(coin, targetCoin);
         AddStar(star, targetStar);
@@ -74,9 +98,38 @@ public class ClearUI : MonoBehaviour
             Manager.User.AddCoin(stageCoin);
             Manager.Audio.PlaySFX("Coin_Add");
             coin.gameObject.SetActive(false);
+            coinText.gameObject.SetActive(false);
             completedCount++;
             if (completedCount >= totalToComplete)
                 finMove?.Invoke();
         });
+    }
+
+    private void DoubleRewardButton()
+    {
+        if (!Manager.Ad.RemovedAD) Manager.Ad.ShowAD();
+        rewardDubbleButton.gameObject.SetActive(false);
+    }
+
+    private void DoubleGold()
+    {
+        int startValue = InGameManager.GetCoin();
+        int endValue = startValue * 2;  // 2배로 증가
+        StartCoroutine(AnimateNumber(startValue, endValue, 1f));
+    }
+
+    private IEnumerator AnimateNumber(int start, int end, float duration)
+    {
+        float elapsed = 0f;
+        InGameManager.AddCoin(InGameManager.GetCoin());
+        while (elapsed < duration)
+        {
+            elapsed += Time.deltaTime;
+            float t = Mathf.Clamp01(elapsed / duration);
+            int current = Mathf.RoundToInt(Mathf.Lerp(start, end, t));
+            coinText.text = current.ToString();
+            yield return null;
+        }
+        coinText.text = end.ToString(); // 마지막 값 보정
     }
 }

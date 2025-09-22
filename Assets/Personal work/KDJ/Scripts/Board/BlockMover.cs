@@ -144,6 +144,13 @@ namespace KDJ
             return new Vector3(worldX, worldY, 0);
         }
 
+        public Vector3 WorldToArrayPosition(Vector3 pos, int plateWidth, int plateHeight)
+        {
+            float arrayX = pos.x - 0.5f + plateWidth / 2.0f;
+            float arrayY = pos.y - 0.5f + plateHeight / 2.0f;
+            return new Vector3(arrayX, arrayY, 0);
+        }
+
         public void ResetPos()
         {
             StartPos = Vector2.zero;

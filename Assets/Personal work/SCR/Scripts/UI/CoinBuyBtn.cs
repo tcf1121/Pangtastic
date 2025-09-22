@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -19,7 +20,8 @@ public class CoinBuyBtn : MonoBehaviour
         if (Manager.User.CanUseCoin(_coin))
         {
             Manager.User.UseCoin(_coin);
-            Manager.User.AddItem(_itemType);
+            OutGameManager.AddReward((Goods)Enum.Parse(typeof(Goods), _itemType.ToString()), 1);
+            OutGameManager.ShowRewardPopup();
         }
     }
 

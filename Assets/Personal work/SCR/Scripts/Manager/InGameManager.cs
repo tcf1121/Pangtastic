@@ -1,8 +1,11 @@
 using SCR;
 using SCR_B;
 using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using TMPro;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
@@ -27,22 +30,27 @@ public class InGameManager : MonoBehaviour
     private int _score;
     private int _coin;
     private bool _firstfail = true;
-    private Action _finishAD;
+    [SerializeField] private bool _showInterstitialAd;
     [SerializeField] private int _useCoin;
 
     void Awake()
     {
+        _showInterstitialAd = false;
         if (!Manager.Ad.RemovedAD)
         {
             _adPanel.SetActive(true);
             Manager.Ad.BannerCreateView();
             Manager.Ad.LoadAD();
+            Manager.Ad.LoadInterstitialAd();
+            Manager.Timer.ADFin += ReadyShowAD;
+            Manager.Timer.StartGame();
+            Manager.Ad.OnRewardAdClosed += ContinueGame;
+            Manager.Ad.OnInterstitialAdClosed += GoLobby;
         }
         Manager.User.UseHeart();
         instate = this;
         _customerFlowController.OnStageCleared += StageClear;
         _customerFlowController.OnStageFailed += StageFail;
-        _finishAD += ContinueGame;
         _useCoinContinueButton.onClick.AddListener(GoldContinueGame);
         _watchAddContinueButton.onClick.AddListener(AdContinueGame);
         _score = 0;
@@ -50,6 +58,21 @@ public class InGameManager : MonoBehaviour
         Manager.Audio.PlayPuzzleBGM();
         foreach (var btn in _gameButtons)
             btn.onClick.AddListener(PushButton);
+    }
+
+    void OnDestroy()
+    {
+        if (!Manager.Ad.RemovedAD)
+        {
+            Manager.Timer.ADFin -= ReadyShowAD;
+            Manager.Ad.OnRewardAdClosed -= ContinueGame;
+            Manager.Ad.OnInterstitialAdClosed -= GoLobby;
+        }
+    }
+
+    private void ReadyShowAD()
+    {
+        _showInterstitialAd = true;
     }
 
     public static void SetPuzzleSize(int xPos, int yPos, int xSize, int ySize)
@@ -90,9 +113,15 @@ public class InGameManager : MonoBehaviour
 
     }
 
+    public static bool GetStageClear()
+    {
+        if (instate == null) instate = GameObject.Find("InGameManager").GetComponent<InGameManager>();
+        return instate._orderStateController.IsAllComplete();
+    }
+
     public static void AddScore(int score)
     {
-        if (instate == null) GameObject.Find("InGameManager").GetComponent<InGameManager>();
+        if (instate == null) instate = GameObject.Find("InGameManager").GetComponent<InGameManager>();
         instate._score += score;
 
         Debug.Log($"현재 점수: {instate._score}");
@@ -168,7 +197,9 @@ public class InGameManager : MonoBehaviour
 
     private void AdContinueGame()
     {
-        Manager.Ad.ShowAD(_finishAD);
+        if (!Manager.Ad.RemovedAD)
+            Manager.Ad.ShowAD();
+        else ContinueGame();
     }
 
     private void GoldContinueGame()
@@ -201,9 +232,19 @@ public class InGameManager : MonoBehaviour
         KDJ.BoardManager.SetTouch(true);
     }
 
-    public static void RewardGem(List<GemType> gemList)
+    public static async Task RewardGem(List<GemType> gemList)
     {
         //보드판에 추가해라
+        var tcs = new TaskCompletionSource<bool>();
+        instate.StartCoroutine(instate.RewardGemWrapperRoutine(gemList, tcs));
+        Debug.Log("보상 종료");
+        await tcs.Task;
+    }
+
+    private IEnumerator RewardGemWrapperRoutine(List<GemType> gemList, TaskCompletionSource<bool> tcs)
+    {
+        yield return StartCoroutine(KDJ.BoardManager.Instance.ClearRewardAnimation(gemList));
+        tcs.SetResult(true);
     }
 
     public static List<GemType> GetTagetGem()
@@ -215,11 +256,20 @@ public class InGameManager : MonoBehaviour
 
     public static void ClearGame()
     {
-        SceneManager.LoadScene(2/*로비씬*/);
+        if (instate == null) instate = GameObject.Find("InGameManager").GetComponent<InGameManager>();
+        if (instate._showInterstitialAd) Manager.Ad.ShowInterstitialAd();
+        else instate.GoLobby();
     }
 
     public void QuitGame()
     {
+        if (_showInterstitialAd) Manager.Ad.ShowInterstitialAd();
+        else GoLobby();
+    }
+
+    private void GoLobby()
+    {
+        Manager.Timer.EndGame();
         SceneManager.LoadScene(2/*로비씬*/);
     }
 

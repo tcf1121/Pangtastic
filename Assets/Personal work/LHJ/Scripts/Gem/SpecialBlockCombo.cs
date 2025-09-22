@@ -236,7 +236,7 @@ namespace LHJ
                     destroyed++;
                 }
 
-                if (destroyed > 0) board.UpdateUI(destroyed * 10);
+                //if (destroyed > 0) board.UpdateUI(destroyed * 10);
                 ConsumeSwapped(board, startPos, endPos);
                 return true;
             }
@@ -283,7 +283,7 @@ namespace LHJ
                         destroyed++;
                     }
 
-                if (destroyed > 0) board.UpdateUI(destroyed * 10);
+                //if (destroyed > 0) board.UpdateUI(destroyed * 10);
                 ConsumeSwapped(board, startPos, endPos);
                 return true;
             }
@@ -354,7 +354,7 @@ namespace LHJ
                         destroyed++;
                     }
                 }
-                if (destroyed > 0) board.UpdateUI(destroyed * 10);
+                //if (destroyed > 0) board.UpdateUI(destroyed * 10);
                 ConsumeSwapped(board, startPos, endPos);
                 return true;
             }
@@ -482,7 +482,7 @@ namespace LHJ
                 sp.GameBoardData.BlockArray[y, x].BlockInstance = null;
                 destroyed++;
             }
-            if (destroyed > 0) b.UpdateUI(destroyed * 10);
+            //if (destroyed > 0) b.UpdateUI(destroyed * 10);
         }
 
         private void ClearCol(BoardManager b, int x, GameObject aGo, GameObject bGo, bool chain)
@@ -508,7 +508,7 @@ namespace LHJ
                 sp.GameBoardData.BlockArray[y, x].BlockInstance = null;
                 destroyed++;
             }
-            if (destroyed > 0) b.UpdateUI(destroyed * 10);
+            //if (destroyed > 0) b.UpdateUI(destroyed * 10);
         }
 
         // 중심(center) 기준 (2r+1) x (2r+1) 정사각형 클리어
@@ -542,7 +542,7 @@ namespace LHJ
                     destroyed++;
                 }
             }
-            if (destroyed > 0) b.UpdateUI(destroyed * 10);
+            //if (destroyed > 0) b.UpdateUI(destroyed * 10);
         }
     }
 }

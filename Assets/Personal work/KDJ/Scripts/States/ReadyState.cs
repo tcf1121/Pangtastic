@@ -29,6 +29,8 @@ namespace KDJ.States
                 }
                 _matchDelayCoroutine = boardManager.StartCoroutine(MatchDelayCoroutine(boardManager));
             }
+
+            BoardManager.SetTouch(true);
         }
 
         public void OnUpdate(BoardManager boardManager)
@@ -40,6 +42,9 @@ namespace KDJ.States
                 boardManager.HintManager.StopHintTimer();
                 return;
             }
+
+            // 입력 중단 처리 부분
+            if (!BoardManager.CanTouch || boardManager.IsClearSpecialTime) return;
 
             if (_isSwapping) return;
 
@@ -72,7 +77,7 @@ namespace KDJ.States
                 Vector3 mousePosition = Input.mousePosition;
                 mousePosition.z = -Camera.main.transform.position.z;
                 boardManager.BlockMover.SetStartPos(Camera.main.ScreenToWorldPoint(mousePosition));
-                TestBlockInfo(boardManager);
+                //TestBlockInfo(boardManager);
             }
             else if (Input.GetTouch(0).phase == TouchPhase.Moved)
             {
@@ -109,7 +114,7 @@ namespace KDJ.States
                 Vector3 mousePosition = Input.mousePosition;
                 mousePosition.z = -Camera.main.transform.position.z;
                 boardManager.BlockMover.SetStartPos(Camera.main.ScreenToWorldPoint(mousePosition));
-                TestBlockInfo(boardManager);
+                //TestBlockInfo(boardManager);
             }
             else if (Input.GetMouseButton(0) && !_isSwapping)
             {
@@ -126,7 +131,7 @@ namespace KDJ.States
             else if (Input.GetMouseButtonUp(0))
             {
                 Debug.Log("마우스 클릭 종료");
-                boardManager.ResetUI();
+                // boardManager.ResetUI();
                 if (!boardManager.BlockMover.IsCoordMoved)
                 {
                     // 뗏을때 아무것도 안 움직였다면 좌표 초기화
@@ -198,27 +203,27 @@ namespace KDJ.States
             }
         }
 
-        private void TestBlockInfo(BoardManager boardManager)
-        {
-            Vector3 mousePosition = Input.mousePosition;
-            mousePosition.z = -Camera.main.transform.position.z;
-            Vector2 targetPos = Camera.main.ScreenToWorldPoint(mousePosition);
-
-            Vector2Int gridPos = boardManager.BlockMover.WorldToGrid(targetPos, boardManager.Spawner.GameBoardData.Width, boardManager.Spawner.GameBoardData.Height);
-
-            if (gridPos.x < 0 || gridPos.y < 0 || gridPos.x >= boardManager.Spawner.GameBoardData.Width || gridPos.y >= boardManager.Spawner.GameBoardData.Height)
-            {
-                return;
-            }
-
-            if (!boardManager.Spawner.GameBoardData.BlockPlate.BlockPlateArray[gridPos.y, gridPos.x]) return;
-
-            Block block = boardManager.Spawner.GameBoardData.GetBlock(gridPos.x, gridPos.y);
-            if (block != null)
-            {
-                boardManager.UpdateUI(block, gridPos.x, gridPos.y);
-            }
-        }
+        // private void TestBlockInfo(BoardManager boardManager)
+        // {
+        //     Vector3 mousePosition = Input.mousePosition;
+        //     mousePosition.z = -Camera.main.transform.position.z;
+        //     Vector2 targetPos = Camera.main.ScreenToWorldPoint(mousePosition);
+        // 
+        //     Vector2Int gridPos = boardManager.BlockMover.WorldToGrid(targetPos, boardManager.Spawner.GameBoardData.Width, boardManager.Spawner.GameBoardData.Height);
+        // 
+        //     if (gridPos.x < 0 || gridPos.y < 0 || gridPos.x >= boardManager.Spawner.GameBoardData.Width || gridPos.y >= boardManager.Spawner.GameBoardData.Height)
+        //     {
+        //         return;
+        //     }
+        // 
+        //     if (!boardManager.Spawner.GameBoardData.BlockPlate.BlockPlateArray[gridPos.y, gridPos.x]) return;
+        // 
+        //     Block block = boardManager.Spawner.GameBoardData.GetBlock(gridPos.x, gridPos.y);
+        //     if (block != null)
+        //     {
+        //         boardManager.UpdateUI(block, gridPos.x, gridPos.y);
+        //     }
+        // }
 
         private IEnumerator MatchDelayCoroutine(BoardManager boardManager)
         {

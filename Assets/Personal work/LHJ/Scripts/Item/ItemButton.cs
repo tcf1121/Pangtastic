@@ -37,10 +37,14 @@ namespace LHJ
                     BoardManager.Instance.HintManager.StopHintTimer();
 
                     if (_itemCheck != null)
-                        _itemCheck.UseDonutPan();
-
-                    Manager.User.UseItem(_type);
-                    SetItemState();
+                    {
+                        bool started = _itemCheck.UseDonutPan();
+                        if (started)
+                        {
+                            Manager.User.UseItem(_type); 
+                            SetItemState();
+                        }
+                    }
                     return;
                 }
             }
