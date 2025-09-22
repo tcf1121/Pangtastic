@@ -8,14 +8,14 @@ public class CustomizeList : MonoBehaviour
     [SerializeField] GameObject _skinPanel;
     [SerializeField] GameObject _facePanel;
     [SerializeField] GameObject _hairPanel;
-    [SerializeField] GameObject _eyewearPanel;
+    [SerializeField] GameObject _facewearPanel;
     [SerializeField] GameObject _bagPanel;
     [SerializeField] GameObject _accessoryPanel;
 
     [SerializeField] Button _skinButton;
     [SerializeField] Button _faceButton;
     [SerializeField] Button _hairButton;
-    [SerializeField] Button _eyewearButton;
+    [SerializeField] Button _facewearButton;
     [SerializeField] Button _bagButton;
     [SerializeField] Button _accessoryButton;
 
@@ -24,14 +24,14 @@ public class CustomizeList : MonoBehaviour
         _skinPanel.SetActive(true);
         _facePanel.SetActive(false);
         _hairPanel.SetActive(false);
-        _eyewearPanel.SetActive(false);
+        _facewearPanel.SetActive(false);
         _bagPanel.SetActive(false);
         _accessoryPanel.SetActive(false);
 
         _skinButton.onClick.AddListener(OnSkinClicked);
         _faceButton.onClick.AddListener(OnFaceClicked);
         _hairButton.onClick.AddListener(OnHairClicked);
-        _eyewearButton.onClick.AddListener(OnEWClicked);
+        _facewearButton.onClick.AddListener(OnEWClicked);
         _bagButton.onClick.AddListener(OnBagClicked);
         _accessoryButton.onClick.AddListener(OnAccClicked);
     }
@@ -59,7 +59,7 @@ public class CustomizeList : MonoBehaviour
     private void OnEWClicked()
     {
         CloseAllPanel();
-        _eyewearPanel.SetActive(true);
+        _facewearPanel.SetActive(true);
         //Manager.Audio.PlaySFX();
     }
     private void OnBagClicked()
@@ -80,7 +80,7 @@ public class CustomizeList : MonoBehaviour
         _skinPanel.SetActive(false);
         _facePanel.SetActive(false);
         _hairPanel.SetActive(false);
-        _eyewearPanel.SetActive(false);
+        _facewearPanel.SetActive(false);
         _bagPanel.SetActive(false);
         _accessoryPanel.SetActive(false);
     }
