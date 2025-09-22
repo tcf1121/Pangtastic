@@ -8,7 +8,7 @@ public static class Manager
 
     public static ScriptingSystem Scripting => ScriptingSystem.GetInstance();
 
-    public static DataManager Data => DataManager.GetInstance();
+    //public static DataManager Data => DataManager.GetInstance();
 
     public static FirebaseManager DB => FirebaseManager.GetInstance();
     public static GPGSManager GPGS => GPGSManager.GetInstance();
@@ -29,7 +29,7 @@ public static class Manager
         AudioManager.CreateManager();
         ScriptingSystem.CreateManager();
 
-        DataManager.CreateManager();
+        //DataManager.CreateManager();
         FirebaseManager.CreateManager();
         GPGSManager.CreateManager();
         AdSystem.CreateManager();

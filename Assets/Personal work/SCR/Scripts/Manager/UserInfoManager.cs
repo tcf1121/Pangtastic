@@ -14,103 +14,6 @@ public class UserInfoManager : Singleton<UserInfoManager>
     public Action<int> OnChangedProfile;
     public Action OnUseHeart;
     public Action<float> OnInfinityHeart;
-    private const string LastPurchaseDateKey = "LastPurchaseDate";
-    private const string DailyCountKey = "DailyCount";
-    private const string DailyGoodsListKey = "MyNumbers";
-    private const int MaxDailyCount = 5;
-
-    // log 쌓는데 게임 시작한 시간만 로그만 쌓도록
-    public static bool IsStartGame = false;
-
-    void Start()
-    {
-        CheckDailyReset();
-    }
-
-    void CheckDailyReset()
-    {
-        string lastDateStr = PlayerPrefs.GetString(LastPurchaseDateKey, "");
-        string today = DateTime.Now.ToString("yyyyMMdd");
-
-        if (lastDateStr != today)
-        {
-            // 날짜가 다르면 카운트 초기화
-            PlayerPrefs.SetInt(DailyCountKey, 0);
-            PlayerPrefs.SetString(LastPurchaseDateKey, today);
-            PlayerPrefs.Save();
-            SetPurchaseList();
-            if (!Manager.Ad.RemovedAD)
-                Manager.Ad.LoadAppOpenAd();
-        }
-    }
-
-    public bool CanPurchase()
-    {
-        int count = PlayerPrefs.GetInt(DailyCountKey, 0);
-        return count < MaxDailyCount;
-    }
-
-    public int GetPurchaseIndex()
-    {
-        return PlayerPrefs.GetInt(DailyCountKey, 0);
-    }
-
-    public void Purchase()
-    {
-        if (CanPurchase())
-        {
-            int count = PlayerPrefs.GetInt(DailyCountKey, 0);
-            PlayerPrefs.SetInt(DailyCountKey, count + 1);
-            PlayerPrefs.Save();
-
-            Debug.Log("구매 완료! 오늘 구매 횟수: " + (count + 1));
-        }
-        else
-        {
-            Debug.Log("오늘은 더 이상 구매할 수 없습니다.");
-        }
-    }
-
-    public void SetPurchaseList()
-    {
-        List<int> pool = new List<int>() { 0, 1, 2, 3, 4, 5, 6 };
-        int[] numbers = new int[4];
-
-        for (int i = 0; i < 4; i++)
-        {
-            int index = UnityEngine.Random.Range(0, pool.Count);
-            numbers[i] = pool[index];
-            pool.RemoveAt(index); // 중복 제거
-        }
-
-        // 배열을 문자열로 변환 (예: "3,0,6,2")
-        string saveString = string.Join(",", numbers);
-
-        // 저장
-        PlayerPrefs.SetString(DailyGoodsListKey, saveString);
-        PlayerPrefs.Save();
-
-        Debug.Log("저장 완료: " + saveString);
-    }
-
-    public ItemType LoadNumbers(int index)
-    {
-        if (PlayerPrefs.HasKey("MyNumbers"))
-        {
-            string loadString = PlayerPrefs.GetString("MyNumbers");
-            string[] split = loadString.Split(',');
-            int[] numbers = new int[split.Length];
-            for (int i = 0; i < split.Length; i++)
-            {
-                numbers[i] = int.Parse(split[i]);
-            }
-            return (ItemType)numbers[index];
-
-        }
-        return 0; // 저장된 값 없음
-    }
-
-
 
     public void SetUser(UserData user)
     {
@@ -417,7 +320,7 @@ public class UserInfoManager : Singleton<UserInfoManager>
             currentData.Logs.Add(entry);
         }
     }
-    
+
     public List<string> GetLogAccessDates()
     {
         List<string> result = new List<string>();
@@ -435,9 +338,9 @@ public class UserInfoManager : Singleton<UserInfoManager>
         if (currentData.Logs.Count > 0)
         {
             currentData.Logs[currentData.Logs.Count - 1].OpenAd = value;
-        }    
+        }
     }
-    
+
     public bool GetLastArrOpenAd()
     {
         if (currentData.Logs.Count > 0)
@@ -474,7 +377,7 @@ public class UserData
     public string PlayerName { get; set; } = "";
     public ItemInfo ItemInfo { get; set; } = new ItemInfo();
     public PlaceInfo PlaceInfo { get; set; } = new PlaceInfo();
-    
+
     // 광고에서 시작이 기준으로 광고 표시하는거 있어서 추가 :: S
     // public string StartUtcDay { get; set; } = "";
     // public Logs Logs { get; set; } = new Logs();

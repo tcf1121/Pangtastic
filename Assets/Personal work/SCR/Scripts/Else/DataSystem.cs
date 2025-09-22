@@ -4,13 +4,12 @@ using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
 
-public class DataManager : Singleton<DataManager>
+public class DataSystem : MonoBehaviour
 {
     private string path;
 
-    protected override void Awake()
+    private void Awake()
     {
-        base.Awake();
         path = Path.Combine(Application.persistentDataPath, "userdata.json");
         Debug.Log($"userdata.json 주소 : {path}");
     }
@@ -62,12 +61,12 @@ public class DataManager : Singleton<DataManager>
     {
         // 기존 저장 데이터 확인
         var savedData = Load();
-        
+
         var newUserData = new UserData();
         newUserData.PlayerName = "guest";
         newUserData.UserInfo.Heart.currentHeart = 5;
         newUserData.UserInfo.Heart.lastSaveTime = DateTime.Now.ToString("O");
-        
+
         // 최초 한번만 실행 - 광고에서 사용하기 위해 추가
         // if (!string.IsNullOrEmpty(savedData.StartUtcDay))
         // {
@@ -77,14 +76,14 @@ public class DataManager : Singleton<DataManager>
         // {
         //     newUserData.StartUtcDay = DateTime.UtcNow.AddHours(9).ToString("yyyy-MM-dd HH:mm:ss");
         // }
-        
+
         // 접속 기록 남기기
         // 기존 로그 가져오기 (없으면 새 리스트)
         // string today = DateTime.UtcNow.AddHours(9).ToString("yyyy-MM-dd HH:mm:ss");
         // newUserData.Logs.AccessDays.Add(today);
         // Manager.User.IsStartGame = true;
         // newUserData.Logs.AccaesDay = DateTime.UtcNow.AddHours(9).ToString("yyyy-MM-dd HH:mm:ss");
-        
+
         Manager.User.SetUser(newUserData);
         Manager.User.NewMissionList(16);
     }
