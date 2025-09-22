@@ -10,8 +10,9 @@ public class ResidentManager : MonoBehaviour
 
     //[SerializeField] private Sprite _greet;
     [SerializeField] private Sprite _workout;
-    [SerializeField] private Sprite _lookAround;
+    //[SerializeField] private Sprite _lookAround;
     [SerializeField] private Sprite _talking;
+    [SerializeField] private Sprite _favStore;
 
     [SerializeField] private ResidentConfigSO _config;
     public ResidentConfigSO Config { get { return _config; } }
@@ -142,7 +143,7 @@ public class ResidentManager : MonoBehaviour
                 return null;
 
             case ResidentState.Interact:
-                return _lookAround;
+                return _favStore;
 
             case ResidentState.Talk:
                 return _talking;

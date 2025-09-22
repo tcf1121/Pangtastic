@@ -200,19 +200,19 @@ public class ResidentController : MonoBehaviour
             bool specialAction = Random.value <= _manager.Config.SpecialAnimation;
             if (specialAction)
             {
-                Debug.Log("스페셜 모션");
                 _isFavAnim = true;
+                SetMove(0f, true);
+                _stateBubble.IconUI(true);
+                yield return new WaitForSeconds(_manager.Config.InteractDuration);
+                _stateBubble.IconUI(false);
             }
             else
             {
                 _isLookingAround = true;
+                SetMove(0f, true);
+                yield return new WaitForSeconds(_manager.Config.InteractDuration);
             }
         }
-        SetMove(0f, true);
-        _stateBubble.IconUI(true);
-        yield return new WaitForSeconds(_manager.Config.InteractDuration);
-        _stateBubble.IconUI(false);
-
         ChangeState(ResidentState.Idle);
     }
 
