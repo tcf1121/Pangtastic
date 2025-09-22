@@ -58,10 +58,24 @@ public class DataManager : Singleton<DataManager>
     // 새로운 유저가 접속할 때 새로운 정보를 만듦
     public void NewUser()
     {
+        // 기존 저장 데이터 확인
+        var savedData = Load();
+        
         var newUserData = new UserData();
         newUserData.PlayerName = "guest";
         newUserData.UserInfo.Heart.currentHeart = 5;
         newUserData.UserInfo.Heart.lastSaveTime = DateTime.Now.ToString("O");
+        
+        // 최초 한번만 실행 - 광고에서 사용하기 위해 추가
+        if (!string.IsNullOrEmpty(savedData.StartUtcDay))
+        {
+            newUserData.StartUtcDay = savedData.StartUtcDay;
+        }
+        else
+        {
+            newUserData.StartUtcDay = DateTime.UtcNow.AddHours(9).ToString("yyyy-MM-dd HH:mm:ss");
+        }
+        
         Manager.User.SetUser(newUserData);
         Manager.User.NewMissionList(16);
     }
@@ -76,7 +90,6 @@ public class DataManager : Singleton<DataManager>
             Debug.Log("데이터가 손상되었습니다.");
             NewUser();
         }
-
     }
 
     public void Save()

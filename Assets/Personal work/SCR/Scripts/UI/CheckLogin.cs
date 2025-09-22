@@ -83,7 +83,14 @@ namespace SCR
 
         public void PushButton()
         {
-            Manager.Audio.PlaySFX("Touch");
+            if (Application.isMobilePlatform)
+            {
+                Handheld.Vibrate();
+            }
+            else
+            {
+                Manager.Audio.PlaySFX("Touch");
+            }
         }
 
         private void HistorySetting()
