@@ -3,7 +3,6 @@ using Firebase.Auth;
 using Firebase.Database;
 using Newtonsoft.Json;
 using System;
-using System.Linq;
 using System.Threading.Tasks;
 using UnityEngine;
 
@@ -196,6 +195,27 @@ public class FirebaseManager : Singleton<FirebaseManager>
         else
         {
             Debug.Log("Realtime Database 업로드 성공");
+        }
+    }
+
+    public void DeleteFB()
+    {
+        FirebaseAuth auth = Manager.DB.auth;
+        if (auth != null)
+        {
+            DatabaseReference dataToRemove = Manager.DB.GetUserPath(auth.CurrentUser.UserId);
+            dataToRemove.RemoveValueAsync().ContinueWith(task =>
+            {
+                if (task.IsCompleted)
+                {
+                    Debug.Log("데이터 삭제 성공!");
+                }
+                else if (task.IsFaulted)
+                {
+                    Debug.LogError("데이터 삭제 실패: " + task.Exception);
+                }
+            });
+            auth.SignOut();
         }
     }
 }

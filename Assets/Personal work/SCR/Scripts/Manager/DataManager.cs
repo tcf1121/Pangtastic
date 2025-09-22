@@ -6,10 +6,14 @@ using UnityEngine;
 public class DataManager : Singleton<DataManager>
 {
     private string path;
+    private bool _isNewData;
+    private const string NewUserKey = "NewUserData";
 
     protected override void Awake()
     {
         base.Awake();
+        string lastDateStr = PlayerPrefs.GetString(NewUserKey, "");
+        _isNewData = string.IsNullOrEmpty(lastDateStr);
         path = Path.Combine(Application.persistentDataPath, "userdata.json");
         Debug.Log($"userdata.json 주소 : {path}");
     }
@@ -32,7 +36,7 @@ public class DataManager : Singleton<DataManager>
 
     public void SetUser()
     {
-        if (!IsReturningUser()) NewUser();
+        if (_isNewData) NewUser();
         else HistoryUser();
     }
 
@@ -65,6 +69,7 @@ public class DataManager : Singleton<DataManager>
         newUserData.UserInfo.Heart.lastSaveTime = DateTime.Now.ToString("O");
         Manager.User.SetUser(newUserData);
         Manager.User.NewMissionList(16);
+        PlayerPrefs.SetString(NewUserKey, "newUser");
     }
 
     public void HistoryUser()
