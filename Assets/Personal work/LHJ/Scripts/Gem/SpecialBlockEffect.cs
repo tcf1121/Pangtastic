@@ -919,6 +919,43 @@ namespace LHJ
                 sr.material = _ovenStrokeMat;
             }
         }
+        public IEnumerator StrokePulseRoutine(GameBoardData gb, List<Vector2Int> cells, float duration, bool includeSpecial = true)
+        {
+            if (gb == null || cells == null || cells.Count == 0) yield break;
+            if (_ovenStrokeMat == null) yield break;
+
+            for (int i = 0; i < cells.Count; i++)
+            {
+                var p = cells[i];
+                var blk = gb.GetBlock(p.x, p.y);
+                if (blk == null || blk.BlockInstance == null) continue;
+
+                if (!includeSpecial && blk.GemType >= GemType.Milk) continue;
+
+                var sr = blk.BlockInstance.GetComponent<SpriteRenderer>();
+                if (sr == null) continue;
+
+                var tag = blk.BlockInstance.GetComponent<StrokeTag>();
+                if (tag == null) tag = blk.BlockInstance.AddComponent<StrokeTag>();
+
+                if (!tag.hasOriginal)
+                {
+                    tag.original = sr.material;
+                    tag.hasOriginal = true;
+                }
+                sr.material = _ovenStrokeMat;
+            }
+
+            yield return new WaitForSeconds(duration);
+
+            for (int i = 0; i < cells.Count; i++)
+            {
+                var p = cells[i];
+                var blk = gb.GetBlock(p.x, p.y);
+                if (blk == null || blk.BlockInstance == null) continue;
+                RevertStroke(blk.BlockInstance);
+            }
+        }
 
         private void RevertStroke(GameObject go)
         {
