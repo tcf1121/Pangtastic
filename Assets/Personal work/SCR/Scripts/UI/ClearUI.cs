@@ -28,7 +28,6 @@ public class ClearUI : MonoBehaviour
         finMove += ClearGame;
         if (!Manager.Ad.RemovedAD)
         {
-            Manager.Ad.OnRewardAdClosed += DoubleGold;
             rewardDubbleButton.onClick.AddListener(DoubleRewardButton);
         }
         else
@@ -107,7 +106,11 @@ public class ClearUI : MonoBehaviour
 
     private void DoubleRewardButton()
     {
-        if (!Manager.Ad.RemovedAD) Manager.Ad.ShowAD();
+        if (!Manager.Ad.RemovedAD)
+        {
+            Manager.Ad.OnRewardAdClosed += DoubleGold;
+            Manager.Ad.ShowAD();
+        }
         rewardDubbleButton.gameObject.SetActive(false);
     }
 

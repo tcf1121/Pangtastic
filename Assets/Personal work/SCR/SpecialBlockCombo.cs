@@ -7,9 +7,9 @@ namespace SCR_B
     public class SpecialBlockCombo : MonoBehaviour
     {
         public static SpecialBlockCombo Instance { get; private set; }
-        private int _lastResolvedFrame = -1;
-        private Vector2Int _lastStart;
-        private Vector2Int _lastEnd;
+        // private int _lastResolvedFrame = -1;
+        // private Vector2Int _lastStart;
+        // private Vector2Int _lastEnd;
 
         // 우유/팝콘이 대상으로 삼는 재료
         private static readonly GemType[] _ingredientTypes =

@@ -1,6 +1,3 @@
-using Firebase.Auth;
-using Firebase.Database;
-using Firebase.Extensions;
 using System;
 using System.Threading.Tasks;
 using UnityEngine;
@@ -16,6 +13,9 @@ namespace SCR
         [SerializeField] Button _logoutBtn;
         [SerializeField] GameObject _enterPanel;
         [SerializeField] private GameObject _infoPopup;
+
+        [SerializeField] private GameObject loadingUI;
+        [SerializeField] private Image loadingBar;
         private DateTime targetDate = new DateTime(2026, 4, 2);
 
         void Awake()
@@ -41,41 +41,36 @@ namespace SCR
 
         private async void CheckBeforeAsync()
         {
+            _enterPanel.SetActive(false);
+            loadingUI.SetActive(true);
+            loadingBar.fillAmount = 0f;
             Manager.Data.SetUser();
-            await Manager.DB.InitFirebase();
+            Task firebaseTask = Manager.DB.InitFirebase();
+            // InitFirebase가 끝날 때까지 가짜 로딩바 연출
+            float fakeProgress = 0f;
+            while (!firebaseTask.IsCompleted)
+            {
+                fakeProgress += Time.deltaTime * 0.5f; // 속도 조절 가능
+                if (loadingBar != null)
+                    loadingBar.fillAmount = Mathf.Clamp01(fakeProgress);
+
+                await Task.Yield();
+            }
+            await firebaseTask; // 에러 처리 포함
             SceneManager.LoadScene("Lobby Scene");
         }
 
         private void Logout()
         {
-            DeleteFB();
+            Manager.Data.OffTest();
             Manager.Data.DeleteSaveData();
+            Manager.DB.DeleteFB();
+            _logoutBtn.gameObject.SetActive(false);
         }
 
         void ShowPopup()
         {
             _infoPopup.SetActive(true);
-        }
-
-        private void DeleteFB()
-        {
-            FirebaseAuth auth = Manager.DB.auth;
-            if (auth != null)
-            {
-                DatabaseReference dataToRemove = Manager.DB.GetUserPath(auth.CurrentUser.UserId);
-                dataToRemove.RemoveValueAsync().ContinueWith(task =>
-                {
-                    if (task.IsCompleted)
-                    {
-                        Debug.Log("데이터 삭제 성공!");
-                    }
-                    else if (task.IsFaulted)
-                    {
-                        Debug.LogError("데이터 삭제 실패: " + task.Exception);
-                    }
-                });
-                auth.SignOut();
-            }
         }
 
         public void PushButton()
@@ -97,6 +92,8 @@ namespace SCR
                     Manager.Audio.SetBGM(historyOption);
                 else if (type == ToggleType.SFX)
                     Manager.Audio.SetSFX(historyOption);
+                else if (type == ToggleType.Vibration)
+                    Manager.Audio.SetVibrate(historyOption);
             }
 
         }

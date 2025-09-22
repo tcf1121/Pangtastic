@@ -6,10 +6,16 @@ using UnityEngine;
 public class DataManager : Singleton<DataManager>
 {
     private string path;
+    private bool _isNewData;
+    private bool _isTest;
+    private const string NewUserKey = "NewUserData";
 
     protected override void Awake()
     {
         base.Awake();
+        string lastDateStr = PlayerPrefs.GetString(NewUserKey, "");
+        _isNewData = string.IsNullOrEmpty(lastDateStr);
+        _isTest = PlayerPrefs.GetInt("Test", 0) == 0 ? false : true;
         path = Path.Combine(Application.persistentDataPath, "userdata.json");
         Debug.Log($"userdata.json 주소 : {path}");
     }
@@ -30,9 +36,26 @@ public class DataManager : Singleton<DataManager>
 
 #endif
 
+    public void OnTest()
+    {
+        _isTest = true;
+        PlayerPrefs.SetInt("Test", 1);
+    }
+
+    public void OffTest()
+    {
+        _isTest = false;
+        PlayerPrefs.SetInt("Test", 0);
+    }
+
+    public bool GetTest()
+    {
+        return _isTest;
+    }
+
     public void SetUser()
     {
-        if (!IsReturningUser()) NewUser();
+        if (_isNewData) NewUser();
         else HistoryUser();
     }
 
@@ -43,6 +66,7 @@ public class DataManager : Singleton<DataManager>
 
     public void DeleteSaveData()
     {
+        PlayerPrefs.DeleteAll();
         if (File.Exists(path))
         {
             File.Delete(path);
@@ -63,8 +87,10 @@ public class DataManager : Singleton<DataManager>
         newUserData.PlayerName = "guest";
         newUserData.UserInfo.Heart.currentHeart = 5;
         newUserData.UserInfo.Heart.lastSaveTime = DateTime.Now.ToString("O");
+
         Manager.User.SetUser(newUserData);
         Manager.User.NewMissionList(16);
+        PlayerPrefs.SetString(NewUserKey, "newUser");
     }
 
     public void HistoryUser()
@@ -77,7 +103,6 @@ public class DataManager : Singleton<DataManager>
             Debug.Log("데이터가 손상되었습니다.");
             NewUser();
         }
-
     }
 
     public void Save()

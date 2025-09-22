@@ -7,7 +7,7 @@ public class StageImporter
 {
     private static string csvPath = "Assets/CSV/Stages.csv"; // 스테이지 CSV 경로
     private static string recipeBundleCsvPath = "Assets/CSV/RecipeBundles.csv"; // 레시피 번들 CSV 경로
-    private static string levelMultiplierCsvPath = "Assets/CSV/LevelMultiplier.csv"; // 레벨 재료 배수 CSV 경로
+    //private static string levelMultiplierCsvPath = "Assets/CSV/LevelMultiplier.csv"; // 레벨 재료 배수 CSV 경로
 
     private static string customerSoDir = "Assets/ScriptableObject/Customers"; // 손님 SO 경로
     private static string recipeSoDir = "Assets/ScriptableObject/Recipes"; // 레시피 SO 경로
@@ -62,13 +62,13 @@ public class StageImporter
             return;
         }
 
-        string[] levelLines = File.ReadAllLines(levelMultiplierCsvPath); //배수 읽기
+        // string[] levelLines = File.ReadAllLines(levelMultiplierCsvPath); //배수 읽기
 
-        if (levelLines.Length < startRow)
-        {
-            Debug.LogError("배수 CSV에 데이터 없음");
-            return;
-        }
+        // if (levelLines.Length < startRow)
+        // {
+        //     Debug.LogError("배수 CSV에 데이터 없음");
+        //     return;
+        // }
 
         if (Directory.Exists(stageSoDir) == false) // StageSO 저장 폴더가 없으면
         {
@@ -97,7 +97,7 @@ public class StageImporter
             int order_count = int.Parse(splitData[2]);
             int.TryParse(splitData[3], out int level_id);
             int stage_recipe_bundle = int.Parse(splitData[4]);
-            string stage_type = splitData[5];
+            float stage_Multiplier = float.Parse(splitData[5]);
             int.TryParse(splitData[6], out int puzzle_board_id);
             int.TryParse(splitData[7], out int max_gold_gain);
 
@@ -120,6 +120,7 @@ public class StageImporter
 
             stage.StageID = stage_id;
             stage.LevelValue = level_id;
+            stage.StageMultiplier = stage_Multiplier;
             stage.MaxGoldGain = order_count * 25;
 
             string customerSOPath = customerSoDir + "/Customer_" + customer_id + ".asset"; // 손님 SO 경로
@@ -141,17 +142,17 @@ public class StageImporter
 
             stage.OrderCount = order_count; // 주문 수 설정
 
-            StageType stageType;
+            // StageType stageType;
 
-            if (System.Enum.TryParse<StageType>(stage_type, true, out stageType)) // string > enum 파싱 시도
-            {
-                stage.Type = stageType;
-            }
-            else
-            {
-                Debug.LogError($"스테이지타입 파싱 실패 {i}행 확인 {stage_type}");
-                return;
-            }
+            // if (System.Enum.TryParse<StageType>(stage_type, true, out stageType)) // string > enum 파싱 시도
+            // {
+            //     stage.Type = stageType;
+            // }
+            // else
+            // {
+            //     Debug.LogError($"스테이지타입 파싱 실패 {i}행 확인 {stage_type}");
+            //     return;
+            // }
 
             string puzzleBoardSOPath = puzzleBoardSoDir + "/PuzzleBoard_" + puzzle_board_id + ".asset"; // 퍼즐보드SO 경로
 
@@ -171,8 +172,8 @@ public class StageImporter
 
             stage.StageRecipes = recipeList.ToArray(); // 배열로 대입
 
-            List<StageSO.IngredientAdjustment> adjList = BuildAdjustmentsFromLevel(level_id, levelLines); // 배수 리스트 생성
-            stage.IngredientAdjustments = adjList.ToArray(); // 배열로 대입
+            // List<StageSO.IngredientAdjustment> adjList = BuildAdjustmentsFromLevel(level_id, levelLines); // 배수 리스트 생성
+            // stage.IngredientAdjustments = adjList.ToArray(); // 배열로 대입
 
             //if (isNew == false) // 기존 SO였다면
             //{
@@ -242,72 +243,72 @@ public class StageImporter
         return list; // 결과 리스트 반환
     }
 
-    private static List<StageSO.IngredientAdjustment> BuildAdjustmentsFromLevel(int levelId, string[] levelLines) // 레벨 ID로 재료 배수 리스트 만들기
-    {
-        List<StageSO.IngredientAdjustment> list = new List<StageSO.IngredientAdjustment>(); // 결과 리스트
+    // private static List<StageSO.IngredientAdjustment> BuildAdjustmentsFromLevel(int levelId, string[] levelLines) // 레벨 ID로 재료 배수 리스트 만들기
+    // {
+    //     List<StageSO.IngredientAdjustment> list = new List<StageSO.IngredientAdjustment>(); // 결과 리스트
 
-        if (levelLines == null || levelLines.Length < startRow) // CSV가 없거나 데이터 부족이면
-        {
-            Debug.LogError("레벨 배수 CSV 없음");
-            return list;
-        }
+    //     if (levelLines == null || levelLines.Length < startRow) // CSV가 없거나 데이터 부족이면
+    //     {
+    //         Debug.LogError("레벨 배수 CSV 없음");
+    //         return list;
+    //     }
 
-        for (int i = startRow; i < levelLines.Length; i++)
-        {
-            string line = levelLines[i];
-            if (string.IsNullOrWhiteSpace(line)) // 빈 줄이면
-            {
-                continue; // 스킵
-            }
+    //     for (int i = startRow; i < levelLines.Length; i++)
+    //     {
+    //         string line = levelLines[i];
+    //         if (string.IsNullOrWhiteSpace(line)) // 빈 줄이면
+    //         {
+    //             continue; // 스킵
+    //         }
 
-            string[] splitData = line.Split(',');
+    //         string[] splitData = line.Split(',');
 
-            int rowLevelId = int.Parse(splitData[0]);  // 현재 행 레벨 ID
+    //         int rowLevelId = int.Parse(splitData[0]);  // 현재 행 레벨 ID
 
-            if (rowLevelId != levelId) // 찾는 레벨이 아니면
-            {
-                continue; // 다음
-            }
+    //         if (rowLevelId != levelId) // 찾는 레벨이 아니면
+    //         {
+    //             continue; // 다음
+    //         }
 
-            for (int j = 1; j < splitData.Length; j += 2) // 1열부터 끝까지 2칸씩 증가
-            {
-                int ing_id; // 재료 ID
-                float mul;  // 배수 값
+    //         for (int j = 1; j < splitData.Length; j += 2) // 1열부터 끝까지 2칸씩 증가
+    //         {
+    //             int ing_id; // 재료 ID
+    //             float mul;  // 배수 값
 
-                // 재료 ID 파싱
-                if (int.TryParse(splitData[j], out ing_id) == false)
-                {
-                    Debug.LogError($"ingredient_id 파싱 실패 (레벨아이디 {levelId}  {j}열 {splitData[j]}");
-                    continue;
-                }
+    //             // 재료 ID 파싱
+    //             if (int.TryParse(splitData[j], out ing_id) == false)
+    //             {
+    //                 Debug.LogError($"ingredient_id 파싱 실패 (레벨아이디 {levelId}  {j}열 {splitData[j]}");
+    //                 continue;
+    //             }
 
-                // 배수 파싱
-                if (float.TryParse(splitData[j + 1], out mul) == false)
-                {
-                    Debug.LogError($"mul 파싱 실패 (레벨아이디 {levelId}  {j}열 {splitData[j + 1]}");
-                    continue;
-                }
+    //             // 배수 파싱
+    //             if (float.TryParse(splitData[j + 1], out mul) == false)
+    //             {
+    //                 Debug.LogError($"mul 파싱 실패 (레벨아이디 {levelId}  {j}열 {splitData[j + 1]}");
+    //                 continue;
+    //             }
 
-                // SO 로드
-                string ingSOPath = ingredientSoDir + "/Ingredient_" + ing_id + ".asset";
-                IngredientSO ing = AssetDatabase.LoadAssetAtPath<IngredientSO>(ingSOPath);
+    //             // SO 로드
+    //             string ingSOPath = ingredientSoDir + "/Ingredient_" + ing_id + ".asset";
+    //             IngredientSO ing = AssetDatabase.LoadAssetAtPath<IngredientSO>(ingSOPath);
 
-                if (ing == null)
-                {
-                    Debug.LogError($"재료SO 없음 : {ingSOPath} 레벨아이디 {levelId}");
-                    continue;
-                }
+    //             if (ing == null)
+    //             {
+    //                 Debug.LogError($"재료SO 없음 : {ingSOPath} 레벨아이디 {levelId}");
+    //                 continue;
+    //             }
 
-                // 조정값 추가
-                StageSO.IngredientAdjustment adj = new StageSO.IngredientAdjustment();
-                adj.Ingredient = ing;
-                adj.MuliflyBy = mul;
-                list.Add(adj);
-            }
+    //             // 조정값 추가
+    //             StageSO.IngredientAdjustment adj = new StageSO.IngredientAdjustment();
+    //             adj.Ingredient = ing;
+    //             adj.MuliflyBy = mul;
+    //             list.Add(adj);
+    //         }
 
-            break;
-        }
+    //         break;
+    //     }
 
-        return list; // 결과 리스트 반환
-    }
+    //     return list; // 결과 리스트 반환
+    // }
 }

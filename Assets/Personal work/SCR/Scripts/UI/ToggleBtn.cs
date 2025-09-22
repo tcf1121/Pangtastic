@@ -29,6 +29,8 @@ public class ToggleBtn : MonoBehaviour
             SetToggleBtn(!Manager.Audio.BgmAudioSource.mute);
         else if (_type == ToggleType.SFX)
             SetToggleBtn(!Manager.Audio.SfxAudioSource.mute);
+        else if (_type == ToggleType.Vibration)
+            SetToggleBtn(Manager.Audio.OnVibrate);
     }
 
     private void SetToggleBtn(bool value)
@@ -46,6 +48,8 @@ public class ToggleBtn : MonoBehaviour
             Manager.Audio.SetBGM(value);
         else if (_type == ToggleType.SFX)
             Manager.Audio.SetSFX(value);
+        else if (_type == ToggleType.Vibration)
+            Manager.Audio.SetVibrate(value);
     }
 }
 
