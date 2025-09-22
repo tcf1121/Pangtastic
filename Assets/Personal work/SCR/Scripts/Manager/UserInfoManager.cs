@@ -391,7 +391,14 @@ public class UserInfoManager : Singleton<UserInfoManager>
         currentData.UserInfo.Face = face;
     }
 
+    // 광고에서 시작이 기준으로 광고 표시하는거 있어서 추가 :: S
+    public string GetUtcStartDay()
+    {
+        return currentData.StartUtcDay;
+    }
+    // 광고에서 시작이 기준으로 광고 표시하는거 있어서 추가 :: E
 }
+
 public enum ItemType
 {
     Roller,
@@ -411,6 +418,10 @@ public class UserData
     public string PlayerName { get; set; } = "";
     public ItemInfo ItemInfo { get; set; } = new ItemInfo();
     public PlaceInfo PlaceInfo { get; set; } = new PlaceInfo();
+    
+    // 광고에서 시작이 기준으로 광고 표시하는거 있어서 추가 :: S
+    public string StartUtcDay { get; set; } = "";
+    // 광고에서 시작이 기준으로 광고 표시하는거 있어서 추가 :: E
 }
 
 [Serializable]
