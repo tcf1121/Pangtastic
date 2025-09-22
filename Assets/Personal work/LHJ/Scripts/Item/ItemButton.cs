@@ -53,9 +53,14 @@ namespace LHJ
             if (_type == ItemType.Coffee)
             {
                 if (_itemCheck != null)
-                    _itemCheck.UseCoffee(30f);
-                Manager.User.UseItem(_type);
-                SetItemState();
+                {
+                    bool used = _itemCheck.UseCoffee(30f);
+                    if (used)
+                    {
+                        Manager.User.UseItem(_type);
+                        SetItemState();
+                    }
+                }
                 return;
             }
 
