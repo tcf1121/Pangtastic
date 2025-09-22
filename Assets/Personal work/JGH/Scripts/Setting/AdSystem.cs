@@ -122,7 +122,27 @@ public class AdSystem : Singleton<AdSystem>
         
         return false;
     }
+    
+    public bool ShouldShowRemoveAdPopup()
+    {
+        LogEntry lastAdLog = Manager.User.GetSearchOpenAdLogs();
+        if (lastAdLog == null)
+            return true;
 
+        DateTime lastAdDay = DateTime.Parse(lastAdLog.AccessDay).Date;
+        DateTime today = DateTime.UtcNow.AddHours(9).Date;
+
+        int diffDays = (today - lastAdDay).Days;
+
+        // 당일도 팝업 포함 → 0일차를 1일차로 보정
+        diffDays += 1;
+
+        // 8일 주기 (5일 노출 + 3일 비노출)
+        int cycle = (diffDays - 1) % 8;
+
+        return cycle < 5; // 0~4 → 노출 / 5~7 → 비노출
+    }
+    
     void CheckRemoveAD()
     {
         int AD = PlayerPrefs.GetInt(RemoveAD);
@@ -219,11 +239,15 @@ public class AdSystem : Singleton<AdSystem>
     public void ShowAppOpenAd()
     {
         // 설치 후 2일 지나지 않음 -- 단순 2일 체크
-        // if (!CheckDays(2))
-            // return;
+        if (!CheckDays(2))
+            return;
         
         // 설치 후 2일 지나지 않음 -- 접속일 기준으로 체크
         if (!HasOverTwoDaysGap(2))
+            return;
+
+        // 5일주기로 보여주고 3일 주기로 안보여주기
+        if (!ShouldShowRemoveAdPopup())
             return;
         
         if (_appOpenAd != null && _appOpenAd.CanShowAd())
@@ -312,6 +336,7 @@ public class AdSystem : Singleton<AdSystem>
         ad.OnAdFullScreenContentOpened += () =>
         {
             Debug.Log("App open ad full screen content opened.");
+            Manager.User.SetLastArrOpenAd(true);
         };
         // Raised when the ad closed full screen content.
         // 광고가 닫혔을때
@@ -333,6 +358,7 @@ public class AdSystem : Singleton<AdSystem>
             LoadAppOpenAd();
         };
     }
+    
     private void OnDestroy()
     {
         // Always unlisten to events when complete.
