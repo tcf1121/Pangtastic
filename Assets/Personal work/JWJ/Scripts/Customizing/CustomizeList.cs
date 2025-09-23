@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Drawing;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -19,6 +20,16 @@ public class CustomizeList : MonoBehaviour
     [SerializeField] Button _bagButton;
     [SerializeField] Button _accessoryButton;
 
+    [SerializeField] ScrollRect _scrollRect;
+
+    private RectTransform _skinRT;
+    private RectTransform _faceRT;
+    private RectTransform _hairRT;
+    private RectTransform _faceWearRT;
+    private RectTransform _bagRT;
+    private RectTransform _accessoryRT;
+
+
     private void Awake()
     {
         _skinPanel.SetActive(true);
@@ -36,6 +47,19 @@ public class CustomizeList : MonoBehaviour
         _accessoryButton.onClick.AddListener(OnAccClicked); 
         
         _skinButton.interactable = false;
+
+        if(_scrollRect == null)
+        {
+            _scrollRect = GetComponentInChildren<ScrollRect>();
+        }
+
+        _skinRT = _facePanel.GetComponent<RectTransform>();
+        _faceRT = _facePanel.GetComponent<RectTransform>();
+        _hairRT = _hairPanel.GetComponent<RectTransform>();
+        _faceWearRT = _facewearPanel.GetComponent<RectTransform>();
+        _bagRT = _bagPanel.GetComponent<RectTransform>();
+        _accessoryRT = _accessoryPanel.GetComponent<RectTransform>();
+
     }
 
     private void OnSkinClicked()
@@ -45,6 +69,7 @@ public class CustomizeList : MonoBehaviour
         _skinPanel.SetActive(true);
         //Manager.Audio.PlaySFX();
         _skinButton.interactable = false;
+        _scrollRect.content = _skinRT;
     }
 
     private void OnFaceClicked()
@@ -54,6 +79,7 @@ public class CustomizeList : MonoBehaviour
         _facePanel.SetActive(true);
         //Manager.Audio.PlaySFX();
         _faceButton.interactable = false;
+        _scrollRect.content = _faceRT;
     }
 
     private void OnHairClicked()
@@ -63,6 +89,7 @@ public class CustomizeList : MonoBehaviour
         _hairPanel.SetActive(true);
         //Manager.Audio.PlaySFX();
         _hairButton.interactable = false;
+        _scrollRect.content = _hairRT;
     }
     private void OnEWClicked()
     {
@@ -71,6 +98,7 @@ public class CustomizeList : MonoBehaviour
         _facewearPanel.SetActive(true);
         //Manager.Audio.PlaySFX();
         _facewearButton.interactable = false;
+        _scrollRect.content = _faceWearRT;
     }
     private void OnBagClicked()
     {
@@ -79,6 +107,7 @@ public class CustomizeList : MonoBehaviour
         _bagPanel.SetActive(true);
         //Manager.Audio.PlaySFX();
         _bagButton.interactable = false;
+        _scrollRect.content = _bagRT;
     }
     private void OnAccClicked()
     {
@@ -87,6 +116,7 @@ public class CustomizeList : MonoBehaviour
         _accessoryPanel.SetActive(true);
         //Manager.Audio.PlaySFX();
         _accessoryButton.interactable = false;
+        _scrollRect.content = _accessoryRT;
     }
 
     private void CloseAllPanel()
