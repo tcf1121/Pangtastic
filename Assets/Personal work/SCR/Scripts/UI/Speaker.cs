@@ -1,30 +1,40 @@
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class SpeakerUI : MonoBehaviour
 {
-    [SerializeField] List<GameObject> Speakers;
+    [SerializeField] List<Image> Speakers;
     [SerializeField] GameObject _nameLabel;
     [SerializeField] TMP_Text _charactersName;
     [SerializeField] SpeakerSO _speakerSO;
 
 
-    public void SetSpeaker(Speaker? speaker)
+    public void SetCharacter(Speaker? speaker)
     {
         SetNameLabel(speaker);
         if (speaker != null)
             for (int i = 0; i < Speakers.Count; i++)
             {
-                if (i == (int)speaker) Speakers[i].SetActive(true);
-                else Speakers[i].SetActive(false);
+                if (i == (int)speaker) Speakers[i].gameObject.SetActive(true);
+                else Speakers[i].gameObject.SetActive(false);
             }
         else
         {
             for (int i = 0; i < Speakers.Count; i++)
             {
-                Speakers[i].SetActive(false);
+                Speakers[i].gameObject.SetActive(false);
             }
+        }
+    }
+
+    public void SetSpeaker(Color speakColor)
+    {
+        foreach (var image in Speakers)
+        {
+            if (image.gameObject.activeSelf)
+                image.color = speakColor;
         }
     }
 
