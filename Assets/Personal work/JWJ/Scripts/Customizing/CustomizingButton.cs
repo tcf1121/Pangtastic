@@ -10,43 +10,70 @@ public class CustomizingButton : MonoBehaviour
     [SerializeField] private int _index;
     [SerializeField] private CustomizeManager _customizeManager;
 
+    [SerializeField] private GameObject _available;
+    [SerializeField] private GameObject _notAvailable;
+
+    [SerializeField] private ButtonController _buttonController;
+    private bool _isSelected = false;
+
     private void Awake()
     {
         _button = GetComponent<Button>();
         _button.onClick.AddListener(OnButtonClicked);
         _customizeManager = FindObjectOfType<CustomizeManager>();
+
+        if (_buttonController == null)
+        {
+            _buttonController = GetComponentInParent<ButtonController>();
+        }
+    }
+
+    private void Start()
+    {
+        Refresh();
+    }
+
+    private void OnEnable()
+    {
+        Refresh();
     }
 
     private void OnButtonClicked()
     {
-        if (_category == CosmeticCategory.Skin)
+        //오디오 여기에 
+        _buttonController.Select(_category, this);
+        _customizeManager.ChangeFeature(_category, _index);
+    }
+
+    public void SetSelected(bool selected)
+    {
+        _isSelected = selected;
+        _button.interactable = !_isSelected;
+    }
+
+    public void Refresh()
+    {
+        if (_index >= _customizeManager.GetArrayLength(_category))
         {
-            _customizeManager.ChangeSkin(_index);
-        }
-        else if (_category == CosmeticCategory.Face)
-        {
-            _customizeManager.ChangeFace(_index);
-        }
-        else if (_category == CosmeticCategory.Headwear)
-        {
-            _customizeManager.ChangeHeadwear(_index);
-        }
-        else if (_category == CosmeticCategory.Facewear)
-        {
-            _customizeManager.ChangeFacewear(_index);
-        }
-        else if (_category == CosmeticCategory.Bag)
-        {
-            _customizeManager.ChangeBag(_index);
-        }
-        else if (_category == CosmeticCategory.Accessory)
-        {
-            _customizeManager.ChangeAccessory(_index);
+            _available.SetActive(false);
+            _notAvailable.SetActive(true);
+            _button.interactable = false;
         }
         else
         {
-            Debug.LogError($"커스텀 아이템 타입이 이상함: {gameObject.name}");
+            _available.SetActive(true);
+            _notAvailable.SetActive(false);
+
+            if (_index == _customizeManager.CurIndex(_category))
+            {
+                SetSelected(true);
+                _buttonController.Select(_category, this);
+            }
+            else
+            {
+                SetSelected(false);
+            }
         }
-        
     }
+
 }

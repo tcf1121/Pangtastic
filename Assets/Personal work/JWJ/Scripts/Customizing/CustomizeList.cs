@@ -33,46 +33,60 @@ public class CustomizeList : MonoBehaviour
         _hairButton.onClick.AddListener(OnHairClicked);
         _facewearButton.onClick.AddListener(OnEWClicked);
         _bagButton.onClick.AddListener(OnBagClicked);
-        _accessoryButton.onClick.AddListener(OnAccClicked);
+        _accessoryButton.onClick.AddListener(OnAccClicked); 
+        
+        _skinButton.interactable = false;
     }
 
     private void OnSkinClicked()
     {
         CloseAllPanel();
+        EnableAllButtons();
         _skinPanel.SetActive(true);
         //Manager.Audio.PlaySFX();
+        _skinButton.interactable = false;
     }
 
     private void OnFaceClicked()
     {
         CloseAllPanel();
+        EnableAllButtons();
         _facePanel.SetActive(true);
         //Manager.Audio.PlaySFX();
+        _faceButton.interactable = false;
     }
 
     private void OnHairClicked()
     {
         CloseAllPanel();
+        EnableAllButtons();
         _hairPanel.SetActive(true);
         //Manager.Audio.PlaySFX();
+        _hairButton.interactable = false;
     }
     private void OnEWClicked()
     {
         CloseAllPanel();
+        EnableAllButtons();
         _facewearPanel.SetActive(true);
         //Manager.Audio.PlaySFX();
+        _facewearButton.interactable = false;
     }
     private void OnBagClicked()
     {
         CloseAllPanel();
+        EnableAllButtons();
         _bagPanel.SetActive(true);
         //Manager.Audio.PlaySFX();
+        _bagButton.interactable = false;
     }
     private void OnAccClicked()
     {
         CloseAllPanel();
+        EnableAllButtons();
         _accessoryPanel.SetActive(true);
         //Manager.Audio.PlaySFX();
+        _accessoryButton.interactable = false;
     }
 
     private void CloseAllPanel()
@@ -83,6 +97,16 @@ public class CustomizeList : MonoBehaviour
         _facewearPanel.SetActive(false);
         _bagPanel.SetActive(false);
         _accessoryPanel.SetActive(false);
+    }
+
+    private void EnableAllButtons()
+    {
+        _skinButton.interactable = true;
+        _faceButton.interactable = true;
+        _hairButton.interactable = true;
+        _facewearButton.interactable = true;
+        _bagButton.interactable = true;
+        _accessoryButton.interactable = true;
     }
 
 
