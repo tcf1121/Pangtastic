@@ -30,7 +30,7 @@ public class ResidentManager : MonoBehaviour
     }
     private void OnConfigLoaded(AsyncOperationHandle<ResidentConfigSO> handle)
     {
-        if (handle.Status == AsyncOperationStatus.Succeeded) //추가됨!!! 성공 여부 체크
+        if (handle.Status == AsyncOperationStatus.Succeeded)
         {
             _config = handle.Result;
             Debug.Log("ResidentConfigSO 로드 완료");
