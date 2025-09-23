@@ -9,7 +9,6 @@ public enum ResidentState
     Idle,
     Move,
     Interact,
-    Greet,
     Talk,
     Workout,
     Touched
@@ -36,6 +35,7 @@ public class ResidentController : MonoBehaviour
     private bool _isLookingAround = false;
     private bool _isWorkout = false;
     private bool _isTouched = false;
+    private bool _isFavAnim = false;
 
     private float _lastTouchTime = -999f;
     private float _lastTalkTime = -999f;
@@ -67,11 +67,6 @@ public class ResidentController : MonoBehaviour
             Debug.LogError("ResidentManager 없음");
         }
     }
-
-   //private void OnEnable()
-   //{
-   //    StartCoroutine(WaitForConfigAndStart());
-   //}
 
     private IEnumerator WaitForConfigAndStart()
     {
@@ -136,9 +131,9 @@ public class ResidentController : MonoBehaviour
 
         SetMove(0f, true);
 
-        _stateBubble.IconUI(true);
+        //_stateBubble.IconUI(true);
         yield return new WaitForSeconds(_manager.Config.IdleDuration);
-        _stateBubble.IconUI(false);
+        //_stateBubble.IconUI(false);
 
         Transform nextDestination = _manager.PickNextDestination(_resident, _currentDestinationType);
         _currentDestination = nextDestination.position;
@@ -161,6 +156,7 @@ public class ResidentController : MonoBehaviour
             timer += Time.deltaTime;
             if (timer > _manager.Config.MoveDuration)
             {
+                Debug.Log("너무 오래 걸음. 목적지 재설정");
                 ChangeState(ResidentState.Idle);
                 yield break;
             }
@@ -194,15 +190,25 @@ public class ResidentController : MonoBehaviour
 
     private IEnumerator InteractRoutine()
     {
-        _isLookingAround = true;
-
-        SetMove(0f, true);
-        _stateBubble.IconUI(true);
-        yield return new WaitForSeconds(_manager.Config.InteractDuration);
-        _stateBubble.IconUI(false);
-
+        if (_currentDestinationType == _resident.FavoriteDestinations[0] || _currentDestinationType == _resident.FavoriteDestinations[1])
+        {
+            bool specialAction = Random.value <= _manager.Config.SpecialAnimation;
+            if (specialAction)
+            {
+                _isFavAnim = true;
+                SetMove(0f, true);
+                _stateBubble.IconUI(true);
+                yield return new WaitForSeconds(_manager.Config.InteractDuration);
+                _stateBubble.IconUI(false);
+            }
+            else
+            {
+                _isLookingAround = true;
+                SetMove(0f, true);
+                yield return new WaitForSeconds(_manager.Config.InteractDuration);
+            }
+        }
         ChangeState(ResidentState.Idle);
-        
     }
 
     private IEnumerator TalkRoutine()
@@ -412,7 +418,7 @@ public class ResidentController : MonoBehaviour
 
         bool isWaving = (_isTouched == true);
         _animator.SetBool("IsWaving", isWaving);
-
+        _animator.SetBool("IsFavStore", _isFavAnim);
         _animator.SetBool("IsJumpingJack", _isWorkout);
         _animator.SetBool("IsTalking", _isTalking);
         _animator.SetBool("IsLookAround", _isLookingAround);
@@ -424,5 +430,23 @@ public class ResidentController : MonoBehaviour
         _isLookingAround = false;
         _isWorkout = false;
         _isTouched = false;
+        _isFavAnim = false;
+    }
+
+    public void StopMoving(Vector3 pos, Quaternion rotation)
+    {
+        ClearBools();
+        StopRunningCoroutine();
+        _agent.Warp(pos);
+        _agent.transform.rotation = rotation;
+        _agent.ResetPath();
+        
+    }
+
+    public void ResumeMoving(Vector3 pos, Quaternion rotation)
+    {
+        _agent.Warp(pos);
+        _agent.transform.rotation = rotation;
+        ChangeState(ResidentState.Idle);
     }
 }

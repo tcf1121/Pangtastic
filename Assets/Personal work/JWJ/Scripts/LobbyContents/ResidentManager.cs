@@ -8,10 +8,11 @@ public class ResidentManager : MonoBehaviour
 {
     private Dictionary<DestinationType, Transform> _destByType = new Dictionary<DestinationType, Transform>();
 
-    [SerializeField] private Sprite _greet;
+    //[SerializeField] private Sprite _greet;
     [SerializeField] private Sprite _workout;
-    [SerializeField] private Sprite _lookAround;
+    //[SerializeField] private Sprite _lookAround;
     [SerializeField] private Sprite _talking;
+    [SerializeField] private Sprite _favStore;
 
     [SerializeField] private ResidentConfigSO _config;
     public ResidentConfigSO Config { get { return _config; } }
@@ -29,7 +30,7 @@ public class ResidentManager : MonoBehaviour
     }
     private void OnConfigLoaded(AsyncOperationHandle<ResidentConfigSO> handle)
     {
-        if (handle.Status == AsyncOperationStatus.Succeeded) //추가됨!!! 성공 여부 체크
+        if (handle.Status == AsyncOperationStatus.Succeeded)
         {
             _config = handle.Result;
             Debug.Log("ResidentConfigSO 로드 완료");
@@ -136,16 +137,13 @@ public class ResidentManager : MonoBehaviour
         switch (state)
         {
             case ResidentState.Idle:
-                return _greet;
+                return null;
 
             case ResidentState.Move:
-                return _greet;
+                return null;
 
             case ResidentState.Interact:
-                return _lookAround;
-
-            case ResidentState.Greet:
-                return _greet;
+                return _favStore;
 
             case ResidentState.Talk:
                 return _talking;
@@ -154,8 +152,8 @@ public class ResidentManager : MonoBehaviour
                 return _workout;
 
             case ResidentState.Touched:
-                return _greet;
+                return null;
         }
-        return _greet;
+        return null;
     }
 }
