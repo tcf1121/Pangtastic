@@ -53,9 +53,10 @@ public class UserInfoUI : MonoBehaviour
         Manager.User.OnUseHeart += Instance.StartHeartTimer;
         Manager.User.OnInfinityHeart += Instance.StartInfinityHeart;
         Debug.Log(Manager.User.GetCurrentUserData());
-        _coin.text = $"{Manager.User.GetCoin()}";
+        _coin.text = SetNum(Manager.User.GetCoin());
+        _star.text = SetNum(Manager.User.GetStar());
         _heart.text = $"{Manager.User.GetHeart()}";
-        _star.text = $"{Manager.User.GetStar()}";
+
         _heartTimer += Instance.HeartTimer;
         _OnTimerFinished += Instance.FinishHeartTimeCor;
         _OnInfinityFinished += Instance.FinishInfinity;
@@ -63,6 +64,31 @@ public class UserInfoUI : MonoBehaviour
             _heartTime.text = _heartSO.GetText(Manager.Language.GetLanguage());
         else
             SetHeartTime();
+    }
+
+    private string SetNum(int num)
+    {
+        string returnNum = $"{num}";
+        if (num > 10000000)
+        {
+            returnNum = $"{num / 1000000}m";
+        }
+        else if (num > 1000000)
+        {
+            float mnum = (float)num / 1000000;
+            returnNum = $"{mnum.ToString("0.0")}m";
+        }
+        else if (num > 10000)
+        {
+            returnNum = $"{num / 1000}k";
+        }
+        else if (num > 1000)
+        {
+            float knum = (float)num / 1000;
+            returnNum = $"{knum.ToString("0.0")}k";
+        }
+
+        return returnNum;
     }
 
     public void SetActive(bool value)
@@ -232,12 +258,12 @@ public class UserInfoUI : MonoBehaviour
 
     private void SetCoin(int value)
     {
-        _coin.text = $"{value}";
+        _coin.text = SetNum(Manager.User.GetCoin());
     }
 
     private void SetStar(int value)
     {
-        _star.text = $"{value}";
+        _star.text = SetNum(Manager.User.GetStar());
     }
 
     private void SetProfile(int value)

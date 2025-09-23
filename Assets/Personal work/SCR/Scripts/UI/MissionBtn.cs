@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using TMPro;
 using UnityEngine;
@@ -12,6 +13,7 @@ public class MissionBtn : MonoBehaviour
     [SerializeField] TMP_Text _currentRoom;
     [SerializeField] TMP_Text _progressText;
     [SerializeField] Slider _progressSlider;
+    [SerializeField] List<StringSO> placeString;
 
     void Awake()
     {
@@ -21,7 +23,8 @@ public class MissionBtn : MonoBehaviour
 
     public void Refresh()
     {
-        _currentRoom.text = $"{Enum.GetName(typeof(MissionPlace), Manager.User.GetCurPlace())}";
+        string place = placeString[(int)Manager.User.GetCurPlace()].GetText(Manager.Language.GetLanguage());
+        _currentRoom.text = $"{place}";
         _progressSlider.minValue = 0;
         _progressSlider.maxValue = Manager.User.GetCurMisson().Length;
         _progressSlider.value = Array.FindAll(Manager.User.GetCurMisson(), n => n == true).ToList().Count;
