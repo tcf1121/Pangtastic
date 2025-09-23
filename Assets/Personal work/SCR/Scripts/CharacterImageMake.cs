@@ -7,10 +7,7 @@ using UnityEngine.UI;
 
 public class CharacterImageMake : MonoBehaviour
 {
-    [SerializeField] SpeakerUI _leftSpeaker;
-    [SerializeField] SpeakerUI _centerSpeaker;
-    [SerializeField] SpeakerUI _rightSpeaker;
-    [SerializeField] List<RawImage> _rawImages;
+    [SerializeField] List<SpeakerUI> _speakers;
     [SerializeField] Color _speakerColor;
     [SerializeField] Color _elseColor;
     [SerializeField] List<GameObject> _nameLabel;
@@ -19,22 +16,20 @@ public class CharacterImageMake : MonoBehaviour
     public void SetCharacter(Speaker? left, Speaker? center, Speaker? right, int speakerIndex, StringSO dialog)
     {
 
-        _leftSpeaker.SetSpeaker(left);
-        _centerSpeaker.SetSpeaker(center);
-        _rightSpeaker.SetSpeaker(right);
+        _speakers[0].SetCharacter(left);
+        _speakers[1].SetCharacter(center);
+        _speakers[2].SetCharacter(right);
 
 
-        for (int i = 0; i < _rawImages.Count; i++)
+        for (int i = 0; i < 3; i++)
         {
             if (i == speakerIndex)
             {
-                _rawImages[i].color = _speakerColor;
-                _nameLabel[i].transform.GetChild(2).gameObject.SetActive(false);
+                _speakers[i].SetSpeaker(_speakerColor);
             }
             else
             {
-                _rawImages[i].color = _elseColor;
-                _nameLabel[i].transform.GetChild(2).gameObject.SetActive(true);
+                _speakers[i].SetSpeaker(_elseColor);
             }
         }
         SetDialog(dialog.GetText(Manager.Language.GetLanguage()));
