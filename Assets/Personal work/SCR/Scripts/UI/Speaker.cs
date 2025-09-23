@@ -53,5 +53,6 @@ public enum Speaker
     Kiki,
     Uni,
     Milo,
-    Ollie
+    Ollie,
+    Fifi
 }
