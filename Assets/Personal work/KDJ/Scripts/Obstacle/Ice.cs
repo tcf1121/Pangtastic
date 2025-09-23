@@ -40,27 +40,40 @@ namespace KDJ
 
         public override void Broken()
         {
-            _brokenCoroutine = BoardManager.Instance.StartCoroutine(BrokenAnimation(X, Y));
-            BoardManager.Instance.Spawner.GameBoardData.SetOverlayBlock(X, Y, null);
+            if (_brokenCoroutine == null)
+            {
+                _brokenCoroutine = BoardManager.Instance.StartCoroutine(BrokenAnimation(X, Y));
+            }
         }
 
         private IEnumerator BrokenAnimation(int x, int y)
         {
             BoardManager.Instance.IsWaitingForAnimation = true;
-            GameObject blockObject = BoardManager.Instance.Spawner.GameBoardData.GetOverlayBlock(x, y).BlockInstance;
-            float timer = 0f;
-            while (timer < 0.15f)
-            {
-                timer += Time.deltaTime;
-                blockObject.transform.localScale = Vector3.Lerp(Vector3.one, Vector3.zero, timer / 0.1f);
-                yield return null;
-            }
+    
+            Block iceBlock = BoardManager.Instance.Spawner.GameBoardData.GetOverlayBlock(x, y);
+            GameObject blockObject = iceBlock?.BlockInstance;
 
             if (blockObject != null)
+            {
+                float timer = 0f;
+                while (timer < 0.15f)
+                {
+                    timer += Time.deltaTime;
+                    blockObject.transform.localScale = Vector3.Lerp(Vector3.one, Vector3.zero, timer / 0.1f);
+                    yield return null;
+                }
                 Object.Destroy(blockObject);
-            
-            BoardManager.Instance.Spawner.GameBoardData.BlockArray[y, x].IsNormal = true;
-            BoardManager.Instance.Spawner.GameBoardData.BlockArray[y, x].CanMove = true;
+            }
+
+            BoardManager.Instance.Spawner.GameBoardData.SetOverlayBlock(x, y, null);
+    
+            Block underlyingBlock = BoardManager.Instance.Spawner.GameBoardData.BlockArray[y, x];
+            if (underlyingBlock != null)
+            {
+                underlyingBlock.IsNormal = true;
+                underlyingBlock.CanMove = true;
+            }
+
             BoardManager.Instance.IsWaitingForAnimation = false;
             _brokenCoroutine = null;
         }
