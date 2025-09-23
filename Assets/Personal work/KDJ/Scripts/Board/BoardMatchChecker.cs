@@ -477,9 +477,15 @@ namespace KDJ
                             // 올바른 '좌하단' 위치를 찾기 위한 로직
                             // 1. 가장 아래쪽 행(minY)을 찾습니다.
                             // 2. 해당 행에 있는 블록들 중 가장 왼쪽(minX)을 찾습니다.
+                            // 3. 만약 해당 위치가 얼음 블록이라면 옆칸을 확인하여 얼음이 아닌 위치를 찾습니다.
                             Vector2Int bottomLeft = new Vector2Int(int.MaxValue, int.MaxValue);
                             foreach (var coord in specialMatchCoords)
                             {
+                                if (boardManager.Spawner.GameBoardData.GetOverlayBlock(coord.x, coord.y) is Ice)
+                                {
+                                    // 해당 위치가 얼음 블록이라면, 건너 뛰어서 다른칸을 특수 블록 생성 위치 후보로 고려합니다.
+                                    continue;
+                                }
                                 if (coord.y < bottomLeft.y)
                                 {
                                     // 더 아래에 있는 행을 발견하면, 좌하단 후보를 이 좌표로 초기화합니다.
@@ -523,13 +529,13 @@ namespace KDJ
             {
                 if (coord.x >= 0 && coord.x < gameBoard.Width && coord.y >= 0 && coord.y < gameBoard.Height)
                 {
-                    Block overlayNeighbor = gameBoard.GetOverlayBlock(coord.x, coord.y);
-                    if (overlayNeighbor is Ice ice)
-                    {
-                        ice.SplashDamage(gameBoard.GetBlock(x, y).GemType);
-                        damagedObstacles.Add(ice);
-                        continue;
-                    }
+                    // Block overlayNeighbor = gameBoard.GetOverlayBlock(coord.x, coord.y);
+                    // if (overlayNeighbor is Ice ice)
+                    // {
+                    //     ice.SplashDamage(gameBoard.GetBlock(x, y).GemType);
+                    //     damagedObstacles.Add(ice);
+                    //     continue;
+                    // }
 
                     Block neighbor = gameBoard.GetBlock(coord.x, coord.y);
                     if (neighbor == null) continue;

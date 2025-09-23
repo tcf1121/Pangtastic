@@ -17,12 +17,12 @@ namespace LHJ
         [SerializeField] private GameObject _rollerTrailFxV;
 
         [Header("우유")]
-        [SerializeField] private GameObject _milkDropFx;   
+        [SerializeField] private GameObject _milkDropFx;
         [SerializeField] private GameObject _milkSplashFx;
         [SerializeField] private float _milkFlyTime;
 
         [Header("오븐")]
-        [SerializeField] private GameObject _ovenFx;  
+        [SerializeField] private GameObject _ovenFx;
         [SerializeField] private Material _ovenStrokeMat;
         [SerializeField] private Material _ovenLineMat;
 
@@ -39,6 +39,21 @@ namespace LHJ
                 || t == GemType.Milk
                 || t == GemType.Oven;
         }
+        private static HashSet<Vector2Int> _activeEffects = new HashSet<Vector2Int>();
+
+        private bool TryBeginEffectAt(Vector2Int pos)
+        {
+            if (_activeEffects.Contains(pos))
+                return false; 
+
+            _activeEffects.Add(pos);
+            return true;
+        }
+
+        private void EndEffectAt(Vector2Int pos)
+        {
+            _activeEffects.Remove(pos);
+        }
         private void OnDisable()
         {
             _running = 0;
@@ -46,7 +61,7 @@ namespace LHJ
 
         private static void BeginEffect()
         {
-            _running++;  
+            _running++;
         }
 
         private static void EndEffect()
@@ -140,22 +155,18 @@ namespace LHJ
                 if (origin.Count > 0) ApplyDamageAndScore(board, origin);
             }
 
-            // 라인 진행 중 만난 특수블록 예약
-            List<(Vector2Int p, GemType t)> queuedSpecials = new List<(Vector2Int, GemType)>();
-
             if (isHorizontal)
             {
                 for (int x = 0; x < gameBoard.Width; x++)
                 {
-                    bool isOriginCell = (x == pos.x);  
+                    bool isOriginCell = (x == pos.x);
                     var cur = gameBoard.GetBlock(x, pos.y);
 
                     if (!isOriginCell && cur != null && cur.BlockInstance != null && IsSpecial(cur.GemType))
                     {
-                        bool exists = false;
-                        for (int i = 0; i < queuedSpecials.Count; i++)
-                            if (queuedSpecials[i].p.x == x && queuedSpecials[i].p.y == pos.y) { exists = true; break; }
-                        if (!exists) queuedSpecials.Add((new Vector2Int(x, pos.y), cur.GemType));
+                        UseSpecial(new Vector2Int(x, pos.y), cur.GemType, gameBoard, new List<Vector2Int>());
+                        yield return new WaitForSeconds(stepTime);
+                        continue;
                     }
 
                     var hits = new List<Vector2Int>();
@@ -169,15 +180,14 @@ namespace LHJ
             {
                 for (int y = gameBoard.Height - 1; y >= 0; y--)
                 {
-                    bool isOriginCell = (y == pos.y); 
+                    bool isOriginCell = (y == pos.y);
                     var cur = gameBoard.GetBlock(pos.x, y);
 
                     if (!isOriginCell && cur != null && cur.BlockInstance != null && IsSpecial(cur.GemType))
                     {
-                        bool exists = false;
-                        for (int i = 0; i < queuedSpecials.Count; i++)
-                            if (queuedSpecials[i].p.x == pos.x && queuedSpecials[i].p.y == y) { exists = true; break; }
-                        if (!exists) queuedSpecials.Add((new Vector2Int(pos.x, y), cur.GemType));
+                        UseSpecial(new Vector2Int(pos.x, y), cur.GemType, gameBoard, new List<Vector2Int>());
+                        yield return new WaitForSeconds(stepTime);
+                        continue;
                     }
 
                     var hits = new List<Vector2Int>();
@@ -185,22 +195,6 @@ namespace LHJ
                     if (hits.Count > 0) ApplyDamageAndScore(board, hits);
 
                     yield return new WaitForSeconds(stepTime);
-                }
-            }
-
-            for (int i = 0; i < queuedSpecials.Count; i++)
-            {
-                var (p, t) = queuedSpecials[i];
-
-                if (t == GemType.Roller_h)
-                    board.StartCoroutine(RollerRoutine(p, true, gameBoard, board));
-                else if (t == GemType.Roller_v)
-                    board.StartCoroutine(RollerRoutine(p, false, gameBoard, board));
-                else
-                {
-                    var extraHits = new List<Vector2Int>();
-                    UseSpecial(p, t, gameBoard, extraHits);
-                    if (extraHits.Count > 0) ApplyDamageAndScore(board, extraHits);
                 }
             }
             Destroy(fx);
@@ -236,7 +230,7 @@ namespace LHJ
             }
         }
 
-        private IEnumerator MilkRoutine(Vector2Int origin, GameBoardData gameBoard, BoardManager board,int count = 3, bool destroyOrigin = true, System.Action<List<Vector2Int>> onCompleted = null)
+        private IEnumerator MilkRoutine(Vector2Int origin, GameBoardData gameBoard, BoardManager board, int count = 3, bool destroyOrigin = true, System.Action<List<Vector2Int>> onCompleted = null)
         {
             if (gameBoard == null || board == null) yield break;
             BeginEffect();
@@ -264,7 +258,7 @@ namespace LHJ
 
                 float baseScale = drop.transform.localScale.x; // 기본 크기 저장
                 drop.transform
-                    .DOScale(Vector3.one * baseScale * 1.3f, _milkFlyTime * 0.5f) 
+                    .DOScale(Vector3.one * baseScale * 1.3f, _milkFlyTime * 0.5f)
                     .SetEase(Ease.OutQuad)
                     .SetLoops(2, LoopType.Yoyo); // 다시 원래 크기로
 
@@ -307,8 +301,8 @@ namespace LHJ
 
             if (needed != null && needed.Count > 0)
             {
-                List<Vector2Int> candidates = GetTargetPos(gb, needed);  
-                Shuffle(candidates);                                     
+                List<Vector2Int> candidates = GetTargetPos(gb, needed);
+                Shuffle(candidates);
                 int take = Mathf.Min(count, candidates.Count);
                 for (int i = 0; i < take; i++) result.Add(candidates[i]);
             }
@@ -355,6 +349,7 @@ namespace LHJ
         private IEnumerator OvenRoutine(Vector2Int origin, GameBoardData gameBoard, BoardManager board)
         {
             if (gameBoard == null || board == null) yield break;
+            if (!TryBeginEffectAt(origin)) yield break;
             BeginEffect();
             Manager.Audio.PlaySFX("Oven_Shake");
             GemType? targetType = null;
@@ -489,11 +484,13 @@ namespace LHJ
             if (hits.Count > 0) ApplyDamageAndScore(board, hits);
 
             EndEffect();
+            EndEffectAt(origin);
         }
 
         private IEnumerator DonutRoutine(Vector2Int origin, GameBoardData gameBoard, BoardManager board, int range = 2)
         {
             if (gameBoard == null || board == null) yield break;
+            if (!TryBeginEffectAt(origin)) yield break;
             BeginEffect();
             Manager.Audio.PlaySFX("DonutBox_Use");
             Vector3 originWorld = GridToWorld(board, gameBoard, origin.x, origin.y);
@@ -519,9 +516,10 @@ namespace LHJ
                     var blk = gameBoard.GetBlock(x, y);
                     if (blk != null && blk.BlockInstance != null)
                     {
-                        if (IsSpecial(blk.GemType) && !(x == origin.x && y == origin.y))
+                        if (!(x == origin.x && y == origin.y) && IsSpecial(blk.GemType))
                         {
-                            queuedSpecials.Add((new Vector2Int(x, y), blk.GemType));
+                            UseSpecial(new Vector2Int(x, y), blk.GemType, gameBoard, new List<Vector2Int>());
+                            continue;
                         }
                     }
                     AddCell(gameBoard, x, y, hits);
@@ -531,14 +529,8 @@ namespace LHJ
             if (hits.Count > 0) ApplyDamageAndScore(board, hits);
 
             if (fx != null) Object.Destroy(fx);
-
-            for (int i = 0; i < queuedSpecials.Count; i++)
-            {
-                var (p, t) = queuedSpecials[i];
-                UseSpecial(p, t, gameBoard, new List<Vector2Int>());
-            }
-
             EndEffect();
+            EndEffectAt(origin);
         }
 
         // 점수 및 콤보 시간
@@ -573,8 +565,8 @@ namespace LHJ
                 var overlay = gameBoard.GetOverlayBlock(c.x, c.y);
                 if (overlay is ObstacleBlock overlayOb && overlay.BlockInstance != null)
                 {
-                    var baseBlock = gameBoard.GetBlock(c.x, c.y);  
-                    if (baseBlock != null && baseBlock.BlockInstance != null)   
+                    var baseBlock = gameBoard.GetBlock(c.x, c.y);
+                    if (baseBlock != null && baseBlock.BlockInstance != null)
                         RevertStroke(baseBlock.BlockInstance);
                     overlayOb.TakeDamage();
                     continue;
@@ -585,7 +577,7 @@ namespace LHJ
                 {
                     if (b.GemType < GemType.Milk)
                         InGameManager.AddIngredientSta(b.GemType);
-                        RevertStroke(b.BlockInstance);
+                    RevertStroke(b.BlockInstance);
                     if (b is ObstacleBlock ob)
                     {
                         if (b.IsNormal != true)
@@ -606,7 +598,7 @@ namespace LHJ
                         Destroy(b.BlockInstance);
                     }
 
-                    
+
                     gameBoard.SetBlock(c.x, c.y, null);
                     destroyedCount++;
                 }
@@ -709,7 +701,7 @@ namespace LHJ
                     {
                         // 우유 3발 모두 끝난 뒤 → 그 자리에서 세로 라인 발동
                         for (int i = 0; i < landed.Count; i++)
-                            bm.StartCoroutine(RollerRoutine(landed[i], false, gameBoard, bm));
+                            bm.StartCoroutine(RollerRoutine(landed[i], true, gameBoard, bm));
                     }));
                 }
                 return;
@@ -728,7 +720,7 @@ namespace LHJ
             if ((a == GemType.Roller_h && b == GemType.DonutBox) ||
                 (a == GemType.DonutBox && b == GemType.Roller_h))
             {
-                for (int dy = -1; dy <= 1; dy++) 
+                for (int dy = -1; dy <= 1; dy++)
                     UseSpecial(new Vector2Int(secondPos.x, secondPos.y + dy), GemType.Roller_h, gameBoard, outDamage);
                 return;
             }
@@ -785,8 +777,9 @@ namespace LHJ
             if ((a == GemType.Oven && (b == GemType.Roller_h || b == GemType.Roller_v)) ||
                ((a == GemType.Roller_h || a == GemType.Roller_v) && b == GemType.Oven))
             {
-                GemType lineType = (a == GemType.Oven) ? b : a; 
+                GemType lineType = (a == GemType.Oven) ? b : a;
 
+                // 노말 젬 타입 수집 (현행 유지)
                 List<GemType> normalTypes = new List<GemType>();
                 for (int y = 0; y < gameBoard.Height; y++)
                 {
@@ -804,19 +797,29 @@ namespace LHJ
                 }
                 if (normalTypes.Count == 0) return;
 
-                // 그 중 랜덤 하나 선택
                 int pickIdx = Random.Range(0, normalTypes.Count);
                 GemType chosenType = normalTypes[pickIdx];
-
-                // 선택된 타입의 모든 좌표에서 '스왑된 밀대' 효과 즉시 발동
+                List<Vector2Int> spawnPositions = new List<Vector2Int>();
                 for (int y = 0; y < gameBoard.Height; y++)
                 {
                     for (int x = 0; x < gameBoard.Width; x++)
                     {
                         var bl = gameBoard.GetBlock(x, y);
                         if (bl != null && bl.BlockInstance != null && bl.GemType == chosenType)
-                            UseSpecial(new Vector2Int(x, y), lineType, gameBoard, outDamage);
+                            spawnPositions.Add(new Vector2Int(x, y));
                     }
+                }
+
+                var bm = BoardManager.Instance;
+                if (bm != null)
+                {
+                    IEnumerator OvenThenRoller()
+                    {
+                        yield return StartCoroutine(OvenRoutine(secondPos, gameBoard, bm));
+                        for (int i = 0; i < spawnPositions.Count; i++)
+                            UseSpecial(spawnPositions[i], lineType, gameBoard, outDamage);
+                    }
+                    bm.StartCoroutine(OvenThenRoller());
                 }
                 return;
             }
@@ -842,19 +845,31 @@ namespace LHJ
                 }
                 if (normalTypes.Count == 0) return;
 
-                // 그 중 랜덤 하나 선택
                 int pickIdx = Random.Range(0, normalTypes.Count);
                 GemType chosenType = normalTypes[pickIdx];
-
-                // 선택된 타입의 모든 좌표에서 '도넛' 효과 즉시 발동
+                List<Vector2Int> spawnPositions = new List<Vector2Int>();
                 for (int y = 0; y < gameBoard.Height; y++)
                 {
                     for (int x = 0; x < gameBoard.Width; x++)
                     {
                         var bl = gameBoard.GetBlock(x, y);
                         if (bl != null && bl.BlockInstance != null && bl.GemType == chosenType)
-                            UseSpecial(new Vector2Int(x, y), GemType.DonutBox, gameBoard, outDamage);
+                            spawnPositions.Add(new Vector2Int(x, y));
                     }
+                }
+
+                var bm = BoardManager.Instance;
+                if (bm != null)
+                {
+                    IEnumerator OvenThenDonut()
+                    {
+                        yield return StartCoroutine(OvenRoutine(secondPos, gameBoard, bm));
+                        for (int i = 0; i < spawnPositions.Count; i++)
+                        {
+                            UseSpecial(spawnPositions[i], GemType.DonutBox, gameBoard, outDamage);
+                        }
+                    }
+                    bm.StartCoroutine(OvenThenDonut());
                 }
                 return;
             }
@@ -917,6 +932,44 @@ namespace LHJ
                     tag.hasOriginal = true;
                 }
                 sr.material = _ovenStrokeMat;
+            }
+        }
+
+        public IEnumerator StrokePulseRoutine(GameBoardData gb, List<Vector2Int> cells, float duration, bool includeSpecial = true)
+        {
+            if (gb == null || cells == null || cells.Count == 0) yield break;
+            if (_ovenStrokeMat == null) yield break;
+
+            for (int i = 0; i < cells.Count; i++)
+            {
+                var p = cells[i];
+                var blk = gb.GetBlock(p.x, p.y);
+                if (blk == null || blk.BlockInstance == null) continue;
+
+                if (!includeSpecial && blk.GemType >= GemType.Milk) continue;
+
+                var sr = blk.BlockInstance.GetComponent<SpriteRenderer>();
+                if (sr == null) continue;
+
+                var tag = blk.BlockInstance.GetComponent<StrokeTag>();
+                if (tag == null) tag = blk.BlockInstance.AddComponent<StrokeTag>();
+
+                if (!tag.hasOriginal)
+                {
+                    tag.original = sr.material;
+                    tag.hasOriginal = true;
+                }
+                sr.material = _ovenStrokeMat;
+            }
+
+            yield return new WaitForSeconds(duration);
+
+            for (int i = 0; i < cells.Count; i++)
+            {
+                var p = cells[i];
+                var blk = gb.GetBlock(p.x, p.y);
+                if (blk == null || blk.BlockInstance == null) continue;
+                RevertStroke(blk.BlockInstance);
             }
         }
 

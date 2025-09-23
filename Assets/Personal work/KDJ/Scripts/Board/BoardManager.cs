@@ -56,6 +56,7 @@ namespace KDJ
         public BoardLoader BoardLoader { get; set; }
         public HintManager HintManager { get; private set; }
         public TestStageManager TestStageManager { get; set; }
+        public Tutorial Tutorial;
         public int Score { get; private set; } = 0;
         public int CurStage;
         public static bool CanTouch { get; private set; }
@@ -68,6 +69,7 @@ namespace KDJ
         public bool IsReadyForStart { get; set; } = false;
         public bool IsUseItem { get; set; } = false;
         public bool IsClearSpecialTime { get; set; } = false;
+        public bool IsTutorialPlayed { get; set; } = false;
         public bool CanSwapBlocks => !IsWaitingForAnimation && !SpecialBlockEffect.effectRunning && !IsUseItem && !MatchChecker.AllBlockMatchCheck(this);
         public bool IsItemEffectRunning { get; set; }
         public Vector2Int? InitialSwapPosition { get; set; } // 한 턴의 스왑 시작 위치를 기억
@@ -122,6 +124,7 @@ namespace KDJ
             MatchCombo = GetComponent<MatchCombo>();
             BoardLoader = GetComponent<BoardLoader>();
             HintManager = GetComponent<HintManager>();
+            Tutorial = GetComponent<Tutorial>();
             TestStageManager = FindObjectOfType<TestStageManager>();
             CanTouch = false;
             IsReadyForStart = false;
@@ -161,6 +164,7 @@ namespace KDJ
             Spawner.Initialize(this, loadedBoardData, blockPlate, BlockMover);
             Debug.Log($"보드 초기화 완료. 가로: {Spawner.GameBoardData.Width}, 세로: {Spawner.GameBoardData.Height}");
             _cameraController.SetStarted(true);
+            //_tutorial.SetMaskImage(Spawner.GameBoardData.Width, Spawner.GameBoardData.Height);
             CanTouch = true;
             progress.fillAmount = 1f;
             IsReadyForStart = true;
@@ -336,8 +340,15 @@ namespace KDJ
             Vector3 shrinkScale = Vector3.one * 0.2f;
 
             List<Block> blocksToAnimate = new List<Block>();
+            List<Vector2Int> exceptions = new List<Vector2Int>();
             foreach (var coord in coordsToDestroy)
             {
+                if (Spawner.GameBoardData.GetOverlayBlock(coord.x, coord.y) is Ice ice)
+                {
+                    exceptions.Add(coord);
+                    ice.TakeDamage();
+                    continue;
+                }
                 Block block = Spawner.GameBoardData.GetBlock(coord.x, coord.y);
                 if (block != null && block.BlockInstance != null)
                 {
@@ -402,6 +413,9 @@ namespace KDJ
                 Block block = Spawner.GameBoardData.GetBlock(coord.x, coord.y);
                 if (block != null)
                 {
+                    if (exceptions.Contains(coord))
+                        continue;
+
                     if (block.BlockInstance != null)
                     {
                         // Destroy(block.BlockInstance);
@@ -561,7 +575,7 @@ namespace KDJ
 
                 while (true)
                 {
-                    if (Spawner.GameBoardData.BlockPlate.BlockPlateArray[randPos.y, randPos.x] && Spawner.GameBoardData.GetBlock(randPos.x, randPos.y).IsNormal)
+                    if (Spawner.GameBoardData.BlockPlate.BlockPlateArray[randPos.y, randPos.x] && Spawner.GameBoardData.GetBlock(randPos.x, randPos.y).IsNormal && !(Spawner.GameBoardData.GetOverlayBlock(randPos.x, randPos.y) is Ice))
                     {
                         break;
                     }
