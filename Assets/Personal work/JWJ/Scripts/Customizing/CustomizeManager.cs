@@ -24,6 +24,7 @@ public class CustomizeManager : MonoBehaviour
     [SerializeField] private GameObject[] _accessories;
 
     [SerializeField] private string _testSaveData;
+    [SerializeField] private GameObject _uis;
 
     private int _curSkinIndex;
     private int _curFaceIndex;
@@ -243,7 +244,7 @@ public class CustomizeManager : MonoBehaviour
     public void CancelCustomize()
     {
         LoadCustomize();
-        gameObject.SetActive(false);
+        _uis.SetActive(false);
     }
 
     public void RandomCustomize()
