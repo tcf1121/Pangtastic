@@ -143,7 +143,7 @@ namespace KDJ
                     {
                         GemType = (GemType)Random.Range(0, maxBlockType),
                     };
-                    boardData.BlockArray[y, x].IsNormal = false;
+                    boardData.BlockArray[y, x].IsNormal = true; //이제 얼음 블록도 매치 가능
                     boardData.BlockArray[y, x].CanMove = false;
                     boardData.OverlayArray[y, x] = new Ice(x, y);
                     boardData.OverlayArray[y, x].IsObstacle = true;
