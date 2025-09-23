@@ -68,11 +68,6 @@ public class ResidentController : MonoBehaviour
         }
     }
 
-   //private void OnEnable()
-   //{
-   //    StartCoroutine(WaitForConfigAndStart());
-   //}
-
     private IEnumerator WaitForConfigAndStart()
     {
         while (_manager == null)
@@ -436,5 +431,22 @@ public class ResidentController : MonoBehaviour
         _isWorkout = false;
         _isTouched = false;
         _isFavAnim = false;
+    }
+
+    public void StopMoving(Vector3 pos, Quaternion rotation)
+    {
+        ClearBools();
+        StopRunningCoroutine();
+        _agent.Warp(pos);
+        _agent.transform.rotation = rotation;
+        _agent.ResetPath();
+        
+    }
+
+    public void ResumeMoving(Vector3 pos, Quaternion rotation)
+    {
+        _agent.Warp(pos);
+        _agent.transform.rotation = rotation;
+        ChangeState(ResidentState.Idle);
     }
 }
