@@ -179,7 +179,7 @@ namespace KDJ
                         GemType = (GemType)Random.Range(0, _spawnRangeMax),
                     };
 
-                    GameBoardData.BlockArray[y, x].IsNormal = false;
+                    GameBoardData.BlockArray[y, x].IsNormal = true;
                     GameBoardData.BlockArray[y, x].CanMove = false;
 
                     GameBoardData.OverlayArray[y, x] = new Ice(x, y);
@@ -351,7 +351,6 @@ namespace KDJ
                         {
                             Block normalBlock = GameBoardData.GetBlock(x, y);
                             normalBlock.CanMove = false; // 얼음 위의 일반 블록은 움직일 수 없습니다.
-                            normalBlock.IsNormal = false;
                         }
 
                         Vector3 position = blockMover.GridToWorld(new Vector2Int(x, y), GameBoardData.Width, GameBoardData.Height);
