@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class StartCustomizing : MonoBehaviour
 {
-    [SerializeField] Animator animator;
+    [SerializeField] Animator _animator;
     [SerializeField] ResidentController _controller;
     [SerializeField] Light _light;
 
@@ -19,6 +19,11 @@ public class StartCustomizing : MonoBehaviour
     private void Awake()
     {
         _prevLightIntensity = _light.intensity;
+
+        if(_light == null)
+        {
+            _light = FindObjectOfType<Light>();
+        }
     }
 
     private void OnEnable()
@@ -26,8 +31,8 @@ public class StartCustomizing : MonoBehaviour
         _light.intensity = 0.7f;
         _prevPos = _controller.transform.position;
         _prevRotation = _controller.transform.rotation;
-
-        animator.SetTrigger("IsCustomizing");
+        _animator.ResetTrigger("ExitCustomize");
+        _animator.SetTrigger("IsCustomizing");
         _controller.StopMoving(_customizePos, _customizeRotation);
         
     }
@@ -35,7 +40,8 @@ public class StartCustomizing : MonoBehaviour
     private void OnDisable()
     {
         _light.intensity = _prevLightIntensity;
-        animator.ResetTrigger("IsCustomizing");
+        _animator.ResetTrigger("IsCustomizing");
+        _animator.SetTrigger("ExitCustomize");
         _controller.ResumeMoving(_prevPos, _prevRotation);
     }
 }
