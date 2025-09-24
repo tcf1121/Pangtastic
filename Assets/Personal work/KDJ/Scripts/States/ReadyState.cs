@@ -1,7 +1,5 @@
 using LHJ;
-using SCR;
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 namespace KDJ.States
@@ -18,11 +16,10 @@ namespace KDJ.States
             boardManager.BlockMover.ResetCoordMoved();
             _isSwapping = false;
 
-            if (Manager.User.GetStage() == 0 && !boardManager.IsTutorialPlayed)
+            if (Manager.User.GetStage() < 5 && !boardManager.IsTutorialPlayed)
             {
                 // 튜토리얼 시작
-                Vector3 startPos = new Vector3(2.5f, 0.5f, 0f);
-                boardManager.Tutorial.PlayTutorial(startPos);
+                boardManager.Tutorial.PlayTutorial(SetStartPos());
                 return; // 튜토리얼을 실행한 순간에는 힌트와 매치를 시작하지 않음
             }
 
@@ -148,6 +145,25 @@ namespace KDJ.States
                     // 뗏을때 아무것도 안 움직였다면 좌표 초기화
                     boardManager.BlockMover.ResetPos();
                 }
+            }
+        }
+
+        private Vector3 SetStartPos()
+        {
+            switch (Manager.User.GetStage())
+            {
+                case 0:
+                    return new Vector3(2.5f, 0.5f, 0f);
+                case 1:
+                    return new Vector3(1.5f, -0.5f, 0f);
+                case 2:
+                    return new Vector3(1.5f, -0.5f, 0f);
+                case 3:
+                    return new Vector3(2.5f, 0.5f, 0f);
+                case 4:
+                    return new Vector3(0.5f, 1.5f, 0f);
+                default:
+                    return Vector3.zero;
             }
         }
 

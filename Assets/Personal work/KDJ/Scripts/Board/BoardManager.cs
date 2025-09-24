@@ -70,6 +70,7 @@ namespace KDJ
         public bool IsUseItem { get; set; } = false;
         public bool IsClearSpecialTime { get; set; } = false;
         public bool IsTutorialPlayed { get; set; } = false;
+        public bool IsPlayingTutorial { get; set; } = false;
         public bool CanSwapBlocks => !IsWaitingForAnimation && !SpecialBlockEffect.effectRunning && !IsUseItem && !MatchChecker.AllBlockMatchCheck(this);
         public bool IsItemEffectRunning { get; set; }
         public Vector2Int? InitialSwapPosition { get; set; } // 한 턴의 스왑 시작 위치를 기억
