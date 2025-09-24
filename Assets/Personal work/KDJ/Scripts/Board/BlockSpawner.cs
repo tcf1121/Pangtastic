@@ -49,7 +49,7 @@ namespace KDJ
             if (!boardManager.IsTest)
             {
                 Debug.Log($"현재 스테이지: {Manager.User.GetStage()}");
-                if (Manager.User.GetStage() < 51)
+                if (Manager.User.GetStage() < 41)
                 {
                     _spawnRangeMax = 5;
                 }
@@ -836,7 +836,7 @@ namespace KDJ
                         if (GameBoardData.BlockPlate.BlockPlateArray[y, x])
                         {
                             Block block = GameBoardData.GetBlock(x, y);
-                            if (block != null && block.IsNormal && block.GemType <= GemType.Sugar)
+                            if (block != null && block.IsNormal && block.CanMove && block.GemType <= GemType.Sugar)
                             {
                                 normalBlocks.Add(block);
                                 normalBlockPositions.Add(new Vector2Int(x, y));
