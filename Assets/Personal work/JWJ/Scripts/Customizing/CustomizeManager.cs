@@ -238,7 +238,7 @@ public class CustomizeManager : MonoBehaviour
         _testSaveData = $"{saveSkin}, {saveFace}, {saveHeadwear}, {saveFacewear}, {saveBag}, {saveAcc}";
         Debug.Log($"세이브 : {saveSkin}, {saveFace}, {saveHeadwear}, {saveFacewear}, {saveBag}, {saveAcc}");
 
-
+        Manager.Audio.PlaySFX("Touch");
     }
 
     public void CancelCustomize()
@@ -264,6 +264,7 @@ public class CustomizeManager : MonoBehaviour
         ChangeAccessory(randAcc);
 
         ResetButtons();
+        Manager.Audio.PlaySFX("Touch");
     }
 
     public void ResetCustomize()
