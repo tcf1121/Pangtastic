@@ -627,14 +627,19 @@ namespace LHJ
             GemType b = secondType;
 
 
-            // 1) 밀대 + 밀대 
             if ((a == GemType.Roller_h && b == GemType.Roller_h) ||
                 (a == GemType.Roller_v && b == GemType.Roller_v) ||
                 (a == GemType.Roller_h && b == GemType.Roller_v) ||
                 (a == GemType.Roller_v && b == GemType.Roller_h))
             {
-                UseSpecial(secondPos, GemType.Roller_h, gameBoard, outDamage);
-                UseSpecial(secondPos, GemType.Roller_v, gameBoard, outDamage);
+                var bm = BoardManager.Instance;
+                if (bm != null)
+                {
+                    var selfOnly = new List<Vector2Int>(1) { firstPos };
+                    ApplyDamageAndScore(bm, selfOnly);
+                    bm.StartCoroutine(RollerRoutine(secondPos, true, gameBoard, bm));
+                    bm.StartCoroutine(RollerRoutine(secondPos, false, gameBoard, bm));
+                }
                 return;
             }
 
@@ -663,9 +668,59 @@ namespace LHJ
             // 4) 오븐 + 오븐
             if (a == GemType.Oven && b == GemType.Oven)
             {
-                for (int x = 0; x < gameBoard.Width; x++)
-                    for (int y = 0; y < gameBoard.Height; y++)
-                        AddCell(gameBoard, x, y, outDamage);
+                var bm = BoardManager.Instance;
+                if (bm != null)
+                {
+                    IEnumerator OvenOvenRoutine()
+                    {
+                        BeginEffect();
+                        Manager.Audio.PlaySFX("Oven_Use");
+
+                        List<Vector2Int> allCells = new List<Vector2Int>();
+                        for (int y = 0; y < gameBoard.Height; y++)
+                            for (int x = 0; x < gameBoard.Width; x++)
+                                allCells.Add(new Vector2Int(x, y));
+
+                        // 보드 전체 스트로크 적용
+                        ApplyStroke(gameBoard, allCells);
+
+                        Vector3 originWorld = GridToWorld(bm, gameBoard, secondPos.x, secondPos.y);
+                        float cellSize = Mathf.Abs(
+                            GridToWorld(bm, gameBoard, 1, 0).x - GridToWorld(bm, gameBoard, 0, 0).x
+                        );
+                        float lineWidth = cellSize * 0.3f;
+
+                        foreach (var p in allCells)
+                        {
+                            Vector3 to = GridToWorld(bm, gameBoard, p.x, p.y);
+                            GameObject go = new GameObject("OvenOvenLine");
+                            go.transform.SetParent(bm.transform, false);
+
+                            var lr = go.AddComponent<LineRenderer>();
+                            lr.useWorldSpace = true;
+                            lr.positionCount = 2;
+                            lr.startWidth = lr.endWidth = lineWidth;
+                            lr.material = _ovenLineMat;
+                            lr.SetPosition(0, originWorld);
+                            lr.SetPosition(1, originWorld);
+
+                            DOTween.To(() => 0f,
+                                       v => lr.SetPosition(1, Vector3.Lerp(originWorld, to, v)),
+                                       1f, 0.4f)
+                                   .SetEase(Ease.OutSine);
+
+                            Destroy(go, 0.7f);
+                        }
+
+                        yield return new WaitForSeconds(0.6f);
+
+                        // 전체 블록 파괴
+                        if (allCells.Count > 0) ApplyDamageAndScore(bm, allCells);
+
+                        EndEffect();
+                    }
+                    bm.StartCoroutine(OvenOvenRoutine());
+                }
                 return;
             }
 
@@ -748,27 +803,50 @@ namespace LHJ
             if ((a == GemType.Oven && b == GemType.Milk) ||
                 (a == GemType.Milk && b == GemType.Oven))
             {
-                // 1) 현재 필요한 재료 타입 목록
-                List<GemType> need = InGameManager.GetTagetGem();
-
+                List<GemType> normalTypes = new List<GemType>();
                 for (int y = 0; y < gameBoard.Height; y++)
                 {
                     for (int x = 0; x < gameBoard.Width; x++)
                     {
                         var bl = gameBoard.GetBlock(x, y);
-                        if (bl == null || bl.BlockInstance == null) continue;
-
-                        // 필요 재료 타입인지 확인
-                        bool isNeeded = false;
-                        for (int k = 0; k < need.Count; k++)
+                        if (bl != null && bl.BlockInstance != null && bl.GemType < GemType.Milk)
                         {
-                            if (bl.GemType == need[k]) { isNeeded = true; break; }
+                            bool exist = false;
+                            for (int k = 0; k < normalTypes.Count; k++)
+                                if (normalTypes[k] == bl.GemType) { exist = true; break; }
+                            if (!exist) normalTypes.Add(bl.GemType);
                         }
-                        if (!isNeeded) continue;
-
-                        // 해당 칸에서 '우유' 특수 효과 즉시 발동
-                        UseSpecial(new Vector2Int(x, y), GemType.Milk, gameBoard, outDamage);
                     }
+                }
+                if (normalTypes.Count == 0) return;
+
+                int pickIdx = Random.Range(0, normalTypes.Count);
+                GemType chosenType = normalTypes[pickIdx];
+
+                List<Vector2Int> spawnPositions = new List<Vector2Int>();
+                for (int y = 0; y < gameBoard.Height; y++)
+                {
+                    for (int x = 0; x < gameBoard.Width; x++)
+                    {
+                        var bl = gameBoard.GetBlock(x, y);
+                        if (bl != null && bl.BlockInstance != null && bl.GemType == chosenType)
+                            spawnPositions.Add(new Vector2Int(x, y));
+                    }
+                }
+
+                var bm = BoardManager.Instance;
+                if (bm != null)
+                {
+                    IEnumerator OvenThenMilk()
+                    {
+                        yield return StartCoroutine(OvenRoutine(secondPos, gameBoard, bm));
+                        for (int i = 0; i < spawnPositions.Count; i++)
+                        {
+                            UseSpecial(spawnPositions[i], GemType.Milk, gameBoard, outDamage);
+                        }
+                    }
+
+                    bm.StartCoroutine(OvenThenMilk());
                 }
                 return;
             }
@@ -778,8 +856,6 @@ namespace LHJ
                ((a == GemType.Roller_h || a == GemType.Roller_v) && b == GemType.Oven))
             {
                 GemType lineType = (a == GemType.Oven) ? b : a;
-
-                // 노말 젬 타입 수집 (현행 유지)
                 List<GemType> normalTypes = new List<GemType>();
                 for (int y = 0; y < gameBoard.Height; y++)
                 {
