@@ -53,7 +53,7 @@ public class CustomizeList : MonoBehaviour
             _scrollRect = GetComponentInChildren<ScrollRect>();
         }
 
-        _skinRT = _facePanel.GetComponent<RectTransform>();
+        _skinRT = _skinPanel.GetComponent<RectTransform>();
         _faceRT = _facePanel.GetComponent<RectTransform>();
         _hairRT = _hairPanel.GetComponent<RectTransform>();
         _faceWearRT = _facewearPanel.GetComponent<RectTransform>();
@@ -67,7 +67,7 @@ public class CustomizeList : MonoBehaviour
         CloseAllPanel();
         EnableAllButtons();
         _skinPanel.SetActive(true);
-        //Manager.Audio.PlaySFX();
+        Manager.Audio.PlaySFX("Touch");
         _skinButton.interactable = false;
         _scrollRect.content = _skinRT;
     }
@@ -77,7 +77,7 @@ public class CustomizeList : MonoBehaviour
         CloseAllPanel();
         EnableAllButtons();
         _facePanel.SetActive(true);
-        //Manager.Audio.PlaySFX();
+        Manager.Audio.PlaySFX("Touch");
         _faceButton.interactable = false;
         _scrollRect.content = _faceRT;
     }
@@ -87,7 +87,7 @@ public class CustomizeList : MonoBehaviour
         CloseAllPanel();
         EnableAllButtons();
         _hairPanel.SetActive(true);
-        //Manager.Audio.PlaySFX();
+        Manager.Audio.PlaySFX("Touch");
         _hairButton.interactable = false;
         _scrollRect.content = _hairRT;
     }
@@ -96,7 +96,7 @@ public class CustomizeList : MonoBehaviour
         CloseAllPanel();
         EnableAllButtons();
         _facewearPanel.SetActive(true);
-        //Manager.Audio.PlaySFX();
+        Manager.Audio.PlaySFX("Touch");
         _facewearButton.interactable = false;
         _scrollRect.content = _faceWearRT;
     }
@@ -105,7 +105,7 @@ public class CustomizeList : MonoBehaviour
         CloseAllPanel();
         EnableAllButtons();
         _bagPanel.SetActive(true);
-        //Manager.Audio.PlaySFX();
+        Manager.Audio.PlaySFX("Touch");
         _bagButton.interactable = false;
         _scrollRect.content = _bagRT;
     }
@@ -114,7 +114,7 @@ public class CustomizeList : MonoBehaviour
         CloseAllPanel();
         EnableAllButtons();
         _accessoryPanel.SetActive(true);
-        //Manager.Audio.PlaySFX();
+        Manager.Audio.PlaySFX("Touch");
         _accessoryButton.interactable = false;
         _scrollRect.content = _accessoryRT;
     }

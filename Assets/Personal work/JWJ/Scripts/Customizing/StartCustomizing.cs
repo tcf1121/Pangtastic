@@ -4,11 +4,11 @@ using UnityEngine;
 
 public class StartCustomizing : MonoBehaviour
 {
-    [SerializeField] Animator animator;
+    [SerializeField] Animator _animator;
     [SerializeField] ResidentController _controller;
-    //[SerializeField] Light _light;
+    [SerializeField] Light _light;
 
-    //private float _prevLightIntensity;
+    private float _prevLightIntensity;
 
     private Vector3 _prevPos;
     private Vector3 _customizePos = new Vector3(50f, 0.315f, -1.31f);
@@ -16,26 +16,32 @@ public class StartCustomizing : MonoBehaviour
     private Quaternion _prevRotation;
     private Quaternion _customizeRotation = Quaternion.Euler(0f, 180f, 0f);
 
-    //private void Awake()
-    //{
-    //    _prevLightIntensity = _light.intensity;
-    //}
+    private void Awake()
+    {
+        _prevLightIntensity = _light.intensity;
+
+        if(_light == null)
+        {
+            _light = FindObjectOfType<Light>();
+        }
+    }
 
     private void OnEnable()
     {
-        //_light.intensity = 0.5f;
+        _light.intensity = 0.7f;
         _prevPos = _controller.transform.position;
         _prevRotation = _controller.transform.rotation;
-
-        animator.SetTrigger("IsCustomizing");
+        _animator.ResetTrigger("ExitCustomize");
+        _animator.SetTrigger("IsCustomizing");
         _controller.StopMoving(_customizePos, _customizeRotation);
         
     }
 
     private void OnDisable()
     {
-        //_light.intensity = _prevLightIntensity;
-        animator.ResetTrigger("IsCustomizing");
+        _light.intensity = _prevLightIntensity;
+        _animator.ResetTrigger("IsCustomizing");
+        _animator.SetTrigger("ExitCustomize");
         _controller.ResumeMoving(_prevPos, _prevRotation);
     }
 }

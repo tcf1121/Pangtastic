@@ -40,7 +40,7 @@ public class CustomizingButton : MonoBehaviour
 
     private void OnButtonClicked()
     {
-        //오디오 여기에 
+        Manager.Audio.PlaySFX("Touch");
         _buttonController.Select(_category, this);
         _customizeManager.ChangeFeature(_category, _index);
     }

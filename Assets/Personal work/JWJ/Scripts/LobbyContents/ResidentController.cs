@@ -440,7 +440,9 @@ public class ResidentController : MonoBehaviour
         _agent.Warp(pos);
         _agent.transform.rotation = rotation;
         _agent.ResetPath();
-        
+        _stateBubble.ChatUI(_resident, false);
+        _stateBubble.IconUI(false);
+
     }
 
     public void ResumeMoving(Vector3 pos, Quaternion rotation)
