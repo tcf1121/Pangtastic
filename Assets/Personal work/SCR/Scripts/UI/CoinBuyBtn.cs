@@ -7,6 +7,8 @@ using UnityEngine.UI;
 public class CoinBuyBtn : MonoBehaviour
 {
     [SerializeField] private ItemType _itemType;
+    [SerializeField] private bool _isSet;
+    [SerializeField] private bool _isBakery;
     [SerializeField] int _coin;
     private Button _button;
     void Awake()
@@ -20,7 +22,22 @@ public class CoinBuyBtn : MonoBehaviour
         if (Manager.User.CanUseCoin(_coin))
         {
             Manager.User.UseCoin(_coin);
-            OutGameManager.AddReward((Goods)Enum.Parse(typeof(Goods), _itemType.ToString()), 1);
+            if (_isBakery)
+            {
+                OutGameManager.AddReward(Goods.Whisk, 3);
+                OutGameManager.AddReward(Goods.Scissors, 3);
+                OutGameManager.AddReward(Goods.DonutPan, 3);
+                OutGameManager.AddReward(Goods.Coffee, 3);
+                OutGameManager.AddReward(Goods.Roller, 3);
+                OutGameManager.AddReward(Goods.DonutBox, 3);
+                OutGameManager.AddReward(Goods.Oven, 3);
+            }
+            else
+            {
+                OutGameManager.AddReward(
+                (Goods)Enum.Parse(typeof(Goods), _itemType.ToString()), _isSet ? 10 : 1);
+            }
+
             OutGameManager.ShowRewardPopup();
         }
     }

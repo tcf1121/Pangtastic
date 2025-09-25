@@ -64,5 +64,6 @@ public enum Speaker
     Uni,
     Milo,
     Ollie,
-    Fifi
+    Fifi,
+    meow
 }
