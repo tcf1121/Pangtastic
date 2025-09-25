@@ -60,6 +60,7 @@ namespace LHJ
                 }
 
                 // 선택된 아이템 발동
+                BoardManager.SetTouch(false);
                 UseCell(grid, _board.SelectedItemType);
 
                 // 발동 후 해제
@@ -130,16 +131,18 @@ namespace LHJ
         {
             _board.IsItemEffectRunning = true;
             Manager.Audio.PlaySFX("Sciccors_Use");
+
             var sp = _board.Spawner;
             int w = sp.GameBoardData.BlockPlate.BlockPlateWidth;
             int h = sp.GameBoardData.BlockPlate.BlockPlateHeight;
 
             float stepWait = Mathf.Max(0.01f, (_scissorFxMs * 0.001f) / Mathf.Max(w, h));
-
-            // 좌표 변환
             Vector3 GridToWorld(int gx, int gy)
-                => _board.BlockMover.GridToWorld(new Vector2Int(gx, gy), w, h);
+            {
+                return _board.BlockMover.GridToWorld(new Vector2Int(gx, gy), w, h);
+            }
 
+            // 연출 FX
             GameObject fxH = null, fxV = null;
             float hDuration = w * stepWait;
             float vDuration = h * stepWait;
@@ -169,8 +172,8 @@ namespace LHJ
             int destroyedCount = 0;
             HashSet<Vector2Int> targetCoords = new HashSet<Vector2Int>();
             HashSet<Vector2Int> triggeredSpecial = new HashSet<Vector2Int>();
+            HashSet<Vector2Int> pendingClear = new HashSet<Vector2Int>();
 
-            // 한 프레임(step)마다 가로 1칸 + 세로 1칸을 "동시에" 처리
             int max = Mathf.Max(w, h);
             for (int i = 0; i < max; i++)
             {
@@ -181,61 +184,55 @@ namespace LHJ
 
                     if (blk != null)
                     {
-                        if (blk.GemType != GemType.Flour_s && blk.BlockInstance == null)
+                        if (blk.GemType == GemType.Flour_s || blk.GemType == GemType.FlourBag)
                         {
-                            continue;
+                            if (blk is FlourBag flourBag && targetCoords.Add(new Vector2Int(x, pos.y)))
+                            {
+                                flourBag.TakeDamage();
+                            }
+                            else if (blk is FlourBag_s flourBag_s && targetCoords.Add(flourBag_s.OwnerPos()))
+                            {
+                                flourBag_s.TakeDamage();
+                            }
                         }
                         else
                         {
-                            if (blk.GemType == GemType.Flour_s || blk.GemType == GemType.FlourBag)
+                            if (IsSpecialType(blk.GemType))
                             {
-                                if (blk is FlourBag flourBag && targetCoords.Add(new Vector2Int(x, pos.y)))
-                                {
-                                    flourBag.TakeDamage();
-                                }
-                                else if (blk is FlourBag_s flourBag_s && targetCoords.Add(flourBag_s.OwnerPos()))
-                                {
-                                    flourBag_s.TakeDamage();
-                                }
+                                Vector2Int p = new Vector2Int(x, pos.y);
+                                if (triggeredSpecial.Add(p))
+                                    TriggerSpecial(p, blk.GemType);
                             }
                             else
                             {
-                                if (IsSpecialType(blk.GemType))
+                                // 오버레이 우선
+                                if (sp.GameBoardData.OverlayArray[pos.y, x] is ObstacleBlock overlayBlock)
                                 {
-                                    Vector2Int p = new Vector2Int(x, pos.y);
-                                    if (triggeredSpecial.Add(p))
-                                        TriggerSpecial(p, blk.GemType);
+                                    overlayBlock.TakeDamage();
                                 }
                                 else
                                 {
-                                    // 오버레이 우선
-                                    if (sp.GameBoardData.OverlayArray[pos.y, x] is ObstacleBlock obstacleBlock)
+                                    if (blk is ObstacleBlock obstacle)
                                     {
-                                        obstacleBlock.TakeDamage();
+                                        if (blk.GemType == GemType.Syrup || blk.GemType == GemType.Egg)
+                                            InGameManager.AddIngredientSta(blk.GemType);
+                                        obstacle.TakeDamage();
                                     }
                                     else
                                     {
-                                        if (blk is ObstacleBlock obstacle)
+                                        if (blk.BlockInstance != null && blk.BlockInstance.TryGetComponent<PooledObject>(out var pooled))
                                         {
-                                            if (blk.GemType == GemType.Syrup || blk.GemType == GemType.Egg)
-                                                InGameManager.AddIngredientSta(blk.GemType);
-                                            obstacle.TakeDamage();
+                                            InGameManager.AddIngredientSta(blk.GemType);
+                                            pooled.ReturnToPool();
                                         }
-                                        else
+                                        else if (blk.BlockInstance != null)
                                         {
-                                            if (blk.BlockInstance != null && blk.BlockInstance.TryGetComponent<PooledObject>(out var pooledObject))
-                                            {
-                                                InGameManager.AddIngredientSta(blk.GemType);
-                                                pooledObject.ReturnToPool();
-                                            }
-                                            else if (blk.BlockInstance != null)
-                                            {
-                                                InGameManager.AddIngredientSta(blk.GemType);
-                                                Destroy(blk.BlockInstance);
-                                            }
-                                            sp.GameBoardData.BlockArray[pos.y, x].BlockInstance = null;
-                                            destroyedCount++;
+                                            InGameManager.AddIngredientSta(blk.GemType);
+                                            Destroy(blk.BlockInstance);
                                         }
+                                        blk.BlockInstance = null;
+                                        pendingClear.Add(new Vector2Int(x, pos.y));
+                                        destroyedCount++;
                                     }
                                 }
                             }
@@ -250,60 +247,54 @@ namespace LHJ
 
                     if (blk != null)
                     {
-                        if (blk.GemType != GemType.Flour_s && blk.BlockInstance == null)
+                        if (blk.GemType == GemType.Flour_s || blk.GemType == GemType.FlourBag)
                         {
-                            continue;
+                            if (blk is FlourBag flourBag && targetCoords.Add(new Vector2Int(pos.x, y)))
+                            {
+                                flourBag.TakeDamage();
+                            }
+                            else if (blk is FlourBag_s flourBag_s && targetCoords.Add(flourBag_s.OwnerPos()))
+                            {
+                                flourBag_s.TakeDamage();
+                            }
                         }
                         else
                         {
-                            if (blk.GemType == GemType.Flour_s || blk.GemType == GemType.FlourBag)
+                            if (IsSpecialType(blk.GemType))
                             {
-                                if (blk is FlourBag flourBag && targetCoords.Add(new Vector2Int(pos.x, y)))
-                                {
-                                    flourBag.TakeDamage();
-                                }
-                                else if (blk is FlourBag_s flourBag_s && targetCoords.Add(flourBag_s.OwnerPos()))
-                                {
-                                    flourBag_s.TakeDamage();
-                                }
-
+                                Vector2Int p = new Vector2Int(pos.x, y);
+                                if (triggeredSpecial.Add(p))
+                                    TriggerSpecial(p, blk.GemType);
                             }
                             else
                             {
-                                if (IsSpecialType(blk.GemType))
+                                if (sp.GameBoardData.OverlayArray[y, pos.x] is ObstacleBlock overlayBlock)
                                 {
-                                    Vector2Int p = new Vector2Int(pos.x, y);
-                                    if (triggeredSpecial.Add(p))
-                                        TriggerSpecial(p, blk.GemType);
+                                    overlayBlock.TakeDamage();
                                 }
                                 else
                                 {
-                                    if (sp.GameBoardData.OverlayArray[y, pos.x] is ObstacleBlock obstacleBlock)
+                                    if (blk is ObstacleBlock obstacle)
                                     {
-                                        obstacleBlock.TakeDamage();
+                                        if (blk.GemType == GemType.Syrup || blk.GemType == GemType.Egg)
+                                            InGameManager.AddIngredientSta(blk.GemType);
+                                        obstacle.TakeDamage();
                                     }
                                     else
                                     {
-                                        if (blk is ObstacleBlock obstacle)
+                                        if (blk.BlockInstance != null && blk.BlockInstance.TryGetComponent<PooledObject>(out var pooled))
                                         {
-                                            if (blk.GemType == GemType.Syrup || blk.GemType == GemType.Egg)
-                                                InGameManager.AddIngredientSta(blk.GemType);
-                                            obstacle.TakeDamage();
+                                            InGameManager.AddIngredientSta(blk.GemType);
+                                            pooled.ReturnToPool();
                                         }
-                                        else
+                                        else if (blk.BlockInstance != null)
                                         {
-                                            if (blk.BlockInstance != null && blk.BlockInstance.TryGetComponent<PooledObject>(out var pooledObject))
-                                            {
-                                                InGameManager.AddIngredientSta(blk.GemType);
-                                                pooledObject.ReturnToPool();
-                                            }
-                                            else if (blk.BlockInstance != null)
-                                            {
-                                                Destroy(blk.BlockInstance);
-                                            }
-                                            sp.GameBoardData.BlockArray[y, pos.x].BlockInstance = null;
-                                            destroyedCount++;
+                                            InGameManager.AddIngredientSta(blk.GemType);
+                                            Destroy(blk.BlockInstance);
                                         }
+                                        blk.BlockInstance = null;
+                                        pendingClear.Add(new Vector2Int(pos.x, y));
+                                        destroyedCount++;
                                     }
                                 }
                             }
@@ -317,7 +308,17 @@ namespace LHJ
             if (destroyedCount > 0)
                 InGameManager.AddScore(destroyedCount * 10);
             yield return new WaitUntil(() => SpecialBlockEffect.effectRunning == false);
+            foreach (var p in pendingClear)
+            {
+                if (p.y >= 0 && p.y < sp.GameBoardData.BlockPlate.BlockPlateHeight &&
+                    p.x >= 0 && p.x < sp.GameBoardData.BlockPlate.BlockPlateWidth)
+                {
+                    sp.GameBoardData.BlockArray[p.y, p.x] = null;
+                }
+            }
+
             _board.IsItemEffectRunning = false;
+            BoardManager.SetTouch(true);
             _board.ChangeState(new RefillState());
         }
 
@@ -446,6 +447,7 @@ namespace LHJ
             if (destroyedCount > 0) InGameManager.AddScore(destroyedCount * 10);
             yield return new WaitUntil(() => SpecialBlockEffect.effectRunning == false);
             _board.IsItemEffectRunning = false;
+            BoardManager.SetTouch(true);
             _board.ChangeState(new RefillState());
         }
 
