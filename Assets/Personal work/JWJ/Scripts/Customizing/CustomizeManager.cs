@@ -23,7 +23,7 @@ public class CustomizeManager : MonoBehaviour
     [Header("악세서리")]
     [SerializeField] private GameObject[] _accessories;
 
-    [SerializeField] private string _testSaveData;
+    //[SerializeField] private string _testSaveData;
     [SerializeField] private GameObject _uis;
 
     private int _curSkinIndex;
@@ -185,8 +185,8 @@ public class CustomizeManager : MonoBehaviour
     }
     private void LoadCustomize()
     {
-        //string[] customizeData = Manager.User.GetCustomizeData();
-        string[] splitData = _testSaveData.Split(',');
+        string customizeData = Manager.User.GetCustomize();
+        string[] splitData = customizeData.Split(',');
         if (splitData.Length < 6)
         {
             Debug.LogWarning("커스터마이즈 저장 데이터 이상함. 기본 세팅으로 불러옴");
@@ -235,9 +235,10 @@ public class CustomizeManager : MonoBehaviour
         string saveBag = _curBagIndex.ToString();
         string saveAcc = _curAccessoriesIndex.ToString();
 
-        _testSaveData = $"{saveSkin}, {saveFace}, {saveHeadwear}, {saveFacewear}, {saveBag}, {saveAcc}";
+        string saveCustomize = $"{saveSkin}, {saveFace}, {saveHeadwear}, {saveFacewear}, {saveBag}, {saveAcc}";
         Debug.Log($"세이브 : {saveSkin}, {saveFace}, {saveHeadwear}, {saveFacewear}, {saveBag}, {saveAcc}");
 
+        Manager.User.SetCustomize(saveCustomize);
         Manager.Audio.PlaySFX("Touch");
     }
 
