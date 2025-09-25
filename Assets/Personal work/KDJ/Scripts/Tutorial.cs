@@ -92,6 +92,7 @@ public class Tutorial : MonoBehaviour
         yield return new WaitForSeconds(0.5f);
 
         // 목표 도넛 정보창 튜토리얼 활성화
+        SetMatchValue(1f);
         _donutInfo.SetActive(true);
         BoardManager.SetTouch(false);
 
@@ -259,6 +260,15 @@ public class Tutorial : MonoBehaviour
         Debug.Log("현재 해상도: " + currentRatio + ", 비율 차이: " + logDiff + ", match 값: " + match);
 
         _canvas.matchWidthOrHeight = match;
+    }
+
+    public void SetMatchValue(float matchValue)
+    {
+        float targetRatio = 9f / 16f;
+        float currentRatio = (float)Screen.width / Screen.height;
+        float logDiff = Mathf.Log(currentRatio / targetRatio, 2f);
+
+        _canvas.matchWidthOrHeight = matchValue;
     }
 
 }

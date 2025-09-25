@@ -146,8 +146,8 @@ namespace KDJ
                         tempBlockArray[y, x] = tempBlockArray[y, x + 1];
                         tempBlockArray[y, x + 1] = temp;
 
-                        // 스왑할 두 블록이 일반 블록인 경우에만 매치 체크
-                        if (tempBlockArray[y, x].IsNormal && tempBlockArray[y, x + 1].IsNormal)
+                        // 스왑할 두 블록이 일반 블록이고, 이동 가능할 경우에만 체크
+                        if (tempBlockArray[y, x].IsNormal && tempBlockArray[y, x + 1].IsNormal && tempBlockArray[y, x].CanMove && tempBlockArray[y, x + 1].CanMove)
                         {
                             if (CheckForMatchAt(BoardManager.Instance, x, y, tempBlockArray, out int count, out int type, out HashSet<Vector2Int> matchedCoords))
                             {
@@ -192,8 +192,8 @@ namespace KDJ
                         tempBlockArray[y, x] = tempBlockArray[y + 1, x];
                         tempBlockArray[y + 1, x] = temp;
                         
-                        // 스왑할 두 블록이 일반 블록인 경우에만 매치 체크
-                        if (tempBlockArray[y, x].IsNormal && tempBlockArray[y + 1, x].IsNormal)
+                        // 스왑할 두 블록이 일반 블록이고 이동 가능할 경우에만 체크
+                        if (tempBlockArray[y, x].IsNormal && tempBlockArray[y + 1, x].IsNormal && tempBlockArray[y, x].CanMove && tempBlockArray[y + 1, x].CanMove)
                         {
                             if (CheckForMatchAt(BoardManager.Instance, x, y, tempBlockArray, out int count, out int type, out HashSet<Vector2Int> matchedCoords))
                             {
@@ -350,15 +350,13 @@ namespace KDJ
         /// <param name="boardManager">게임 보드 관리자</param>
         /// <param name="swapPosition">플레이어 스왑이 발생한 경우, 해당 위치</param>
         /// <returns>파괴할 블록 좌표, 생성할 특수 블록 정보, 특수 블록 생성 위치를 담은 튜플을 반환합니다.</returns>
-        public (HashSet<Vector2Int> coordsToDestroy, (Vector2Int pos, int type)? specialToCreate, Vector2Int? specialSpawnPos) ProcessMatches(BoardManager boardManager, Vector2Int? swapPosition = null)
+        public (HashSet<Vector2Int> coordsToDestroy, List<(Vector2Int pos, int type, List<Vector2Int> matchCoords)> specialsToCreate) ProcessMatches(BoardManager boardManager)
         {
             var gameBoard = boardManager.Spawner.GameBoardData;
             var coordsToDestroy = new HashSet<Vector2Int>();
-            (Vector2Int pos, int type)? specialToCreate = null;
-            Vector2Int? specialSpawnPos = null;
-            List<Vector2Int> specialMatchCoords = null; // 특수 블록 매치 좌표 저장
+            var specialsToCreate = new List<(Vector2Int pos, int type, List<Vector2Int> matchCoords)>();
 
-            if (gameBoard == null) return (coordsToDestroy, specialToCreate, specialSpawnPos);
+            if (gameBoard == null) return (coordsToDestroy, specialsToCreate);
 
             int height = gameBoard.Height;
             int width = gameBoard.Width;
@@ -370,10 +368,24 @@ namespace KDJ
                 for (int x = 0; x < width; x++)
                 {
                     if (visited[y, x] || !CheckBlockIsAllValid(boardManager, x, y)) continue;
+                    
                     var hMatch = FindFullLineMatch(boardManager, x, y, true);
-                    if (hMatch.Count >= 5) { if (!specialToCreate.HasValue) { specialToCreate = (new Vector2Int(x, y), 10); specialMatchCoords = hMatch; } foreach (var c in hMatch) { coordsToDestroy.Add(c); visited[c.y, c.x] = true; } }
+                    if (hMatch.Count >= 5)
+                    {
+                        bool isNewMatch = true;
+                        foreach (var c in hMatch) { if (visited[c.y, c.x]) { isNewMatch = false; break; } }
+                        if (isNewMatch) specialsToCreate.Add((new Vector2Int(x, y), 10, hMatch));
+                        foreach (var c in hMatch) { coordsToDestroy.Add(c); visited[c.y, c.x] = true; }
+                    }
+
                     var vMatch = FindFullLineMatch(boardManager, x, y, false);
-                    if (vMatch.Count >= 5) { if (!specialToCreate.HasValue) { specialToCreate = (new Vector2Int(x, y), 10); specialMatchCoords = vMatch; } foreach (var c in vMatch) { coordsToDestroy.Add(c); visited[c.y, c.x] = true; } }
+                    if (vMatch.Count >= 5)
+                    {
+                        bool isNewMatch = true;
+                        foreach (var c in vMatch) { if (visited[c.y, c.x]) { isNewMatch = false; break; } }
+                        if (isNewMatch) specialsToCreate.Add((new Vector2Int(x, y), 10, vMatch));
+                        foreach (var c in vMatch) { coordsToDestroy.Add(c); visited[c.y, c.x] = true; }
+                    }
                 }
             }
 
@@ -387,15 +399,12 @@ namespace KDJ
                     var vMatch = FindFullLineMatch(boardManager, x, y, false);
                     if (hMatch.Count >= 3 && vMatch.Count >= 3)
                     {
-                        if (!specialToCreate.HasValue)
-                        {
-                            specialToCreate = (new Vector2Int(x, y), 9);
-                            specialMatchCoords = new List<Vector2Int>();
-                            specialMatchCoords.AddRange(hMatch);
-                            specialMatchCoords.AddRange(vMatch);
-                        }
-                        foreach (var c in hMatch) { coordsToDestroy.Add(c); visited[c.y, c.x] = true; }
-                        foreach (var c in vMatch) { coordsToDestroy.Add(c); visited[c.y, c.x] = true; }
+                        var combinedMatch = new List<Vector2Int>(hMatch.Union(vMatch));
+                        bool isNewMatch = true;
+                        foreach (var c in combinedMatch) { if (visited[c.y, c.x]) { isNewMatch = false; break; } }
+                        if (isNewMatch) specialsToCreate.Add((new Vector2Int(x, y), 9, combinedMatch));
+                        
+                        foreach (var c in combinedMatch) { coordsToDestroy.Add(c); visited[c.y, c.x] = true; }
                     }
                 }
             }
@@ -405,18 +414,14 @@ namespace KDJ
             {
                 for (int x = 0; x < width - 1; x++)
                 {
-                    if (visited[y, x]) continue;
                     if (IsCubeMatched(boardManager, x, y))
                     {
-                        var coords = new Vector2Int[] { new(x, y), new(x + 1, y), new(x, y + 1), new(x + 1, y + 1) };
-                        bool isOverlapped = false;
-                        foreach (var c in coords) { if (visited[c.y, c.x]) isOverlapped = true; }
-                        if (isOverlapped) continue;
-                        if (!specialToCreate.HasValue)
-                        {
-                            specialToCreate = (new Vector2Int(x, y), 6);
-                            specialMatchCoords = new List<Vector2Int>(coords);
-                        }
+                        var coords = new List<Vector2Int> { new(x, y), new(x + 1, y), new(x, y + 1), new(x + 1, y + 1) };
+                        bool isNewMatch = true;
+                        foreach (var c in coords) { if (visited[c.y, c.x]) { isNewMatch = false; break; } }
+
+                        if (isNewMatch) specialsToCreate.Add((new Vector2Int(x, y), 6, coords));
+                        
                         foreach (var c in coords) { coordsToDestroy.Add(c); visited[c.y, c.x] = true; }
                     }
                 }
@@ -429,9 +434,21 @@ namespace KDJ
                 {
                     if (visited[y, x] || !CheckBlockIsAllValid(boardManager, x, y)) continue;
                     var hMatch = FindFullLineMatch(boardManager, x, y, true);
-                    if (hMatch.Count == 4) { if (!specialToCreate.HasValue) { specialToCreate = (new Vector2Int(x, y), 7); specialMatchCoords = hMatch; } foreach (var c in hMatch) { coordsToDestroy.Add(c); visited[c.y, c.x] = true; } }
+                    if (hMatch.Count == 4)
+                    {
+                        bool isNewMatch = true;
+                        foreach (var c in hMatch) { if (visited[c.y, c.x]) { isNewMatch = false; break; } }
+                        if (isNewMatch) specialsToCreate.Add((new Vector2Int(x, y), 7, hMatch));
+                        foreach (var c in hMatch) { coordsToDestroy.Add(c); visited[c.y, c.x] = true; }
+                    }
                     var vMatch = FindFullLineMatch(boardManager, x, y, false);
-                    if (vMatch.Count == 4) { if (!specialToCreate.HasValue) { specialToCreate = (new Vector2Int(x, y), 8); specialMatchCoords = vMatch; } foreach (var c in vMatch) { coordsToDestroy.Add(c); visited[c.y, c.x] = true; } }
+                    if (vMatch.Count == 4)
+                    {
+                        bool isNewMatch = true;
+                        foreach (var c in vMatch) { if (visited[c.y, c.x]) { isNewMatch = false; break; } }
+                        if (isNewMatch) specialsToCreate.Add((new Vector2Int(x, y), 8, vMatch));
+                        foreach (var c in vMatch) { coordsToDestroy.Add(c); visited[c.y, c.x] = true; }
+                    }
                 }
             }
 
@@ -442,9 +459,9 @@ namespace KDJ
                 {
                     if (visited[y, x] || !CheckBlockIsAllValid(boardManager, x, y)) continue;
                     var hMatch = FindFullLineMatch(boardManager, x, y, true);
-                    if (hMatch.Count == 3) { foreach (var c in hMatch) { coordsToDestroy.Add(c); visited[c.y, c.x] = true; } }
+                    if (hMatch.Count >= 3) { foreach (var c in hMatch) { coordsToDestroy.Add(c); visited[c.y, c.x] = true; } }
                     var vMatch = FindFullLineMatch(boardManager, x, y, false);
-                    if (vMatch.Count == 3) { foreach (var c in vMatch) { coordsToDestroy.Add(c); visited[c.y, c.x] = true; } }
+                    if (vMatch.Count >= 3) { foreach (var c in vMatch) { coordsToDestroy.Add(c); visited[c.y, c.x] = true; } }
                 }
             }
 
@@ -462,55 +479,9 @@ namespace KDJ
                         ApplyDamageToOverlayBlock(boardManager, coord.x, coord.y, damagedObstaclesThisMatch);
                     }
                 }
-
-                if (specialToCreate.HasValue)
-                {
-                    var creation = specialToCreate.Value;
-                    if (swapPosition.HasValue && coordsToDestroy.Contains(swapPosition.Value))
-                    {
-                        specialSpawnPos = swapPosition.Value;
-                    }
-                    else
-                    {
-                        if (specialMatchCoords != null && specialMatchCoords.Count > 0)
-                        {
-                            // 올바른 '좌하단' 위치를 찾기 위한 로직
-                            // 1. 가장 아래쪽 행(minY)을 찾습니다.
-                            // 2. 해당 행에 있는 블록들 중 가장 왼쪽(minX)을 찾습니다.
-                            // 3. 만약 해당 위치가 얼음 블록이라면 옆칸을 확인하여 얼음이 아닌 위치를 찾습니다.
-                            Vector2Int bottomLeft = new Vector2Int(int.MaxValue, int.MaxValue);
-                            foreach (var coord in specialMatchCoords)
-                            {
-                                if (boardManager.Spawner.GameBoardData.GetOverlayBlock(coord.x, coord.y) is Ice)
-                                {
-                                    // 해당 위치가 얼음 블록이라면, 건너 뛰어서 다른칸을 특수 블록 생성 위치 후보로 고려합니다.
-                                    continue;
-                                }
-                                if (coord.y < bottomLeft.y)
-                                {
-                                    // 더 아래에 있는 행을 발견하면, 좌하단 후보를 이 좌표로 초기화합니다.
-                                    bottomLeft = coord;
-                                }
-                                else if (coord.y == bottomLeft.y)
-                                {
-                                    // 같은 행이라면, 더 왼쪽에 있는지 확인합니다.
-                                    if (coord.x < bottomLeft.x)
-                                    {
-                                        bottomLeft.x = coord.x;
-                                    }
-                                }
-                            }
-                            specialSpawnPos = bottomLeft;
-                        }
-                        else
-                        {
-                            specialSpawnPos = creation.pos;
-                        }
-                    }
-                }
             }
 
-            return (coordsToDestroy, specialToCreate, specialSpawnPos);
+            return (coordsToDestroy, specialsToCreate);
         }
 
         /// <summary>

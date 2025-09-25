@@ -153,13 +153,13 @@ namespace KDJ.States
             switch (Manager.User.GetStage())
             {
                 case 0:
-                    return new Vector3(2.5f, 0.5f, 0f);
+                    return new Vector3(3f, 0.5f, 0f);
                 case 1:
-                    return new Vector3(1.5f, -0.5f, 0f);
+                    return new Vector3(2f, -0.5f, 0f);
                 case 2:
-                    return new Vector3(1.5f, -0.5f, 0f);
+                    return new Vector3(2f, -0.5f, 0f);
                 case 3:
-                    return new Vector3(2.5f, 0.5f, 0f);
+                    return new Vector3(3f, 0.5f, 0f);
                 case 4:
                     return new Vector3(0.5f, 1.5f, 0f);
                 default:
