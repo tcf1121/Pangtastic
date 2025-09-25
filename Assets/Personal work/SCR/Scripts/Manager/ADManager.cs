@@ -1,6 +1,8 @@
 using GoogleMobileAds.Api;
 using GoogleMobileAds.Common;
 using System;
+using System.Collections;
+using System.Linq.Expressions;
 using UnityEngine;
 //using AdSize = GoogleMobileAds.Api.AdSize;
 
@@ -73,6 +75,12 @@ public class ADManager : Singleton<ADManager>
         int AD = PlayerPrefs.GetInt(RemoveAD);
         if (AD == 1) _removedAD = true;
         else _removedAD = false;
+    }
+
+    public void BuyRemoveAD()
+    {
+        _removedAD = true;
+        PlayerPrefs.SetInt(RemoveAD, 1);
     }
 
 
@@ -172,14 +180,21 @@ public class ADManager : Singleton<ADManager>
     {
         Debug.Log("RewardAdClosed ad closed. Notifying subscribers.");
         // 광고 닫힘 이벤트를 외부에 알림
-        OnRewardAdClosed?.Invoke();
-        OnRewardAdClosed = null;
+        StartCoroutine(WaitAndInvokeRewoard());
         // 이벤트 핸들러 해제 (중복 호출 방지)
-        if (_interstitialAd != null)
+        if (_rewardedInterstitialAd != null)
         {
-            _interstitialAd.OnAdFullScreenContentClosed -= ShowAdClosed;
+            _rewardedInterstitialAd.OnAdFullScreenContentClosed -= ShowAdClosed;
         }
 
+    }
+
+    private IEnumerator WaitAndInvokeRewoard()
+    {
+        yield return new WaitForSeconds(0.1f);
+
+        OnRewardAdClosed?.Invoke();
+        OnRewardAdClosed = null;
     }
 
     // ===================== App Open Ad =====================
@@ -376,13 +391,21 @@ public class ADManager : Singleton<ADManager>
     {
         Debug.Log("Interstitial ad closed. Notifying subscribers.");
         // 광고 닫힘 이벤트를 외부에 알림
-        OnInterstitialAdClosed?.Invoke();
-        OnInterstitialAdClosed = null;
+        StartCoroutine(WaitAndInvokeInterstitial());
+
         // 이벤트 핸들러 해제 (중복 호출 방지)
         if (_interstitialAd != null)
         {
             _interstitialAd.OnAdFullScreenContentClosed -= InterstitialAdClosed;
         }
+    }
+
+    private IEnumerator WaitAndInvokeInterstitial()
+    {
+        yield return new WaitForSeconds(0.1f);
+
+        OnInterstitialAdClosed?.Invoke();
+        OnInterstitialAdClosed = null;
     }
 
     void InterstitialListenToAdEvents(InterstitialAd interstitialAd)

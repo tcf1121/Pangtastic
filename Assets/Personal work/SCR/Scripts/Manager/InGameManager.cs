@@ -190,6 +190,7 @@ public class InGameManager : MonoBehaviour
         if (instate._firstfail)
         {
             instate._firstfail = false;
+            Manager.Ad.OnRewardAdClosed = null;
             Manager.Ad.OnRewardAdClosed += instate.ContinueGame;
             instate._continueUI.SetActive(true);
         }
@@ -214,7 +215,6 @@ public class InGameManager : MonoBehaviour
 
     private void ContinueGame()
     {
-        Manager.Ad.OnRewardAdClosed = null;
         _orderStateController.AddPatience(50f);
         _continueUI.SetActive(false);
         KDJ.BoardManager.SetTouch(true);

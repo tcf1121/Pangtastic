@@ -53,18 +53,23 @@ public class ADBuyButton : MonoBehaviour
         }
         else if (count < 4)
         {
-            Manager.Ad.OnRewardAdClosed += GetADReward;
+            Manager.Ad.OnRewardAdClosed = null;
+            if (!Manager.Ad.RemovedAD) Manager.Ad.OnRewardAdClosed += GetADReward;
+
             Goods goods = Manager.Date.LoadNumbers(count);
             int index = 1;
             if (goods == Goods.Gold) index = 1000;
             OutGameManager.AddReward(goods, index);
-            Manager.Ad.ShowAD();
+            if (!Manager.Ad.RemovedAD) Manager.Ad.ShowAD();
+            else GetADReward();
         }
         else if (count == 4)
         {
-            Manager.Ad.OnRewardAdClosed += GetADReward;
+            Manager.Ad.OnRewardAdClosed = null;
+            if (!Manager.Ad.RemovedAD) Manager.Ad.OnRewardAdClosed += GetADReward;
             OutGameManager.AddIHReward(0.5f);
-            Manager.Ad.ShowAD();
+            if (!Manager.Ad.RemovedAD) Manager.Ad.ShowAD();
+            else GetADReward();
         }
         else
         {

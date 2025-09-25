@@ -38,13 +38,9 @@ public class ClearUI : MonoBehaviour
         }
     }
 
-    void OnDestroy()
-    {
-        Manager.Ad.OnRewardAdClosed -= DoubleGold;
-    }
-
     public void MoveUI()
     {
+        button.interactable = false;
         RewardObj.SetActive(false);
         textObj.SetActive(false);
         UserInfoUI.Instance.SetActive(true);
@@ -106,12 +102,13 @@ public class ClearUI : MonoBehaviour
 
     private void DoubleRewardButton()
     {
+        rewardDubbleButton.gameObject.SetActive(false);
         if (!Manager.Ad.RemovedAD)
         {
+            Manager.Ad.OnRewardAdClosed = null;
             Manager.Ad.OnRewardAdClosed += DoubleGold;
             Manager.Ad.ShowAD();
         }
-        rewardDubbleButton.gameObject.SetActive(false);
     }
 
     private void DoubleGold()

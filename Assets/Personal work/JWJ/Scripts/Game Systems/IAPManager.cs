@@ -288,6 +288,9 @@ public class IAPManager : Singleton<IAPManager>
             //보상 예시
             switch (reward.RewardType)
             {
+                case RewardType.RemovedAD:
+                    Manager.Ad.BuyRemoveAD();
+                    break;
                 case RewardType.Heart:
                     OutGameManager.AddIHReward(reward.RewardAmount);
                     break;

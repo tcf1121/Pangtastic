@@ -34,7 +34,7 @@ public class DateManager : Singleton<DateManager>
         _loginStreak = PlayerPrefs.GetInt(StreakKey, 0);
 
 
-        if (lastDateStr != today.ToString("yyyy-MM-dd"))
+        if (lastDateStr != today.ToString("yyyyMMdd"))
         {
             // 날짜가 다르면 카운트 초기화
             PlayerPrefs.SetInt(DailyCountKey, 0);

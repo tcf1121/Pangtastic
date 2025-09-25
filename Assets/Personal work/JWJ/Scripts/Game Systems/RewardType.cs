@@ -3,5 +3,6 @@ public enum RewardType
     Heart,
     Coin,
     UseItem,
-    BoosterItem
+    BoosterItem,
+    RemovedAD
 }
