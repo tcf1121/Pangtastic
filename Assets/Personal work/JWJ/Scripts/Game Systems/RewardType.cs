@@ -2,5 +2,6 @@ public enum RewardType
 {
     Heart,
     Coin,
-    Star
+    UseItem,
+    BoosterItem
 }

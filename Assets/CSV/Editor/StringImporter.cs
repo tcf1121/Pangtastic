@@ -61,8 +61,8 @@ public class StringImporter // 레시피 CSV를 RecipeSO로 변환하는 클래�
             string korean = GetString(splitData, 1).Trim('"').Trim('”').Trim('“');
             string english = GetString(splitData, 2).Trim('"');
             string chinese = GetString(splitData, 3).Trim('"').Trim('”').Trim('“');
-
-            string japanese = GetString(splitData, 4).Trim('"').Trim('」').Trim('「');
+            string taiwanese = GetString(splitData, 4).Trim('"').Trim('」').Trim('「');
+            string japanese = GetString(splitData, 5).Trim('"').Trim('」').Trim('「');
 
             string soPath = stringSoDir + "/" + String_id + ".asset"; // SO파일 저장경로/파일이름
 
@@ -89,6 +89,7 @@ public class StringImporter // 레시피 CSV를 RecipeSO로 변환하는 클래�
             strings.ID = String_id;
             strings.value[0] = english;
             strings.value[3] = chinese;
+            strings.value[4] = taiwanese;
             strings.value[5] = japanese;
             strings.value[6] = korean;
 

@@ -289,16 +289,26 @@ public class IAPManager : Singleton<IAPManager>
             switch (reward.RewardType)
             {
                 case RewardType.Heart:
-                    Manager.User.AddHeart(); //수량 있어야할듯
+                    OutGameManager.AddIHReward(reward.RewardAmount);
                     break;
                 case RewardType.Coin:
-                    Manager.User.AddCoin(reward.RewardAmount);
+                    OutGameManager.AddReward(Goods.Gold, reward.RewardAmount);
                     break;
-                case RewardType.Star:
-                    Manager.User.AddStar(reward.RewardAmount);
+                case RewardType.UseItem:
+                    OutGameManager.AddReward(Goods.Whisk, reward.RewardAmount);
+                    OutGameManager.AddReward(Goods.Scissors, reward.RewardAmount);
+                    OutGameManager.AddReward(Goods.DonutPan, reward.RewardAmount);
+                    OutGameManager.AddReward(Goods.Coffee, reward.RewardAmount);
                     break;
+                case RewardType.BoosterItem:
+                    OutGameManager.AddReward(Goods.Roller, reward.RewardAmount);
+                    OutGameManager.AddReward(Goods.DonutBox, reward.RewardAmount);
+                    OutGameManager.AddReward(Goods.Oven, reward.RewardAmount);
+                    break;
+
             }
 
         }
+        OutGameManager.ShowRewardPopup();
     }
 }
