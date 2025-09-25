@@ -78,7 +78,7 @@ namespace KDJ.States
             }
 
             // 2. 매치 처리
-            var (coordsToDestroy, specialToCreate, specialSpawnPos) = boardManager.MatchChecker.ProcessMatches(boardManager, boardManager.InitialSwapPosition);
+            var (coordsToDestroy, specialsToCreate) = boardManager.MatchChecker.ProcessMatches(boardManager);
 
             // 3. 후속 처리
             if (coordsToDestroy.Count > 0)
@@ -87,9 +87,11 @@ namespace KDJ.States
                 boardManager.HintManager.StopHintTimer();
                 boardManager.CurHintPositions.Clear();
 
+                var swapPositions = wasSwap ? new List<Vector2Int> { startPos, endPos } : null;
+
                 // 애니메이션 후 리필 상태로 이동
                 boardManager.BlockMover.ResetCoordMoved();
-                yield return boardManager.StartCoroutine(boardManager.AnimateAndDestroyMatches(coordsToDestroy, specialToCreate, specialSpawnPos, boardManager.InitialSwapPosition));
+                yield return boardManager.StartCoroutine(boardManager.AnimateAndDestroyMatches(coordsToDestroy, specialsToCreate, swapPositions));
             }
             else if (usedSpecial)
             {

@@ -821,6 +821,7 @@ namespace KDJ
         {
             List<Block> normalBlocks = new List<Block>();
             List<Vector2Int> normalBlockPositions = new List<Vector2Int>();
+            List<(Vector2Int pos, Block block)> icedBlocks = new List<(Vector2Int pos, Block block)>();
             int maxTries = maxAttempts;
             int tries = 0;
 
@@ -828,6 +829,7 @@ namespace KDJ
             {
                 normalBlocks.Clear();
                 normalBlockPositions.Clear();
+                icedBlocks.Clear();
 
                 for (int y = 0; y < GameBoardData.Height; y++)
                 {
@@ -840,6 +842,10 @@ namespace KDJ
                             {
                                 normalBlocks.Add(block);
                                 normalBlockPositions.Add(new Vector2Int(x, y));
+                            }
+                            else if (block != null && block.IsNormal && !block.CanMove && block.GemType <= GemType.Sugar)
+                            {
+                                icedBlocks.Add((new Vector2Int(x, y), block));
                             }
                         }
                     }
@@ -857,6 +863,15 @@ namespace KDJ
                 {
                     Vector2Int pos = normalBlockPositions[i];
                     GameBoardData.SetBlock(pos.x, pos.y, normalBlocks[i]);
+                }
+
+                for (int i = 0; i < icedBlocks.Count; i++)
+                {
+                    int randomIndex = Random.Range(i, icedBlocks.Count);
+                    var temp = icedBlocks[i].block;
+                    icedBlocks[i] = (icedBlocks[i].pos, icedBlocks[randomIndex].block);
+                    icedBlocks[randomIndex] = (icedBlocks[randomIndex].pos, temp);
+                    GameBoardData.SetBlock(icedBlocks[i].pos.x, icedBlocks[i].pos.y, icedBlocks[i].block);
                 }
 
                 if (!boardManager.MatchChecker.AllBlockMatchCheck(boardManager))

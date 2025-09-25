@@ -291,7 +291,7 @@ namespace KDJ
         #endregion
 
         #region 효과
-        public IEnumerator AnimateAndDestroyMatches(HashSet<Vector2Int> coordsToDestroy, (Vector2Int pos, int type)? specialToCreate, Vector2Int? specialSpawnPos, Vector2Int? swapPosition = null)
+        public IEnumerator AnimateAndDestroyMatches(HashSet<Vector2Int> coordsToDestroy, List<(Vector2Int pos, int type, List<Vector2Int> matchCoords)> specialsToCreate, List<Vector2Int> swapPositions = null)
         {
             List<HashSet<Vector2Int>> matchGroups = new List<HashSet<Vector2Int>>();
             HashSet<Vector2Int> visited = new HashSet<Vector2Int>();
@@ -374,7 +374,7 @@ namespace KDJ
             // 2단계: 폭발 이펙트 생성
             SpriteRenderer[] renderers = new SpriteRenderer[blocksToAnimate.Count];
 
-            if (specialToCreate.HasValue)
+            if (specialsToCreate.Count > 0)
                 Manager.Audio.PlaySFX("Block_MakeSpecial");
             else
                 Manager.Audio.PlaySFX("Block_Match");
@@ -419,7 +419,6 @@ namespace KDJ
 
                     if (block.BlockInstance != null)
                     {
-                        // Destroy(block.BlockInstance);
                         if (block.BlockInstance.TryGetComponent<PooledObject>(out var pooledObj))
                         {
                             int score = MatchChecker.CalculateScore(block.Score);
@@ -438,30 +437,67 @@ namespace KDJ
             }
 
             // 4단계: 특수 블록 생성
-            if (specialToCreate.HasValue && specialSpawnPos.HasValue)
+            if (specialsToCreate.Count > 0)
             {
-                // 특수 블록이 생성될 위치에 리턴하지 못한 블록이 있다면 리턴
-                Vector3 worldPos = BlockMover.GridToWorld(specialSpawnPos.Value, Spawner.GameBoardData.Width, Spawner.GameBoardData.Height);
-                Collider2D[] colliders = Physics2D.OverlapCircleAll(worldPos, 0.1f);
-
-                foreach (var collider in colliders)
+                foreach (var special in specialsToCreate)
                 {
-                    if (collider.TryGetComponent<PooledObject>(out var pooledObj))
-                    {
-                        pooledObj.ReturnToPool();
-                    }
-                    else
-                    {
-                        Destroy(collider.gameObject);
-                    }
-                }
+                    Vector2Int spawnPos = CalculateSpecialBlockSpawnPosition(special.matchCoords, swapPositions);
+                    Vector3 worldPos = BlockMover.GridToWorld(spawnPos, Spawner.GameBoardData.Width, Spawner.GameBoardData.Height);
+                    Collider2D[] colliders = Physics2D.OverlapCircleAll(worldPos, 0.1f);
 
-                var creation = specialToCreate.Value;
-                Spawner.SpawnBlock(specialSpawnPos.Value.x, specialSpawnPos.Value.y, (GemType)creation.type, BlockMover);
+                    foreach (var collider in colliders)
+                    {
+                        if (collider.TryGetComponent<PooledObject>(out var pooledObj))
+                        {
+                            pooledObj.ReturnToPool();
+                        }
+                        else
+                        {
+                            Destroy(collider.gameObject);
+                        }
+                    }
+
+                    Spawner.SpawnBlock(spawnPos.x, spawnPos.y, (GemType)special.type, BlockMover);
+                }
             }
 
             // 5단계: 다음 상태로 전환
             ChangeState(new RefillState());
+        }
+
+        private Vector2Int CalculateSpecialBlockSpawnPosition(List<Vector2Int> matchCoords, List<Vector2Int> swapPositions)
+        {
+            if (swapPositions != null)
+            {
+                foreach (var swapPos in swapPositions)
+                {
+                    if (matchCoords.Contains(swapPos))
+                    {
+                        return swapPos;
+                    }
+                }
+            }
+
+            Vector2Int bottomLeft = new Vector2Int(int.MaxValue, int.MaxValue);
+            foreach (var coord in matchCoords)
+            {
+                if (Spawner.GameBoardData.GetOverlayBlock(coord.x, coord.y) is Ice)
+                {
+                    continue;
+                }
+                if (coord.y < bottomLeft.y)
+                {
+                    bottomLeft = coord;
+                }
+                else if (coord.y == bottomLeft.y)
+                {
+                    if (coord.x < bottomLeft.x)
+                    {
+                        bottomLeft.x = coord.x;
+                    }
+                }
+            }
+            return bottomLeft;
         }
 
         public void ShowHint(List<Vector2Int> hintPositions)
