@@ -58,6 +58,13 @@ namespace LHJ
                     _board.ClearItemSelection();
                     return;
                 }
+                var sp = _board.Spawner;
+                var blk = sp.GameBoardData.BlockArray[grid.y, grid.x];
+                if (blk == null || blk.BlockInstance == null)
+                {
+                    _board.ClearItemSelection();
+                    return;
+                }
 
                 // 선택된 아이템 발동
                 BoardManager.SetTouch(false);
