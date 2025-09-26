@@ -13,9 +13,8 @@ public class DialogueLine
     public Speaker RightSpeaker;
 
     public int SpeakerCheck;
-    public StringSO DialogueStringId;
-    //public Sprite BackgroundSprite; //주석 해제 해야함
-    public string BackgroundSprite; // 테스트용, 삭제해야함
+    public StringSO DialogueStringSO;
+    public Sprite BackgroundSprite;
     public string BgmSoundId;
     public string SfxSoundId;
 }

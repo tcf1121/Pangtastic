@@ -14,10 +14,11 @@ public class SpeakerUI : MonoBehaviour
     public void SetCharacter(Speaker? speaker)
     {
         SetNameLabel(speaker);
-        if (speaker != null)
+
+        if (speaker != Speaker.None)
             for (int i = 0; i < Speakers.Count; i++)
             {
-                Debug.Log(Speakers[i].gameObject);
+                //Debug.Log(Speakers[i].gameObject);
                 if (i == (int)speaker) Speakers[i].gameObject.SetActive(true);
                 else Speakers[i].gameObject.SetActive(false);
             }
@@ -42,7 +43,7 @@ public class SpeakerUI : MonoBehaviour
     private void SetNameLabel(Speaker? speaker)
     {
 
-        if (speaker == null || speaker == Speaker.meow) _nameLabel.SetActive(false);
+        if (speaker == Speaker.None || speaker == Speaker.meow) _nameLabel.SetActive(false);
         else
         {
             _charactersName.text = _speakerSO.GetSpeaker((Speaker)speaker).
@@ -56,6 +57,7 @@ public class SpeakerUI : MonoBehaviour
 
 public enum Speaker
 {
+    None,
     Lulu,
     Toto,
     Bambi,

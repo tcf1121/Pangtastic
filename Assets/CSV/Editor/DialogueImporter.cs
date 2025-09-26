@@ -5,7 +5,7 @@ using UnityEngine;
 
 public class DialogueImporter
 {
-    private static string _csvPath = "Assets/CSV/Dialogue.csv";
+    private static string _csvPath = "Assets/CSV/Dialog.csv";
 
     private static string _dialogueGoupSODir = "Assets/ScriptableObject/DialogueGroup";
     private static string _stringSOPath = "Assets/ScriptableObject/String";
@@ -14,7 +14,7 @@ public class DialogueImporter
 
     private static Dictionary<int, DialogueGroupSO> _groupMap = new Dictionary<int, DialogueGroupSO>();
 
-    //[MenuItem("PangTastic/Import DialogueGroupSO")]
+    [MenuItem("PangTastic/Import DialogueGroupSO")]
     public static void StartImportDialogue()
     {
         ImportDialogueCSV();
@@ -61,7 +61,14 @@ public class DialogueImporter
             string left_speaker = splitData[3];
             string center_speaker = splitData[4];
             string right_speaker = splitData[5];
-            int.TryParse(splitData[6], out int left_speaker_check);
+
+            int left_speaker_check = -1;
+
+            int parsed;
+            if (int.TryParse(splitData[6], out parsed))
+            {
+                left_speaker_check = parsed;
+            }
 
             string dialog_string_id = splitData[7];
 
@@ -77,8 +84,17 @@ public class DialogueImporter
             dialogueLine.SpeakerCheck = left_speaker_check;
             dialogueLine.BgmSoundId = bgm_sound_id;
             dialogueLine.SfxSoundId = sfx_sound_id;
-            //dialogueLine.BackgroundSprite = AssetDatabase.LoadAssetAtPath<Sprite>(sprite_path); //주석 해제해야함
-            dialogueLine.BackgroundSprite = "TEST"; // 테스트용. 삭제해야함
+
+            Sprite sprite = AssetDatabase.LoadAssetAtPath<Sprite>(sprite_path);
+
+            if (sprite != null)
+            {
+                dialogueLine.BackgroundSprite = sprite;
+            }
+            else
+            {
+                Debug.LogWarning($"이미지 없음: {sprite_path}");
+            }
 
             string stringSoPath = _stringSOPath + "/" + dialog_string_id + ".asset";
 
@@ -92,7 +108,7 @@ public class DialogueImporter
                 return;
             }
 
-            dialogueLine.DialogueStringId = stringSo;
+            dialogueLine.DialogueStringSO = stringSo;
 
             string leftSpeakerName = left_speaker.Replace("speaker_", "").Trim();
             string centerSpeakerName = center_speaker.Replace("speaker_", "").Trim();
@@ -106,7 +122,7 @@ public class DialogueImporter
             }
             else
             {
-                Debug.LogWarning($"스피커 파싱 빈칸/실패 {i}행 확인 {leftSpeakerName}");
+                Debug.LogWarning($"스피커 파싱 빈칸/실패. {i}행 확인 {leftSpeakerName}");
             }
 
             if (System.Enum.TryParse<Speaker>(centerSpeakerName, true, out speaker))
@@ -124,7 +140,7 @@ public class DialogueImporter
             }
             else
             {
-                Debug.LogWarning($"스피커 파싱 빈칸/실패 {i}행 확인 {rightSpeakerName}");
+                Debug.LogWarning($"스피커 파싱 빈칸/실패 {i}행 확인 Null 지정 {rightSpeakerName}");
             }
 
             string soPath = _dialogueGoupSODir + "/DialogueGroup_" + dialog_group + ".asset";
