@@ -14,6 +14,8 @@ public class MissionBtn : MonoBehaviour
     [SerializeField] TMP_Text _progressText;
     [SerializeField] Slider _progressSlider;
     [SerializeField] List<StringSO> placeString;
+    public float Percent { get { return _percent; } }
+    private float _percent;
 
     void Awake()
     {
@@ -29,6 +31,7 @@ public class MissionBtn : MonoBehaviour
         _progressSlider.maxValue = Manager.User.GetCurMisson().Length;
         _progressSlider.value = Array.FindAll(Manager.User.GetCurMisson(), n => n == true).ToList().Count;
         _progressText.text = $"{Array.FindAll(Manager.User.GetCurMisson(), n => n == true).ToList().Count}/{_progressSlider.maxValue}";
+        _percent = (float)Array.FindAll(Manager.User.GetCurMisson(), n => n == true).ToList().Count / _progressSlider.maxValue;
     }
 
 }

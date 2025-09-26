@@ -6,13 +6,14 @@ using UnityEngine.ResourceManagement.AsyncOperations;
 public class DialoguePlayer : MonoBehaviour
 {
     [SerializeField] private DialogueController _controller;
+    [SerializeField] ScenarioManager _scenario;
     [SerializeField] private List<DialogueGroupSO> _dialogueGroupSO = new List<DialogueGroupSO>();
 
     private void Awake()
     {
         LoadAllGroup();
 
-        if(_controller == null)
+        if (_controller == null)
         {
             _controller = FindObjectOfType<DialogueController>();
         }
@@ -36,6 +37,7 @@ public class DialoguePlayer : MonoBehaviour
                 _dialogueGroupSO.Add(loadedList[i]);
             }
             Debug.Log($"DialogueGroupSO 로드 완료 총 {_dialogueGroupSO.Count}개");
+            _scenario.PlayScenario();
         }
         else
         {
@@ -63,4 +65,6 @@ public class DialoguePlayer : MonoBehaviour
         }
         Debug.LogError($"잘못된 DialogueGroup ID: {groupId}");
     }
+
+
 }

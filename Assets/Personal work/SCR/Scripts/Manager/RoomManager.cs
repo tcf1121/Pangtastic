@@ -10,6 +10,7 @@ public class RoomManager : MonoBehaviour
     private MissionPlace curPlace;
     [SerializeField] MissionListSO missionList;
     [SerializeField] private MissionBtn missonBtn;
+    [SerializeField] ScenarioManager _scenario;
     Action clearPlace;
 
     void Awake()
@@ -35,12 +36,14 @@ public class RoomManager : MonoBehaviour
             {
                 menuUI.GoRoom(() =>
                 {
+                    _scenario.PlayScenario(curPlace, missonBtn.Percent);
                     openPopup?.Invoke();
                 });
             });
 
 
         }
+
     }
 
 
@@ -56,6 +59,7 @@ public class RoomManager : MonoBehaviour
             _places[(int)curPlace].MissionClear(index, openPopup);
             missonBtn.Refresh();
         }
+        _scenario.PlayScenario(curPlace, missonBtn.Percent);
     }
 
     public int GetMaxMission()

@@ -289,6 +289,16 @@ public class UserInfoManager : Singleton<UserInfoManager>
     {
         currentData.UserInfo.Customize = customize;
     }
+
+    public int GetScenario()
+    {
+        return currentData.Scenario;
+    }
+
+    public void ClearScenario()
+    {
+        currentData.Scenario++;
+    }
 }
 
 public enum ItemType
@@ -307,6 +317,7 @@ public class UserData
 {
     public UserInfo UserInfo { get; set; } = new UserInfo();
     public int Stage { get; set; } = 0;
+    public int Scenario { get; set; } = 0;
     public string PlayerName { get; set; } = "";
     public ItemInfo ItemInfo { get; set; } = new ItemInfo();
     public PlaceInfo PlaceInfo { get; set; } = new PlaceInfo();

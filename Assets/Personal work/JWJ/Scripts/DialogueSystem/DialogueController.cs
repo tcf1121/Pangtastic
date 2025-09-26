@@ -18,7 +18,7 @@ public class DialogueController : MonoBehaviour
 
     private void Awake()
     {
-        if(_dialogueManager == null)
+        if (_dialogueManager == null)
         {
             _dialogueManager = FindObjectOfType<DialogManager>();
         }
@@ -48,7 +48,7 @@ public class DialogueController : MonoBehaviour
 
         for (int i = 0; i < _lines.Count; i++)
         {
-            Debug.Log($"현재 라인: {i+1} / {_lines.Count}. 대사 ID : {_lines[i].DialogId}. 스피커 : {_lines[i].SpeakerCheck}");
+            Debug.Log($"현재 라인: {i + 1} / {_lines.Count}. 대사 ID : {_lines[i].DialogId}. 스피커 : {_lines[i].SpeakerCheck}");
             DialogueLine line = _lines[i];
 
             if (line.BackgroundSprite != null)
@@ -78,14 +78,15 @@ public class DialogueController : MonoBehaviour
             {
                 if (Input.GetMouseButtonDown(0))
                 {
-                    Vector2 localPoint;
+                    // Vector2 localPoint;
 
-                    RectTransformUtility.ScreenPointToLocalPointInRectangle(_dialogueBox, Input.mousePosition, null, out localPoint);
+                    // RectTransformUtility.ScreenPointToLocalPointInRectangle(_dialogueBox, Input.mousePosition, null, out localPoint);
 
-                    if (_dialogueBox.rect.Contains(localPoint))
-                    {
-                        break;
-                    }
+                    // if (_dialogueBox.rect.Contains(localPoint))
+                    // {
+                    //     break;
+                    // }
+                    break;
                 }
                 yield return null;
             }
