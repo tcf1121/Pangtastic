@@ -37,11 +37,6 @@ public class DialogManager : MonoBehaviour
                 _nonNameLabel[i].SetActive(true);
             }
         }
-        SetDialog(dialog.GetText(Manager.Language.GetLanguage()));
-    }
-
-    public void SetDialog(string dialog)
-    {
-        _dialog.text = dialog;
+        _dialog.text = dialog.GetText(Manager.Language.GetLanguage());
     }
 }
