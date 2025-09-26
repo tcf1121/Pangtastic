@@ -106,6 +106,20 @@ namespace KDJ
 
             if (!IsOnBoard(swapEndGrid, gameBoard) || !IsOnBoard(startGrid, gameBoard)) return false;
 
+            // 튜토리얼 스왑 제한 로직
+            if (boardManager.IsPlayingTutorial)
+            {
+                var tutorial = boardManager.Tutorial;
+                if (tutorial.SwappableBlocks.Count == 2)
+                {
+                    bool isAllowed = tutorial.SwappableBlocks.Contains(startGrid) && tutorial.SwappableBlocks.Contains(swapEndGrid);
+                    if (!isAllowed)
+                    {
+                        return false; // 튜토리얼에서 허용된 스왑이 아님
+                    }
+                }
+            }
+
             Block startBlock = gameBoard.GetBlock(startGrid.x, startGrid.y);
             Block endBlock = gameBoard.GetBlock(swapEndGrid.x, swapEndGrid.y);
 
