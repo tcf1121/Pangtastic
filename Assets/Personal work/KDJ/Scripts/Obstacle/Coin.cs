@@ -16,6 +16,11 @@ namespace KDJ
             CanMove = true;
         }
 
+                public override Block Clone()
+        {
+            return (Coin)this.MemberwiseClone();
+        }
+
         public override void SplashDamage()
         {
             TakeDamage();

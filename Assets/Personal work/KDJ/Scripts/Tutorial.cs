@@ -202,6 +202,9 @@ public class Tutorial : MonoBehaviour
 
         _maskImages[Manager.User.GetStage()].SetActive(true);
         _handImage.enabled = true;
+
+        _handImage.rectTransform.rotation = Quaternion.Euler(0, 0, 30);
+
         // 사용자의 입력으로 상태가 변경될때까지 반복
         while (true)
         {

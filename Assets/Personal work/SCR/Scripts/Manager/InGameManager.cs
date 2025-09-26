@@ -13,6 +13,7 @@ public class InGameManager : MonoBehaviour
     [SerializeField] private List<IngredientSO> _ingredientSOs;
     [SerializeField] OrderStateController _orderStateController;
     [SerializeField] CustomerFlowController _customerFlowController;
+    [SerializeField] GameObject _popupUI;
     [SerializeField] GameObject _clearUI;
     [SerializeField] GameObject _continueUI;
     [SerializeField] GameObject _retryUI;
@@ -23,7 +24,7 @@ public class InGameManager : MonoBehaviour
     [SerializeField] List<Button> _gameButtons;
     [SerializeField] GameObject _adPanel;
 
-    private static InGameManager instate;
+    public static InGameManager Instate;
     private int _score;
     private int _coin;
     private bool _firstfail = true;
@@ -48,7 +49,7 @@ public class InGameManager : MonoBehaviour
             }
         }
         Manager.User.UseHeart();
-        instate = this;
+        Instate = this;
         _customerFlowController.OnStageCleared += StageClear;
         _customerFlowController.OnStageFailed += StageFail;
         _useCoinContinueButton.onClick.AddListener(GoldContinueGame);
@@ -77,7 +78,7 @@ public class InGameManager : MonoBehaviour
 
     public static void SetPuzzleSize(int xPos, int yPos, int xSize, int ySize)
     {
-        if (instate == null) GameObject.Find("InGameManager").GetComponent<InGameManager>();
+        if (Instate == null) GameObject.Find("InGameManager").GetComponent<InGameManager>();
         Camera.main.orthographicSize = xSize + 1;
         float puzzleXpos = 0;
         float puzzleYpos = 1f;
@@ -115,86 +116,86 @@ public class InGameManager : MonoBehaviour
 
     public static bool GetStageClear()
     {
-        if (instate == null) instate = GameObject.Find("InGameManager").GetComponent<InGameManager>();
-        return instate._orderStateController.IsAllComplete();
+        if (Instate == null) Instate = GameObject.Find("InGameManager").GetComponent<InGameManager>();
+        return Instate._orderStateController.IsAllComplete();
     }
 
     public static void AddScore(int score)
     {
-        if (instate == null) instate = GameObject.Find("InGameManager").GetComponent<InGameManager>();
-        instate._score += score;
+        if (Instate == null) Instate = GameObject.Find("InGameManager").GetComponent<InGameManager>();
+        Instate._score += score;
 
-        Debug.Log($"현재 점수: {instate._score}");
+        Debug.Log($"현재 점수: {Instate._score}");
 
     }
 
     public static void ResetScore()
     {
-        if (instate == null) instate = GameObject.Find("InGameManager").GetComponent<InGameManager>();
-        instate._score = 0;
-        Debug.Log($"점수 초기화. 현재 점수: {instate._score}");
+        if (Instate == null) Instate = GameObject.Find("InGameManager").GetComponent<InGameManager>();
+        Instate._score = 0;
+        Debug.Log($"점수 초기화. 현재 점수: {Instate._score}");
     }
 
     public static int GetScore()
     {
-        if (instate == null) instate = GameObject.Find("InGameManager").GetComponent<InGameManager>();
-        return instate._score;
+        if (Instate == null) Instate = GameObject.Find("InGameManager").GetComponent<InGameManager>();
+        return Instate._score;
     }
 
     public static void AddCoin(int num)
     {
-        if (instate == null) instate = GameObject.Find("InGameManager").GetComponent<InGameManager>();
-        instate._coin += num;
-        Debug.Log($"현재 코인: {instate._coin}");
+        if (Instate == null) Instate = GameObject.Find("InGameManager").GetComponent<InGameManager>();
+        Instate._coin += num;
+        Debug.Log($"현재 코인: {Instate._coin}");
     }
 
     public static GameObject GetPrefab(GemType gemType)
     {
-        return instate._blockList.GetPrefab(gemType);
+        return Instate._blockList.GetPrefab(gemType);
     }
 
     public static int GetCoin()
     {
-        if (instate == null) instate = GameObject.Find("InGameManager").GetComponent<InGameManager>();
-        return instate._coin;
+        if (Instate == null) Instate = GameObject.Find("InGameManager").GetComponent<InGameManager>();
+        return Instate._coin;
     }
 
     public static void AddIngredientSta(GemType ingredient)
     {
-        if (instate == null) instate = GameObject.Find("InGameManager").GetComponent<InGameManager>();
+        if (Instate == null) Instate = GameObject.Find("InGameManager").GetComponent<InGameManager>();
         Debug.Log(ingredient);
-        instate._orderStateController.AddIngredientSta(instate._ingredientSOs[(int)ingredient]);
+        Instate._orderStateController.AddIngredientSta(Instate._ingredientSOs[(int)ingredient]);
     }
 
     public static void SpawnCustomer()
     {
-        if (instate == null) instate = GameObject.Find("InGameManager").GetComponent<InGameManager>();
-        instate._customerFlowController.SpawnCustomer();
+        if (Instate == null) Instate = GameObject.Find("InGameManager").GetComponent<InGameManager>();
+        Instate._customerFlowController.SpawnCustomer();
     }
 
     public static void StageClear()
     {
-        if (instate == null) instate = GameObject.Find("InGameManager").GetComponent<InGameManager>();
+        if (Instate == null) Instate = GameObject.Find("InGameManager").GetComponent<InGameManager>();
         Manager.Audio.PlaySFX("Stage_Clear");
         AddCoin(GetScore() / 100);
         KDJ.BoardManager.SetTouch(false);
-        instate._winCoinText.text = $"{GetCoin()}";
-        instate._clearUI.SetActive(true);
+        Instate._winCoinText.text = $"{GetCoin()}";
+        Instate._clearUI.SetActive(true);
     }
 
     public static void StageFail()
     {
-        if (instate == null) instate = GameObject.Find("InGameManager").GetComponent<InGameManager>();
+        if (Instate == null) Instate = GameObject.Find("InGameManager").GetComponent<InGameManager>();
         Manager.Audio.PlaySFX("Stage_Fail");
         KDJ.BoardManager.SetTouch(false);
-        if (instate._firstfail)
+        if (Instate._firstfail)
         {
-            instate._firstfail = false;
+            Instate._firstfail = false;
             Manager.Ad.OnRewardAdClosed = null;
-            Manager.Ad.OnRewardAdClosed += instate.ContinueGame;
-            instate._continueUI.SetActive(true);
+            Manager.Ad.OnRewardAdClosed += Instate.ContinueGame;
+            Instate._continueUI.SetActive(true);
         }
-        else instate._retryUI.SetActive(true);
+        else Instate._retryUI.SetActive(true);
     }
 
     private void AdContinueGame()
@@ -229,6 +230,15 @@ public class InGameManager : MonoBehaviour
 
     public void ResumeGame()
     {
+        // 팝업 UI의 자식개체 중 켜져있는게 있으면 반환
+        foreach (Transform child in _popupUI.transform)
+        {
+            if (child.gameObject.activeSelf)
+            {
+                return;
+            }
+        }
+
         Debug.Log("게임 재실행");
         Time.timeScale = 1f;
         KDJ.BoardManager.SetTouch(true);
@@ -238,29 +248,29 @@ public class InGameManager : MonoBehaviour
     {
         //보드판에 추가해라
         var tcs = new TaskCompletionSource<bool>();
-        instate.StartCoroutine(instate.RewardGemWrapperRoutine(gemList, tcs));
+        Instate.StartCoroutine(Instate.RewardGemWrapperRoutine(gemList, tcs));
         Debug.Log("보상 종료");
         await tcs.Task;
     }
 
     private IEnumerator RewardGemWrapperRoutine(List<GemType> gemList, TaskCompletionSource<bool> tcs)
     {
-        yield return StartCoroutine(KDJ.BoardManager.Instance.ClearRewardAnimation(gemList));
+        yield return StartCoroutine(KDJ.BoardManager.Instance.RewardRoutine(gemList));
         tcs.SetResult(true);
     }
 
     public static List<GemType> GetTagetGem()
     {
-        List<GemType> gemTypes = instate._orderStateController.GetRequiredGem();
+        List<GemType> gemTypes = Instate._orderStateController.GetRequiredGem();
 
         return gemTypes;
     }
 
     public static void ClearGame()
     {
-        if (instate == null) instate = GameObject.Find("InGameManager").GetComponent<InGameManager>();
-        if (instate._showInterstitialAd) Manager.Ad.ShowInterstitialAd();
-        else instate.GoLobby();
+        if (Instate == null) Instate = GameObject.Find("InGameManager").GetComponent<InGameManager>();
+        if (Instate._showInterstitialAd) Manager.Ad.ShowInterstitialAd();
+        else Instate.GoLobby();
     }
 
     public void QuitGame()
@@ -278,5 +288,10 @@ public class InGameManager : MonoBehaviour
     public void PushButton()
     {
         Manager.Audio.PlaySFX("Touch");
+    }
+
+    public void LockButton()
+    {
+        Manager.Audio.PlaySFX("Item_fail");
     }
 }

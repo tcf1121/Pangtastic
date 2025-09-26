@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -19,6 +20,8 @@ public class EnterInGamePanel : MonoBehaviour
     [SerializeField] Sprite questionMarkImage;
     [SerializeField] StringSO stringSO;
     [SerializeField] GameObject _fallHeartPopup;
+    [SerializeField] List<Button> _emptyButton;
+    [SerializeField] List<GameObject> _buyButton;
 
     private StageSO _curStage;
     private CustomerSO _curCustomer;
@@ -33,6 +36,7 @@ public class EnterInGamePanel : MonoBehaviour
         _stageRecipes = RecipeRule.BuildOrder(_curCustomer, _curStage);
         Manager.Stage.SetStageRecipe(_stageRecipes);
         enterBtn.onClick.AddListener(EnterGame);
+        SetBuyButton();
         // 여기서 레시피 만들어서 Stage에 넣기
     }
     void GetRecipe()
@@ -69,6 +73,10 @@ public class EnterInGamePanel : MonoBehaviour
 
     void OnEnable()
     {
+        foreach (var go in _buyButton)
+        {
+            go.SetActive(false);
+        }
         _level.text = $"{Manager.Stage.CurrentStageIndex + 1}{stringSO.GetText(Manager.Language.GetLanguage())}";
         GetRecipe();
         _rollerNum.text = $"{Manager.User.GetItem().Roller}";
@@ -84,31 +92,37 @@ public class EnterInGamePanel : MonoBehaviour
         {
             rollerToggle.isOn = false;
             rollerToggle.interactable = false;
+            _emptyButton[0].gameObject.SetActive(true);
         }
         else if (Manager.User.GetItem().Roller > 0)
         {
             rollerToggle.isOn = false;
             rollerToggle.interactable = true;
+            _emptyButton[0].gameObject.SetActive(false);
         }
         if (Manager.User.GetItem().DonutBox <= 0)
         {
             donutBoxToggle.isOn = false;
             donutBoxToggle.interactable = false;
+            _emptyButton[1].gameObject.SetActive(true);
         }
         else if (Manager.User.GetItem().DonutBox > 0)
         {
             donutBoxToggle.isOn = false;
             donutBoxToggle.interactable = true;
+            _emptyButton[1].gameObject.SetActive(false);
         }
         if (Manager.User.GetItem().Oven <= 0)
         {
             ovenToggle.isOn = false;
             ovenToggle.interactable = false;
+            _emptyButton[2].gameObject.SetActive(true);
         }
         else if (Manager.User.GetItem().Oven > 0)
         {
             ovenToggle.isOn = false;
             ovenToggle.interactable = true;
+            _emptyButton[2].gameObject.SetActive(false);
         }
     }
 
@@ -142,5 +156,13 @@ public class EnterInGamePanel : MonoBehaviour
         }
     }
 
+    void SetBuyButton()
+    {
+        for (int i = 0; i < _emptyButton.Count; i++)
+        {
+            int index = i;
+            _emptyButton[index].onClick.AddListener(() => _buyButton[index].SetActive(!_buyButton[index].activeSelf));
+        }
+    }
 
 }

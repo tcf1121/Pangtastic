@@ -66,7 +66,7 @@ public class UserInfoUI : MonoBehaviour
             SetHeartTime();
     }
 
-    private string SetNum(int num)
+    public string SetNum(int num)
     {
         string returnNum = $"{num}";
         if (num > 10000000)
