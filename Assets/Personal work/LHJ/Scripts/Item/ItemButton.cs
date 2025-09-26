@@ -41,7 +41,7 @@ namespace LHJ
                         bool started = _itemCheck.UseDonutPan();
                         if (started)
                         {
-                            Manager.User.UseItem(_type); 
+                            Manager.User.UseItem(_type);
                             SetItemState();
                         }
                     }
@@ -74,16 +74,6 @@ namespace LHJ
                 _board.ClearItemSelection();
             else
                 _board.SelectItem(_type);
-        }
-        
-
-        private void Lock()
-        {
-            if (!Manager.User.CanUseItem(_type))
-            {
-                _button.interactable = false;
-                _lockGO.SetActive(true);
-            }
         }
 
         public void SetItemState()
