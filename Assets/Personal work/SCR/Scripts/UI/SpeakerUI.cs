@@ -7,9 +7,9 @@ public class SpeakerUI : MonoBehaviour
 {
     [SerializeField] List<Image> Speakers;
     [SerializeField] GameObject _nameLabel;
+    [SerializeField] GameObject _NonSpeaknameLabel;
     [SerializeField] TMP_Text _charactersName;
     [SerializeField] SpeakerSO _speakerSO;
-
 
     public void SetCharacter(Speaker? speaker)
     {
@@ -17,6 +17,7 @@ public class SpeakerUI : MonoBehaviour
         if (speaker != null)
             for (int i = 0; i < Speakers.Count; i++)
             {
+                Debug.Log(Speakers[i].gameObject);
                 if (i == (int)speaker) Speakers[i].gameObject.SetActive(true);
                 else Speakers[i].gameObject.SetActive(false);
             }
@@ -41,7 +42,7 @@ public class SpeakerUI : MonoBehaviour
     private void SetNameLabel(Speaker? speaker)
     {
 
-        if (speaker == null) _nameLabel.SetActive(false);
+        if (speaker == null || speaker == Speaker.meow) _nameLabel.SetActive(false);
         else
         {
             _charactersName.text = _speakerSO.GetSpeaker((Speaker)speaker).

@@ -9,7 +9,6 @@ public class TextLanguage : MonoBehaviour
 
     public void ChangeLanguage()
     {
-        Debug.Log(_text);
         _text.font = Manager.Language.GetFont();
         if (_stringSO != null)
             _text.text = _stringSO.GetText(Manager.Language.GetLanguage());
