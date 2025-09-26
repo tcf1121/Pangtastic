@@ -107,6 +107,20 @@ public class IAPManager : Singleton<IAPManager>
         OnProductsReady?.Invoke(false);
     }
 
+    public (string priceString, decimal priceValue, string currencyCode) GetPriceInfo(string productId)
+    {
+        if (_store == null) return ("", 0m, "");
+        Product product = _store.GetProductById(productId);
+        if (product == null || product.metadata == null) return ("", 0m, "");
+
+        return (
+            product.metadata.localizedPriceString,
+            product.metadata.localizedPrice,
+            product.metadata.isoCurrencyCode
+        );
+    }
+
+
 
     private void OnProductsFetched(List<Product> products)
     {
@@ -314,4 +328,5 @@ public class IAPManager : Singleton<IAPManager>
         }
         OutGameManager.ShowRewardPopup();
     }
+
 }

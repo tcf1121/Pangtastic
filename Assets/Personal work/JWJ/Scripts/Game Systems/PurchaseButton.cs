@@ -8,41 +8,41 @@ using UnityEngine.UI;
 public class PurchaseButton : MonoBehaviour
 {
     [SerializeField] private string _productId;
+    [SerializeField] private float _discountRate;
     [SerializeField] private Button _button;
-    [SerializeField] private TMP_Text _buttonText;
+    [SerializeField] private TMP_Text _originalPriceText;
+    [SerializeField] private TMP_Text _currentPriceText;
 
     private bool isSubscribe = false;
 
     private void Awake()
     {
-        if(_button == null)
+        if (_button == null)
         {
             _button = GetComponent<Button>();
         }
-        if (_buttonText == null)
-        {
-            _buttonText = _button.GetComponentInChildren<TMP_Text>();
-        }
 
-        if(!isSubscribe)
+        if (!isSubscribe)
         {
             _button.onClick.AddListener(OnClickBuy);
             Manager.IAP.OnProductsReady += OnProductsReady;
             Manager.IAP.OnNonConsumableOwned += OnNonConsumableOwned;
             isSubscribe = true;
         }
+
         _button.interactable = false;
         //_buttonText.text = "";
     }
 
     private void Start()
     {
+        GetCurrentPrice();
         if (string.IsNullOrEmpty(_productId))
         {
             Debug.LogWarning($"{gameObject.name} : 상품이름 없어서 버튼 비활성화");
             _button.interactable = false;
 
-            if(isSubscribe)
+            if (isSubscribe)
             {
                 _button.onClick.RemoveListener(OnClickBuy);
                 Manager.IAP.OnProductsReady -= OnProductsReady;
@@ -54,6 +54,19 @@ public class PurchaseButton : MonoBehaviour
 
         OnProductsReady(Manager.IAP.IsReady());
     }
+
+    private void GetCurrentPrice()
+    {
+        (string priceString, decimal currentPrice, string currencyCode) =
+        Manager.IAP.GetPriceInfo(_productId);
+        _currentPriceText.text = priceString;
+        if (_originalPriceText != null)
+        {
+            decimal originalPrice = currentPrice / (1 - (decimal)_discountRate);
+            _originalPriceText.text = $"{currencyCode} {originalPrice:#,##0.00}";
+        }
+    }
+
 
     private void OnDestroy()
     {
@@ -81,7 +94,7 @@ public class PurchaseButton : MonoBehaviour
         {
             _button.interactable = false;
             Debug.Log($"{_productId} 이미 구매함. 버튼 비활성화");
-            _buttonText.text = "Purchased";
+
         }
     }
 
@@ -90,7 +103,6 @@ public class PurchaseButton : MonoBehaviour
         if (id == _productId)
         {
             _button.interactable = false;
-            _buttonText.text = "Purchased";
             Debug.Log($"{id} 구매 완료. 버튼 비활성화");
         }
     }
