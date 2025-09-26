@@ -14,6 +14,16 @@ namespace KDJ
             CanMove = false;
         }
 
+                public override Block Clone()
+        {
+            return (FlourBag_s)this.MemberwiseClone();
+        }
+
+                public void SetOwner(FlourBag owner)
+        {
+            Owner = owner;
+        }
+
         public Vector2Int OwnerPos()
         {
             return new Vector2Int(Owner.X, Owner.Y);

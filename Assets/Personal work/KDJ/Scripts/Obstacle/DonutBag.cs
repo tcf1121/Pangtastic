@@ -17,6 +17,11 @@ namespace KDJ
             IsObstacle = true;
         }
 
+        public override Block Clone()
+        {
+            return (DonutBag)this.MemberwiseClone();
+        }
+
         public override void SplashDamage()
         {
             base.TakeDamage();

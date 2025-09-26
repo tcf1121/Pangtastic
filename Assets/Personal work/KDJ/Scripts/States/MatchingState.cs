@@ -12,6 +12,8 @@ namespace KDJ.States
 
         public void OnEnter(BoardManager boardManager)
         {
+            if (boardManager.IsRewardSkipped) return;
+
             Debug.Log("블럭 매칭 상태");
             BoardManager.SetTouch(false);
             if (_matchingCoroutine != null)

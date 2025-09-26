@@ -16,6 +16,11 @@ namespace KDJ
             CanMove = false;
         }
 
+                public override Block Clone()
+        {
+            return (Syrup)this.MemberwiseClone();
+        }
+
         public override void TakeDamage()
         {
             CurrentHP--;

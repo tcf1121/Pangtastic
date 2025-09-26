@@ -18,6 +18,11 @@ namespace KDJ
 
         private Coroutine _damageCoroutine;
 
+                public override Block Clone()
+        {
+            return (Dust)this.MemberwiseClone();
+        }
+
         public override void TakeDamage()
         {
             CurrentHP--;

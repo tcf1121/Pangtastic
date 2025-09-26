@@ -12,6 +12,8 @@ namespace KDJ.States
 
         public void OnEnter(BoardManager boardManager)
         {
+            if (boardManager.IsRewardSkipped) return;
+
             Debug.Log("블록 재충전 상태");
             count = 0;
 
@@ -48,6 +50,8 @@ namespace KDJ.States
 
             // 애니메이션 재생중이라면 대기
             yield return new WaitWhile(() => SpecialBlockEffect.effectRunning || boardManager.IsWaitingForAnimation);
+
+            if (boardManager.IsRewardSkipped) yield break;
 
             // Spawner에서 새로운 리필 코루틴을 실행하고 끝날 때까지 대기
             yield return boardManager.Spawner.StartCoroutine(boardManager.Spawner.RefillBoardCoroutine(boardManager.BlockMover));
