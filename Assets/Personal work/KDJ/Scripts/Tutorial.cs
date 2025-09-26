@@ -18,6 +18,7 @@ public class Tutorial : MonoBehaviour
     [SerializeField] private float _resolutionCorrectMultiplier = 1f;
 
     public int Count = 0;
+    public List<Vector2Int> SwappableBlocks { get; private set; } = new List<Vector2Int>();
 
     public void PlayTutorial(Vector3 startPos)
     {
@@ -37,11 +38,21 @@ public class Tutorial : MonoBehaviour
     {
         BoardManager.Instance.IsPlayingTutorial = true;
         BoardManager.Instance.IsTutorialPlayed = true;
+        int width = BoardManager.Instance.Spawner.GameBoardData.Width;
+        int height = BoardManager.Instance.Spawner.GameBoardData.Height;
         Vector3 SPos = startPos - new Vector3(0, 1f, 0);
         Vector3 screenStartPos = Camera.main.WorldToScreenPoint(SPos);
         Vector3 endPos = SPos + new Vector3(-1.5f, 0, 0); // 손가락이 이동할 끝 위치 설정
         Vector3 screenEndPos = Camera.main.WorldToScreenPoint(endPos);
         bool animationEnd = false;
+
+        SwappableBlocks.Clear();
+        Vector2Int block1GridPos = BoardManager.Instance.BlockMover.WorldToGrid(SPos + new Vector3(-0.5f, 2f, 0), width, height);
+        Vector2Int block2GridPos = block1GridPos + new Vector2Int(-1, 0);
+        SwappableBlocks.Add(block1GridPos);
+        SwappableBlocks.Add(block2GridPos);
+
+        Debug.Log($"이동 가능한 블록 좌표 {block1GridPos}, {block2GridPos}");
 
         // 튜토리얼 재생 전 해상도 보정
         // ResolutionCorrect();
@@ -156,6 +167,8 @@ public class Tutorial : MonoBehaviour
     {
         BoardManager.Instance.IsPlayingTutorial = true;
         BoardManager.Instance.IsTutorialPlayed = true;
+        int width = BoardManager.Instance.Spawner.GameBoardData.Width;
+        int height = BoardManager.Instance.Spawner.GameBoardData.Height;
         Vector3 SPos = startPos - new Vector3(0, 1f, 0);
         Vector3 screenStartPos = Camera.main.WorldToScreenPoint(SPos);
         Vector3 endPos;
@@ -165,6 +178,21 @@ public class Tutorial : MonoBehaviour
             endPos = SPos + new Vector3(-1.5f, 0, 0); // 손가락이 이동할 끝 위치 설정
         Vector3 screenEndPos = Camera.main.WorldToScreenPoint(endPos);
         bool animationEnd = false;
+
+        SwappableBlocks.Clear();
+        Vector2Int block1GridPos = BoardManager.Instance.BlockMover.WorldToGrid(SPos + new Vector3(-0.5f, 2f, 0), width, height);
+        Vector2Int block2GridPos;
+        if (Manager.User.GetStage() == 4)
+        {
+            block1GridPos = BoardManager.Instance.BlockMover.WorldToGrid(SPos + new Vector3(-1f, 1, 0), width, height);
+            block2GridPos = block1GridPos + new Vector2Int(0, -1);
+        }
+        else
+            block2GridPos = block1GridPos + new Vector2Int(-1, 0);
+        SwappableBlocks.Add(block1GridPos);
+        SwappableBlocks.Add(block2GridPos);
+
+        Debug.Log($"이동 가능한 블록 좌표 {block1GridPos}, {block2GridPos}");
 
         // 튜토리얼 재생 전 해상도 보정
         // ResolutionCorrect();
