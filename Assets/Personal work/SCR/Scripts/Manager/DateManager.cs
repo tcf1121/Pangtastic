@@ -41,8 +41,7 @@ public class DateManager : Singleton<DateManager>
             PlayerPrefs.SetString(LastPurchaseDateKey, today.ToString("yyyyMMdd"));
             PlayerPrefs.Save();
             SetPurchaseList();
-            if (!Manager.Ad.RemovedAD)
-                Manager.Ad.LoadAppOpenAd();
+
             if (string.IsNullOrEmpty(lastDateStr))
             {
                 _loginStreak = 0;
@@ -53,11 +52,17 @@ public class DateManager : Singleton<DateManager>
             }
             PlayerPrefs.SetInt(StreakKey, _loginStreak);
         }
+
     }
 
     public string GetDate()
     {
         return PlayerPrefs.GetString(LastPurchaseDateKey, "");
+    }
+
+    public bool GetLoginStreak(int num)
+    {
+        return _loginStreak >= num;
     }
 
     public bool CanPurchase()

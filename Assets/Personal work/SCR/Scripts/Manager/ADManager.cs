@@ -31,6 +31,8 @@ public class ADManager : Singleton<ADManager>
     private BannerView _bannerView;
     public float bannerHeight;
 
+    private int adDay = 2;
+
     protected override void Awake()
     {
         base.Awake();
@@ -47,12 +49,10 @@ public class ADManager : Singleton<ADManager>
                 return;
             }
             Debug.Log("Google Mobile Ads initialization complete.");
-
-            // ===================== Rewarded Interstitial =====================
-            LoadAD();
-            // 2일 이상부터만 적용
-            if (Manager.Date.LoginStreak > 1)
+            if (!Manager.Ad.RemovedAD)
             {
+                // ===================== Rewarded Interstitial =====================
+                LoadAD();
                 // ===================== App Open Ad =====================
                 // 로그인 화면에서 불러옴
 
@@ -60,10 +60,10 @@ public class ADManager : Singleton<ADManager>
 
                 // ===================== Interstitial Ad =====================
                 LoadInterstitialAd();
+                // ===================== Banner Ad =====================
+                // 로비와 게임 화면에서 불러옴
+                //BannerCreateView();
             }
-            // ===================== Banner Ad =====================
-            // 로비와 게임 화면에서 불러옴
-            //BannerCreateView();
         });
 
         // ===================== App Open Event Ad =====================
@@ -243,7 +243,7 @@ public class ADManager : Singleton<ADManager>
     public void ShowAppOpenAd()
     {
         // 설치 후 2일 지나지 않음
-        if (!CheckDays(2))
+        if (!Manager.Date.GetLoginStreak(adDay))
             return;
 
         if (_appOpenAd != null && _appOpenAd.CanShowAd())
@@ -373,6 +373,8 @@ public class ADManager : Singleton<ADManager>
 
     public void ShowInterstitialAd()
     {
+        if (!Manager.Date.GetLoginStreak(adDay))
+            return;
         if (_interstitialAd != null && _interstitialAd.CanShowAd())
         {
             Debug.Log("Showing interstitial ad.");
