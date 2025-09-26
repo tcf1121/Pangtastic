@@ -34,7 +34,7 @@ public class DateManager : Singleton<DateManager>
         _loginStreak = PlayerPrefs.GetInt(StreakKey, 0);
 
 
-        if (lastDateStr != today.ToString("yyyy-MM-dd"))
+        if (lastDateStr != today.ToString("yyyyMMdd"))
         {
             // 날짜가 다르면 카운트 초기화
             PlayerPrefs.SetInt(DailyCountKey, 0);
@@ -89,7 +89,7 @@ public class DateManager : Singleton<DateManager>
 
     public void SetPurchaseList()
     {
-        List<int> pool = new List<int>() { 0, 1, 2, 3, 4, 5, 6 };
+        List<int> pool = new List<int>() { 0, 1, 2, 3, 4, 5, 6, 7 };
         int[] numbers = new int[4];
 
         for (int i = 0; i < 4; i++)
@@ -109,7 +109,7 @@ public class DateManager : Singleton<DateManager>
         Debug.Log("저장 완료: " + saveString);
     }
 
-    public ItemType LoadNumbers(int index)
+    public Goods LoadNumbers(int index)
     {
         if (PlayerPrefs.HasKey("MyNumbers"))
         {
@@ -120,7 +120,7 @@ public class DateManager : Singleton<DateManager>
             {
                 numbers[i] = int.Parse(split[i]);
             }
-            return (ItemType)numbers[index];
+            return (Goods)numbers[index];
 
         }
         return 0; // 저장된 값 없음

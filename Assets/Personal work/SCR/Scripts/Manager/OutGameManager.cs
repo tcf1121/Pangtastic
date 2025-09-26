@@ -28,6 +28,7 @@ public class OutGameManager : MonoBehaviour
         if (!Manager.Ad.RemovedAD)
         {
             _adPanel.SetActive(true);
+            Manager.Ad.LoadAD();
             Manager.Ad.BannerCreateView();
         }
 

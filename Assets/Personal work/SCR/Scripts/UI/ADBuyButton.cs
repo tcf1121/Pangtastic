@@ -6,7 +6,8 @@ using UnityEngine.UI;
 public class ADBuyButton : MonoBehaviour
 {
     [SerializeField] TMP_Text _text;
-    [SerializeField] GameObject _todayfin;
+    [SerializeField] GameObject _usualText;
+    [SerializeField] GameObject _finishText;
     [SerializeField] Slider _slider;
     [SerializeField] GameObject _adIcon;
     [SerializeField] Button _buyButton;
@@ -29,8 +30,14 @@ public class ADBuyButton : MonoBehaviour
 
         if (count == 5)
         {
-            _todayfin.SetActive(true);
+            _usualText.SetActive(false);
+            _finishText.SetActive(true);
             _buyButton.interactable = false;
+        }
+        else
+        {
+            _usualText.SetActive(true);
+            _finishText.SetActive(false);
         }
     }
 
@@ -38,22 +45,31 @@ public class ADBuyButton : MonoBehaviour
     {
         if (count == 0)
         {
-            ItemType item = Manager.Date.LoadNumbers(count);
-            OutGameManager.AddReward((Goods)Enum.Parse(typeof(Goods), item.ToString()), 1);
+            Goods goods = Manager.Date.LoadNumbers(count);
+            int index = 1;
+            if (goods == Goods.Gold) index = 1000;
+            OutGameManager.AddReward(goods, index);
             GetADReward();
         }
         else if (count < 4)
         {
-            Manager.Ad.OnRewardAdClosed += GetADReward;
-            ItemType item = Manager.Date.LoadNumbers(count);
-            OutGameManager.AddReward((Goods)Enum.Parse(typeof(Goods), item.ToString()), 1);
-            Manager.Ad.ShowAD();
+            Manager.Ad.OnRewardAdClosed = null;
+            if (!Manager.Ad.RemovedAD) Manager.Ad.OnRewardAdClosed += GetADReward;
+
+            Goods goods = Manager.Date.LoadNumbers(count);
+            int index = 1;
+            if (goods == Goods.Gold) index = 1000;
+            OutGameManager.AddReward(goods, index);
+            if (!Manager.Ad.RemovedAD) Manager.Ad.ShowAD();
+            else GetADReward();
         }
         else if (count == 4)
         {
-            Manager.Ad.OnRewardAdClosed += GetADReward;
+            Manager.Ad.OnRewardAdClosed = null;
+            if (!Manager.Ad.RemovedAD) Manager.Ad.OnRewardAdClosed += GetADReward;
             OutGameManager.AddIHReward(0.5f);
-            Manager.Ad.ShowAD();
+            if (!Manager.Ad.RemovedAD) Manager.Ad.ShowAD();
+            else GetADReward();
         }
         else
         {

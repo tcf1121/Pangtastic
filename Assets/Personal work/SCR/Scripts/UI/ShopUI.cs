@@ -20,6 +20,8 @@ public class ShopUI : MonoBehaviour
 
     void Start()
     {
+        _panels[2].gameObject.SetActive(false);
+        _panels[2].gameObject.SetActive(true);
         _layout.enabled = true;
         _scrollRect.onValueChanged.AddListener((v) => UpdateToggleByScroll());
     }
