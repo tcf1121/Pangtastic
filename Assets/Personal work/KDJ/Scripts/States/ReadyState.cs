@@ -11,6 +11,8 @@ namespace KDJ.States
 
         public void OnEnter(BoardManager boardManager)
         {
+            if (boardManager.IsRewardSkipped) return;
+            
             Debug.Log("입력 준비 상태");
             boardManager.InitialSwapPosition = null;
             boardManager.BlockMover.ResetCoordMoved();
@@ -92,7 +94,6 @@ namespace KDJ.States
                     Vector3 mousePosition = Input.mousePosition;
                     mousePosition.z = -Camera.main.transform.position.z;
                     boardManager.BlockMover.UpdateCoord(Camera.main.ScreenToWorldPoint(mousePosition));
-                    Debug.Log($"StartPos: {boardManager.BlockMover.StartBlockPos}, EndPos: {boardManager.BlockMover.EndBlockPos}");
                     if (boardManager.BlockMover.IsCoordMoved && !_isSwapping)
                     {
                         boardManager.StartCoroutine(SwapAndChangeState(boardManager));
@@ -130,7 +131,6 @@ namespace KDJ.States
                 Vector3 mousePosition = Input.mousePosition;
                 mousePosition.z = -Camera.main.transform.position.z;
                 boardManager.BlockMover.UpdateCoord(Camera.main.ScreenToWorldPoint(mousePosition));
-                Debug.Log($"StartPos: {boardManager.BlockMover.StartBlockPos}, EndPos: {boardManager.BlockMover.EndBlockPos}");
                 if (boardManager.BlockMover.IsCoordMoved && !_isSwapping)
                 {
                     boardManager.StartCoroutine(SwapAndChangeState(boardManager));

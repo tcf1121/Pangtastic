@@ -35,6 +35,13 @@ namespace KDJ
             }
         }
 
+        public override Block Clone()
+        {
+            FlourBag newFlourBag = (FlourBag)this.MemberwiseClone();
+            newFlourBag.fourPos = new List<Vector2Int>(this.fourPos);
+            return newFlourBag;
+        }
+
         private void SetFourPos(Block[,] array)
         {
             fourPos.Add(new Vector2Int(X, Y + 1));

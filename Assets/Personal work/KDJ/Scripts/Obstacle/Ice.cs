@@ -21,6 +21,11 @@ namespace KDJ
             DountType = (GemType)Random.Range(0, 6);
         }
 
+                public override Block Clone()
+        {
+            return (Ice)this.MemberwiseClone();
+        }
+
         public void SetSprite()
         {
             if (IceObject != null && iceSprite != null)

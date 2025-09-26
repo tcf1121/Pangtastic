@@ -23,6 +23,11 @@ namespace KDJ
             handle.Completed += OnSpriteLoadCompleted;
         }
 
+                public override Block Clone()
+        {
+            return (Egg)this.MemberwiseClone();
+        }
+
         private void OnSpriteLoadCompleted(AsyncOperationHandle<Sprite> handle)
         {
             if (handle.Status == AsyncOperationStatus.Succeeded)

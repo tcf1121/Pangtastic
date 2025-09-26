@@ -12,6 +12,11 @@ namespace KDJ
         protected Coroutine _brokenCoroutine;
 
 
+        public override Block Clone()
+        {
+            return (ObstacleBlock)this.MemberwiseClone();
+        }
+
         public virtual void TakeDamage()
         {
             CurrentHP--;

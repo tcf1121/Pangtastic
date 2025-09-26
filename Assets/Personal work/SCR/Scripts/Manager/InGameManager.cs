@@ -245,7 +245,7 @@ public class InGameManager : MonoBehaviour
 
     private IEnumerator RewardGemWrapperRoutine(List<GemType> gemList, TaskCompletionSource<bool> tcs)
     {
-        yield return StartCoroutine(KDJ.BoardManager.Instance.ClearRewardAnimation(gemList));
+        yield return StartCoroutine(KDJ.BoardManager.Instance.RewardRoutine(gemList));
         tcs.SetResult(true);
     }
 

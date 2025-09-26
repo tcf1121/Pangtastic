@@ -24,6 +24,11 @@ namespace KDJ
             handle.Completed += OnSpriteLoadCompleted;
         }
 
+                public override Block Clone()
+        {
+            return (GiftBox)this.MemberwiseClone();
+        }
+
         private void OnSpriteLoadCompleted(AsyncOperationHandle<Sprite> handle)
         {
             if (handle.Status == AsyncOperationStatus.Succeeded)
