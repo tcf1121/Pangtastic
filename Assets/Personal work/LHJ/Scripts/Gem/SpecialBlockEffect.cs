@@ -230,13 +230,19 @@ namespace LHJ
             }
         }
 
-        private IEnumerator MilkRoutine(Vector2Int origin, GameBoardData gameBoard, BoardManager board, int count = 3, bool destroyOrigin = true, System.Action<List<Vector2Int>> onCompleted = null)
+        private static HashSet<Vector2Int> _milkUsedTargets = new HashSet<Vector2Int>();
+
+        private IEnumerator MilkRoutine(Vector2Int origin, GameBoardData gameBoard, BoardManager board,
+            int count = 3, bool destroyOrigin = true, System.Action<List<Vector2Int>> onCompleted = null)
         {
             if (gameBoard == null || board == null) yield break;
             BeginEffect();
             Manager.Audio.PlaySFX("Milk_Use");
-            List<Vector2Int> targets = GetMilkTargets(gameBoard, count);
+            List<Vector2Int> targets = GetMilkTargets(gameBoard, count, _milkUsedTargets);
             if (targets.Count == 0) { EndEffect(); yield break; }
+
+            for (int i = 0; i < targets.Count; i++)
+                _milkUsedTargets.Add(targets[i]);
 
             if (destroyOrigin)
             {
@@ -256,11 +262,11 @@ namespace LHJ
                 GameObject drop = Instantiate(_milkDropFx, originWorld, Quaternion.identity, board.transform);
                 if (drop.TryGetComponent<SpriteRenderer>(out var sr)) sr.sortingOrder = 9999;
 
-                float baseScale = drop.transform.localScale.x; // 기본 크기 저장
+                float baseScale = drop.transform.localScale.x;
                 drop.transform
                     .DOScale(Vector3.one * baseScale * 1.3f, _milkFlyTime * 0.5f)
                     .SetEase(Ease.OutQuad)
-                    .SetLoops(2, LoopType.Yoyo); // 다시 원래 크기로
+                    .SetLoops(2, LoopType.Yoyo);
 
                 drop.transform.DOMove(targetWorld, _milkFlyTime)
                     .SetEase(Ease.InOutSine)
@@ -292,22 +298,22 @@ namespace LHJ
             onCompleted?.Invoke(targets);
             EndEffect();
         }
-        private List<Vector2Int> GetMilkTargets(GameBoardData gb, int count)
+        private List<Vector2Int> GetMilkTargets(GameBoardData gb, int count, HashSet<Vector2Int> exclude = null)
         {
-            // 필요 재료 우선
             List<GemType> needed = InGameManager.GetTagetGem();
-
             List<Vector2Int> result = new List<Vector2Int>();
 
             if (needed != null && needed.Count > 0)
             {
                 List<Vector2Int> candidates = GetTargetPos(gb, needed);
                 Shuffle(candidates);
-                int take = Mathf.Min(count, candidates.Count);
-                for (int i = 0; i < take; i++) result.Add(candidates[i]);
+                for (int i = 0; i < candidates.Count && result.Count < count; i++)
+                {
+                    if (exclude != null && exclude.Contains(candidates[i])) continue;
+                    result.Add(candidates[i]);
+                }
             }
 
-            // 노말 젬에서 랜덤 보충
             if (result.Count < count)
             {
                 List<Vector2Int> normals = new List<Vector2Int>();
@@ -317,16 +323,17 @@ namespace LHJ
                     {
                         var b = gb.GetBlock(x, y);
                         if (b != null && b.BlockInstance != null && b.GemType < GemType.Milk)
-                            normals.Add(new Vector2Int(x, y));
+                        {
+                            Vector2Int v = new Vector2Int(x, y);
+                            if (exclude != null && exclude.Contains(v)) continue;
+                            normals.Add(v);
+                        }
                     }
                 }
                 Shuffle(normals);
                 for (int i = 0; i < normals.Count && result.Count < count; i++)
                 {
-                    Vector2Int v = normals[i];
-                    bool exists = false;
-                    for (int j = 0; j < result.Count; j++) if (result[j] == v) { exists = true; break; }
-                    if (!exists) result.Add(v);
+                    result.Add(normals[i]);
                 }
             }
             return result;
