@@ -61,7 +61,14 @@ public class DialogueImporter
             string left_speaker = splitData[3];
             string center_speaker = splitData[4];
             string right_speaker = splitData[5];
-            int.TryParse(splitData[6], out int left_speaker_check);
+
+            int left_speaker_check = -1;
+
+            int parsed;
+            if (int.TryParse(splitData[6], out parsed))
+            {
+                left_speaker_check = parsed;
+            }
 
             string dialog_string_id = splitData[7];
 
@@ -115,7 +122,7 @@ public class DialogueImporter
             }
             else
             {
-                Debug.LogWarning($"스피커 파싱 빈칸/실패 {i}행 확인 {leftSpeakerName}");
+                Debug.LogWarning($"스피커 파싱 빈칸/실패. {i}행 확인 {leftSpeakerName}");
             }
 
             if (System.Enum.TryParse<Speaker>(centerSpeakerName, true, out speaker))
@@ -133,7 +140,7 @@ public class DialogueImporter
             }
             else
             {
-                Debug.LogWarning($"스피커 파싱 빈칸/실패 {i}행 확인 {rightSpeakerName}");
+                Debug.LogWarning($"스피커 파싱 빈칸/실패 {i}행 확인 Null 지정 {rightSpeakerName}");
             }
 
             string soPath = _dialogueGoupSODir + "/DialogueGroup_" + dialog_group + ".asset";

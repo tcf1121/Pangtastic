@@ -1,4 +1,3 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
@@ -6,12 +5,19 @@ using UnityEngine.ResourceManagement.AsyncOperations;
 
 public class DialoguePlayer : MonoBehaviour
 {
+    [SerializeField] private DialogueController _controller;
     [SerializeField] private List<DialogueGroupSO> _dialogueGroupSO = new List<DialogueGroupSO>();
 
     private void Awake()
     {
         LoadAllGroup();
+
+        if(_controller == null)
+        {
+            _controller = FindObjectOfType<DialogueController>();
+        }
     }
+
     private void LoadAllGroup()
     {
         _dialogueGroupSO.Clear();
@@ -29,14 +35,32 @@ public class DialoguePlayer : MonoBehaviour
             {
                 _dialogueGroupSO.Add(loadedList[i]);
             }
-
-            _dialogueGroupSO.Sort((a, b) => a.dialogGroup.CompareTo(b.dialogGroup)); // 스테이지 정렬
-
-            Debug.Log($"DialogueGroupSO 로드 완료. 총 {_dialogueGroupSO.Count}개");
+            Debug.Log($"DialogueGroupSO 로드 완료 총 {_dialogueGroupSO.Count}개");
         }
         else
         {
             Debug.LogError($"DialogueGroupSO 로드 실패:{handle.OperationException}");
         }
+    }
+
+    public void ShowById(int groupId)
+    {
+        for (int i = 0; i < _dialogueGroupSO.Count; i++)
+        {
+            if (_dialogueGroupSO[i].dialogGroup == groupId)
+            {
+                if (_controller != null)
+                {
+                    _controller.Play(_dialogueGroupSO[i]);
+                    return;
+                }
+                else
+                {
+                    Debug.LogError("DialogueController 연결안됨");
+                    return;
+                }
+            }
+        }
+        Debug.LogError($"잘못된 DialogueGroup ID: {groupId}");
     }
 }
