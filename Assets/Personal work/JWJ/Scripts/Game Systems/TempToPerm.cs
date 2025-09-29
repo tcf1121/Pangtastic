@@ -3,12 +3,14 @@ using Firebase.Database;
 using GooglePlayGames;
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
 public class TempToPerm : MonoBehaviour
 {
     [SerializeField] Button _tempToPermButton;
+    [SerializeField] TMP_Text _buttonText;
     private FirebaseUser _user;
 
     private void Awake()
@@ -43,21 +45,25 @@ public class TempToPerm : MonoBehaviour
         if (!_user.IsAnonymous)
         {
             Debug.LogError("이미 영구계정 입니다.");
+            _tempToPermButton.interactable = false;
             return;
         }
 
         _tempToPermButton.interactable = false;
+        _buttonText.text = "Linking..";
 
         Manager.GPGS.LinkGuestToGoogle(success =>
         {
             if (success) //성공하면
             {
                 _tempToPermButton.interactable = false; //버튼 숨김
+                _buttonText.text = "";
 
             }
             else // 실패하면
             {
                 _tempToPermButton.interactable = true; // 버튼 다시 활성화
+                _buttonText.text = "Google Play Games";
             }
         });
     }
