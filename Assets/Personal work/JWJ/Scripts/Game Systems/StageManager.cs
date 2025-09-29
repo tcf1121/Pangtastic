@@ -13,6 +13,8 @@ public class StageManager : Singleton<StageManager>
     public int CurrentStageIndex { get { return Manager.User.GetStage(); } }
     public StageSO CurrentStage => stages[CurrentStageIndex];
     private List<bool> UseItem = new();
+    private int _clearing;
+    private const string UserClearing = "ContinuousClearing";
     private List<RecipeSO> _stageRecipes = new();
     // 레시피 변수 추가
 
@@ -24,6 +26,7 @@ public class StageManager : Singleton<StageManager>
         UseItem.Add(false);
         UseItem.Add(false);
         UseItem.Add(false);
+        _clearing = PlayerPrefs.GetInt(UserClearing, 0);
     }
 
     private void LoadAllStages()
@@ -97,6 +100,23 @@ public class StageManager : Singleton<StageManager>
     public List<RecipeSO> GetStageRecipes()
     {
         return _stageRecipes;
+    }
+
+    public void StageClear()
+    {
+        _clearing++;
+        PlayerPrefs.SetInt(UserClearing, _clearing);
+    }
+
+    public void StageFail()
+    {
+        _clearing = 0;
+        PlayerPrefs.SetInt(UserClearing, _clearing);
+    }
+
+    public int GetClearing()
+    {
+        return _clearing;
     }
 
     // public void SaveStage()

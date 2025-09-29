@@ -268,6 +268,7 @@ public class InGameManager : MonoBehaviour
 
     public static void ClearGame()
     {
+        Manager.Stage.StageClear();
         if (Instate == null) Instate = GameObject.Find("InGameManager").GetComponent<InGameManager>();
         if (Instate._showInterstitialAd) Manager.Ad.ShowInterstitialAd();
         else Instate.GoLobby();
@@ -275,6 +276,7 @@ public class InGameManager : MonoBehaviour
 
     public void QuitGame()
     {
+        Manager.Stage.StageFail();
         if (_showInterstitialAd) Manager.Ad.ShowInterstitialAd();
         else GoLobby();
     }
