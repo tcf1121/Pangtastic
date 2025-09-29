@@ -609,6 +609,47 @@ namespace KDJ
                 scorePopup.GetComponentInParent<PooledObject>().ReturnToPool(1.0f);
             }
         }
+        public void PlayMatchExplosion(Vector3 position)
+        {
+            StartCoroutine(PlayMatchExplosionRoutine(position));
+        }
+
+        private IEnumerator PlayMatchExplosionRoutine(Vector3 position)
+        {
+            if (_explosionEffectPool == null) yield break;
+
+            var fxObj = _explosionEffectPool.GetObject().gameObject;
+            var sr = fxObj.GetComponent<SpriteRenderer>();
+
+            fxObj.transform.position = position;
+            fxObj.transform.localScale = Vector3.one * 0.2f;
+
+            float popTime = _duration * 0.65f;
+            float timer = 0f;
+
+            while (timer < popTime)
+            {
+                timer += Time.deltaTime;
+                float t = Mathf.Clamp01(timer / popTime);
+
+                float scale = _explosionScaleCurve != null ? _explosionScaleCurve.Evaluate(t) : Mathf.Lerp(0.2f, 1f, t);
+                float alpha = _explosionAlphaCurve != null ? _explosionAlphaCurve.Evaluate(t) : (1f - t);
+
+                if (sr != null)
+                {
+                    var c = sr.color;
+                    c.a = alpha;
+                    sr.color = c;
+                }
+                fxObj.transform.localScale = Vector3.one * scale;
+                yield return null;
+            }
+
+            if (fxObj.TryGetComponent<PooledObject>(out var pooled))
+                pooled.ReturnToPool();
+            else
+                Destroy(fxObj);
+        }
         #endregion
 
         #region 보상 및 특수 블록
