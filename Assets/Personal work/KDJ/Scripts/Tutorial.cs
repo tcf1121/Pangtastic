@@ -40,14 +40,18 @@ public class Tutorial : MonoBehaviour
         BoardManager.Instance.IsTutorialPlayed = true;
         int width = BoardManager.Instance.Spawner.GameBoardData.Width;
         int height = BoardManager.Instance.Spawner.GameBoardData.Height;
-        Vector3 SPos = startPos - new Vector3(0, 1f, 0);
-        Vector3 screenStartPos = Camera.main.WorldToScreenPoint(SPos);
-        Vector3 endPos = SPos + new Vector3(-1.5f, 0, 0); // 손가락이 이동할 끝 위치 설정
-        Vector3 screenEndPos = Camera.main.WorldToScreenPoint(endPos);
-        bool animationEnd = false;
+        RectTransform handRect = _handImage.transform.parent.GetComponent<RectTransform>();
+        Vector2 localSPos, localEPos;
+        Vector3 sPos = startPos - new Vector3(0, 1f, 0);
+        Vector3 screenStartPos = Camera.main.WorldToScreenPoint(sPos);
+        Vector3 ePos = sPos + new Vector3(-1.5f, 0, 0); // 손가락이 이동할 끝 위치 설정
+        Vector3 screenEndPos = Camera.main.WorldToScreenPoint(ePos);
+        RectTransformUtility.ScreenPointToLocalPointInRectangle(handRect, screenStartPos, null, out localSPos);
+        RectTransformUtility.ScreenPointToLocalPointInRectangle(handRect, screenEndPos, null, out localEPos);
 
+        bool animationEnd = false;
         SwappableBlocks.Clear();
-        Vector2Int block1GridPos = BoardManager.Instance.BlockMover.WorldToGrid(SPos + new Vector3(-0.5f, 2f, 0), width, height);
+        Vector2Int block1GridPos = BoardManager.Instance.BlockMover.WorldToGrid(sPos + new Vector3(-0.5f, 2f, 0), width, height);
         Vector2Int block2GridPos = block1GridPos + new Vector2Int(-1, 0);
         SwappableBlocks.Add(block1GridPos);
         SwappableBlocks.Add(block2GridPos);
@@ -62,6 +66,8 @@ public class Tutorial : MonoBehaviour
 
         _maskImages[Manager.User.GetStage()].SetActive(true);
         _handImage.enabled = true;
+
+        _handImage.rectTransform.rotation = Quaternion.Euler(0, 0, 30);
         // 사용자의 입력으로 상태가 변경될때까지 반복
         while (true)
         {
@@ -71,7 +77,7 @@ public class Tutorial : MonoBehaviour
             while (elapsedTime < _handMoveDuration)
             {
                 if (BoardManager.Instance.CurrentState is ReadyState == false) { animationEnd = true; break; }
-                _handImage.transform.position = Vector3.Lerp(screenStartPos, screenEndPos, (elapsedTime / _handMoveDuration));
+                _handImage.rectTransform.anchoredPosition = Vector3.Lerp(localSPos, localEPos, (elapsedTime / _handMoveDuration));
                 elapsedTime += Time.deltaTime;
                 yield return null;
             }
@@ -103,7 +109,7 @@ public class Tutorial : MonoBehaviour
         yield return new WaitForSeconds(0.5f);
 
         // 목표 도넛 정보창 튜토리얼 활성화
-        SetMatchValue(1f);
+        SetMatchValueForResolution();
         _donutInfo.SetActive(true);
         BoardManager.SetTouch(false);
 
@@ -169,22 +175,27 @@ public class Tutorial : MonoBehaviour
         BoardManager.Instance.IsTutorialPlayed = true;
         int width = BoardManager.Instance.Spawner.GameBoardData.Width;
         int height = BoardManager.Instance.Spawner.GameBoardData.Height;
-        Vector3 SPos = startPos - new Vector3(0, 1f, 0);
-        Vector3 screenStartPos = Camera.main.WorldToScreenPoint(SPos);
-        Vector3 endPos;
+        RectTransform handRect = _handImage.transform.parent.GetComponent<RectTransform>();
+        Vector2 localSPos, localEPos;
+        Vector3 sPos = startPos - new Vector3(0, 1f, 0);
+        Vector3 screenStartPos = Camera.main.WorldToScreenPoint(sPos);
+        Vector3 ePos;
         if (Manager.User.GetStage() == 4) // 4스테이지는 손가락 이동 방향이 다름
-            endPos = SPos + new Vector3(0, -1.5f, 0); // 4스테이지는 세로
+            ePos = sPos + new Vector3(0, -1.5f, 0); // 4스테이지는 세로
         else
-            endPos = SPos + new Vector3(-1.5f, 0, 0); // 손가락이 이동할 끝 위치 설정
-        Vector3 screenEndPos = Camera.main.WorldToScreenPoint(endPos);
+            ePos = sPos + new Vector3(-1.5f, 0, 0); // 손가락이 이동할 끝 위치 설정
+        Vector3 screenEndPos = Camera.main.WorldToScreenPoint(ePos);
+        RectTransformUtility.ScreenPointToLocalPointInRectangle(handRect, screenStartPos, null, out localSPos);
+        RectTransformUtility.ScreenPointToLocalPointInRectangle(handRect, screenEndPos, null, out localEPos);
+
         bool animationEnd = false;
 
         SwappableBlocks.Clear();
-        Vector2Int block1GridPos = BoardManager.Instance.BlockMover.WorldToGrid(SPos + new Vector3(-0.5f, 2f, 0), width, height);
+        Vector2Int block1GridPos = BoardManager.Instance.BlockMover.WorldToGrid(sPos + new Vector3(-0.5f, 2f, 0), width, height);
         Vector2Int block2GridPos;
         if (Manager.User.GetStage() == 4)
         {
-            block1GridPos = BoardManager.Instance.BlockMover.WorldToGrid(SPos + new Vector3(-1f, 1, 0), width, height);
+            block1GridPos = BoardManager.Instance.BlockMover.WorldToGrid(sPos + new Vector3(-1f, 1, 0), width, height);
             block2GridPos = block1GridPos + new Vector2Int(0, -1);
         }
         else
@@ -214,7 +225,7 @@ public class Tutorial : MonoBehaviour
             while (elapsedTime < _handMoveDuration)
             {
                 if (BoardManager.Instance.CurrentState is ReadyState == false) { animationEnd = true; break; }
-                _handImage.transform.position = Vector3.Lerp(screenStartPos, screenEndPos, (elapsedTime / _handMoveDuration));
+                _handImage.rectTransform.anchoredPosition = Vector3.Lerp(localSPos, localEPos, (elapsedTime / _handMoveDuration));
                 elapsedTime += Time.deltaTime;
                 yield return null;
             }
@@ -255,14 +266,6 @@ public class Tutorial : MonoBehaviour
         float currentRatio = (float)Screen.width / Screen.height;
         float logDiff = Mathf.Log(currentRatio / targetRatio, 2f);
         float multiplier;
-        if (logDiff > 0)
-        {
-            multiplier = 1 - _resolutionCorrectMultiplier;
-        }
-        else
-        {
-            multiplier = _resolutionCorrectMultiplier;
-        }
 
         multiplier = _resolutionCorrectMultiplier;
         float multipliedLogDiff = Mathf.Abs(logDiff * multiplier);
@@ -293,6 +296,32 @@ public class Tutorial : MonoBehaviour
         _canvas.matchWidthOrHeight = match;
     }
 
+    /// <summary>
+    /// matchWidthOrHeight를 해상도에 맞게 계산하여 설정
+    /// </summary>
+    public void SetMatchValueForResolution()
+    {
+        float targetRatio = 9f / 16f;
+        float currentRatio = (float)Screen.width / Screen.height;
+        float logDiff = Mathf.Log(currentRatio / targetRatio, 2f);
+        float match;
+
+        if (logDiff > 0)
+        {
+            match = 1f;
+        }
+        else
+        {
+            match = 0f;
+        }
+
+        _canvas.matchWidthOrHeight = match;
+    }
+
+    /// <summary>
+    /// 외부에서 matchWidthOrHeight를 지정하여 설정
+    /// </summary>
+    /// <param name="matchValue"></param>
     public void SetMatchValue(float matchValue)
     {
         float targetRatio = 9f / 16f;
