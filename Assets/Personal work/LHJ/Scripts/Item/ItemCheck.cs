@@ -158,6 +158,7 @@ namespace LHJ
             {
                 Vector3 hStart = GridToWorld(0, pos.y);
                 Vector3 hEnd = GridToWorld(w - 1, pos.y);
+
                 fxH = Instantiate(_scissorHFx, hStart, Quaternion.identity, _board.transform);
                 fxH.transform.DOMove(hEnd, hDuration).SetEase(Ease.Linear).OnComplete(() =>
                 {
@@ -169,7 +170,8 @@ namespace LHJ
             {
                 Vector3 vStart = GridToWorld(pos.x, h - 1);
                 Vector3 vEnd = GridToWorld(pos.x, 0);
-                fxV = Instantiate(_scissorVFx, vStart, Quaternion.identity, _board.transform);
+
+                fxV = Instantiate(_scissorVFx, vStart, Quaternion.Euler(0, 0, 270), _board.transform);
                 fxV.transform.DOMove(vEnd, vDuration).SetEase(Ease.Linear).OnComplete(() =>
                 {
                     if (fxV != null) Destroy(fxV);
@@ -229,11 +231,13 @@ namespace LHJ
                                     {
                                         if (blk.BlockInstance != null && blk.BlockInstance.TryGetComponent<PooledObject>(out var pooled))
                                         {
+                                            BoardManager.Instance.PlayMatchExplosion(blk.BlockInstance.transform.position);
                                             InGameManager.AddIngredientSta(blk.GemType);
                                             pooled.ReturnToPool();
                                         }
                                         else if (blk.BlockInstance != null)
                                         {
+                                            BoardManager.Instance.PlayMatchExplosion(blk.BlockInstance.transform.position);
                                             InGameManager.AddIngredientSta(blk.GemType);
                                             Destroy(blk.BlockInstance);
                                         }
@@ -291,11 +295,13 @@ namespace LHJ
                                     {
                                         if (blk.BlockInstance != null && blk.BlockInstance.TryGetComponent<PooledObject>(out var pooled))
                                         {
+                                            BoardManager.Instance.PlayMatchExplosion(blk.BlockInstance.transform.position);
                                             InGameManager.AddIngredientSta(blk.GemType);
                                             pooled.ReturnToPool();
                                         }
                                         else if (blk.BlockInstance != null)
                                         {
+                                            BoardManager.Instance.PlayMatchExplosion(blk.BlockInstance.transform.position);
                                             InGameManager.AddIngredientSta(blk.GemType);
                                             Destroy(blk.BlockInstance);
                                         }
@@ -443,9 +449,17 @@ namespace LHJ
                 }
 
                 if (blk.BlockInstance != null && blk.BlockInstance.TryGetComponent<PooledObject>(out var pooled))
-                { InGameManager.AddIngredientSta(blk.GemType); pooled.ReturnToPool(); }
+                {
+                    BoardManager.Instance.PlayMatchExplosion(blk.BlockInstance.transform.position);
+                    InGameManager.AddIngredientSta(blk.GemType); 
+                    pooled.ReturnToPool(); 
+                }
                 else if (blk.BlockInstance != null)
-                { InGameManager.AddIngredientSta(blk.GemType); Destroy(blk.BlockInstance); }
+                {
+                    BoardManager.Instance.PlayMatchExplosion(blk.BlockInstance.transform.position);
+                    InGameManager.AddIngredientSta(blk.GemType); 
+                    Destroy(blk.BlockInstance); 
+                }
 
                 sp.GameBoardData.BlockArray[y, x].BlockInstance = null;
                 destroyedCount++;

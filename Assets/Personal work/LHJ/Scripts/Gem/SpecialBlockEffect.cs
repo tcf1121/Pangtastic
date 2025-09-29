@@ -15,19 +15,26 @@ namespace LHJ
         [SerializeField] private GameObject _rollerVerticalFx;
         [SerializeField] private GameObject _rollerTrailFxH;
         [SerializeField] private GameObject _rollerTrailFxV;
+        [SerializeField] private float _rollerEffectTime;
 
         [Header("우유")]
         [SerializeField] private GameObject _milkDropFx;
         [SerializeField] private GameObject _milkSplashFx;
-        [SerializeField] private float _milkFlyTime;
+        [SerializeField] private float _milkShrinkTime;
+        [SerializeField] private float _milkTimePerCell;
+        [SerializeField] private float _milkMinFlyTime;
+        [SerializeField] private int _milkDropCount;
+        [SerializeField] private int _milkDropCountDouble;
 
         [Header("오븐")]
         [SerializeField] private GameObject _ovenFx;
         [SerializeField] private Material _ovenStrokeMat;
         [SerializeField] private Material _ovenLineMat;
+        [SerializeField] private float _ovenShakeTime;
 
         [Header("도넛상자")]
         [SerializeField] private GameObject _donutBurstFx;
+        [SerializeField] private float _donutEffectTime;
         public static bool effectRunning { get { return _running > 0; } }
 
         private static int _running;
@@ -77,7 +84,7 @@ namespace LHJ
             {
                 var bm = BoardManager.Instance;
                 if (bm != null)
-                    bm.StartCoroutine(MilkRoutine(pos, gameBoard, bm));
+                    bm.StartCoroutine(MilkRoutine(pos, gameBoard, bm, _milkDropCount, true));
                 return;
             }
 
@@ -144,7 +151,7 @@ namespace LHJ
             fx.transform.position = startWorld;
             if (fx.TryGetComponent<SpriteRenderer>(out var sr)) sr.sortingOrder = 9999;
 
-            float stepTime = 0.15f;
+            float stepTime = _rollerEffectTime;
             float duration = (isHorizontal ? gameBoard.Width : gameBoard.Height) * stepTime;
             fx.transform.DOMove(endWorld, duration).SetEase(Ease.Linear);
 
@@ -225,7 +232,7 @@ namespace LHJ
                     sr.color = new Color(c.r, c.g, c.b, Mathf.Min(c.a, 0.7f));
                 }
 
-                Destroy(trail, 0.25f);
+                Destroy(trail, _rollerEffectTime);
                 yield return null;
             }
         }
@@ -246,9 +253,7 @@ namespace LHJ
 
             if (destroyOrigin)
             {
-                var selfHit = new List<Vector2Int>(1);
-                AddCell(gameBoard, origin.x, origin.y, selfHit);
-                if (selfHit.Count > 0) ApplyDamageAndScore(board, selfHit);
+                StartCoroutine(ShrinkMilkOriginRoutine(origin, gameBoard, board));
             }
 
             Vector3 originWorld = GridToWorld(board, gameBoard, origin.x, origin.y);
@@ -262,14 +267,20 @@ namespace LHJ
                 GameObject drop = Instantiate(_milkDropFx, originWorld, Quaternion.identity, board.transform);
                 if (drop.TryGetComponent<SpriteRenderer>(out var sr)) sr.sortingOrder = 9999;
 
+                Vector3 c00 = GridToWorld(board, gameBoard, 0, 0);
+                Vector3 c10 = GridToWorld(board, gameBoard, 1, 0);
+                float cellSize = Mathf.Abs(c10.x - c00.x);
+                float cellsDist = Mathf.Max(1f, Vector3.Distance(originWorld, targetWorld) / Mathf.Max(0.0001f, cellSize));
+                float flyTime = Mathf.Max(_milkMinFlyTime, cellsDist * _milkTimePerCell);
+
                 float baseScale = drop.transform.localScale.x;
                 drop.transform
-                    .DOScale(Vector3.one * baseScale * 1.3f, _milkFlyTime * 0.5f)
+                    .DOScale(Vector3.one * baseScale * 1.3f, flyTime * 0.5f)
                     .SetEase(Ease.OutQuad)
                     .SetLoops(2, LoopType.Yoyo);
 
-                drop.transform.DOMove(targetWorld, _milkFlyTime)
-                    .SetEase(Ease.InOutSine)
+                drop.transform.DOMove(targetWorld, flyTime)
+                    .SetEase(Ease.Linear)
                     .OnComplete(() =>
                     {
                         if (_milkSplashFx != null)
@@ -288,7 +299,7 @@ namespace LHJ
             }
 
             float elapsed = 0f;
-            float timeout = _milkFlyTime + 0.25f;
+            float timeout = (_milkMinFlyTime + (Mathf.Max(gameBoard.Width, gameBoard.Height) * _milkTimePerCell)) + 0.25f;
             while (finished < targets.Count && elapsed < timeout)
             {
                 elapsed += Time.deltaTime;
@@ -353,6 +364,25 @@ namespace LHJ
             }
             return list;
         }
+        private IEnumerator ShrinkMilkOriginRoutine(Vector2Int origin, GameBoardData gb, BoardManager board)
+        {
+            var blk = gb.GetBlock(origin.x, origin.y);
+            if (blk == null || blk.BlockInstance == null) yield break;
+            var t = blk.BlockInstance.transform;
+            t.DOScale(Vector3.zero, _milkShrinkTime).SetEase(Ease.InBack);
+
+            float elapsed = 0f;
+            while (elapsed < _milkShrinkTime)
+            {
+                elapsed += Time.deltaTime;
+                yield return null;
+            }
+
+            var selfHit = new List<Vector2Int>(1);
+            AddCell(gb, origin.x, origin.y, selfHit);
+            if (selfHit.Count > 0) ApplyDamageAndScore(board, selfHit);
+        }
+
         private IEnumerator OvenRoutine(Vector2Int origin, GameBoardData gameBoard, BoardManager board)
         {
             if (gameBoard == null || board == null) yield break;
@@ -422,7 +452,7 @@ namespace LHJ
                         }
                     }
             }
-            yield return new WaitForSeconds(1f);
+            yield return new WaitForSeconds(_ovenShakeTime);
             Manager.Audio.PlaySFX("Oven_Use");
             ApplyStroke(gameBoard, targets);
 
@@ -508,7 +538,7 @@ namespace LHJ
                 if (fx.TryGetComponent<SpriteRenderer>(out var sr)) sr.sortingOrder = 9999;
             }
 
-            yield return new WaitForSeconds(0.5f);
+            yield return new WaitForSeconds(_donutEffectTime);
 
             var hits = new List<Vector2Int>();
             var queuedSpecials = new List<(Vector2Int pos, GemType type)>();
@@ -595,7 +625,7 @@ namespace LHJ
                         ob.TakeDamage();
                         continue;
                     }
-
+                    BoardManager.Instance.PlayMatchExplosion(b.BlockInstance.transform.position);
                     if (b.BlockInstance.TryGetComponent<PooledObject>(out var pooledObject))
                     {
                         pooledObject.ReturnToPool();
@@ -656,7 +686,7 @@ namespace LHJ
                 var bm = BoardManager.Instance;
                 if (bm != null)
                 {
-                    bm.StartCoroutine(MilkRoutine(secondPos, gameBoard, bm, 5, false));
+                    bm.StartCoroutine(MilkRoutine(secondPos, gameBoard, bm, _milkDropCountDouble, false));
                 }
                 return;
             }
@@ -740,9 +770,8 @@ namespace LHJ
                 {
                     Vector2Int milkPos = (a == GemType.Milk) ? firstPos : secondPos;
 
-                    bm.StartCoroutine(MilkRoutine(milkPos, gameBoard, bm, 3, true, (landed) =>
+                    bm.StartCoroutine(MilkRoutine(milkPos, gameBoard, bm, _milkDropCount, true, (landed) =>
                     {
-                        // 우유 3발 모두 끝난 뒤 → 그 자리에서 세로 라인 발동
                         for (int i = 0; i < landed.Count; i++)
                             bm.StartCoroutine(RollerRoutine(landed[i], false, gameBoard, bm));
                     }));
@@ -759,7 +788,7 @@ namespace LHJ
                 {
                     Vector2Int milkPos = (a == GemType.Milk) ? firstPos : secondPos;
 
-                    bm.StartCoroutine(MilkRoutine(milkPos, gameBoard, bm, 3, true, (landed) =>
+                    bm.StartCoroutine(MilkRoutine(milkPos, gameBoard, bm, _milkDropCount, true, (landed) =>
                     {
                         // 우유 3발 모두 끝난 뒤 → 그 자리에서 세로 라인 발동
                         for (int i = 0; i < landed.Count; i++)
@@ -795,7 +824,7 @@ namespace LHJ
                 if (bm != null)
                 {
                     Vector2Int milkPos = (a == GemType.Milk) ? firstPos : secondPos;
-                    bm.StartCoroutine(MilkRoutine(milkPos, gameBoard, bm, 3, true, (landed) =>
+                    bm.StartCoroutine(MilkRoutine(milkPos, gameBoard, bm, _milkDropCount, true, (landed) =>
                     {
                         for (int i = 0; i < landed.Count; i++)
                         {
