@@ -12,7 +12,7 @@ public class ResidentConfigSO : ScriptableObject
     [Header("이동 최대 시간")]
     public float MoveDuration = 20f;
     [Header("목표지점에서 멈춤 거리")]
-    public float StoppingDistance = 0.6f;
+    public float StoppingDistance = 4f;
     [Header("선호 지점 갈 확률")]
     [Range(0f, 1f)] public float PreferredWeight = 0.5f;
     [Header("선호 지점 애니메이션 확률")]
