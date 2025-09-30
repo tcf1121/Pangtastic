@@ -15,6 +15,11 @@ public class CharacterRotationUI : MonoBehaviour, IDragHandler, IPointerDownHand
 
     public void OnPointerDown(PointerEventData eventData)
     {
+        if (Input.touchCount >= 2) 
+        { 
+            _isDragging = false; 
+            return; 
+        }
         _isDragging = true;
     }
 
@@ -25,11 +30,12 @@ public class CharacterRotationUI : MonoBehaviour, IDragHandler, IPointerDownHand
 
     public void OnDrag(PointerEventData eventData)
     {
-        if (_isDragging)
+        if (_isDragging && (Input.touchCount == 1 || !Input.touchSupported))
         {
             float deltaX = eventData.delta.x;
             _character.transform.Rotate(Vector3.up, deltaX * -_rotationSpeed);
         }
+
     }
 
     private void Update()
@@ -46,5 +52,32 @@ public class CharacterRotationUI : MonoBehaviour, IDragHandler, IPointerDownHand
 
             _cam.transform.position = _character.transform.position + dir * distance;
         }
+
+        if (Input.touchCount >= 2)
+        {
+            _isDragging = false;
+        }
+
+        if ( Input.touchCount == 2)
+        {
+            var touch0 = Input.GetTouch(0);
+            var touch1 = Input.GetTouch(1);
+
+            float prevDis = ((touch0.position - touch0.deltaPosition) - (touch1.position - touch1.deltaPosition)).magnitude;
+            
+            float curDis = (touch0.position - touch1.position).magnitude;
+
+            float delta = (curDis - prevDis);
+            ZoomByDelta(-delta * 0.002f);
+        }
+    }
+
+    void ZoomByDelta(float delta)
+    {
+        Vector3 dir = (_cam.transform.position - _character.transform.position).normalized;
+        float distance = Vector3.Distance(_cam.transform.position, _character.transform.position);
+        distance += delta;
+        distance = Mathf.Clamp(distance, _minDistance, _maxDistance);
+        _cam.transform.position = _character.transform.position + dir * distance;
     }
 }

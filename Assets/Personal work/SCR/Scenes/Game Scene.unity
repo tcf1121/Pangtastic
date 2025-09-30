@@ -12527,17 +12527,24 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 47ef4da04b1134a47a6442b1d4cd64c0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _rollerHorizontalFx: {fileID: 426720338226107974, guid: 75a34cb5470028a4eb0d912416fb3f53, type: 3}
-  _rollerVerticalFx: {fileID: 7732103167370757450, guid: abaa78b1519a0f842a756a4b83a6cf6c, type: 3}
+  _rollerHorizontalFx: {fileID: 426720338226107974, guid: 316925a292ffadd41bf9abe161515db3, type: 3}
+  _rollerVerticalFx: {fileID: 7732103167370757450, guid: 1433dc6dd0e9bb744af8a254f9109847, type: 3}
   _rollerTrailFxH: {fileID: 5730566548226682007, guid: f8bb0f551f8d5504cb73e7d279bf608b, type: 3}
   _rollerTrailFxV: {fileID: 5256505135586146949, guid: f25bd44ffdbc1d243aa2055181ad194c, type: 3}
+  _rollerEffectTime: 0.15
   _milkDropFx: {fileID: 6599639827530494147, guid: 96cf646826781dc4eabb87786cc44ef2, type: 3}
-  _milkSplashFx: {fileID: 1533138629959123385, guid: b14e68e3779225640b6c0c71912c8e56, type: 3}
-  _milkFlyTime: 1
-  _ovenFx: {fileID: 8216247949329258546, guid: 110c05336d55fe74f8b9ea56c501a050, type: 3}
+  _milkSplashFx: {fileID: 498417713505491951, guid: 2095b6983e1bfa64cae37cb281b00451, type: 3}
+  _milkShrinkTime: 0.1
+  _milkTimePerCell: 0.2
+  _milkMinFlyTime: 0.2
+  _milkDropCount: 2
+  _milkDropCountDouble: 5
+  _ovenFx: {fileID: 8216247949329258546, guid: 60be342cb12723447b33a31ed115105f, type: 3}
   _ovenStrokeMat: {fileID: 2100000, guid: d957cb65e396860489d6bbbf89ca9c86, type: 2}
   _ovenLineMat: {fileID: 2100000, guid: c75f6c14bec8afa46a1cd568bd90d442, type: 2}
+  _ovenShakeTime: 0.5
   _donutBurstFx: {fileID: 9157105887711914197, guid: c4f829cb7dd4b864caf8832ec5b1ee55, type: 3}
+  _donutEffectTime: 0.5
 --- !u!114 &486154115
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -26813,11 +26820,11 @@ PrefabInstance:
     - target: {fileID: 7085172997495155829, guid: e18bdeefcce5d304e84da3a5664879c5, type: 3}
       propertyPath: _scissorHFx
       value: 
-      objectReference: {fileID: 8948550414140682282, guid: d006bd4f2e4e79b48b551acb3fc97721, type: 3}
+      objectReference: {fileID: 6378134695496327388, guid: d58291544d2b7084f9574d21cbc33b14, type: 3}
     - target: {fileID: 7085172997495155829, guid: e18bdeefcce5d304e84da3a5664879c5, type: 3}
       propertyPath: _scissorVFx
       value: 
-      objectReference: {fileID: 451048349482114044, guid: 28c46f7fb83183b4bb398dcabe34fb5a, type: 3}
+      objectReference: {fileID: 6378134695496327388, guid: 789c3facf6034c2429274e19144ec6c3, type: 3}
     - target: {fileID: 7085172997495155829, guid: e18bdeefcce5d304e84da3a5664879c5, type: 3}
       propertyPath: _scissorFxMs
       value: 2000
@@ -26825,7 +26832,7 @@ PrefabInstance:
     - target: {fileID: 7085172997495155829, guid: e18bdeefcce5d304e84da3a5664879c5, type: 3}
       propertyPath: _whiskAreaFx
       value: 
-      objectReference: {fileID: 1128856061811643905, guid: 97d74f73ddcbe5248af86f984860380a, type: 3}
+      objectReference: {fileID: 6733366654335811489, guid: 2e0b6f7cb7f474142951299a9d32c2ca, type: 3}
     - target: {fileID: 7085172997495155829, guid: e18bdeefcce5d304e84da3a5664879c5, type: 3}
       propertyPath: _whiskTileFx
       value: 
@@ -36357,7 +36364,7 @@ PrefabInstance:
     - target: {fileID: 399701196991078587, guid: 4c882021e99ce47429f6f0ed664fafd4, type: 3}
       propertyPath: m_Sprite
       value: 
-      objectReference: {fileID: 21300000, guid: 13c0846f428cd6c4ca358828929ba243, type: 3}
+      objectReference: {fileID: 21300000, guid: 39e5f6a9ac99b294b8b1d270de35c5e3, type: 3}
     - target: {fileID: 1528867895100658450, guid: 4c882021e99ce47429f6f0ed664fafd4, type: 3}
       propertyPath: m_IsActive
       value: 1
@@ -42156,7 +42163,7 @@ PrefabInstance:
     - target: {fileID: 399701196991078587, guid: 4c882021e99ce47429f6f0ed664fafd4, type: 3}
       propertyPath: m_Sprite
       value: 
-      objectReference: {fileID: 21300000, guid: 2bcefbf6cb4c0f44f8de7f67528f6db0, type: 3}
+      objectReference: {fileID: 21300000, guid: 7822311d7a39c3047ab2126158b093cd, type: 3}
     - target: {fileID: 2099633209566882258, guid: 4c882021e99ce47429f6f0ed664fafd4, type: 3}
       propertyPath: m_AnchorMax.x
       value: 1

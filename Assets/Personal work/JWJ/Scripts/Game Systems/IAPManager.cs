@@ -240,12 +240,12 @@ public class IAPManager : Singleton<IAPManager>
 
     public void TryPurchase(string productId)
     {
-        if (Manager.DB.GetUserRoot() == "guests" || Manager.DB.auth.CurrentUser.IsAnonymous)
-        {
-            Debug.LogWarning("게스트 계정은 결제 불가");
-            OutGameManager.Instance.OpenAccountLinkingPopup();
-            return;
-        }
+        //if (Manager.DB.GetUserRoot() == "guests" || Manager.DB.auth.CurrentUser.IsAnonymous)
+        //{
+        //    Debug.LogWarning("게스트 계정은 결제 불가");
+        //    OutGameManager.Instance.OpenAccountLinkingPopup();
+        //    return;
+        //}
 
         if (_store == null)
         {

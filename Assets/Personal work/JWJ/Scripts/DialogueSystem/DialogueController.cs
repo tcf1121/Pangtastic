@@ -48,7 +48,7 @@ public class DialogueController : MonoBehaviour
 
         for (int i = 0; i < _lines.Count; i++)
         {
-            Debug.Log($"현재 라인: {i + 1} / {_lines.Count}. 대사 ID : {_lines[i].DialogId}. 스피커 : {_lines[i].SpeakerCheck}");
+            //Debug.Log($"현재 라인: {i + 1} / {_lines.Count}. 대사 ID : {_lines[i].DialogId}. 스피커 : {_lines[i].SpeakerCheck}");
             DialogueLine line = _lines[i];
 
             if (line.BackgroundSprite != null)
