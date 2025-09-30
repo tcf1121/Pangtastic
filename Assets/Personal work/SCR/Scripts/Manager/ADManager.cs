@@ -37,6 +37,8 @@ public class ADManager : Singleton<ADManager>
     {
         base.Awake();
         CheckRemoveAD();
+
+        PlayerPrefs.SetInt(RemoveAD, 0); //테스트용 지울예정
     }
 
     private void Start()
@@ -81,6 +83,8 @@ public class ADManager : Singleton<ADManager>
     {
         _removedAD = true;
         PlayerPrefs.SetInt(RemoveAD, 1);
+
+        OutGameManager.CloseBannerAd();
     }
 
 
@@ -455,7 +459,7 @@ public class ADManager : Singleton<ADManager>
         // int width = Screen.width / (int)(Screen.dpi / 160f);
         // 적응형 배너 크기 얻기
         // AdSize adaptiveSize = AdSize.GetCurrentOrientationAnchoredAdaptiveBannerAdSizeWithWidth(width);
-        AdSize adaptiveSize = new AdSize(300, 50);
+        AdSize adaptiveSize = new AdSize(320, 50);
         bannerHeight = DipsToPixels(adaptiveSize.Height);
 
         // 배너 생성
