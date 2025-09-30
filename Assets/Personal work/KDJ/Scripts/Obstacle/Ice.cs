@@ -57,6 +57,7 @@ namespace KDJ
     
             Block iceBlock = BoardManager.Instance.Spawner.GameBoardData.GetOverlayBlock(x, y);
             GameObject blockObject = iceBlock?.BlockInstance;
+            Manager.Audio.PlaySFX("Ice_Broken");
 
             if (blockObject != null)
             {

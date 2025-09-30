@@ -8,11 +8,12 @@ namespace KDJ.States
     {
         private Coroutine _matchDelayCoroutine;
         private bool _isSwapping = false;
+        private int count = 0;
 
         public void OnEnter(BoardManager boardManager)
         {
             if (boardManager.IsRewardSkipped) return;
-            
+
             Debug.Log("입력 준비 상태");
             boardManager.InitialSwapPosition = null;
             boardManager.BlockMover.ResetCoordMoved();
@@ -222,9 +223,16 @@ namespace KDJ.States
             }
             else
             {
-                if (!boardManager.MatchChecker.AllBlockMatchPossibilityCheck(boardManager, out int possibleCount))
+                if (!boardManager.MatchChecker.AllBlockMatchPossibilityCheck(boardManager, out int possibleCount) && boardManager.firstCheck < 1)
                 {
-                    boardManager.Spawner.Shuffle(boardManager);
+                    // 최초 실행시에만
+                    boardManager.Spawner.Shuffle(boardManager, true);
+                    boardManager.firstCheck++;
+                    boardManager.ChangeState(new ReadyState());
+                }
+                else if (!boardManager.MatchChecker.AllBlockMatchPossibilityCheck(boardManager, out int asd))
+                {
+                    boardManager.Spawner.Shuffle(boardManager, false);
                     boardManager.ChangeState(new ReadyState());
                 }
             }

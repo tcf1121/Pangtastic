@@ -115,7 +115,7 @@ namespace KDJ
             // 게임 시작시 매치가 이루어진다면 데이터 셔플을 수행하여 매치되지 않는 상태를 만듭니다.
             if (boardManager.MatchChecker.AllBlockMatchCheck(boardManager))
             {
-                DataShuffle(boardManager, 1000);
+                DataShuffle(boardManager, 1000, true);
             }
 
             // 3. 모든 블록 GameObject 생성
@@ -791,9 +791,9 @@ namespace KDJ
         /// 데이터 셔플이 끝나면 기존 블록 오브젝트를 모두 풀에 반환하고, 새로 그립니다.
         /// </summary>
         /// <param name="boardManager"></param>
-        public void Shuffle(BoardManager boardManager)
+        public void Shuffle(BoardManager boardManager, bool init = false)
         {
-            DataShuffle(boardManager, 100);
+            DataShuffle(boardManager, 100, init);
 
             foreach (Block block in boardManager.Spawner.GameBoardData.BlockArray)
             {
@@ -817,35 +817,43 @@ namespace KDJ
         /// </summary>
         /// <param name="boardManager"></param>
         /// <param name="maxAttempts"></param>
-        private void DataShuffle(BoardManager boardManager, int maxAttempts)
+        private void DataShuffle(BoardManager boardManager, int maxAttempts, bool init)
         {
             List<Block> normalBlocks = new List<Block>();
             List<Vector2Int> normalBlockPositions = new List<Vector2Int>();
-            List<(Vector2Int pos, Block block)> icedBlocks = new List<(Vector2Int pos, Block block)>();
+            List<(Vector2Int pos, Block block)> underBlocks = new List<(Vector2Int pos, Block block)>();
             int maxTries = maxAttempts;
             int tries = 0;
 
+            // 오버레이 배열에 방해 블록이 있고, 그 아래 일반 블록이 매치의 대상일 경우 오버레이 블록만 셔플하도록 처리
             while (tries < maxTries)
             {
                 normalBlocks.Clear();
                 normalBlockPositions.Clear();
-                icedBlocks.Clear();
+                underBlocks.Clear();
 
                 for (int y = 0; y < GameBoardData.Height; y++)
                 {
                     for (int x = 0; x < GameBoardData.Width; x++)
                     {
-                        if (GameBoardData.BlockPlate.BlockPlateArray[y, x])
+                        Block block = GameBoardData.GetBlock(x, y);
+                        Block overlayBlock = GameBoardData.GetOverlayBlock(x, y);
+                        if (GameBoardData.BlockPlate.BlockPlateArray[y, x] && GameBoardData.IsOverLayBlockInBoard() && init)
                         {
-                            Block block = GameBoardData.GetBlock(x, y);
+                            // 오버레이 블록이 존재하고 아래 있는 블록이 일반 블록이라면
+                            if (overlayBlock != null && block.IsNormal)
+                            {
+                                underBlocks.Add((new Vector2Int(x, y), block));
+                            }
+
+                        }
+                        else if (GameBoardData.BlockPlate.BlockPlateArray[y, x])
+                        {
+                            // 오버레이 블록이 없다면
                             if (block != null && block.IsNormal && block.CanMove && block.GemType <= GemType.Sugar)
                             {
                                 normalBlocks.Add(block);
                                 normalBlockPositions.Add(new Vector2Int(x, y));
-                            }
-                            else if (block != null && block.IsNormal && !block.CanMove && block.GemType <= GemType.Sugar)
-                            {
-                                icedBlocks.Add((new Vector2Int(x, y), block));
                             }
                         }
                     }
@@ -865,13 +873,13 @@ namespace KDJ
                     GameBoardData.SetBlock(pos.x, pos.y, normalBlocks[i]);
                 }
 
-                for (int i = 0; i < icedBlocks.Count; i++)
+                for (int i = 0; i < underBlocks.Count; i++)
                 {
-                    int randomIndex = Random.Range(i, icedBlocks.Count);
-                    var temp = icedBlocks[i].block;
-                    icedBlocks[i] = (icedBlocks[i].pos, icedBlocks[randomIndex].block);
-                    icedBlocks[randomIndex] = (icedBlocks[randomIndex].pos, temp);
-                    GameBoardData.SetBlock(icedBlocks[i].pos.x, icedBlocks[i].pos.y, icedBlocks[i].block);
+                    int randomIndex = Random.Range(i, underBlocks.Count);
+                    var temp = underBlocks[i].block;
+                    underBlocks[i] = (underBlocks[i].pos, underBlocks[randomIndex].block);
+                    underBlocks[randomIndex] = (underBlocks[randomIndex].pos, temp);
+                    GameBoardData.SetBlock(underBlocks[i].pos.x, underBlocks[i].pos.y, underBlocks[i].block);
                 }
 
                 if (!boardManager.MatchChecker.AllBlockMatchCheck(boardManager))
