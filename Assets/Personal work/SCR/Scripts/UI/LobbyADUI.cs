@@ -27,10 +27,14 @@ public class LobbyADUI : MonoBehaviour
         offsetMin.y = height;
         mainPanel.offsetMin = offsetMin;
 
-        float bannerHeight = thisPanel.rect.height;
-        var customizeOffset = _customizePanel.offsetMin;
-        customizeOffset.y = bannerHeight;
-        _customizePanel.offsetMin = customizeOffset;
+        if(_customizePanel != null)
+        {
+            float bannerHeight = thisPanel.rect.height;
+            var customizeOffset = _customizePanel.offsetMin;
+            customizeOffset.y = bannerHeight;
+            _customizePanel.offsetMin = customizeOffset;
+        }
+        
     }
 
     void Start()
