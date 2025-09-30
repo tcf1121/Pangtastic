@@ -52,6 +52,7 @@ public class ShopUI : MonoBehaviour
         }
 
         _isScrollingByButton = false;
+        UpdateToggleByScroll();
     }
 
     private void UpdateToggleByScroll()

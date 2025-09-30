@@ -83,7 +83,27 @@ public class EnterInGamePanel : MonoBehaviour
         _donutBoxNum.text = $"{Manager.User.GetItem().DonutBox}";
         _ovenNum.text = $"{Manager.User.GetItem().Oven}";
         Manager.Stage.ResetUseItem();
-        SetToggles();
+        CheckClearing();
+    }
+
+    void CheckClearing()
+    {
+        if (Manager.Stage.GetClearing() > 2)
+        {
+            rollerToggle.isOn = true;
+            rollerToggle.interactable = false;
+            _emptyButton[0].gameObject.SetActive(false);
+            donutBoxToggle.isOn = true;
+            donutBoxToggle.interactable = false;
+            _emptyButton[0].gameObject.SetActive(false);
+            ovenToggle.isOn = true;
+            ovenToggle.interactable = false;
+            _emptyButton[0].gameObject.SetActive(false);
+        }
+        else
+        {
+            SetToggles();
+        }
     }
 
     void SetToggles()
@@ -134,17 +154,20 @@ public class EnterInGamePanel : MonoBehaviour
 
             if (rollerToggle.isOn)
             {
-                Manager.User.UseItem(ItemType.Roller);
+                if (Manager.Stage.GetClearing() < 3)
+                    Manager.User.UseItem(ItemType.Roller);
                 Manager.Stage.SetUseItem((int)ItemType.Roller);
             }
             if (donutBoxToggle.isOn)
             {
-                Manager.User.UseItem(ItemType.DonutBox);
+                if (Manager.Stage.GetClearing() < 3)
+                    Manager.User.UseItem(ItemType.DonutBox);
                 Manager.Stage.SetUseItem((int)ItemType.DonutBox);
             }
             if (ovenToggle.isOn)
             {
-                Manager.User.UseItem(ItemType.Oven);
+                if (Manager.Stage.GetClearing() < 3)
+                    Manager.User.UseItem(ItemType.Oven);
                 Manager.Stage.SetUseItem((int)ItemType.Oven);
             }
 

@@ -84,16 +84,19 @@ public class PurchaseButton : MonoBehaviour
         _button.interactable = isProductsReady;
         Debug.Log($"{_productId} 준비완료: {isProductsReady}");
 
-        if (Manager.DB.auth.CurrentUser.IsAnonymous)
-        {
-            Debug.Log("게스트 계정은 구매목록 적용 안함");
-            return;
-        }
+        //if (Manager.DB.auth.CurrentUser.IsAnonymous)
+        //{
+        //    Debug.Log("게스트 계정은 구매목록 적용 안함");
+        //    return;
+        //}
 
         if (isProductsReady && Manager.IAP.CheckNonConsumableOwned(_productId))
         {
             _button.interactable = false;
             Debug.Log($"{_productId} 이미 구매함. 버튼 비활성화");
+
+            _originalPriceText.text = null;
+            _currentPriceText.text = "Purchased";
 
         }
     }
