@@ -304,6 +304,7 @@ public class IAPManager : Singleton<IAPManager>
             {
                 case RewardType.RemovedAD:
                     Manager.Ad.BuyRemoveAD();
+                    Debug.Log("광고제거 구매 성공");
                     break;
                 case RewardType.Heart:
                     OutGameManager.AddIHReward(reward.RewardAmount);
@@ -329,4 +330,8 @@ public class IAPManager : Singleton<IAPManager>
         OutGameManager.ShowRewardPopup();
     }
 
+    public void TestPurchasing(string productId)
+    {
+        GiveReward(productId);
+    }
 }

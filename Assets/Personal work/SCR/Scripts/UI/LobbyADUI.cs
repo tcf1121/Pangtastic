@@ -7,6 +7,7 @@ public class LobbyADUI : MonoBehaviour
     [SerializeField] RectTransform mainPanel;
     [SerializeField] RectTransform thisPanel;
     [SerializeField] RectTransform parentCanvasRect;
+    [SerializeField] RectTransform _customizePanel;
 
     void OnEnable()
     {
@@ -25,6 +26,11 @@ public class LobbyADUI : MonoBehaviour
         var offsetMin = mainPanel.offsetMin;
         offsetMin.y = height;
         mainPanel.offsetMin = offsetMin;
+
+        float bannerHeight = thisPanel.rect.height;
+        var customizeOffset = _customizePanel.offsetMin;
+        customizeOffset.y = bannerHeight;
+        _customizePanel.offsetMin = customizeOffset;
     }
 
     void Start()

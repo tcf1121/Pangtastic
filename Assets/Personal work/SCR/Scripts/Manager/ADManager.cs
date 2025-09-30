@@ -37,6 +37,8 @@ public class ADManager : Singleton<ADManager>
     {
         base.Awake();
         CheckRemoveAD();
+
+        PlayerPrefs.SetInt(RemoveAD, 0); //테스트용 지울예정
     }
 
     private void Start()
@@ -81,6 +83,8 @@ public class ADManager : Singleton<ADManager>
     {
         _removedAD = true;
         PlayerPrefs.SetInt(RemoveAD, 1);
+
+        OutGameManager.CloseBannerAd();
     }
 
 

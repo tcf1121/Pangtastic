@@ -25,11 +25,20 @@ public class OutGameManager : MonoBehaviour
     void Awake()
     {
         instate = this;
-        if (!Manager.Ad.RemovedAD)
-        {
-            _adPanel.SetActive(true);
-            Manager.Ad.LoadAD();
-            Manager.Ad.BannerCreateView();
+        if (!Manager.Ad.RemovedAD)                                           
+        {                                                                    
+            if (Manager.IAP.CheckNonConsumableOwned("noads"))                
+            {                                                                
+                Debug.Log("광고제거 구매이력 발견. 배너 광고제거 적용");     
+                Manager.Ad.BuyRemoveAD();                                    
+            }                                                                
+            else                                                             
+            {                                                                
+                Debug.Log("배너 광고활성화");                                
+                _adPanel.SetActive(true);                                    
+                Manager.Ad.LoadAD();                                         
+                Manager.Ad.BannerCreateView();                               
+            }                                                                
         }
 
         _settingBtn.onClick.AddListener(SetStage);
@@ -91,5 +100,12 @@ public class OutGameManager : MonoBehaviour
     public static void ShowRewardPopup()
     {
         instate._rewardPopup.gameObject.SetActive(true);
+    }
+
+    public static void CloseBannerAd()
+    {
+        instate._adPanel.SetActive(false);
+        Debug.Log("배너 광고 비활성화");
+        Manager.Ad.BannerDestroyAd();
     }
 }
