@@ -56,8 +56,8 @@ public class TempToPerm : MonoBehaviour
         {
             if (success) //성공하면
             {
-                _tempToPermButton.interactable = false; //버튼 숨김
-                _buttonText.text = "";
+                _tempToPermButton.interactable = false; //버튼 비활성화
+                _buttonText.text = "Linked";
 
             }
             else // 실패하면
