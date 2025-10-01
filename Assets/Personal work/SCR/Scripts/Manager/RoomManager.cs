@@ -16,6 +16,8 @@ public class RoomManager : MonoBehaviour
     void Awake()
     {
         curPlace = Manager.User.GetCurPlace();
+        // TODO: TEST
+        // curPlace = Manager.UserInfoSystem.GetCurPlace();
         for (int i = 0; i < _places.Count; i++)
         {
             if (i < (int)curPlace) _places[i].AllClear();

@@ -5,11 +5,13 @@ using System.IO;
 using UnityEngine;
 
 public class DataSystem : MonoBehaviour
+// public class DataSystem : Singleton<DataSystem>
 {
     private string path;
 
     private void Awake()
     {
+        // base.Awake();
         path = Path.Combine(Application.persistentDataPath, "userdata.json");
         Debug.Log($"userdata.json 주소 : {path}");
     }
@@ -60,8 +62,10 @@ public class DataSystem : MonoBehaviour
     public void NewUser()
     {
         // 기존 저장 데이터 확인
-        var savedData = Load();
+        // var savedData = Load();
 
+        // TODO: TEST
+        // var newUserData = new JGH.UserData();
         var newUserData = new UserData();
         newUserData.PlayerName = "guest";
         newUserData.UserInfo.Heart.currentHeart = 5;
@@ -86,13 +90,24 @@ public class DataSystem : MonoBehaviour
 
         Manager.User.SetUser(newUserData);
         Manager.User.NewMissionList(16);
+        // TODO: TEST
+        // Manager.UserInfoSystem.SetUser(newUserData);
+        // Manager.UserInfoSystem.NewMissionList(16);
+        
     }
 
     public void HistoryUser()
     {
+        //TODO: TEST
+        // JGH.UserData loadData = Load();
         UserData loadData = Load();
         if (loadData != null)
+        {
+            // TODO: TEST
+            // Manager.UserInfoSystem.SetUser(Load());
             Manager.User.SetUser(Load());
+        
+        }
         else
         {
             Debug.Log("데이터가 손상되었습니다.");
@@ -102,12 +117,22 @@ public class DataSystem : MonoBehaviour
 
     public void Save()
     {
+        // 무한하트
+        // Manager.UserInfoSystem.SetLeaveTime(DateTime.UtcNow.ToString("O"));
+        // TODO: TEST
+        Manager.User.SetLeaveTime(DateTime.UtcNow.ToString("O"));
+        
+        
+        // TODO: TEST
+        // string json = JsonConvert.SerializeObject(Manager.UserInfoSystem.GetCurrentUserData());
         string json = JsonConvert.SerializeObject(Manager.User.GetCurrentUserData());
         string encrypted = Crypto.Encrypt(json);
         File.WriteAllText(path, encrypted);
         Debug.Log("저장 완료: " + path);
     }
 
+    // TODO: TEST
+    // public JGH.UserData Load()
     public UserData Load()
     {
         if (File.Exists(path))
@@ -115,12 +140,14 @@ public class DataSystem : MonoBehaviour
             string encrypted = File.ReadAllText(path);
             string json = Crypto.Decrypt(encrypted);
             Debug.Log("저장된 데이터 확인");
-            Debug.Log(JsonConvert.DeserializeObject<UserData>(json));
+            Debug.Log(JsonConvert.DeserializeObject<JGH.UserData>(json));
+            // return JsonConvert.DeserializeObject<JGH.UserData>(json);
             return JsonConvert.DeserializeObject<UserData>(json);
         }
         else
         {
             Debug.LogWarning("저장된 데이터 없음, 기본값 반환");
+            // return new JGH.UserData();
             return new UserData();
         }
     }
