@@ -12,9 +12,11 @@ namespace SCR
     public class MapLoader : MonoBehaviour
     {
         [SerializeField] GameObject canvas;
+        [SerializeField] Transform gem;
         private BoardCell[] sortedItemsArray;
         [SerializeField] private InputField inputField;
         [SerializeField] Button loadBtn;
+        [SerializeField] bool Test;
         private Dictionary<Vector3Int, GemType> _mapInfo = new();
         private List<Vector3Int> _spawnPoint = new();
 
@@ -23,6 +25,7 @@ namespace SCR
 
         void Awake()
         {
+            if (Test) path = "Assets/CSV/Puzzle Board.csv";
             loadBtn.onClick.AddListener(LoadPuzzle);
         }
 
@@ -48,6 +51,10 @@ namespace SCR
                 string[] values = lines[_stage].Split(',');
                 GetPuzzle(values[1]);
                 GetSpawnPoint(values[2]);
+                foreach (Transform child in gem)
+                {
+                    Destroy(child.gameObject);
+                }
                 Board.SetPuzzleInfo(_mapInfo, _spawnPoint);
 
                 Addressables.Release(handle);

@@ -61,8 +61,6 @@ namespace LHJ
                         SetItemState();
                     }
                 }
-                Manager.User.UseItem(_type);
-                SetItemState();
                 return;
             }
 

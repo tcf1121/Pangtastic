@@ -541,7 +541,6 @@ namespace LHJ
             yield return new WaitForSeconds(_donutEffectTime);
 
             var hits = new List<Vector2Int>();
-            var queuedSpecials = new List<(Vector2Int pos, GemType type)>();
 
             for (int y = origin.y - range; y <= origin.y + range; y++)
             {
@@ -617,11 +616,6 @@ namespace LHJ
                     RevertStroke(b.BlockInstance);
                     if (b is ObstacleBlock ob)
                     {
-                        if (b.IsNormal != true)
-                        {
-                            ob.TakeDamage();
-                            continue;
-                        }
                         ob.TakeDamage();
                         continue;
                     }
