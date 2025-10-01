@@ -30,10 +30,12 @@ public class MissionList : MonoBehaviour
 
     private void UseStar()
     {
-        if (Manager.User.CanUseStar(_needStar))
+        // if (Manager.User.CanUseStar(_needStar))
+        if (Manager.UserInfoSystem.CanUseStar(_needStar))
         {
 
-            Manager.User.UseStar(_needStar);
+            // Manager.User.UseStar(_needStar);
+            Manager.UserInfoSystem.UseStar(_needStar);
             Debug.Log($"{_needStar}소모");
             _useStarBtn.enabled = false;
             transform.SetSiblingIndex(0);

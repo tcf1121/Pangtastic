@@ -59,13 +59,17 @@ public class MenuUI : MonoBehaviour
 
     public void GoRoom(Action onComplete = null)
     {
-        int index = (int)Manager.User.GetCurPlace();
+        // int index = (int)Manager.User.GetCurPlace();
+        // TODO: TEST
+        int index = (int)Manager.UserInfoSystem.GetCurPlace();
         MoveCameraDOTween(_roomCameraPosList[index].position, _roomCameraPosList[index].rotation, 6, 1f, onComplete);
     }
 
     private void GoRoom()
     {
-        int index = (int)Manager.User.GetCurPlace();
+        // int index = (int)Manager.User.GetCurPlace();
+        // TODO: TEST
+        int index = (int)Manager.UserInfoSystem.GetCurPlace();
         MoveCameraDOTween(_roomCameraPosList[index].position, _roomCameraPosList[index].rotation, 6, 1f);
     }
 

@@ -79,9 +79,13 @@ public class EnterInGamePanel : MonoBehaviour
         }
         _level.text = $"{Manager.Stage.CurrentStageIndex + 1}{stringSO.GetText(Manager.Language.GetLanguage())}";
         GetRecipe();
-        _rollerNum.text = $"{Manager.User.GetItem().Roller}";
-        _donutBoxNum.text = $"{Manager.User.GetItem().DonutBox}";
-        _ovenNum.text = $"{Manager.User.GetItem().Oven}";
+        // _rollerNum.text = $"{Manager.User.GetItem().Roller}";
+        // _donutBoxNum.text = $"{Manager.User.GetItem().DonutBox}";
+        // _ovenNum.text = $"{Manager.User.GetItem().Oven}";
+        // TODO: TEST
+        _rollerNum.text = $"{Manager.UserInfoSystem.GetItem().Roller}";
+        _donutBoxNum.text = $"{Manager.UserInfoSystem.GetItem().DonutBox}";
+        _ovenNum.text = $"{Manager.UserInfoSystem.GetItem().Oven}";
         Manager.Stage.ResetUseItem();
         CheckClearing();
     }
@@ -108,37 +112,43 @@ public class EnterInGamePanel : MonoBehaviour
 
     void SetToggles()
     {
-        if (Manager.User.GetItem().Roller <= 0)
+        // if (Manager.User.GetItem().Roller <= 0)
+        if (Manager.UserInfoSystem.GetItem().Roller <= 0)
         {
             rollerToggle.isOn = false;
             rollerToggle.interactable = false;
             _emptyButton[0].gameObject.SetActive(true);
         }
-        else if (Manager.User.GetItem().Roller > 0)
+        // else if (Manager.User.GetItem().Roller > 0)
+        else if (Manager.UserInfoSystem.GetItem().Roller > 0)
         {
             rollerToggle.isOn = false;
             rollerToggle.interactable = true;
             _emptyButton[0].gameObject.SetActive(false);
         }
-        if (Manager.User.GetItem().DonutBox <= 0)
+        // if (Manager.User.GetItem().DonutBox <= 0)
+        if (Manager.UserInfoSystem.GetItem().DonutBox <= 0)
         {
             donutBoxToggle.isOn = false;
             donutBoxToggle.interactable = false;
             _emptyButton[1].gameObject.SetActive(true);
         }
-        else if (Manager.User.GetItem().DonutBox > 0)
+        // else if (Manager.User.GetItem().DonutBox > 0)
+        else if (Manager.UserInfoSystem.GetItem().DonutBox > 0)
         {
             donutBoxToggle.isOn = false;
             donutBoxToggle.interactable = true;
             _emptyButton[1].gameObject.SetActive(false);
         }
-        if (Manager.User.GetItem().Oven <= 0)
+        // if (Manager.User.GetItem().Oven <= 0)
+        if (Manager.UserInfoSystem.GetItem().Oven <= 0)
         {
             ovenToggle.isOn = false;
             ovenToggle.interactable = false;
             _emptyButton[2].gameObject.SetActive(true);
         }
-        else if (Manager.User.GetItem().Oven > 0)
+        // else if (Manager.User.GetItem().Oven > 0)
+        else if (Manager.UserInfoSystem.GetItem().Oven > 0)
         {
             ovenToggle.isOn = false;
             ovenToggle.interactable = true;
@@ -149,25 +159,32 @@ public class EnterInGamePanel : MonoBehaviour
     void EnterGame()
     {
         Debug.Log("게임 시작");
-        if (Manager.User.CheckHeart())
+        // if (Manager.User.CheckHeart())
+        if (Manager.UserInfoSystem.CheckHeart())
         {
 
             if (rollerToggle.isOn)
             {
                 if (Manager.Stage.GetClearing() < 3)
-                    Manager.User.UseItem(ItemType.Roller);
+                    // Manager.User.UseItem(ItemType.Roller);
+                    // TODO: TEST
+                    Manager.UserInfoSystem.UseItem(JGH.ItemType.Roller);
                 Manager.Stage.SetUseItem((int)ItemType.Roller);
             }
             if (donutBoxToggle.isOn)
             {
                 if (Manager.Stage.GetClearing() < 3)
-                    Manager.User.UseItem(ItemType.DonutBox);
+                    // Manager.User.UseItem(ItemType.DonutBox);
+                    // TODO: TEST
+                    Manager.UserInfoSystem.UseItem(JGH.ItemType.DonutBox);
                 Manager.Stage.SetUseItem((int)ItemType.DonutBox);
             }
             if (ovenToggle.isOn)
             {
                 if (Manager.Stage.GetClearing() < 3)
-                    Manager.User.UseItem(ItemType.Oven);
+                    // Manager.User.UseItem(ItemType.Oven);
+                    // TODO: TEST
+                    Manager.UserInfoSystem.UseItem(JGH.ItemType.Oven);
                 Manager.Stage.SetUseItem((int)ItemType.Oven);
             }
 

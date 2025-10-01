@@ -20,8 +20,15 @@ public static class Manager
 
     public static IAPManager IAP => IAPManager.GetInstance();
     public static LanguageSystem Language => LanguageSystem.GetInstance();
-
-
+    
+    
+    // TODO: 테스트
+    public static JGH.UserInfoSystem UserInfoSystem => JGH.UserInfoSystem.GetInstance();
+    public static DataSystem DataSystem => DataSystem.GetInstance();
+    public static AdSystem AdSystem => AdSystem.GetInstance();
+    // public static HeartSystem HeartSystem => HeartSystem.GetInstance();
+    
+    
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
     private static void Init()  //인스펙터 세팅해야하는건 전부 첫씬으로 배치 (일단 주석처리 했음. 오브젝트 있는 씬부터 돈디스트로이 걸림)
     {
@@ -40,5 +47,11 @@ public static class Manager
         IAPManager.CreateManager();
 
         LanguageSystem.CreateManager();
+        
+        // TODO: 테스트
+        JGH.UserInfoSystem.CreateManager();
+        // HeartSystem.CreateManager();
+        DataSystem.CreateManager();
+        AdSystem.CreateManager();
     }
 }

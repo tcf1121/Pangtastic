@@ -48,7 +48,9 @@ public class Place : MonoBehaviour
 
     public void CurrentClear()
     {
-        List<bool> curclear = Manager.User.GetCurMisson().ToList();
+        // List<bool> curclear = Manager.User.GetCurMisson().ToList();
+        // TODO: TEST
+        List<bool> curclear = Manager.UserInfoSystem.GetCurMisson().ToList();
         for (int i = 0; i < curclear.Count; i++)
         {
             if (curclear[i]) MissionClear(i + 1);

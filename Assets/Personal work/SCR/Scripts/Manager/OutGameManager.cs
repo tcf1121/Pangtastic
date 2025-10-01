@@ -50,11 +50,11 @@ public class OutGameManager : MonoBehaviour
         Manager.Audio.PlayLobbyBGM();
         
         // TODO: 광고 로그 쌓기
-        // Manager.UserInfoSystem.SetLogAccessDates();
-        // Manager.UserInfoSystem.GetLogAccessDates();
+        Manager.UserInfoSystem.SetLogAccessDates();
+        Manager.UserInfoSystem.GetLogAccessDates();
         
         // TODO: 주간 퀘스트
-        // Manager.UserInfoSystem.CheckAndResetIfNewWeek();
+        Manager.UserInfoSystem.CheckAndResetIfNewWeek();
     }
 
     public static void UpdateStageStartButton()

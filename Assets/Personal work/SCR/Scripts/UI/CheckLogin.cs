@@ -44,7 +44,8 @@ namespace SCR
             _enterPanel.SetActive(false);
             loadingUI.SetActive(true);
             loadingBar.fillAmount = 0f;
-            Manager.Data.SetUser();
+            // Manager.Data.SetUser();
+            Manager.DataSystem.SetUser();
             Task firebaseTask = Manager.DB.InitFirebase();
             // InitFirebase가 끝날 때까지 가짜 로딩바 연출
             float fakeProgress = 0f;

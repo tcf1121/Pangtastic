@@ -45,22 +45,38 @@ public class UserInfoUI : MonoBehaviour
 
     void Start()
     {
-        Manager.User.OnChangedCoin += Instance.SetCoin;
-        Manager.User.OnChangedHeart += Instance.SetHeart;
-        Manager.User.OnChangedHeartTime += Instance.SetHeartTimer;
-        Manager.User.OnChangedStar += Instance.SetStar;
-        Manager.User.OnChangedProfile += Instance.SetProfile;
-        Manager.User.OnUseHeart += Instance.StartHeartTimer;
-        Manager.User.OnInfinityHeart += Instance.StartInfinityHeart;
-        Debug.Log(Manager.User.GetCurrentUserData());
-        _coin.text = SetNum(Manager.User.GetCoin());
-        _star.text = SetNum(Manager.User.GetStar());
-        _heart.text = $"{Manager.User.GetHeart()}";
+        // Manager.User.OnChangedCoin += Instance.SetCoin;
+        // Manager.User.OnChangedHeart += Instance.SetHeart;
+        // Manager.User.OnChangedHeartTime += Instance.SetHeartTimer;
+        // Manager.User.OnChangedStar += Instance.SetStar;
+        // Manager.User.OnChangedProfile += Instance.SetProfile;
+        // Manager.User.OnUseHeart += Instance.StartHeartTimer;
+        // Manager.User.OnInfinityHeart += Instance.StartInfinityHeart;
+        // Debug.Log(Manager.User.GetCurrentUserData());
+        // _coin.text = SetNum(Manager.User.GetCoin());
+        // _star.text = SetNum(Manager.User.GetStar());
+        // _heart.text = $"{Manager.User.GetHeart()}";
+        
+        // TODO: TEST
+        Manager.UserInfoSystem.OnChangedCoin += Instance.SetCoin;
+        Manager.UserInfoSystem.OnChangedHeart += Instance.SetHeart;
+        Manager.UserInfoSystem.OnChangedHeartTime += Instance.SetHeartTimer;
+        Manager.UserInfoSystem.OnChangedStar += Instance.SetStar;
+        Manager.UserInfoSystem.OnChangedProfile += Instance.SetProfile;
+        Manager.UserInfoSystem.OnUseHeart += Instance.StartHeartTimer;
+        Manager.UserInfoSystem.OnInfinityHeart += Instance.StartInfinityHeart;
+        Debug.Log(Manager.UserInfoSystem.GetCurrentUserData());
+        _coin.text = SetNum(Manager.UserInfoSystem.GetCoin());
+        _star.text = SetNum(Manager.UserInfoSystem.GetStar());
+        _heart.text = $"{Manager.UserInfoSystem.GetHeart()}";
+        
+        
 
         _heartTimer += Instance.HeartTimer;
         _OnTimerFinished += Instance.FinishHeartTimeCor;
         _OnInfinityFinished += Instance.FinishInfinity;
-        if (Manager.User.GetHeart() == 5)
+        // if (Manager.User.GetHeart() == 5)
+        if (Manager.UserInfoSystem.GetHeart() == 5)
             _heartTime.text = _heartSO.GetText(Manager.Language.GetLanguage());
         else
             SetHeartTime();
@@ -98,16 +114,20 @@ public class UserInfoUI : MonoBehaviour
 
     public void SetHeartTime()
     {
-        if (Manager.User.GetHeart() == 6)
+        // if (Manager.User.GetHeart() == 6)
+        if (Manager.UserInfoSystem.GetHeart() == 6)
         {
             _infinityImage.SetActive(true);
             _heart.gameObject.SetActive(false);
             DateTime lastTime = DateTime.MinValue;
-            if (!string.IsNullOrEmpty(Manager.User.GetLeaveTime()))
-                lastTime = DateTime.Parse(Manager.User.GetLeaveTime());
+            // if (!string.IsNullOrEmpty(Manager.User.GetLeaveTime()))
+            if (!string.IsNullOrEmpty(Manager.UserInfoSystem.GetLeaveTime()))
+                // lastTime = DateTime.Parse(Manager.User.GetLeaveTime());
+                lastTime = DateTime.Parse(Manager.UserInfoSystem.GetLeaveTime());
 
             TimeSpan diff = DateTime.Now - lastTime;
-            int TotalSeconds = Manager.User.GetHeartTime() - (int)diff.TotalSeconds;
+            // int TotalSeconds = Manager.User.GetHeartTime() - (int)diff.TotalSeconds;
+            int TotalSeconds = Manager.UserInfoSystem.GetHeartTime() - (int)diff.TotalSeconds;
             if (TotalSeconds <= 0) FinishInfinity();
             else
             {
@@ -115,18 +135,23 @@ public class UserInfoUI : MonoBehaviour
              TotalSeconds, Instance._heartTimer, Instance._OnInfinityFinished));
             }
         }
-        else if (Manager.User.GetHeart() == 5)
-            Manager.User.SetHeartTime(0);
+        else if (Manager.UserInfoSystem.GetHeart() == 5)
+            Manager.UserInfoSystem.SetHeartTime(0);
+        // else if (Manager.User.GetHeart() == 5)
+            // Manager.User.SetHeartTime(0);
         else
         {
             DateTime lastTime = DateTime.MinValue;
-            if (!string.IsNullOrEmpty(Manager.User.GetLeaveTime()))
-                lastTime = DateTime.Parse(Manager.User.GetLeaveTime());
+            // if (!string.IsNullOrEmpty(Manager.User.GetLeaveTime()))
+                // lastTime = DateTime.Parse(Manager.User.GetLeaveTime());
+            if (!string.IsNullOrEmpty(Manager.UserInfoSystem.GetLeaveTime()))
+                lastTime = DateTime.Parse(Manager.UserInfoSystem.GetLeaveTime());
 
             TimeSpan diff = DateTime.Now - lastTime;
             int elapsed = (int)diff.TotalSeconds;
 
-            int lastHeartTime = Manager.User.GetHeartTime(); // 나갈 당시 남은 시간
+            // int lastHeartTime = Manager.User.GetHeartTime(); // 나갈 당시 남은 시간
+            int lastHeartTime = Manager.UserInfoSystem.GetHeartTime(); // 나갈 당시 남은 시간
             int respawn = (int)_respwanTime; // 1800
             int recoveredHearts = 0;
 
@@ -150,7 +175,8 @@ public class UserInfoUI : MonoBehaviour
                 lastHeartTime, Instance._heartTimer, Instance._OnTimerFinished));
 
             if (recoveredHearts > 0)
-                Manager.User.AddHeart(recoveredHearts);
+                // Manager.User.AddHeart(recoveredHearts);
+                Manager.UserInfoSystem.AddHeart(recoveredHearts);
 
         }
     }
@@ -164,7 +190,8 @@ public class UserInfoUI : MonoBehaviour
             Instance._heartCor = null;
             SetHeartTimer(0);
         }
-        Manager.User.AddHeart();
+        // Manager.User.AddHeart();
+        Manager.UserInfoSystem.AddHeart();
     }
 
 
@@ -216,14 +243,16 @@ public class UserInfoUI : MonoBehaviour
             StopCoroutine(Instance._infinityCor);
             Instance._infinityCor = null;
         }
-        Manager.User.InfinityHeart(0, true);
+        // Manager.User.InfinityHeart(0, true);
+        Manager.UserInfoSystem.InfinityHeart(0, true);
         SetHeartTimer(0);
     }
 
     private void HeartTimer(float leftTime)
     {
         _leftTime = leftTime;
-        Manager.User.SetHeartTime((int)(leftTime));
+        // Manager.User.SetHeartTime((int)(leftTime));
+        Manager.UserInfoSystem.SetHeartTime((int)(leftTime));
     }
 
     private void SetHeart(int value)
@@ -246,7 +275,8 @@ public class UserInfoUI : MonoBehaviour
 
     private void SetHeartTimer(int value)
     {
-        if (Manager.User.GetHeart() == 5)
+        // if (Manager.User.GetHeart() == 5)
+        if (Manager.UserInfoSystem.GetHeart() == 5)
             _heartTime.text = _heartSO.GetText(Manager.Language.GetLanguage());
         else
         {

@@ -37,7 +37,8 @@ public class BGMSettingPopup : MonoBehaviour
         _optionList.Clear();
         _dropdown.ClearOptions();
         _optionList.Add(Manager.Audio.GetBGMName(0));
-        for (int i = 1; i < (int)Manager.User.GetCurPlace(); i++)
+        // for (int i = 1; i < (int)Manager.User.GetCurPlace(); i++)
+        for (int i = 1; i < (int)Manager.UserInfoSystem.GetCurPlace(); i++)
         {
             _optionList.Add(Manager.Audio.GetBGMName(i));
         }

@@ -15,9 +15,9 @@ public class RoomManager : MonoBehaviour
 
     void Awake()
     {
-        curPlace = Manager.User.GetCurPlace();
+        // curPlace = Manager.User.GetCurPlace();
         // TODO: TEST
-        // curPlace = Manager.UserInfoSystem.GetCurPlace();
+        curPlace = Manager.UserInfoSystem.GetCurPlace();
         for (int i = 0; i < _places.Count; i++)
         {
             if (i < (int)curPlace) _places[i].AllClear();
@@ -31,11 +31,11 @@ public class RoomManager : MonoBehaviour
         if (curPlace < MissionPlace.Greengrocery)
         {
             curPlace++;
-            Manager.User.SetCurPlace(curPlace);
-            Manager.User.NewMissionList(GetMaxMission());
+            // Manager.User.SetCurPlace(curPlace);
+            // Manager.User.NewMissionList(GetMaxMission());
             //TODO:TEST
-            // Manager.UserInfoSystem.SetCurPlace(curPlace);
-            // Manager.UserInfoSystem.NewMissionList(GetMaxMission());
+            Manager.UserInfoSystem.SetCurPlace(curPlace);
+            Manager.UserInfoSystem.NewMissionList(GetMaxMission());
             missonBtn.Refresh();
             menuUI.GoHome(() =>
             {
@@ -55,16 +55,16 @@ public class RoomManager : MonoBehaviour
     public void ClearMission(int index, Action openPopup = null)
     {
         // 가구 업적 :: S
-        // Manager.UserInfoSystem.furniturePlaced(1);
+        Manager.UserInfoSystem.furniturePlaced(1);
         // 가구 업적 :: E
         
-        // Manager.UserInfoSystem.ClearCurMisson(index);
-        // if (Manager.UserInfoSystem.MissionAllClear())
-        Manager.User.ClearCurMisson(index);
-        if (Manager.User.MissionAllClear())
+        Manager.UserInfoSystem.ClearCurMisson(index);
+        if (Manager.UserInfoSystem.MissionAllClear())
+        // Manager.User.ClearCurMisson(index);
+        // if (Manager.User.MissionAllClear())
         {
             // 스태이지 업적 :: S
-            // Manager.UserInfoSystem.OnChapterLastStageCleared((int)curPlace);
+            Manager.UserInfoSystem.OnChapterLastStageCleared((int)curPlace);
             // 스태이지 업적 :: E
             
             _places[(int)curPlace].MissionClear(index, () => ClearPlace(openPopup));
@@ -87,8 +87,8 @@ public class RoomManager : MonoBehaviour
         if (num == 0) return null;
         List<Mission> returnMission = new();
         // TODO: TEST
-        // List<bool> isclearMission = Manager.UserInfoSystem.GetCurMisson().ToList();
-        List<bool> isclearMission = Manager.User.GetCurMisson().ToList();
+        List<bool> isclearMission = Manager.UserInfoSystem.GetCurMisson().ToList();
+        // List<bool> isclearMission = Manager.User.GetCurMisson().ToList();
         List<Mission> missionLists = missionList.Missions[(int)curPlace].Mission;
         for (int i = 0; i < isclearMission.Count; i++)
         {

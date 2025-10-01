@@ -8,8 +8,8 @@ using UnityEngine;
 
 namespace JGH
 {
-    public class UserInfoSystem : MonoBehaviour
-    // public class UserInfoSystem : Singleton<UserInfoSystem>
+    // public class UserInfoSystem : MonoBehaviour
+    public class UserInfoSystem : Singleton<UserInfoSystem>
     {
         private UserData currentData;
         public Action<int> OnChangedHeart;
@@ -36,8 +36,12 @@ namespace JGH
 
         // 하트 시스템
         private Coroutine infinityRoutine;
-        
-        
+
+        private void Awake()
+        {
+            base.Awake();
+        }
+
         void Start()
         {
             CheckDailyReset();

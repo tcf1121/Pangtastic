@@ -29,9 +29,13 @@ public class MissionBtn : MonoBehaviour
         _currentRoom.text = $"{place}";
         _progressSlider.minValue = 0;
         _progressSlider.maxValue = Manager.User.GetCurMisson().Length;
-        _progressSlider.value = Array.FindAll(Manager.User.GetCurMisson(), n => n == true).ToList().Count;
-        _progressText.text = $"{Array.FindAll(Manager.User.GetCurMisson(), n => n == true).ToList().Count}/{_progressSlider.maxValue}";
-        _percent = (float)Array.FindAll(Manager.User.GetCurMisson(), n => n == true).ToList().Count / _progressSlider.maxValue;
+        // _progressSlider.value = Array.FindAll(Manager.User.GetCurMisson(), n => n == true).ToList().Count;
+        // _progressText.text = $"{Array.FindAll(Manager.User.GetCurMisson(), n => n == true).ToList().Count}/{_progressSlider.maxValue}";
+        // _percent = (float)Array.FindAll(Manager.User.GetCurMisson(), n => n == true).ToList().Count / _progressSlider.maxValue;
+        // TODO: TEST
+        _progressSlider.value = Array.FindAll(Manager.UserInfoSystem.GetCurMisson(), n => n == true).ToList().Count;
+        _progressText.text = $"{Array.FindAll(Manager.UserInfoSystem.GetCurMisson(), n => n == true).ToList().Count}/{_progressSlider.maxValue}";
+        _percent = (float)Array.FindAll(Manager.UserInfoSystem.GetCurMisson(), n => n == true).ToList().Count / _progressSlider.maxValue;
     }
 
 }

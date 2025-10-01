@@ -22,7 +22,8 @@ public class ClearUI : MonoBehaviour
 
     void Awake()
     {
-        Manager.User.AddHeart();
+        // Manager.User.AddHeart();
+        Manager.UserInfoSystem.AddHeart();
 
         button.onClick.AddListener(MoveUI);
         finMove += ClearGame;
@@ -73,7 +74,8 @@ public class ClearUI : MonoBehaviour
     {
         MoveUIItem(star, target, () =>
         {
-            Manager.User.AddStar(Manager.Stage.CurrentStage.LevelValue);
+            // Manager.User.AddStar(Manager.Stage.CurrentStage.LevelValue);
+            Manager.UserInfoSystem.AddStar(Manager.Stage.CurrentStage.LevelValue);
             Manager.Audio.PlaySFX("Star_Add");
             star.gameObject.SetActive(false);
             completedCount++;
@@ -90,7 +92,8 @@ public class ClearUI : MonoBehaviour
             int maxCoin = Manager.Stage.CurrentStage.MaxGoldGain;
             if (stageCoin > maxCoin)
                 stageCoin = maxCoin;
-            Manager.User.AddCoin(stageCoin);
+            // Manager.User.AddCoin(stageCoin);
+            Manager.UserInfoSystem.AddCoin(stageCoin);
             Manager.Audio.PlaySFX("Coin_Add");
             coin.gameObject.SetActive(false);
             coinText.gameObject.SetActive(false);

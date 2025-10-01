@@ -28,8 +28,11 @@ public class MissionPopup : MonoBehaviour
     private void Refresh()
     {
         _progressSlider.minValue = 0;
-        _progressSlider.value = Array.FindAll(Manager.User.GetCurMisson(), n => n == true).ToList().Count;
-        _progressSlider.maxValue = Manager.User.GetCurMisson().Length;
+        // _progressSlider.value = Array.FindAll(Manager.User.GetCurMisson(), n => n == true).ToList().Count;
+        // TODO:  TEST
+        _progressSlider.value = Array.FindAll(Manager.UserInfoSystem.GetCurMisson(), n => n == true).ToList().Count;
+        _progressSlider.maxValue = Manager.UserInfoSystem.GetCurMisson().Length;
+        // _progressSlider.maxValue = Manager.User.GetCurMisson().Length;
         _progressText.text = $"{Array.FindAll(Manager.User.GetCurMisson(), n => n == true).ToList().Count}/{_progressSlider.maxValue}";
         SetMission();
     }

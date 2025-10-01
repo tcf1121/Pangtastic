@@ -4,14 +4,14 @@ using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
 
-public class DataSystem : MonoBehaviour
-// public class DataSystem : Singleton<DataSystem>
+// public class DataSystem : MonoBehaviour
+public class DataSystem : Singleton<DataSystem>
 {
     private string path;
 
     private void Awake()
     {
-        // base.Awake();
+        base.Awake();
         path = Path.Combine(Application.persistentDataPath, "userdata.json");
         Debug.Log($"userdata.json 주소 : {path}");
     }

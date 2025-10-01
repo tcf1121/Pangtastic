@@ -185,9 +185,9 @@ public class InGameManager : MonoBehaviour
         Instate._clearUI.SetActive(true);
         
         // TODO: 퀘스트 - 일일 리워드 1개 추가
-        // Manager.UserInfoSystem.DailyAddSlot();
+        Manager.UserInfoSystem.DailyAddSlot();
         // TODO: 퀘스트 - 주간 퀘스트
-        // Manager.UserInfoSystem.WeeklyOnStageClear();
+        Manager.UserInfoSystem.WeeklyOnStageClear();
     }
 
     public static void StageFail()
@@ -197,7 +197,7 @@ public class InGameManager : MonoBehaviour
         KDJ.BoardManager.SetTouch(false);
         
         // TODO: 퀘스트 - 일일 리워드 1개 빼기
-        // Manager.UserInfoSystem.DailyDropSlot();
+        Manager.UserInfoSystem.DailyDropSlot();
         
         if (Instate._firstfail)
         {
@@ -216,7 +216,7 @@ public class InGameManager : MonoBehaviour
             Manager.Ad.ShowAD();
             
             // TODO: 퀘스트 - 일일 퀘스트 1개 추가
-            // Manager.UserInfoSystem.DailyAddSlot();
+            Manager.UserInfoSystem.DailyAddSlot();
         }
         else ContinueGame();
     }
@@ -224,21 +224,20 @@ public class InGameManager : MonoBehaviour
     private void GoldContinueGame()
     {
         // TODO: TEST
-        // if (Manager.UserInfoSystem.CanUseCoin(_useCoin))
-        // {
-        //     Manager.UserInfoSystem.UseCoin(_useCoin);
-        //     
-        //     // TODO: 퀘스트 - 일일 퀘스트 1개 추가
-        //     Manager.UserInfoSystem.DailyAddSlot();
-        //     
-        //     ContinueGame();
-        // }
-        
-        if (Manager.User.CanUseCoin(_useCoin))
+        if (Manager.UserInfoSystem.CanUseCoin(_useCoin))
         {
-            Manager.User.UseCoin(_useCoin);
+            Manager.UserInfoSystem.UseCoin(_useCoin);
+                 
+            // TODO: 퀘스트 - 일일 퀘스트 1개 추가
+            Manager.UserInfoSystem.DailyAddSlot();
             ContinueGame();
         }
+        
+        // if (Manager.User.CanUseCoin(_useCoin))
+        // {
+        //     Manager.User.UseCoin(_useCoin);
+        //     ContinueGame();
+        // }
     }
 
     private void ContinueGame()

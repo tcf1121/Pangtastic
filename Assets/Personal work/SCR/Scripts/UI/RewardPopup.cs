@@ -70,38 +70,48 @@ public class RewardPopup : MonoBehaviour
         switch (goods)
         {
             case Goods.Gold:
-                Manager.User.AddCoin(index);
+                // Manager.User.AddCoin(index);
+                Manager.UserInfoSystem.AddCoin(index);
                 break;
             case Goods.Whisk:
-                Manager.User.AddItem(ItemType.Whisk, index);
+                // Manager.User.AddItem(ItemType.Whisk, index);
+                Manager.UserInfoSystem.AddItem(JGH.ItemType.Whisk, index);
                 break;
             case Goods.Scissors:
-                Manager.User.AddItem(ItemType.Scissors, index);
+                // Manager.User.AddItem(ItemType.Scissors, index);
+                Manager.UserInfoSystem.AddItem(JGH.ItemType.Scissors, index);
                 break;
             case Goods.DonutPan:
-                Manager.User.AddItem(ItemType.DonutPan, index);
+                // Manager.User.AddItem(ItemType.DonutPan, index);
+                Manager.UserInfoSystem.AddItem(JGH.ItemType.DonutPan, index);
                 break;
             case Goods.Coffee:
-                Manager.User.AddItem(ItemType.Coffee, index);
+                // Manager.User.AddItem(ItemType.Coffee, index);
+                Manager.UserInfoSystem.AddItem(JGH.ItemType.Coffee, index);
                 break;
             case Goods.Roller:
-                Manager.User.AddItem(ItemType.Roller, index);
+                // Manager.User.AddItem(ItemType.Roller, index);
+                Manager.UserInfoSystem.AddItem(JGH.ItemType.Roller, index);
                 break;
             case Goods.DonutBox:
-                Manager.User.AddItem(ItemType.DonutBox, index);
+                // Manager.User.AddItem(ItemType.DonutBox, index);
+                Manager.UserInfoSystem.AddItem(JGH.ItemType.DonutBox, index);
                 break;
             case Goods.Oven:
-                Manager.User.AddItem(ItemType.Oven, index);
+                // Manager.User.AddItem(ItemType.Oven, index);
+                Manager.UserInfoSystem.AddItem(JGH.ItemType.Oven, index);
                 break;
             case Goods.Heart:
-                Manager.User.AddHeart(index);
+                // Manager.User.AddHeart(index);
+                Manager.UserInfoSystem.AddHeart(index);
                 break;
         }
     }
 
     private void GetIHReward(float index)
     {
-        Manager.User.InfinityHeart(index);
+        // Manager.User.InfinityHeart(index);
+        Manager.UserInfoSystem.InfinityHeart(index);
     }
 }
 

@@ -19,9 +19,11 @@ public class CoinBuyBtn : MonoBehaviour
 
     private void BuyItem()
     {
-        if (Manager.User.CanUseCoin(_coin))
+        if (Manager.UserInfoSystem.CanUseCoin(_coin))
+        // if (Manager.User.CanUseCoin(_coin))
         {
-            Manager.User.UseCoin(_coin);
+            // Manager.User.UseCoin(_coin);
+            Manager.UserInfoSystem.UseCoin(_coin);
             if (_isBakery)
             {
                 OutGameManager.AddReward(Goods.Whisk, 3);

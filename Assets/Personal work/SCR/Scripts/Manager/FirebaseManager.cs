@@ -155,47 +155,72 @@ public class FirebaseManager : Singleton<FirebaseManager>
         else if (snapshot.Exists)
         {
             string json = snapshot.GetRawJsonValue();
-            UserData userData = JsonConvert.DeserializeObject<UserData>(json);
-            Debug.Log(userData.Stage);
-            Manager.User.SetUser(userData);
+            // UserData userData = JsonConvert.DeserializeObject<UserData>(json);
+            // Debug.Log(userData.Stage);
+            // Manager.User.SetUser(userData);
+            // TODO: TEST
+            JGH.UserData JGH_userData = JsonConvert.DeserializeObject<JGH.UserData>(json);
+            Manager.UserInfoSystem.SetUser(JGH_userData);
         }
     }
 
     // 파이어베이스에 업로드
     public async Task UploadUserData()
     {
-        Manager.User.SetLeaveTime(DateTime.Now.ToString("O"));
-        string json = JsonConvert.SerializeObject(Manager.User.GetCurrentUserData());
-
-        var task = dbRef.Child("users").Child(GetUid()).SetRawJsonValueAsync(json);
-        await task;
-
-        if (task.Exception != null)
-        {
-            Debug.LogError("Realtime Database 업로드 실패: " + task.Exception);
-        }
+        // Manager.User.SetLeaveTime(DateTime.Now.ToString("O"));
+        // string json = JsonConvert.SerializeObject(Manager.User.GetCurrentUserData());
+        //
+        // var task = dbRef.Child("users").Child(GetUid()).SetRawJsonValueAsync(json);
+        // await task;
+        //
+        // if (task.Exception != null)
+        // {
+        //     Debug.LogError("Realtime Database 업로드 실패: " + task.Exception);
+        // }
+        // else
+        // {
+        //     Debug.Log("Realtime Database 업로드 성공");
+        // }
+        
+        // TODO: TEST :: S
+        Manager.UserInfoSystem.SetLeaveTime(DateTime.Now.ToString("O"));
+        string JGH_json = JsonConvert.SerializeObject(Manager.UserInfoSystem.GetCurrentUserData());
+        var JGH_task = dbRef.Child("users").Child(GetUid()).SetRawJsonValueAsync(JGH_json);
+        await JGH_task;
+        if (JGH_task.Exception != null)
+            Debug.LogError("Realtime Database 업로드 실패: " + JGH_task.Exception);
         else
-        {
             Debug.Log("Realtime Database 업로드 성공");
-        }
+        // TODO: TEST :: E
     }
 
     public async Task UploadGuestData()
     {
-        Manager.User.SetLeaveTime(DateTime.Now.ToString("O"));
-        string json = JsonConvert.SerializeObject(Manager.User.GetCurrentUserData());
-
-        var task = dbRef.Child("guests").Child(GetUid()).SetRawJsonValueAsync(json);
-        await task;
-
-        if (task.Exception != null)
-        {
-            Debug.LogError("Realtime Database 업로드 실패: " + task.Exception);
-        }
+        // Manager.User.SetLeaveTime(DateTime.Now.ToString("O"));
+        // string json = JsonConvert.SerializeObject(Manager.User.GetCurrentUserData());
+        //
+        // var task = dbRef.Child("guests").Child(GetUid()).SetRawJsonValueAsync(json);
+        // await task;
+        //
+        // if (task.Exception != null)
+        // {
+        //     Debug.LogError("Realtime Database 업로드 실패: " + task.Exception);
+        // }
+        // else
+        // {
+        //     Debug.Log("Realtime Database 업로드 성공");
+        // }
+        
+        // TODO: TEST :: S
+        Manager.UserInfoSystem.SetLeaveTime(DateTime.Now.ToString("O"));
+        string JGH_json = JsonConvert.SerializeObject(Manager.UserInfoSystem.GetCurrentUserData());
+        var JGH_task = dbRef.Child("guests").Child(GetUid()).SetRawJsonValueAsync(JGH_json);
+        await JGH_task;
+        if (JGH_task.Exception != null)
+            Debug.LogError("Realtime Database 업로드 실패: " + JGH_task.Exception);
         else
-        {
             Debug.Log("Realtime Database 업로드 성공");
-        }
+        // TODO: TEST :: E
     }
 
     public void DeleteFB()

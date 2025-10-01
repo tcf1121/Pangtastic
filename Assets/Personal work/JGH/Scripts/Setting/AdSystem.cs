@@ -5,7 +5,8 @@ using UnityEngine;
 //using AdSize = GoogleMobileAds.Api.AdSize;
 
 
-public class AdSystem : MonoBehaviour
+// public class AdSystem : MonoBehaviour
+public class AdSystem : Singleton<AdSystem>
 {
     //public static AdSystem Instance { get; private set; }
     private const string RemoveAD = "RemoveAD";
