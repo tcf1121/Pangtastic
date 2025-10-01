@@ -48,6 +48,13 @@ public class OutGameManager : MonoBehaviour
         else _currentPlace = PlayerPrefs.GetInt(DROPDOWN_KEY);
         Manager.Audio.SetLobbyPlace((MissionPlace)_currentPlace);
         Manager.Audio.PlayLobbyBGM();
+        
+        // TODO: 광고 로그 쌓기
+        // Manager.UserInfoSystem.SetLogAccessDates();
+        // Manager.UserInfoSystem.GetLogAccessDates();
+        
+        // TODO: 주간 퀘스트
+        // Manager.UserInfoSystem.CheckAndResetIfNewWeek();
     }
 
     public static void UpdateStageStartButton()
