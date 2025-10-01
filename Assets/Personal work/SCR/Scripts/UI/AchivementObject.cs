@@ -47,7 +47,7 @@ public class AchivementObject : MonoBehaviour
     private void SetTitle()
     {
         _title.text = rewards.achivements[_achvLevel].Title.GetText(Manager.Language.GetLanguage());
-        _explane.text = rewards.achivements[_achvLevel].Explane.GetText(Manager.Language.GetLanguage());
+        _explane.text = $"({rewards.achivements[_achvLevel].Explane.GetText(Manager.Language.GetLanguage())})";
     }
 
     private void SetProgressBar(int index)
@@ -90,7 +90,7 @@ public class AchivementObject : MonoBehaviour
         {
             _achvLevel = Manager.User.GetAchievementLevel(_achivementIndex);
             _title.text = rewards.achivements[_achvLevel - 1].Title.GetText(Manager.Language.GetLanguage());
-            _explane.text = rewards.achivements[_achvLevel - 1].Explane.GetText(Manager.Language.GetLanguage());
+            _explane.text = $"({rewards.achivements[_achvLevel].Explane.GetText(Manager.Language.GetLanguage())})";
             _progressBar.minValue = 0;
             _progressBar.maxValue = 1;
             _progressBar.value = 1;
