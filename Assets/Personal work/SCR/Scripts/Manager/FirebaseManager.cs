@@ -1,6 +1,7 @@
 using Firebase;
 using Firebase.Auth;
 using Firebase.Database;
+using Firebase.Extensions;
 using Newtonsoft.Json;
 using System;
 using System.Threading.Tasks;
@@ -227,5 +228,45 @@ public class FirebaseManager : Singleton<FirebaseManager>
                 }
             });
         }
+    }
+
+    public void DeleteGuestDB(string uid) //구글 전환시 게스트 DB정보 삭제
+    {
+        if (string.IsNullOrEmpty(uid))
+        {
+            Debug.LogError("게스트 UID 없음");
+            return;
+        }
+
+        Debug.Log("게스트 DB 있는지 확인중");
+
+        var guestRef = dbRef.Child("guests").Child(uid);
+
+        guestRef.GetValueAsync().ContinueWithOnMainThread(readTask =>
+        {
+            if (readTask.IsFaulted || readTask.IsCanceled)
+            {
+                Debug.LogError($"게스트 데이터 읽기 실패:{readTask.Exception}");
+                return;
+            }
+
+            DataSnapshot snapshot = readTask.Result;
+            if (!snapshot.Exists)
+            {
+                Debug.Log("게스트 DB 없음. 리턴");
+                return;
+            }
+
+            guestRef.RemoveValueAsync().ContinueWithOnMainThread(removeTask =>
+            {
+                if (removeTask.IsFaulted || removeTask.IsCanceled)
+                {
+                    Debug.LogError($"게스트 데이터 삭제 실패:{removeTask.Exception}");
+                    return;
+                }
+
+                Debug.Log("게스트 데이터 삭제 완료");
+            });
+        });
     }
 }
