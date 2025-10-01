@@ -26,7 +26,9 @@ public class TempToPerm : MonoBehaviour
         }
         else
         {
-            _tempToPermButton.gameObject.SetActive(false);
+            //_tempToPermButton.gameObject.SetActive(false);
+            _tempToPermButton.interactable = false;
+            _buttonText.text = "Linked";
         }
     }
 
@@ -46,6 +48,7 @@ public class TempToPerm : MonoBehaviour
         {
             Debug.LogError("이미 영구계정 입니다.");
             _tempToPermButton.interactable = false;
+            _buttonText.text = "Linked";
             return;
         }
 

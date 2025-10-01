@@ -251,6 +251,8 @@ public class GPGSManager : Singleton<GPGSManager>
                     Debug.Log($"profile.DisplayName : {profile.DisplayName}");
 
                     string uid = Manager.DB.auth.CurrentUser.UserId;
+                    Manager.DB.DeleteGuestDB(uid); // 게스트 DB 삭제
+
                     //Manager.DB.MigrateGuestDataToUser(uid); //마이그레이션
                     //Manager.DB.UserIntoSave(); //이름 설정
                     onDone?.Invoke(true);
