@@ -96,7 +96,7 @@ public class EnterInGamePanel : MonoBehaviour
 
     void CheckClearing()
     {
-        if (Manager.Stage.GetClearing() > 2)
+        if (Manager.User.GetClearing() > 2)
         {
             rollerToggle.isOn = true;
             rollerToggle.interactable = false;
@@ -162,19 +162,19 @@ public class EnterInGamePanel : MonoBehaviour
 
             if (rollerToggle.isOn)
             {
-                if (Manager.Stage.GetClearing() < 3)
+                if (Manager.User.GetClearing() < 3)
                     Manager.User.UseItem(ItemType.Roller);
                 Manager.Stage.SetUseItem((int)ItemType.Roller);
             }
             if (donutBoxToggle.isOn)
             {
-                if (Manager.Stage.GetClearing() < 3)
+                if (Manager.User.GetClearing() < 3)
                     Manager.User.UseItem(ItemType.DonutBox);
                 Manager.Stage.SetUseItem((int)ItemType.DonutBox);
             }
             if (ovenToggle.isOn)
             {
-                if (Manager.Stage.GetClearing() < 3)
+                if (Manager.User.GetClearing() < 3)
                     Manager.User.UseItem(ItemType.Oven);
                 Manager.Stage.SetUseItem((int)ItemType.Oven);
             }

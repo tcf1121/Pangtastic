@@ -9,8 +9,6 @@ public class DateManager : Singleton<DateManager>
     private const string DailyCountKey = "DailyCount";
     private const string DailyGoodsListKey = "MyNumbers";
     private const string StreakKey = "LoginStreak";
-    private const string WeeklyKey = "WeeklyKey";
-    private const string ReceivedKey = "ReceivedKey";
 
     private const int MaxDailyCount = 5;
     public int LoginStreak { get { return _loginStreak; } }
@@ -24,6 +22,10 @@ public class DateManager : Singleton<DateManager>
     protected override void Awake()
     {
         base.Awake();
+    }
+
+    void Start()
+    {
         CheckDailyReset();
         CheckReceived();
     }
@@ -95,14 +97,14 @@ public class DateManager : Singleton<DateManager>
 
     private void WeeklyReset()
     {
-        PlayerPrefs.SetInt(WeeklyKey, 0);
-        PlayerPrefs.SetString(ReceivedKey, "00000000000000000000");
+        Manager.User.ResetReceived();
+        Manager.User.ResetWeeklyLevel();
     }
 
     public void CheckReceived()
     {
-        _weekLevel = PlayerPrefs.GetInt(WeeklyKey, 0);
-        string receivedString = PlayerPrefs.GetString(ReceivedKey, "00000000000000000000");
+        _weekLevel = Manager.User.GetWeeklyLevel();
+        string receivedString = Manager.User.GetReceived();
         _received = new();
 
         for (int i = 0; i < 20; i++)
@@ -116,9 +118,7 @@ public class DateManager : Singleton<DateManager>
 
     public void StageClear()
     {
-        _weekLevel++;
-        if (_weekLevel > 20) _weekLevel = 20;
-        PlayerPrefs.SetInt(WeeklyKey, _weekLevel);
+        Manager.User.WeeklyLevelUp();
     }
 
     public void SetReceived(int index)
@@ -132,7 +132,7 @@ public class DateManager : Singleton<DateManager>
         }
 
         string result = sb.ToString();
-        PlayerPrefs.GetString(ReceivedKey, result);
+        Manager.User.SetReceived(result);
     }
 
     public string GetDate()

@@ -339,6 +339,53 @@ public class UserInfoManager : Singleton<UserInfoManager>
     {
         return currentData.Achievement.CurProgress[index];
     }
+
+    public void WeeklyLevelUp()
+    {
+        currentData.Quest.WeeklyLevel++;
+        if (currentData.Quest.WeeklyLevel > 20)
+            currentData.Quest.WeeklyLevel = 20;
+    }
+
+    public void ResetWeeklyLevel()
+    {
+        currentData.Quest.WeeklyLevel = 0;
+    }
+
+    public int GetWeeklyLevel()
+    {
+        return currentData.Quest.WeeklyLevel;
+    }
+
+    public void SetReceived(string value)
+    {
+        currentData.Quest.Received = value;
+    }
+
+    public void ResetReceived()
+    {
+        currentData.Quest.Received = "00000000000000000000";
+    }
+
+    public string GetReceived()
+    {
+        return currentData.Quest.Received;
+    }
+
+    public void AddClearing()
+    {
+        currentData.Quest.Clearing++;
+    }
+
+    public void ResetClearing()
+    {
+        currentData.Quest.Clearing = 0;
+    }
+
+    public int GetClearing()
+    {
+        return currentData.Quest.Clearing;
+    }
 }
 
 public enum ItemType
@@ -362,6 +409,7 @@ public class UserData
     public ItemInfo ItemInfo { get; set; } = new ItemInfo();
     public PlaceInfo PlaceInfo { get; set; } = new PlaceInfo();
     public Achievement Achievement { get; set; } = new Achievement();
+    public Quest Quest { get; set; } = new Quest();
 }
 
 [Serializable]
@@ -398,6 +446,14 @@ public class PlaceInfo
 {
     public int CurPlace { get; set; } = 0;
     public bool[] CurMisson { get; set; } = new bool[16];
+}
+
+[Serializable]
+public class Quest
+{
+    public string Received { get; set; } = "00000000000000000000";
+    public int WeeklyLevel { get; set; } = 0;
+    public int Clearing { get; set; } = 0;
 }
 
 [Serializable]
