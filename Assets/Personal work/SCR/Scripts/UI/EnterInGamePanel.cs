@@ -35,9 +35,18 @@ public class EnterInGamePanel : MonoBehaviour
         _stageRecipes.Clear();
         _stageRecipes = RecipeRule.BuildOrder(_curCustomer, _curStage);
         Manager.Stage.SetStageRecipe(_stageRecipes);
+        Manager.Language.ChangedLanguage += () =>
+        _level.text = $"{Manager.Stage.CurrentStageIndex + 1}{stringSO.GetText(Manager.Language.GetLanguage())}";
+
         enterBtn.onClick.AddListener(EnterGame);
         SetBuyButton();
         // 여기서 레시피 만들어서 Stage에 넣기
+    }
+
+    void OnDestroy()
+    {
+        Manager.Language.ChangedLanguage -= () =>
+        _level.text = $"{Manager.Stage.CurrentStageIndex + 1}{stringSO.GetText(Manager.Language.GetLanguage())}";
     }
     void GetRecipe()
     {
@@ -77,7 +86,6 @@ public class EnterInGamePanel : MonoBehaviour
         {
             go.SetActive(false);
         }
-        _level.text = $"{Manager.Stage.CurrentStageIndex + 1}{stringSO.GetText(Manager.Language.GetLanguage())}";
         GetRecipe();
         _rollerNum.text = $"{Manager.User.GetItem().Roller}";
         _donutBoxNum.text = $"{Manager.User.GetItem().DonutBox}";

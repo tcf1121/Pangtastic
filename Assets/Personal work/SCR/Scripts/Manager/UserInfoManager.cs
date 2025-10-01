@@ -299,6 +299,46 @@ public class UserInfoManager : Singleton<UserInfoManager>
     {
         currentData.Scenario++;
     }
+
+    public void MatchBlock()
+    {
+        currentData.Achievement.CurProgress[0]++;
+    }
+
+    public void PlaceFurniture()
+    {
+        currentData.Achievement.CurProgress[1]++;
+    }
+
+    public void ChapterClear()
+    {
+        currentData.Achievement.CurProgress[2]++;
+    }
+
+    public void CompleteAchievement(int index)
+    {
+        currentData.Achievement.CurLevel[index]++;
+        if (index == 2)
+        {
+            if (currentData.Achievement.CurLevel[index] > 8)
+                currentData.Achievement.CurLevel[index] = 8;
+        }
+        else
+        {
+            if (currentData.Achievement.CurLevel[index] > 5)
+                currentData.Achievement.CurLevel[index] = 5;
+        }
+    }
+
+    public int GetAchievementLevel(int index)
+    {
+        return currentData.Achievement.CurLevel[index];
+    }
+
+    public int GetAchievementProgress(int index)
+    {
+        return currentData.Achievement.CurProgress[index];
+    }
 }
 
 public enum ItemType
@@ -321,6 +361,7 @@ public class UserData
     public string PlayerName { get; set; } = "";
     public ItemInfo ItemInfo { get; set; } = new ItemInfo();
     public PlaceInfo PlaceInfo { get; set; } = new PlaceInfo();
+    public Achievement Achievement { get; set; } = new Achievement();
 }
 
 [Serializable]
@@ -357,4 +398,11 @@ public class PlaceInfo
 {
     public int CurPlace { get; set; } = 0;
     public bool[] CurMisson { get; set; } = new bool[16];
+}
+
+[Serializable]
+public class Achievement
+{
+    public int[] CurLevel { get; set; } = new int[3] { 0, 0, 0 };
+    public int[] CurProgress { get; set; } = new int[3] { 0, 0, 0 };
 }

@@ -9,9 +9,9 @@ public class UserInfoUI : MonoBehaviour
     [SerializeField] TMP_Text _coin;
     [SerializeField] TMP_Text _heart;
     [SerializeField] TMP_Text _heartTime;
+    [SerializeField] TMP_Text _heartFull;
     [SerializeField] StringSO _heartSO;
     [SerializeField] TMP_Text _star;
-    [SerializeField] Image _profileImage;
     [SerializeField] float _respwanTime;
     [SerializeField] GameObject _infinityImage;
     [SerializeField] GameObject _ui;
@@ -41,6 +41,8 @@ public class UserInfoUI : MonoBehaviour
         {
             Destroy(gameObject);
         }
+        Manager.Language.ChangedLanguage += () =>
+        _heartFull.text = _heartSO.GetText(Manager.Language.GetLanguage());
     }
 
     void Start()
@@ -64,6 +66,12 @@ public class UserInfoUI : MonoBehaviour
             _heartTime.text = _heartSO.GetText(Manager.Language.GetLanguage());
         else
             SetHeartTime();
+    }
+
+    void OnDestroy()
+    {
+        Manager.Language.ChangedLanguage -= () =>
+        _heartFull.text = _heartSO.GetText(Manager.Language.GetLanguage());
     }
 
     public string SetNum(int num)
@@ -247,9 +255,16 @@ public class UserInfoUI : MonoBehaviour
     private void SetHeartTimer(int value)
     {
         if (Manager.User.GetHeart() == 5)
-            _heartTime.text = _heartSO.GetText(Manager.Language.GetLanguage());
+        {
+            _heartFull.gameObject.SetActive(true);
+            _heartTime.gameObject.SetActive(false);
+
+        }
+
         else
         {
+            _heartFull.gameObject.SetActive(false);
+            _heartTime.gameObject.SetActive(true);
             int minutes = value / 60;
             int seconds = value % 60;
             _heartTime.text = string.Format("{0:D2}:{1:D2}", minutes, seconds);
