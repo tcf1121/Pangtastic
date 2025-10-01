@@ -102,6 +102,7 @@ public class StageManager : Singleton<StageManager>
 
     public void StageClear()
     {
+        Manager.Date.StageClear();
         Manager.User.AddClearing();
     }
 

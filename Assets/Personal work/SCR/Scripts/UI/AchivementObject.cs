@@ -31,6 +31,11 @@ public class AchivementObject : MonoBehaviour
         Manager.Language.ChangedLanguage -= SetTitle;
     }
 
+    void OnEnable()
+    {
+        SetAchivement(Manager.User.GetAchievementLevel(_achivementIndex));
+    }
+
     public void SetAchivement(int index)
     {
         _achvLevel = index;

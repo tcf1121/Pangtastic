@@ -38,6 +38,12 @@ public class DateManager : Singleton<DateManager>
         }
     }
 
+    public void NewUser()
+    {
+        CheckDailyReset();
+        CheckReceived();
+    }
+
     void CheckDailyReset()
     {
         string lastDateStr = PlayerPrefs.GetString(LastPurchaseDateKey, "");

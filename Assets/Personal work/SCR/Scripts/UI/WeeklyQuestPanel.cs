@@ -17,11 +17,18 @@ public class WeeklyQuestPanel : MonoBehaviour
             int index = i;
             rewardButtons[i].onClick.AddListener(() => GetReward(index));
         }
+    }
+
+    void OnEnable()
+    {
         SetWeeklyQuest();
     }
 
     private void SetWeeklyQuest()
     {
+        Manager.Date.CheckReceived();
+        Debug.Log(Manager.Date.WeekLevel);
+        Debug.Log(Manager.Date.Received);
         for (int i = 0; i < levelCheckObj.Count; i++)
         {
             if (i < Manager.Date.WeekLevel) levelCheckObj[i].SetActive(true);
