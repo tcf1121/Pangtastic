@@ -7,6 +7,7 @@ public class CSVToSOImporter
     public static void StartImportIngredients()
     {
         StringImporter.StartImportString();
+        RewardImporter.StartImportReward();
         IngredientImporter.StartImportIngredients();
         RecipeImporter.StartImportRecipes();
         CustomerImporter.StartImportCustomers();

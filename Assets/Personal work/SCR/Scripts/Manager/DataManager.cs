@@ -10,6 +10,7 @@ public class DataManager : Singleton<DataManager>
     private bool _isTest;
     private const string NewUserKey = "NewUserData";
 
+
     protected override void Awake()
     {
         base.Awake();
@@ -35,6 +36,8 @@ public class DataManager : Singleton<DataManager>
     }
 
 #endif
+
+
 
     public void OnTest()
     {

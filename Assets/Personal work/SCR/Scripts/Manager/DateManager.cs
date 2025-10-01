@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Text;
 using UnityEngine;
 
 public class DateManager : Singleton<DateManager>
@@ -8,14 +9,23 @@ public class DateManager : Singleton<DateManager>
     private const string DailyCountKey = "DailyCount";
     private const string DailyGoodsListKey = "MyNumbers";
     private const string StreakKey = "LoginStreak";
+    private const string WeeklyKey = "WeeklyKey";
+    private const string ReceivedKey = "ReceivedKey";
+
     private const int MaxDailyCount = 5;
     public int LoginStreak { get { return _loginStreak; } }
     private int _loginStreak;
+    public int WeekLevel { get { return _weekLevel; } }
+    private int _weekLevel;
+    public List<bool> Received { get { return _received; } }
+    private List<bool> _received;
+    private bool _checkMonday;
     // Start is called before the first frame update
     protected override void Awake()
     {
         base.Awake();
         CheckDailyReset();
+        CheckReceived();
     }
 
     private void OnApplicationPause(bool pause)
@@ -33,7 +43,7 @@ public class DateManager : Singleton<DateManager>
 
         _loginStreak = PlayerPrefs.GetInt(StreakKey, 0);
 
-
+        // 일간 초기화
         if (lastDateStr != today.ToString("yyyyMMdd"))
         {
             // 날짜가 다르면 카운트 초기화
@@ -53,6 +63,76 @@ public class DateManager : Singleton<DateManager>
             PlayerPrefs.SetInt(StreakKey, _loginStreak);
         }
 
+        // 주간 초기화
+        if (!string.IsNullOrEmpty(lastDateStr))
+        {
+            DateTime lastDate = DateTime.ParseExact(lastDateStr, "yyyyMMdd", null);
+
+            // 마지막 접속일 이후 가장 가까운 월요일 찾기
+            DateTime lastMonday = today;
+            while (lastMonday.DayOfWeek != DayOfWeek.Monday)
+                lastMonday = lastMonday.AddDays(-1);
+
+            // 마지막 접속일 < 최근 월요일 && 오늘 >= 월요일
+            if (lastDate < lastMonday)
+            {
+                _checkMonday = true;
+            }
+        }
+        else
+        {
+            // 첫 접속일 경우: 오늘이 월요일이면 체크
+            if (today.DayOfWeek == DayOfWeek.Monday)
+                _checkMonday = true;
+        }
+
+        if (_checkMonday)
+        {
+            Debug.Log("주간 리셋 실행!");
+            WeeklyReset();
+        }
+    }
+
+    private void WeeklyReset()
+    {
+        PlayerPrefs.SetInt(WeeklyKey, 0);
+        PlayerPrefs.SetString(ReceivedKey, "00000000000000000000");
+    }
+
+    public void CheckReceived()
+    {
+        _weekLevel = PlayerPrefs.GetInt(WeeklyKey, 0);
+        string receivedString = PlayerPrefs.GetString(ReceivedKey, "00000000000000000000");
+        _received = new();
+
+        for (int i = 0; i < 20; i++)
+        {
+            char c = receivedString[i];
+            int digit = c - '0';
+            bool received = digit == 1 ? true : false;
+            _received.Add(received);
+        }
+    }
+
+    public void StageClear()
+    {
+        _weekLevel++;
+        if (_weekLevel > 20) _weekLevel = 20;
+        PlayerPrefs.SetInt(WeeklyKey, _weekLevel);
+    }
+
+    public void SetReceived(int index)
+    {
+
+        _received[index] = true;
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < 20; i++)
+        {
+            sb.Append(_received[i] ? '1' : '0');
+        }
+
+        string result = sb.ToString();
+        PlayerPrefs.GetString(ReceivedKey, result);
     }
 
     public string GetDate()

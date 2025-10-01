@@ -24,6 +24,10 @@ public class OrderUIPresenter : MonoBehaviour
     [SerializeField] private Sprite _emojiHigh;
     [SerializeField] private Sprite _emojiMid;
     [SerializeField] private Sprite _emojiLow;
+    [SerializeField] private RectTransform _start;
+    [SerializeField] private RectTransform _end;
+    [SerializeField] private Color _startColor;
+    [SerializeField] private Color _endColor;
 
     [Header("레시피 아이템 리스트")]
     [SerializeField] private List<OrderItem> _recipeSlotList = new List<OrderItem>();
@@ -158,12 +162,30 @@ public class OrderUIPresenter : MonoBehaviour
         yield return new WaitForSeconds(_dialogueDuration);
         _chatBox.SetActive(false);
     }
+
     private IEnumerator EmojiRoutine(float percent) //이모지 코루틴
     {
         _emojiImage.sprite = GetEmojiSprite(percent);
         _emojiBox.gameObject.SetActive(true);
 
-        yield return new WaitForSeconds(_dialogueDuration);
+        _emojiImage.rectTransform.position = _start.position;
+        _emojiImage.color = _startColor;
+
+        float elapsed = 0f;
+
+        while (elapsed < _dialogueDuration)
+        {
+            elapsed += Time.deltaTime;
+            float t = elapsed / _dialogueDuration; // 0 → 1
+
+            // 위치 보간
+            _emojiImage.rectTransform.position = Vector3.Lerp(_start.position, _end.position, t);
+
+            // 색상 보간
+            _emojiImage.color = Color.Lerp(_startColor, _endColor, t);
+
+            yield return null;
+        }
         _emojiBox.gameObject.SetActive(false);
     }
 

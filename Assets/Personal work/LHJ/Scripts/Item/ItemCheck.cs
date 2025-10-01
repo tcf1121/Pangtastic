@@ -31,9 +31,9 @@ namespace LHJ
         [Header("커피")]
         [SerializeField] private RectTransform _coffeeIconRt;
         [SerializeField] private GameObject _coffeeFx; 
-        [SerializeField] private float _coffeeDurationMs = 2000f;
-        [SerializeField] private float _coffeeZigzagHeight = 260f;
-        [SerializeField] private float _coffeeZigzagAmp = 60f;
+        [SerializeField] private float _coffeeDurationMs;
+        [SerializeField] private float _coffeeZigzagHeight;
+        [SerializeField] private float _coffeeZigzagAmp;
         private void Update()
         {
             if (_board == null || !_board.IsItemSelected || !(BoardManager.Instance.CurrentState is ReadyState) || _board.IsItemEffectRunning || BoardManager.Instance.IsClearSpecialTime || InGameManager.GetStageClear())
@@ -232,12 +232,14 @@ namespace LHJ
                                         if (blk.BlockInstance != null && blk.BlockInstance.TryGetComponent<PooledObject>(out var pooled))
                                         {
                                             BoardManager.Instance.PlayMatchExplosion(blk.BlockInstance.transform.position);
+                                            Manager.Audio.PlaySFX("Block_Match");
                                             InGameManager.AddIngredientSta(blk.GemType);
                                             pooled.ReturnToPool();
                                         }
                                         else if (blk.BlockInstance != null)
                                         {
                                             BoardManager.Instance.PlayMatchExplosion(blk.BlockInstance.transform.position);
+                                            Manager.Audio.PlaySFX("Block_Match");
                                             InGameManager.AddIngredientSta(blk.GemType);
                                             Destroy(blk.BlockInstance);
                                         }
@@ -382,12 +384,14 @@ namespace LHJ
                 whiskFx.transform.DOPath(path, rotateSec, PathType.CatmullRom, PathMode.TopDown2D, 10, Color.white)
                        .SetEase(Ease.Linear)
                        .OnComplete(() => { if (whiskFx != null) Destroy(whiskFx); });
-
                 yield return new WaitForSeconds(rotateSec);
             }
 
+            bool areaFaded = true;
+            float fadeSec = Mathf.Max(0.01f, _whiskAreaFadeMs * 0.001f);
             if (_whiskAreaFx != null)
             {
+                areaFaded = false;
                 Vector3 centerWorld = GridToWorld(pos.x, pos.y);
                 var areaFx = Instantiate(_whiskAreaFx, centerWorld, Quaternion.identity, _board.transform);
 
@@ -401,18 +405,25 @@ namespace LHJ
                     float sy = (3f * cellH) / Mathf.Max(0.0001f, spriteSize.y);
                     areaFx.transform.localScale = new Vector3(sx, sy, 1f);
 
-                    float fadeSec = Mathf.Max(0.01f, _whiskAreaFadeMs * 0.001f);
                     areaSr.DOFade(0f, fadeSec).OnComplete(() =>
                     {
                         if (areaFx != null) Destroy(areaFx);
+                        areaFaded = true;
                     });
                 }
                 else
                 {
-                    Destroy(areaFx, Mathf.Max(0.01f, _whiskAreaFadeMs * 0.001f));
+                    yield return new WaitForSeconds(fadeSec);
+                    if (areaFx != null) Destroy(areaFx);
+                    areaFaded = true;
                 }
             }
 
+            if (!areaFaded)
+                yield return new WaitUntil(() => areaFaded);
+            bool playedMatchSfx = false;
+
+            // 블록 파괴 처리
             for (int i = 0; i < area.Count; i++)
             {
                 int x = area[i].x;
@@ -420,7 +431,6 @@ namespace LHJ
 
                 var blk = sp.GameBoardData.BlockArray[y, x];
                 if (blk == null) continue;
-
                 if (blk.GemType != GemType.Flour_s && blk.BlockInstance == null)
                     continue;
 
@@ -443,7 +453,8 @@ namespace LHJ
 
                 if (blk is ObstacleBlock obstacle)
                 {
-                    if (blk.GemType == GemType.Syrup || blk.GemType == GemType.Egg) InGameManager.AddIngredientSta(blk.GemType);
+                    if (blk.GemType == GemType.Syrup || blk.GemType == GemType.Egg)
+                        InGameManager.AddIngredientSta(blk.GemType);
                     obstacle.TakeDamage();
                     continue;
                 }
@@ -451,14 +462,28 @@ namespace LHJ
                 if (blk.BlockInstance != null && blk.BlockInstance.TryGetComponent<PooledObject>(out var pooled))
                 {
                     BoardManager.Instance.PlayMatchExplosion(blk.BlockInstance.transform.position);
-                    InGameManager.AddIngredientSta(blk.GemType); 
-                    pooled.ReturnToPool(); 
+
+                    if (!playedMatchSfx)
+                    {
+                        Manager.Audio.PlaySFX("Block_Match");
+                        playedMatchSfx = true;
+                    }
+
+                    InGameManager.AddIngredientSta(blk.GemType);
+                    pooled.ReturnToPool();
                 }
                 else if (blk.BlockInstance != null)
                 {
                     BoardManager.Instance.PlayMatchExplosion(blk.BlockInstance.transform.position);
-                    InGameManager.AddIngredientSta(blk.GemType); 
-                    Destroy(blk.BlockInstance); 
+
+                    if (!playedMatchSfx)
+                    {
+                        Manager.Audio.PlaySFX("Block_Match");
+                        playedMatchSfx = true;
+                    }
+
+                    InGameManager.AddIngredientSta(blk.GemType);
+                    Destroy(blk.BlockInstance);
                 }
 
                 sp.GameBoardData.BlockArray[y, x].BlockInstance = null;
