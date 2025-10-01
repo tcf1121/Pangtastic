@@ -208,12 +208,12 @@ public class CustomizeManager : MonoBehaviour
 
             if(index == 0)
             {
-                _profilePic.transform.localScale = Vector3.one;
+                //_profilePic.transform.localScale = Vector3.one;
                 _profilePicButton.transform.localScale = Vector3.one;
             }
             else
             {
-                _profilePic.transform.localScale = new Vector3(1.5f, 1.5f, 0f);
+                //_profilePic.transform.localScale = new Vector3(1.5f, 1.5f, 0f);
                 _profilePicButton.transform.localScale = new Vector3(1.5f, 1.5f, 0f);
             }
             
