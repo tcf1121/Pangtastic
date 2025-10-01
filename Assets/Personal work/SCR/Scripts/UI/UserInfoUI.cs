@@ -10,7 +10,6 @@ public class UserInfoUI : MonoBehaviour
     [SerializeField] TMP_Text _heart;
     [SerializeField] TMP_Text _heartTime;
     [SerializeField] TMP_Text _heartFull;
-    [SerializeField] StringSO _heartSO;
     [SerializeField] TMP_Text _star;
     [SerializeField] float _respwanTime;
     [SerializeField] GameObject _infinityImage;
@@ -41,8 +40,6 @@ public class UserInfoUI : MonoBehaviour
         {
             Destroy(gameObject);
         }
-        Manager.Language.ChangedLanguage += () =>
-        _heartFull.text = _heartSO.GetText(Manager.Language.GetLanguage());
     }
 
     void Start()
@@ -63,15 +60,17 @@ public class UserInfoUI : MonoBehaviour
         _OnTimerFinished += Instance.FinishHeartTimeCor;
         _OnInfinityFinished += Instance.FinishInfinity;
         if (Manager.User.GetHeart() == 5)
-            _heartTime.text = _heartSO.GetText(Manager.Language.GetLanguage());
+        {
+            _heartFull.gameObject.SetActive(true);
+            _heartTime.gameObject.SetActive(false);
+        }
         else
+        {
+            _heartFull.gameObject.SetActive(false);
+            _heartTime.gameObject.SetActive(true);
             SetHeartTime();
-    }
+        }
 
-    void OnDestroy()
-    {
-        Manager.Language.ChangedLanguage -= () =>
-        _heartFull.text = _heartSO.GetText(Manager.Language.GetLanguage());
     }
 
     public string SetNum(int num)
@@ -258,7 +257,6 @@ public class UserInfoUI : MonoBehaviour
         {
             _heartFull.gameObject.SetActive(true);
             _heartTime.gameObject.SetActive(false);
-
         }
 
         else
