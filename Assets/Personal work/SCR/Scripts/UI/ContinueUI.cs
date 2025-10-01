@@ -6,7 +6,7 @@ public class ContinueUI : MonoBehaviour
 
     void OnEnable()
     {
-        if (Manager.Stage.GetClearing() > 0)
+        if (Manager.User.GetClearing() > 0)
             _clearingText.SetActive(true);
         else
             _clearingText.SetActive(false);

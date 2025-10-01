@@ -299,6 +299,93 @@ public class UserInfoManager : Singleton<UserInfoManager>
     {
         currentData.Scenario++;
     }
+
+    public void MatchBlock()
+    {
+        currentData.Achievement.CurProgress[0]++;
+    }
+
+    public void PlaceFurniture()
+    {
+        currentData.Achievement.CurProgress[1]++;
+    }
+
+    public void ChapterClear()
+    {
+        currentData.Achievement.CurProgress[2]++;
+    }
+
+    public void CompleteAchievement(int index)
+    {
+        currentData.Achievement.CurLevel[index]++;
+        if (index == 2)
+        {
+            if (currentData.Achievement.CurLevel[index] > 8)
+                currentData.Achievement.CurLevel[index] = 8;
+        }
+        else
+        {
+            if (currentData.Achievement.CurLevel[index] > 5)
+                currentData.Achievement.CurLevel[index] = 5;
+        }
+    }
+
+    public int GetAchievementLevel(int index)
+    {
+        return currentData.Achievement.CurLevel[index];
+    }
+
+    public int GetAchievementProgress(int index)
+    {
+        return currentData.Achievement.CurProgress[index];
+    }
+
+    public void WeeklyLevelUp()
+    {
+        currentData.Quest.WeeklyLevel++;
+        if (currentData.Quest.WeeklyLevel > 20)
+            currentData.Quest.WeeklyLevel = 20;
+    }
+
+    public void ResetWeeklyLevel()
+    {
+        currentData.Quest.WeeklyLevel = 0;
+    }
+
+    public int GetWeeklyLevel()
+    {
+        return currentData.Quest.WeeklyLevel;
+    }
+
+    public void SetReceived(string value)
+    {
+        currentData.Quest.Received = value;
+    }
+
+    public void ResetReceived()
+    {
+        currentData.Quest.Received = "00000000000000000000";
+    }
+
+    public string GetReceived()
+    {
+        return currentData.Quest.Received;
+    }
+
+    public void AddClearing()
+    {
+        currentData.Quest.Clearing++;
+    }
+
+    public void ResetClearing()
+    {
+        currentData.Quest.Clearing = 0;
+    }
+
+    public int GetClearing()
+    {
+        return currentData.Quest.Clearing;
+    }
 }
 
 public enum ItemType
@@ -321,6 +408,8 @@ public class UserData
     public string PlayerName { get; set; } = "";
     public ItemInfo ItemInfo { get; set; } = new ItemInfo();
     public PlaceInfo PlaceInfo { get; set; } = new PlaceInfo();
+    public Achievement Achievement { get; set; } = new Achievement();
+    public Quest Quest { get; set; } = new Quest();
 }
 
 [Serializable]
@@ -357,4 +446,19 @@ public class PlaceInfo
 {
     public int CurPlace { get; set; } = 0;
     public bool[] CurMisson { get; set; } = new bool[16];
+}
+
+[Serializable]
+public class Quest
+{
+    public string Received { get; set; } = "00000000000000000000";
+    public int WeeklyLevel { get; set; } = 0;
+    public int Clearing { get; set; } = 0;
+}
+
+[Serializable]
+public class Achievement
+{
+    public int[] CurLevel { get; set; } = new int[3] { 0, 0, 0 };
+    public int[] CurProgress { get; set; } = new int[3] { 0, 0, 0 };
 }

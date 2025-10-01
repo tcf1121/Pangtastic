@@ -11,7 +11,8 @@ public class AchivementSO : ScriptableObject
 public class AchivementInfo
 {
     public int ID;
-    public string Title;
+    public StringSO Title;
+    public StringSO Explane;
     public int Target;
     public RewardSO reward;
 }

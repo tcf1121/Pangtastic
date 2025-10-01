@@ -21,6 +21,12 @@ public class MissionBtn : MonoBehaviour
     {
         _missionBtn = GetComponent<Button>();
         Refresh();
+        Manager.Language.ChangedLanguage += Refresh;
+    }
+
+    void OnDestroy()
+    {
+        Manager.Language.ChangedLanguage -= Refresh;
     }
 
     public void Refresh()

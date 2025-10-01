@@ -28,14 +28,13 @@ public class RoomManager : MonoBehaviour
 
     public void ClearPlace(Action openPopup = null)
     {
-        if (curPlace < MissionPlace.Greengrocery)
+        if (curPlace <= MissionPlace.Greengrocery)
         {
-            curPlace++;
+            if (curPlace < MissionPlace.Greengrocery)
+                curPlace++;
             Manager.User.SetCurPlace(curPlace);
             Manager.User.NewMissionList(GetMaxMission());
-            //TODO:TEST
-            // Manager.UserInfoSystem.SetCurPlace(curPlace);
-            // Manager.UserInfoSystem.NewMissionList(GetMaxMission());
+            Manager.User.ChapterClear();
             missonBtn.Refresh();
             menuUI.GoHome(() =>
             {
@@ -54,19 +53,9 @@ public class RoomManager : MonoBehaviour
 
     public void ClearMission(int index, Action openPopup = null)
     {
-        // 가구 업적 :: S
-        // Manager.UserInfoSystem.furniturePlaced(1);
-        // 가구 업적 :: E
-        
-        // Manager.UserInfoSystem.ClearCurMisson(index);
-        // if (Manager.UserInfoSystem.MissionAllClear())
         Manager.User.ClearCurMisson(index);
         if (Manager.User.MissionAllClear())
         {
-            // 스태이지 업적 :: S
-            // Manager.UserInfoSystem.OnChapterLastStageCleared((int)curPlace);
-            // 스태이지 업적 :: E
-            
             _places[(int)curPlace].MissionClear(index, () => ClearPlace(openPopup));
         }
         else
@@ -74,6 +63,7 @@ public class RoomManager : MonoBehaviour
             _places[(int)curPlace].MissionClear(index, openPopup);
             missonBtn.Refresh();
         }
+        Manager.User.PlaceFurniture();
         _scenario.PlayScenario(curPlace, missonBtn.Percent);
     }
 
@@ -86,8 +76,6 @@ public class RoomManager : MonoBehaviour
     {
         if (num == 0) return null;
         List<Mission> returnMission = new();
-        // TODO: TEST
-        // List<bool> isclearMission = Manager.UserInfoSystem.GetCurMisson().ToList();
         List<bool> isclearMission = Manager.User.GetCurMisson().ToList();
         List<Mission> missionLists = missionList.Missions[(int)curPlace].Mission;
         for (int i = 0; i < isclearMission.Count; i++)
