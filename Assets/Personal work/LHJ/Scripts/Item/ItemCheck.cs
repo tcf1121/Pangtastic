@@ -41,9 +41,6 @@ namespace LHJ
 
             if (Input.GetMouseButtonDown(0))
             {
-                //if (EventSystem.current != null && EventSystem.current.IsPointerOverGameObject())
-                //    return;
-
                 Vector3 mouse = Input.mousePosition;
                 mouse.z = -Camera.main.transform.position.z;
                 Vector3 world = Camera.main.ScreenToWorldPoint(mouse);
@@ -124,12 +121,6 @@ namespace LHJ
                     StartCoroutine(ApplyWhisk(pos));
                     Manager.User.UseItem(type);
                     break;
-            }
-
-            if (destroyed > 0)
-            {
-                InGameManager.AddScore(destroyed * 10);
-                _board.ChangeState(new RefillState());
             }
         }
 
