@@ -43,12 +43,15 @@ namespace KDJ.States
 
         public void OnUpdate(BoardManager boardManager)
         {
-            // 사용자 입력이나 특정 조건 발생 시 힌트를 중단합니다.
-            if (SpecialBlockEffect.effectRunning || boardManager.IsUseItem || (boardManager.IsItemSelected && !BoardManager.CanTouch))
+            // 사용자 입력이나 특정 조건 발생 시 힌트를 중단하고, 아닐 경우 힌트를 시작합니다.
+            if (SpecialBlockEffect.effectRunning || boardManager.IsUseItem || (boardManager.IsItemSelected && !BoardManager.CanTouch) || boardManager.IsClearSpecialTime)
             {
                 if (boardManager.IsUseItem) boardManager.IsUseItem = false;
                 boardManager.HintManager.StopHintTimer();
-                return;
+            }
+            else
+            {
+                boardManager.HintManager.StartHintTimer();
             }
 
             // 입력 중단 처리 부분
