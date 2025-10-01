@@ -7,6 +7,8 @@ using UnityEngine;
 public class PassiveBooster : MonoBehaviour
 {
     [SerializeField] private BoardManager _board;
+    [SerializeField] private Tutorial _tutorial;
+    [SerializeField] private int _tutorialNoSpawnRadius;
 
     // 패시브 아이템에 사용되는 특수블록
     [SerializeField]
@@ -28,6 +30,7 @@ public class PassiveBooster : MonoBehaviour
 
     private void OnEnable()
     {
+        if (_board != null && _tutorial == null) _tutorial = _board.GetComponent<Tutorial>();
         SetPassiveItem(Manager.Stage.GetUseItem());
         if (_applyCo == null)
             _applyCo = StartCoroutine(WaitAndApplyRoutine());
@@ -53,18 +56,7 @@ public class PassiveBooster : MonoBehaviour
     {
         Debug.Log("패시브 아이템 적용 대기 코루틴 시작");
         if (_board == null) yield break;
-        
-        // while (sp == null || sp.GameBoardData == null || sp.GameBoardData.BlockPlate == null || sp.GameBoardData.BlockArray == null)
-        // {
-        //     sp = _board.Spawner;
-        //     yield return null;
-        // }
-
         yield return new WaitUntil(() => _board.IsReadyForStart);
-
-        int w = _board.Spawner.GameBoardData.BlockPlate.BlockPlateWidth;
-        int h = _board.Spawner.GameBoardData.BlockPlate.BlockPlateHeight;
-
         ApplyOnStageStart();
     }
 
@@ -99,6 +91,7 @@ public class PassiveBooster : MonoBehaviour
         {
             int x = Random.Range(0, w);
             int y = Random.Range(0, h);
+            if(IsTutorialStage() && IsNearTutorialSwap(x, y)) continue;
 
             var cell = sp.GameBoardData.BlockArray[y, x];
             if (cell == null || cell.BlockInstance == null) continue;
@@ -124,6 +117,27 @@ public class PassiveBooster : MonoBehaviour
             picked.Add(new Vector2Int(x, y));
             Debug.Log($"Placed {gemType} at ({x},{y})");
             return true;
+        }
+        return false;
+    }
+    private bool IsTutorialStage()
+    {
+        int s = Manager.User.GetStage();
+        return s >= 0 && s <= 4 && _tutorial != null;
+    }
+
+    private bool IsNearTutorialSwap(int x, int y)
+    {
+        if (_tutorial == null || _tutorial.SwappableBlocks == null || _tutorial.SwappableBlocks.Count == 0)
+            return false;
+
+        int r = (_tutorialNoSpawnRadius <= 0) ? 2 : _tutorialNoSpawnRadius;
+
+        for (int i = 0; i < _tutorial.SwappableBlocks.Count; i++)
+        {
+            Vector2Int p = _tutorial.SwappableBlocks[i];
+            int dist = Mathf.Abs(x - p.x) + Mathf.Abs(y - p.y);
+            if (dist <= r) return true;
         }
         return false;
     }
