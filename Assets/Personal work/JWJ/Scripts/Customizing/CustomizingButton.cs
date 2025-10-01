@@ -20,7 +20,11 @@ public class CustomizingButton : MonoBehaviour
     {
         _button = GetComponent<Button>();
         _button.onClick.AddListener(OnButtonClicked);
-        _customizeManager = FindObjectOfType<CustomizeManager>();
+
+        if(_customizeManager == null)
+        {
+            _customizeManager = FindObjectOfType<CustomizeManager>();
+        }
 
         if (_buttonController == null)
         {

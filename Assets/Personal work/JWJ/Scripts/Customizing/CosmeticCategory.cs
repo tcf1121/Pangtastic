@@ -8,5 +8,6 @@ public enum CosmeticCategory
     Headwear,
     Facewear,
     Bag,
-    Accessory
+    Accessory,
+    ProfilePic
 }
