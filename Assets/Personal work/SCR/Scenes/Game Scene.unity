@@ -4039,6 +4039,41 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 100, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
+--- !u!1 &168411956
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 168411957}
+  m_Layer: 0
+  m_Name: SpecialBlockStartPos
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!224 &168411957
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 168411956}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1541269074}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0.5, y: 1}
+  m_AnchorMax: {x: 0.5, y: 1}
+  m_AnchoredPosition: {x: -371, y: -481}
+  m_SizeDelta: {x: 100, y: 100}
+  m_Pivot: {x: 0.5, y: 0.5}
 --- !u!1 &171406323
 GameObject:
   m_ObjectHideFlags: 0
@@ -12182,7 +12217,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 568480722}
+  m_Father: {fileID: 692353756}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &483364063
 PrefabInstance:
@@ -12531,20 +12566,24 @@ MonoBehaviour:
   _rollerVerticalFx: {fileID: 7732103167370757450, guid: 1433dc6dd0e9bb744af8a254f9109847, type: 3}
   _rollerTrailFxH: {fileID: 5730566548226682007, guid: f8bb0f551f8d5504cb73e7d279bf608b, type: 3}
   _rollerTrailFxV: {fileID: 5256505135586146949, guid: f25bd44ffdbc1d243aa2055181ad194c, type: 3}
-  _rollerEffectTime: 0.1
+  _rollerEffectTime: 0.07
   _milkDropFx: {fileID: 6599639827530494147, guid: 96cf646826781dc4eabb87786cc44ef2, type: 3}
   _milkSplashFx: {fileID: 498417713505491951, guid: 2095b6983e1bfa64cae37cb281b00451, type: 3}
-  _milkShrinkTime: 0.1
-  _milkTimePerCell: 0.2
-  _milkMinFlyTime: 0.1
+  _milkShrinkTime: 0.5
+  _milkTimePerCell: 0.15
+  _milkMinFlyTime: 0.15
   _milkDropCount: 2
   _milkDropCountDouble: 5
   _ovenFx: {fileID: 8216247949329258546, guid: 60be342cb12723447b33a31ed115105f, type: 3}
   _ovenStrokeMat: {fileID: 2100000, guid: d957cb65e396860489d6bbbf89ca9c86, type: 2}
   _ovenLineMat: {fileID: 2100000, guid: c75f6c14bec8afa46a1cd568bd90d442, type: 2}
-  _ovenShakeTime: 0.3
+  _ovenShakeTime: 0.2
   _donutBurstFx: {fileID: 9157105887711914197, guid: c4f829cb7dd4b864caf8832ec5b1ee55, type: 3}
   _donutEffectTime: 0.3
+  _shakeTarget: {fileID: 692353756}
+  _shakeHeight: 0.2
+  _shakeDuration: 0.3
+  _shakeFrequency: 10
 --- !u!114 &486154115
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -13366,7 +13405,6 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 948208277}
-  - {fileID: 483036288}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &568665248
@@ -16006,6 +16044,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
+  - {fileID: 483036288}
   - {fileID: 471848937}
   - {fileID: 205530441}
   m_Father: {fileID: 0}
@@ -27106,12 +27145,12 @@ PrefabInstance:
       objectReference: {fileID: 6378134695496327388, guid: 789c3facf6034c2429274e19144ec6c3, type: 3}
     - target: {fileID: 7085172997495155829, guid: e18bdeefcce5d304e84da3a5664879c5, type: 3}
       propertyPath: _scissorFxMs
-      value: 2000
+      value: 800
       objectReference: {fileID: 0}
     - target: {fileID: 7085172997495155829, guid: e18bdeefcce5d304e84da3a5664879c5, type: 3}
       propertyPath: _whiskAreaFx
       value: 
-      objectReference: {fileID: 6733366654335811489, guid: 2e0b6f7cb7f474142951299a9d32c2ca, type: 3}
+      objectReference: {fileID: 4409737667057535298, guid: 37dea8abf72b8964fb9bb907822f4323, type: 3}
     - target: {fileID: 7085172997495155829, guid: e18bdeefcce5d304e84da3a5664879c5, type: 3}
       propertyPath: _whiskTileFx
       value: 
@@ -27130,7 +27169,7 @@ PrefabInstance:
       objectReference: {fileID: 8364117961288194918, guid: 506e45c1cad7c3949a3f13ed220f5673, type: 3}
     - target: {fileID: 7085172997495155829, guid: e18bdeefcce5d304e84da3a5664879c5, type: 3}
       propertyPath: _whiskRotateMs
-      value: 700
+      value: 500
       objectReference: {fileID: 0}
     - target: {fileID: 7085172997495155829, guid: e18bdeefcce5d304e84da3a5664879c5, type: 3}
       propertyPath: _whiskRotateMat
@@ -27142,7 +27181,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7085172997495155829, guid: e18bdeefcce5d304e84da3a5664879c5, type: 3}
       propertyPath: _whiskAreaFadeMs
-      value: 1000
+      value: 300
       objectReference: {fileID: 0}
     - target: {fileID: 7085172997495155829, guid: e18bdeefcce5d304e84da3a5664879c5, type: 3}
       propertyPath: _whiskTileFadeMs
@@ -34704,6 +34743,7 @@ RectTransform:
   - {fileID: 1031755624}
   - {fileID: 939125886}
   - {fileID: 155200076}
+  - {fileID: 168411957}
   m_Father: {fileID: 574744994}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
@@ -36405,6 +36445,10 @@ PrefabInstance:
       propertyPath: _explosionEffectPool
       value: 
       objectReference: {fileID: 948208276}
+    - target: {fileID: 3981300310010789011, guid: 285de4924e1fde841a475f6e261a41bf, type: 3}
+      propertyPath: _specialBlockStartPos
+      value: 
+      objectReference: {fileID: 168411957}
     - target: {fileID: 3981300310010789011, guid: 285de4924e1fde841a475f6e261a41bf, type: 3}
       propertyPath: _explosionAlphaCurve.m_Curve.Array.size
       value: 5
@@ -42155,6 +42199,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4146232147abe8f4a9ee0b511f1159f7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _extraZoomOut: 5
 --- !u!1 &1789368953
 GameObject:
   m_ObjectHideFlags: 0

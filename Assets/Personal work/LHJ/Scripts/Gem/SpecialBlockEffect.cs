@@ -35,6 +35,11 @@ namespace LHJ
         [Header("도넛상자")]
         [SerializeField] private GameObject _donutBurstFx;
         [SerializeField] private float _donutEffectTime;
+        [SerializeField] private Transform _shakeTarget;
+        [SerializeField] private float _shakeHeight;
+        [SerializeField] private float _shakeDuration;
+        [SerializeField] private int _shakeFrequency;
+        private Coroutine shake;
         public static bool effectRunning { get { return _running > 0; } }
 
         private static int _running;
@@ -51,7 +56,7 @@ namespace LHJ
         private bool TryBeginEffectAt(Vector2Int pos)
         {
             if (_activeEffects.Contains(pos))
-                return false; 
+                return false;
 
             _activeEffects.Add(pos);
             return true;
@@ -125,29 +130,78 @@ namespace LHJ
                 return;
             }
         }
+
+        public void StopAllSpecialEffects()
+        {
+            var b = BoardManager.Instance;
+            b.StopAllCoroutines();
+            DOTween.KillAll(true);
+            foreach (Transform child in b.transform)
+            {
+                child.gameObject.SetActive(false);
+            }
+            Manager.Audio.StopSFX();
+        }
+
         // 밀대(가로,세로)
         public IEnumerator RollerRoutine(Vector2Int pos, bool isHorizontal, GameBoardData gameBoard, BoardManager board)
         {
             if (gameBoard == null || board == null) yield break;
             BeginEffect();
-            Manager.Audio.PlaySFX("Roller_Use");
+            Manager.Audio.PlaySFX("NewRoller_Use");
+
             GameObject fxPrefab = isHorizontal ? _rollerHorizontalFx : _rollerVerticalFx;
             GameObject fx = Instantiate(fxPrefab, board.transform);
 
-            // 잔상 생성 코루틴 시작: 방향 전달
-            board.StartCoroutine(SpawnTrail(fx, board, isHorizontal));
+            bool leftToRight = true;
+            if (isHorizontal && board.BlockMover != null)
+            {
+                Vector2Int s = board.BlockMover.StartBlockPos;
+                Vector2Int e = board.BlockMover.EndBlockPos;
+
+                if (s.y == e.y && Mathf.Abs(e.x - s.x) == 1 && (pos == s || pos == e))
+                {
+                    int dirX = e.x - s.x;
+                    int appliedDir = (pos == e) ? dirX : -dirX;
+                    leftToRight = appliedDir > 0;
+                }
+            }
+
+            bool bottomToTop = false;
+            if (!isHorizontal && board.BlockMover != null)
+            {
+                Vector2Int s = board.BlockMover.StartBlockPos;
+                Vector2Int e = board.BlockMover.EndBlockPos;
+
+                if (s.x == e.x && Mathf.Abs(e.y - s.y) == 1 && (pos == s || pos == e))
+                {
+                    int dirY = e.y - s.y;
+                    int appliedDir = (pos == e) ? dirY : -dirY;
+                    bottomToTop = appliedDir > 0;
+                }
+            }
+
+            board.StartCoroutine(SpawnTrail(fx, board, isHorizontal, isHorizontal ? leftToRight : bottomToTop));
 
             Vector3 startWorld, endWorld;
+
             if (isHorizontal)
             {
-                startWorld = GridToWorld(board, gameBoard, 0, pos.y);
-                endWorld = GridToWorld(board, gameBoard, gameBoard.Width - 1, pos.y);
+                int startX = leftToRight ? 0 : gameBoard.Width - 1;
+                int endX = leftToRight ? gameBoard.Width - 1 : 0;
+
+                startWorld = GridToWorld(board, gameBoard, startX, pos.y);
+                endWorld = GridToWorld(board, gameBoard, endX, pos.y);
             }
             else
             {
-                startWorld = GridToWorld(board, gameBoard, pos.x, gameBoard.Height - 1);
-                endWorld = GridToWorld(board, gameBoard, pos.x, 0);
+                int startY = bottomToTop ? 0 : gameBoard.Height - 1;
+                int endY = bottomToTop ? gameBoard.Height - 1 : 0;
+
+                startWorld = GridToWorld(board, gameBoard, pos.x, startY);
+                endWorld = GridToWorld(board, gameBoard, pos.x, endY);
             }
+
             fx.transform.position = startWorld;
             if (fx.TryGetComponent<SpriteRenderer>(out var sr)) sr.sortingOrder = 9999;
 
@@ -155,7 +209,6 @@ namespace LHJ
             float duration = (isHorizontal ? gameBoard.Width : gameBoard.Height) * stepTime;
             fx.transform.DOMove(endWorld, duration).SetEase(Ease.Linear);
 
-            // 시작칸 먼저 제거
             {
                 var origin = new List<Vector2Int>();
                 AddCell(gameBoard, pos.x, pos.y, origin);
@@ -164,54 +217,106 @@ namespace LHJ
 
             if (isHorizontal)
             {
-                for (int x = 0; x < gameBoard.Width; x++)
+                if (leftToRight)
                 {
-                    bool isOriginCell = (x == pos.x);
-                    var cur = gameBoard.GetBlock(x, pos.y);
-
-                    if (!isOriginCell && cur != null && cur.BlockInstance != null && IsSpecial(cur.GemType))
+                    for (int x = 0; x < gameBoard.Width; x++)
                     {
-                        UseSpecial(new Vector2Int(x, pos.y), cur.GemType, gameBoard, new List<Vector2Int>());
+                        bool isOriginCell = (x == pos.x);
+                        var cur = gameBoard.GetBlock(x, pos.y);
+
+                        if (!isOriginCell && cur != null && cur.BlockInstance != null && IsSpecial(cur.GemType))
+                        {
+                            UseSpecial(new Vector2Int(x, pos.y), cur.GemType, gameBoard, new List<Vector2Int>());
+                            yield return new WaitForSeconds(stepTime);
+                            continue;
+                        }
+
+                        var hits = new List<Vector2Int>();
+                        AddCell(gameBoard, x, pos.y, hits);
+                        if (hits.Count > 0) ApplyDamageAndScore(board, hits);
+
                         yield return new WaitForSeconds(stepTime);
-                        continue;
                     }
+                }
+                else
+                {
+                    for (int x = gameBoard.Width - 1; x >= 0; x--)
+                    {
+                        bool isOriginCell = (x == pos.x);
+                        var cur = gameBoard.GetBlock(x, pos.y);
 
-                    var hits = new List<Vector2Int>();
-                    AddCell(gameBoard, x, pos.y, hits);
-                    if (hits.Count > 0) ApplyDamageAndScore(board, hits);
+                        if (!isOriginCell && cur != null && cur.BlockInstance != null && IsSpecial(cur.GemType))
+                        {
+                            UseSpecial(new Vector2Int(x, pos.y), cur.GemType, gameBoard, new List<Vector2Int>());
+                            yield return new WaitForSeconds(stepTime);
+                            continue;
+                        }
 
-                    yield return new WaitForSeconds(stepTime);
+                        var hits = new List<Vector2Int>();
+                        AddCell(gameBoard, x, pos.y, hits);
+                        if (hits.Count > 0) ApplyDamageAndScore(board, hits);
+
+                        yield return new WaitForSeconds(stepTime);
+                    }
                 }
             }
             else
             {
-                for (int y = gameBoard.Height - 1; y >= 0; y--)
+                if (bottomToTop)
                 {
-                    bool isOriginCell = (y == pos.y);
-                    var cur = gameBoard.GetBlock(pos.x, y);
-
-                    if (!isOriginCell && cur != null && cur.BlockInstance != null && IsSpecial(cur.GemType))
+                    for (int y = 0; y < gameBoard.Height; y++)
                     {
-                        UseSpecial(new Vector2Int(pos.x, y), cur.GemType, gameBoard, new List<Vector2Int>());
+                        bool isOriginCell = (y == pos.y);
+                        var cur = gameBoard.GetBlock(pos.x, y);
+
+                        if (!isOriginCell && cur != null && cur.BlockInstance != null && IsSpecial(cur.GemType))
+                        {
+                            UseSpecial(new Vector2Int(pos.x, y), cur.GemType, gameBoard, new List<Vector2Int>());
+                            yield return new WaitForSeconds(stepTime);
+                            continue;
+                        }
+
+                        var hits = new List<Vector2Int>();
+                        AddCell(gameBoard, pos.x, y, hits);
+                        if (hits.Count > 0) ApplyDamageAndScore(board, hits);
+
                         yield return new WaitForSeconds(stepTime);
-                        continue;
                     }
+                }
+                else
+                {
+                    for (int y = gameBoard.Height - 1; y >= 0; y--)
+                    {
+                        bool isOriginCell = (y == pos.y);
+                        var cur = gameBoard.GetBlock(pos.x, y);
 
-                    var hits = new List<Vector2Int>();
-                    AddCell(gameBoard, pos.x, y, hits);
-                    if (hits.Count > 0) ApplyDamageAndScore(board, hits);
+                        if (!isOriginCell && cur != null && cur.BlockInstance != null && IsSpecial(cur.GemType))
+                        {
+                            UseSpecial(new Vector2Int(pos.x, y), cur.GemType, gameBoard, new List<Vector2Int>());
+                            yield return new WaitForSeconds(stepTime);
+                            continue;
+                        }
 
-                    yield return new WaitForSeconds(stepTime);
+                        var hits = new List<Vector2Int>();
+                        AddCell(gameBoard, pos.x, y, hits);
+                        if (hits.Count > 0) ApplyDamageAndScore(board, hits);
+
+                        yield return new WaitForSeconds(stepTime);
+                    }
                 }
             }
+
             Destroy(fx);
             EndEffect();
         }
-        private IEnumerator SpawnTrail(GameObject roller, BoardManager board, bool isHorizontal)
+        private IEnumerator SpawnTrail(GameObject roller, BoardManager board, bool isHorizontal, bool leftToRight)
         {
             GameObject trailPrefab = isHorizontal ? _rollerTrailFxH : _rollerTrailFxV;
             if (trailPrefab == null) yield break;
-            Vector3 moveDir = isHorizontal ? Vector3.right : Vector3.down;
+
+            Vector3 moveDir = isHorizontal
+                ? (leftToRight ? Vector3.right : Vector3.left)
+                : (leftToRight ? Vector3.up : Vector3.down);
 
             Vector3 c00 = GridToWorld(board, board.Spawner.GameBoardData, 0, 0);
             Vector3 c10 = GridToWorld(board, board.Spawner.GameBoardData, 1, 0);
@@ -388,7 +493,7 @@ namespace LHJ
             if (gameBoard == null || board == null) yield break;
             if (!TryBeginEffectAt(origin)) yield break;
             BeginEffect();
-            Manager.Audio.PlaySFX("Oven_Shake");
+            Manager.Audio.PlaySFX("NewOven_Shake");
             GemType? targetType = null;
             if (board.BlockMover != null)
             {
@@ -453,7 +558,7 @@ namespace LHJ
                     }
             }
             yield return new WaitForSeconds(_ovenShakeTime);
-            Manager.Audio.PlaySFX("Oven_Use");
+            Manager.Audio.PlaySFX("NewOven_Use");
             ApplyStroke(gameBoard, targets);
 
             float lineWidth = cellSize * 0.30f;
@@ -529,7 +634,8 @@ namespace LHJ
             if (gameBoard == null || board == null) yield break;
             if (!TryBeginEffectAt(origin)) yield break;
             BeginEffect();
-            Manager.Audio.PlaySFX("DonutBox_Use");
+            Manager.Audio.PlaySFX("NewDonutBox_Use");
+            TriggerBoardShake();
             Vector3 originWorld = GridToWorld(board, gameBoard, origin.x, origin.y);
             GameObject fx = null;
             if (_donutBurstFx != null)
@@ -568,6 +674,29 @@ namespace LHJ
             EndEffect();
             EndEffectAt(origin);
         }
+        private void TriggerBoardShake()
+        {
+            if (_shakeTarget == null) return;
+            if (shake != null) StopCoroutine(shake);
+            shake = StartCoroutine(ShakeRoutine());
+        }
+
+        private IEnumerator ShakeRoutine()
+        {
+            Vector3 originalPos = _shakeTarget.localPosition;
+            float elapsed = 0f;
+
+            while (elapsed < _shakeDuration)
+            {
+                float offset = Mathf.Sin(elapsed * Mathf.PI * _shakeFrequency) * _shakeHeight;
+                _shakeTarget.localPosition = originalPos + new Vector3(0f, offset, 0f);
+                elapsed += Time.deltaTime;
+                yield return null;
+            }
+
+            _shakeTarget.localPosition = originalPos;
+            shake = null;
+        }
 
         // 점수 및 콤보 시간
         public int ApplyDamageAndScore(BoardManager board, List<Vector2Int> hits)
@@ -593,6 +722,7 @@ namespace LHJ
                 if (!exists) unique.Add(v);
             }
             int destroyedCount = 0;
+            bool playedMatchSfx = false;
 
             // 실제 파괴
             for (int i = 0; i < unique.Count; i++)
@@ -620,6 +750,11 @@ namespace LHJ
                         continue;
                     }
                     BoardManager.Instance.PlayMatchExplosion(b.BlockInstance.transform.position);
+                    if (!playedMatchSfx)
+                    {
+                        Manager.Audio.PlaySFX("Block_Match");
+                        playedMatchSfx = true;
+                    }
                     if (b.BlockInstance.TryGetComponent<PooledObject>(out var pooledObject))
                     {
                         pooledObject.ReturnToPool();

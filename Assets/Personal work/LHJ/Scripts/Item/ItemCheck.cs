@@ -88,7 +88,7 @@ namespace LHJ
             var order = FindObjectOfType<OrderStateController>();
 
             order.AddPatience(amount);
-            Manager.Audio.PlaySFX("Coffe_Use");
+            Manager.Audio.PlaySFX("NewCoffee_Use");
             PlayCoffeeFxFromButton();
             return true;
         }
@@ -128,7 +128,7 @@ namespace LHJ
         private IEnumerator ApplyScissor(Vector2Int pos)
         {
             _board.IsItemEffectRunning = true;
-            Manager.Audio.PlaySFX("Sciccors_Use");
+            Manager.Audio.PlaySFX("NewSciccors_Use");
 
             var sp = _board.Spawner;
             int w = sp.GameBoardData.BlockPlate.BlockPlateWidth;
@@ -331,7 +331,7 @@ namespace LHJ
         private IEnumerator ApplyWhisk(Vector2Int pos)
         {
             _board.IsItemEffectRunning = true;
-            Manager.Audio.PlaySFX("Whisk_Use");
+            Manager.Audio.PlaySFX("NewWhisk_Use");
             var sp = _board.Spawner;
             int w = sp.GameBoardData.BlockPlate.BlockPlateWidth;
             int h = sp.GameBoardData.BlockPlate.BlockPlateHeight;
