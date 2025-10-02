@@ -1038,6 +1038,17 @@ namespace KDJ
             return false; // 어떤 활동도 불가능
         }
 
+        public GameObject SpawnBlockObject(GemType gemType)
+        {
+            GameObject blockPrefab = GetBlockPrefab((int)gemType);
+            if (blockPrefab != null)
+            {
+                GameObject blockInstance = Instantiate(blockPrefab, Vector3.zero, Quaternion.identity);
+                return blockInstance;
+            }
+            return null;
+        }
+
         public int GetMaxDonutSpawnRange()
         {
             return _spawnRangeMax;

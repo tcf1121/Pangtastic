@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+using DG.Tweening;
 
 namespace KDJ
 {
@@ -41,6 +42,7 @@ namespace KDJ
         [SerializeField] private AnimationCurve _explosionScaleCurve;
         [SerializeField] private AnimationCurve _explosionAlphaCurve;
         [SerializeField] private AnimationCurve _specialBlockCreateCurve;
+        [SerializeField] private RectTransform _specialBlockStartPos;
 
         [Header("가위 선택 UI")]
         [SerializeField] private GameObject _scissorUseUI;
@@ -238,6 +240,7 @@ namespace KDJ
                 CurrentState.OnUpdate(this);
                 //Debug.Log($"Current State: {CurrentState.GetType().Name}");
             }
+
         }
 
 
@@ -675,6 +678,9 @@ namespace KDJ
             Instance.HintManager.StopHintTimer();
             IsClearSpecialTime = true;
             CanTouch = false;
+            Vector3 screenPos = _specialBlockStartPos.position;
+            screenPos.z = 20f;
+            Vector3 flyStartPos = Camera.main.ScreenToWorldPoint(screenPos);
 
             if (!IsRewardSkipped)
             {
@@ -695,6 +701,7 @@ namespace KDJ
                 yield return new WaitForSeconds(0.25f);
             }
 
+            /*
             // 보상 블록 생성
             for (int i = 0; i < rewards.Count; i++)
             {
@@ -762,9 +769,84 @@ namespace KDJ
 
                 specialPositions.Add(randPos);
             }
+            */
+
+            var mySequence = DOTween.Sequence();
+            Vector2Int randPos = Vector2Int.zero;
+            HashSet<Vector2Int> visitedPos = new HashSet<Vector2Int>();
+            List<Vector2Int> randPositions = new List<Vector2Int>();
+            float startTime = 0f;
+
+            for (int i = 0; i < rewards.Count; i++)
+            {
+                int c = 0;
+                while (true)
+                {
+                    if (IsRewardSkipped) break;
+
+                    if (c > 100)
+                    {
+                        Debug.LogWarning("보상 블록 위치 선정 시도 100회 초과, 중단합니다.");
+                        break;
+                    }
+
+                    randPos = new Vector2Int(Random.Range(0, Spawner.GameBoardData.Width), Random.Range(0, Spawner.GameBoardData.Height));
+
+                    if (Spawner.GameBoardData.BlockPlate.BlockPlateArray[randPos.y, randPos.x] && Spawner.GameBoardData.GetBlock(randPos.x, randPos.y).IsNormal && !(Spawner.GameBoardData.GetOverlayBlock(randPos.x, randPos.y) is Ice) && !visitedPos.Contains(randPos))
+                    {
+                        visitedPos.Add(randPos);
+                        randPositions.Add(randPos);
+                        break;
+                    }
+
+                    c++;
+                }
+            }
+
+            foreach (var reward in rewards)
+            {
+                if (IsRewardSkipped) break;
+
+                // 2. 시작 좌표에서 보상 블록 오브젝트만 생성(데이터는 생성 X)
+                var tempBlock = Spawner.SpawnBlockObject(reward);
+                tempBlock.transform.position = flyStartPos;
+                tempBlock.transform.localScale = Vector3.zero;
+
+                GameObject capturedTempBlock = tempBlock;
+                Vector2Int capturedRandPos = randPositions[rewards.IndexOf(reward)];
+                GemType capturedReward = reward;
+                // 3. 지정 위치로 날아가는 DOTween 애니메이션 실행
+                Tween move = tempBlock.transform.DOMove(BlockMover.GridToWorld(capturedRandPos, Spawner.GameBoardData.Width, Spawner.GameBoardData.Height), 1f).SetEase(Ease.InOutQuad);
+                Tween scale = tempBlock.transform.DOScale(Vector3.one, 1f).SetEase(Ease.OutBack).OnComplete(() =>
+                {
+                    // 4. 도착 시점에 데이터 생성 및 오브젝트 교체
+                    // 기존 블록 제거
+                    Block oldBlock = Spawner.GameBoardData.GetBlock(capturedRandPos.x, capturedRandPos.y);
+                    if (oldBlock != null && oldBlock.BlockInstance != null)
+                    {
+                        oldBlock.BlockInstance.GetComponent<PooledObject>().ReturnToPool();
+                    }
+                    Spawner.GameBoardData.SetBlock(capturedRandPos.x, capturedRandPos.y, null);
+
+                    Spawner.SpawnBlock(capturedRandPos.x, capturedRandPos.y, capturedReward, BlockMover);
+                    // 블록 생성 후 임시 블록 제거(깔끔하게 보이게끔)
+                    Destroy(capturedTempBlock);
+                });
+
+                mySequence.Insert(startTime, move);
+                mySequence.Insert(startTime, scale);
+
+                float delay = Random.Range(0.1f, 0.25f);
+                startTime += delay;
+            }
+
+            yield return new WaitUntil(() => !mySequence.IsPlaying() || IsRewardSkipped);
+
+            Debug.Log("스테이지 클리어 여부" + InGameManager.GetStageClear());
 
             if (!InGameManager.GetStageClear())
             {
+                Debug.Log("아직 클리어 아님");
                 // 클리어가 아니라면 특수 블록 사용은 건너뜀
                 IsClearSpecialTime = false;
                 CanTouch = true;
@@ -829,7 +911,7 @@ namespace KDJ
                 sBE.StopAllSpecialEffects();
             }
 
-            
+
 
             // 2. SkipLogic으로 데이터 시뮬레이션 실행
             var skipLogic = new SkipLogic(Spawner.GameBoardData, Spawner.GetMaxDonutSpawnRange());
