@@ -91,15 +91,15 @@ namespace SCR
             AsyncOperation op = SceneManager.LoadSceneAsync("Lobby Scene");
             op.allowSceneActivation = false; // 다 찼을 때 씬 전환하도록 제어
 
-            while (op.progress < 0.9f) // 0~0.9f까지만 반환 (90%까지)
+            while (op.progress < 0.9f) // 0~0.9f까지만 반환 (95%까지)
             {
-                float target = 0.5f + op.progress * 0.25f / 0.9f; // 75%~100% 매핑
+                float target = 0.5f + op.progress * 0.25f / 0.95f; // 75%~100% 매핑
                 loadingBar.fillAmount = Mathf.MoveTowards(loadingBar.fillAmount, target, Time.deltaTime * 0.5f);
                 yield return null;
             }
 
             // 0.9f → 실제 100%는 allowSceneActivation = true 해야 씬 전환됨
-            yield return StartCoroutine(FillToTarget(1f, 0.5f));
+            yield return StartCoroutine(FillToTarget(1f, 0.2f));
 
             // 씬 전환
             op.allowSceneActivation = true;
