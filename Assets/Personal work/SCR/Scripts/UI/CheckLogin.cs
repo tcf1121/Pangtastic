@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -23,7 +24,8 @@ namespace SCR
             Application.targetFrameRate = 60;
             _logoutBtn.onClick.AddListener(Logout);
             _enterBtn.onClick.AddListener(PushButton);
-            _enterBtn.onClick.AddListener(CheckBeforeAsync);
+            //_enterBtn.onClick.AddListener(CheckBeforeAsync);
+            _enterBtn.onClick.AddListener(() => StartCoroutine(CheckBeforeCoroutine()));
         }
 
         private void Start()
@@ -41,6 +43,7 @@ namespace SCR
 
         private async void CheckBeforeAsync()
         {
+
             _enterPanel.SetActive(false);
             loadingUI.SetActive(true);
             loadingBar.fillAmount = 0f;
@@ -50,15 +53,79 @@ namespace SCR
             float fakeProgress = 0f;
             while (!firebaseTask.IsCompleted)
             {
-                fakeProgress += Time.deltaTime * 0.5f; // 속도 조절 가능
+
+                fakeProgress += 0.5f * 0.016f; // deltaTime 직접 계산
                 if (loadingBar != null)
                     loadingBar.fillAmount = Mathf.Clamp01(fakeProgress);
 
-                await Task.Yield();
+                await Task.Delay(16); // 약 1프레임(60fps 기준) 대기
             }
             await firebaseTask; // 에러 처리 포함
             SceneManager.LoadScene("Lobby Scene");
         }
+
+        private IEnumerator CheckBeforeCoroutine()
+        {
+            _enterPanel.SetActive(false);
+            loadingUI.SetActive(true);
+            loadingBar.fillAmount = 0f;
+
+            // 1단계: Data.SetUser() → 25%
+            Manager.Data.SetUser();
+            yield return StartCoroutine(FillToTarget(0.25f, 0.5f));
+
+            // 2단계: Firebase Init → 50%
+            Task firebaseTask = Manager.DB.InitFirebase();
+
+            while (!firebaseTask.IsCompleted)
+            {
+                loadingBar.fillAmount = Mathf.MoveTowards(
+                    loadingBar.fillAmount, 0.5f, Time.deltaTime * 0.2f);
+                yield return null; // 프레임 대기
+            }
+            // Firebase 완료 보장
+            yield return new WaitUntil(() => firebaseTask.IsCompleted);
+            yield return StartCoroutine(FillToTarget(0.5f, 0.5f));
+
+            // 3단계: 다음 씬 비동기 로딩  → 100%
+            AsyncOperation op = SceneManager.LoadSceneAsync("Lobby Scene");
+            op.allowSceneActivation = false; // 다 찼을 때 씬 전환하도록 제어
+
+            while (op.progress < 0.9f) // 0~0.9f까지만 반환 (90%까지)
+            {
+                float target = 0.5f + op.progress * 0.25f / 0.9f; // 75%~100% 매핑
+                loadingBar.fillAmount = Mathf.MoveTowards(loadingBar.fillAmount, target, Time.deltaTime * 0.5f);
+                yield return null;
+            }
+
+            // 0.9f → 실제 100%는 allowSceneActivation = true 해야 씬 전환됨
+            yield return StartCoroutine(FillToTarget(1f, 0.5f));
+
+            // 씬 전환
+            op.allowSceneActivation = true;
+
+            SceneManager.LoadScene("Lobby Scene");
+        }
+
+        /// <summary>
+        /// 로딩바를 target까지 duration 동안 부드럽게 채움
+        /// </summary>
+        private IEnumerator FillToTarget(float target, float duration)
+        {
+            float start = loadingBar.fillAmount;
+            float time = 0f;
+
+            while (time < duration)
+            {
+                time += Time.deltaTime;
+                float t = time / duration;
+                loadingBar.fillAmount = Mathf.Lerp(start, target, t);
+                yield return null;
+            }
+
+            loadingBar.fillAmount = target;
+        }
+
 
         private void Logout()
         {
