@@ -355,6 +355,7 @@ namespace KDJ
             var gameBoard = boardManager.Spawner.GameBoardData;
             var coordsToDestroy = new HashSet<Vector2Int>();
             var specialsToCreate = new List<(Vector2Int pos, int type, List<Vector2Int> matchCoords)>();
+            int matchCount = 0;
 
             if (gameBoard == null) return (coordsToDestroy, specialsToCreate);
 
@@ -374,8 +375,9 @@ namespace KDJ
                     {
                         bool isNewMatch = true;
                         foreach (var c in hMatch) { if (visited[c.y, c.x]) { isNewMatch = false; break; } }
-                        if (isNewMatch) specialsToCreate.Add((new Vector2Int(x, y), 10, hMatch));
-                        foreach (var c in hMatch) { coordsToDestroy.Add(c); visited[c.y, c.x] = true; }
+
+                        if (isNewMatch) { specialsToCreate.Add((new Vector2Int(x, y), 10, hMatch)); matchCount++; }
+                        foreach (var c in hMatch) { coordsToDestroy.Add(c); visited[c.y, c.x] = true;}
                     }
 
                     var vMatch = FindFullLineMatch(boardManager, x, y, false);
@@ -383,8 +385,9 @@ namespace KDJ
                     {
                         bool isNewMatch = true;
                         foreach (var c in vMatch) { if (visited[c.y, c.x]) { isNewMatch = false; break; } }
-                        if (isNewMatch) specialsToCreate.Add((new Vector2Int(x, y), 10, vMatch));
-                        foreach (var c in vMatch) { coordsToDestroy.Add(c); visited[c.y, c.x] = true; }
+
+                        if (isNewMatch) {specialsToCreate.Add((new Vector2Int(x, y), 10, vMatch)); matchCount++; }
+                        foreach (var c in vMatch) { coordsToDestroy.Add(c); visited[c.y, c.x] = true;}
                     }
                 }
             }
@@ -402,9 +405,9 @@ namespace KDJ
                         var combinedMatch = new List<Vector2Int>(hMatch.Union(vMatch));
                         bool isNewMatch = true;
                         foreach (var c in combinedMatch) { if (visited[c.y, c.x]) { isNewMatch = false; break; } }
-                        if (isNewMatch) specialsToCreate.Add((new Vector2Int(x, y), 9, combinedMatch));
-                        
-                        foreach (var c in combinedMatch) { coordsToDestroy.Add(c); visited[c.y, c.x] = true; }
+
+                        if (isNewMatch) {specialsToCreate.Add((new Vector2Int(x, y), 9, combinedMatch)); matchCount++;}                       
+                        foreach (var c in combinedMatch) { coordsToDestroy.Add(c); visited[c.y, c.x] = true;}
                     }
                 }
             }
@@ -420,8 +423,7 @@ namespace KDJ
                         bool isNewMatch = true;
                         foreach (var c in coords) { if (visited[c.y, c.x]) { isNewMatch = false; break; } }
 
-                        if (isNewMatch) specialsToCreate.Add((new Vector2Int(x, y), 6, coords));
-                        
+                        if (isNewMatch) { specialsToCreate.Add((new Vector2Int(x, y), 6, coords)); matchCount++; }
                         foreach (var c in coords) { coordsToDestroy.Add(c); visited[c.y, c.x] = true; }
                     }
                 }
@@ -438,7 +440,8 @@ namespace KDJ
                     {
                         bool isNewMatch = true;
                         foreach (var c in hMatch) { if (visited[c.y, c.x]) { isNewMatch = false; break; } }
-                        if (isNewMatch) specialsToCreate.Add((new Vector2Int(x, y), 7, hMatch));
+
+                        if (isNewMatch) { specialsToCreate.Add((new Vector2Int(x, y), 7, hMatch)); matchCount++; }
                         foreach (var c in hMatch) { coordsToDestroy.Add(c); visited[c.y, c.x] = true; }
                     }
                     var vMatch = FindFullLineMatch(boardManager, x, y, false);
@@ -446,7 +449,8 @@ namespace KDJ
                     {
                         bool isNewMatch = true;
                         foreach (var c in vMatch) { if (visited[c.y, c.x]) { isNewMatch = false; break; } }
-                        if (isNewMatch) specialsToCreate.Add((new Vector2Int(x, y), 8, vMatch));
+
+                        if (isNewMatch) { specialsToCreate.Add((new Vector2Int(x, y), 8, vMatch)); matchCount++; }
                         foreach (var c in vMatch) { coordsToDestroy.Add(c); visited[c.y, c.x] = true; }
                     }
                 }
@@ -459,15 +463,32 @@ namespace KDJ
                 {
                     if (visited[y, x] || !CheckBlockIsAllValid(boardManager, x, y)) continue;
                     var hMatch = FindFullLineMatch(boardManager, x, y, true);
-                    if (hMatch.Count >= 3) { foreach (var c in hMatch) { coordsToDestroy.Add(c); visited[c.y, c.x] = true; } }
+                    if (hMatch.Count >= 3)
+                    {
+                        bool isNewMatch = true;
+                        foreach (var c in hMatch) { if (visited[c.y, c.x]) { isNewMatch = false; break; } }
+                        if (isNewMatch) matchCount++;
+                        foreach (var c in hMatch) { coordsToDestroy.Add(c); visited[c.y, c.x] = true; }
+                    }
                     var vMatch = FindFullLineMatch(boardManager, x, y, false);
-                    if (vMatch.Count >= 3) { foreach (var c in vMatch) { coordsToDestroy.Add(c); visited[c.y, c.x] = true; } }
+                    if (vMatch.Count >= 3)
+                    {
+                        bool isNewMatch = true;
+                        foreach (var c in vMatch) { if (visited[c.y, c.x]) { isNewMatch = false; break; } }
+                        if (isNewMatch) matchCount++;
+                        foreach (var c in vMatch) { coordsToDestroy.Add(c); visited[c.y, c.x] = true; }
+                    }
                 }
+            }
+
+            for (int c = 0; c < matchCount; c++)
+            {
+                boardManager.MatchCombo.UpCombo();
+                Manager.User.MatchBlock();
             }
 
             if (coordsToDestroy.Count > 0)
             {
-                boardManager.MatchCombo.UpCombo();
                 var damagedObstaclesThisMatch = new HashSet<Block>();
 
                 foreach (var coord in coordsToDestroy)

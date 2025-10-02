@@ -130,6 +130,19 @@ namespace LHJ
                 return;
             }
         }
+
+        public void StopAllSpecialEffects()
+        {
+            var b = BoardManager.Instance;
+            b.StopAllCoroutines();
+            DOTween.KillAll(true);
+            foreach (Transform child in b.transform)
+            {
+                child.gameObject.SetActive(false);
+            }
+            Manager.Audio.StopSFX();
+        }
+
         // 밀대(가로,세로)
         public IEnumerator RollerRoutine(Vector2Int pos, bool isHorizontal, GameBoardData gameBoard, BoardManager board)
         {
