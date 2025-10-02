@@ -87,6 +87,7 @@ public class EnterInGamePanel : MonoBehaviour
             go.SetActive(false);
         }
         GetRecipe();
+        _level.text = $"{Manager.Stage.CurrentStageIndex + 1}{stringSO.GetText(Manager.Language.GetLanguage())}";
         _rollerNum.text = $"{Manager.User.GetItem().Roller}";
         _donutBoxNum.text = $"{Manager.User.GetItem().DonutBox}";
         _ovenNum.text = $"{Manager.User.GetItem().Oven}";
