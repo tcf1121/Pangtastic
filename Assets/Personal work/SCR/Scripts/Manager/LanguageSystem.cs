@@ -40,6 +40,22 @@ public class LanguageSystem : Singleton<LanguageSystem>
     public void SetLanguage(Language language)
     {
         currentLang = language;
+        SystemLanguage sysLanguage;
+        if (language == Language.Korean) sysLanguage = SystemLanguage.Korean;
+        else if (language == Language.Chinese) sysLanguage = SystemLanguage.ChineseSimplified;
+        else if (language == Language.French) sysLanguage = SystemLanguage.French;
+        else if (language == Language.German) sysLanguage = SystemLanguage.German;
+        else if (language == Language.Italian) sysLanguage = SystemLanguage.Italian;
+        else if (language == Language.Japanese) sysLanguage = SystemLanguage.Japanese;
+        else if (language == Language.Nederlands) sysLanguage = SystemLanguage.Dutch;
+        else if (language == Language.Portuguese) sysLanguage = SystemLanguage.Portuguese;
+        else if (language == Language.Russian) sysLanguage = SystemLanguage.Russian;
+        else if (language == Language.Spanish) sysLanguage = SystemLanguage.Spanish;
+        else if (language == Language.Taiwanese) sysLanguage = SystemLanguage.ChineseTraditional;
+        else if (language == Language.Turkish) sysLanguage = SystemLanguage.Turkish;
+        else sysLanguage = SystemLanguage.English;
+
+        PlayerPrefs.SetInt(savedLanguage, (int)sysLanguage);
     }
 
     public Language GetLanguage()
@@ -62,6 +78,7 @@ public class LanguageSystem : Singleton<LanguageSystem>
         if (languageList == null) return;
         int language = (int)currentLang;
         LocalizationSettings.SelectedLocale = languageList.Infos[language].Locale;
+
         Debug.Log("언어 변경됨: " + languageList.Infos[language].Language);
 
         //글꼴 전체 변경
@@ -76,7 +93,7 @@ public class LanguageSystem : Singleton<LanguageSystem>
     private void SetSystemLanguage()
     {
         int sysNum = PlayerPrefs.GetInt(savedLanguage, (int)Application.systemLanguage);
-
+        Debug.Log($"언어:{sysNum}");
         SystemLanguage sysLanguage = (SystemLanguage)sysNum;
         if (sysLanguage == SystemLanguage.Korean) SetLanguage(Language.Korean);
         else if (sysLanguage == SystemLanguage.ChineseSimplified) SetLanguage(Language.Chinese);

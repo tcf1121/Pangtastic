@@ -17,6 +17,7 @@ public class ADManager : Singleton<ADManager>
     // ===================== Rewarded Interstitial (보상형) =====================
     private RewardedInterstitialAd _rewardedInterstitialAd;
     public Action OnRewardAdClosed;
+    private bool _getReward = false;
 
     // ===================== App Open Event Ad (오프닝) =====================
     private AppOpenAd _appOpenAd;
@@ -148,6 +149,7 @@ public class ADManager : Singleton<ADManager>
             _rewardedInterstitialAd.Show((Reward reward) =>
             {
                 Debug.Log($"User earned reward: {reward.Amount} {reward.Type}");
+                _getReward = true;
             });
 
             _rewardedInterstitialAd = null;
@@ -158,38 +160,25 @@ public class ADManager : Singleton<ADManager>
         }
     }
 
-
-    public bool CheckDays(int day)
-    {
-        // Json 저장 데이터 
-        DateTime startDay = DateTime.Parse(Manager.Date.GetDate());
-
-        // 현재 UTC → 한국시간(+9)
-        DateTime kstNow = DateTime.UtcNow.AddHours(9);
-
-        // 기준일을 00시로 맞춤
-        DateTime baseDate = new DateTime(startDay.Year, startDay.Month, startDay.Day, 0, 0, 0);
-
-        // 2일(48시간) 경과 여부 체크
-        bool isOverDays = (kstNow - baseDate).TotalDays >= day;
-
-        Debug.Log($"dddddd 기준일: {baseDate:yyyy-MM-dd HH:mm:ss}");
-        Debug.Log($"dddddd 현재 한국 시간: {kstNow:yyyy-MM-dd HH:mm:ss}");
-        Debug.Log($"dddddd {day}일 지났는가? {isOverDays}");
-
-        return isOverDays;
-    }
-
     public void ShowAdClosed()
     {
         Debug.Log("RewardAdClosed ad closed. Notifying subscribers.");
         // 광고 닫힘 이벤트를 외부에 알림
-        StartCoroutine(WaitAndInvokeRewoard());
+        if (_getReward)
+            StartCoroutine(WaitAndInvokeRewoard());
+        else
+        {
+            if (OnRewardAdClosed != null)
+            {
+                OnRewardAdClosed = null;
+            }
+        }
         // 이벤트 핸들러 해제 (중복 호출 방지)
         if (_rewardedInterstitialAd != null)
         {
             _rewardedInterstitialAd.OnAdFullScreenContentClosed -= ShowAdClosed;
         }
+
 
     }
 
@@ -197,6 +186,7 @@ public class ADManager : Singleton<ADManager>
     {
         yield return new WaitForSeconds(0.1f);
 
+        _getReward = false;
         OnRewardAdClosed?.Invoke();
         OnRewardAdClosed = null;
     }
