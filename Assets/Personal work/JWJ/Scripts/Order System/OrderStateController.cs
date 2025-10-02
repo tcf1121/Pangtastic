@@ -166,9 +166,9 @@ public class OrderStateController : MonoBehaviour
         {
             _curPatience = 0f;
         }
-        Debug.Log($"현재 인내심: {_curPatience}, 추가 인내심 : {amount}");
+        //Debug.Log($"현재 인내심: {_curPatience}, 추가 인내심 : {amount}");
         _curPatience += amount;
-        Debug.Log($"더해진 인내심: {_curPatience}");
+        //Debug.Log($"더해진 인내심: {_curPatience}");
 
         if (_curPatience > _maxPatience)
         {
