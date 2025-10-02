@@ -14,18 +14,13 @@ public class CustomerOrderController : MonoBehaviour
     private int _specialSuccess;
     private float _specialPatientSum;
 
-    //public event Action<CustomerSO, float> OnCustomerSuccess; // 일반/유니크 최종 성공
-    //public event Action<float> OnSpecialCustomerRewardGiven; //CustomerSO 추가 /////////////////
-    //public event Action<CustomerSO ,float> OnSpecialCustomerSuccess; // 스페셜 최종 성공
-
     public event Action OnCustomerFail; //스테이지 실패
     public event Action<CustomerSO, float> OnOrderSegmentCleared; // 주문 한 번 완료
     public event Action<CustomerSO, float> OnStageClear; // 전체 주문 최종 완료
 
     private int _segmentSize; // 이번 손님이 한 번에 주문할 레시피 개수
     private int _segmentStartIndex; // 현재 진행 중인 주문 시작 인덱스
-    private int _segmentClearCount; // 완료한 주문 수
-    private float _segmentRemainSum; // 각 주문 완료 시 남은 인내심 퍼센트 누적합
+    private float _normalCurPatient;
 
     private void Awake()
     {
@@ -75,8 +70,6 @@ public class CustomerOrderController : MonoBehaviour
         }
 
         _segmentStartIndex = 0; // 첫 주문 시작 인덱스
-        _segmentClearCount = 0; // 완료한 주문 수
-        _segmentRemainSum = 0f; // 누적 퍼센트
 
         _specialPatientSum = 0f; // 스페셜 누적 퍼센트
         _specialSuccess = 0; // 스페셜 완료 개수
@@ -129,9 +122,9 @@ public class CustomerOrderController : MonoBehaviour
         }
         else
         {
-            _segmentClearCount ++; //혹시 기획이 인내심 리셋후 평균으로 계산하게 바뀔때를 대비해 넣음 
-            _segmentRemainSum += remainPercent;
+            _normalCurPatient = remainPercent; 
         }
+        Debug.Log($"주문 하나 완료 남은 인내심: {remainPercent}%");
 
         OnOrderSegmentCleared?.Invoke(curCustomer, remainPercent); // 한 주문 완료
 
@@ -166,17 +159,18 @@ public class CustomerOrderController : MonoBehaviour
 
     private void EndAnyCustomer()
     {
-        float averagePercent;
+        float finalPercent;
 
-        if (_segmentClearCount > 0)
+        if (_curCustomer.Type == CustomerType.Special)
         {
-            averagePercent = _segmentRemainSum / _segmentClearCount;
+            finalPercent = _specialPatientSum / _specialSuccess;
         }
         else
         {
-            averagePercent = 0f;
+            finalPercent = _normalCurPatient;
         }
 
-        OnStageClear?.Invoke(_curCustomer, averagePercent); // 최종 완료이벤트
+        Debug.Log($"스테이지 종료 최종 인내심 : {finalPercent}");
+        OnStageClear?.Invoke(_curCustomer, finalPercent); // 최종 완료이벤트
     }
 }

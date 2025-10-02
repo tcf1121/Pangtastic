@@ -1,7 +1,5 @@
 fileFormatVersion: 2
-guid: 933d0bea8a264bada1386b6bb44891ca
-labels:
-- gvh
+guid: 8e5a66d1f156457e8febecd5e695e922
 PluginImporter:
   externalObjects: {}
   serializedVersion: 2
@@ -13,6 +11,12 @@ PluginImporter:
   isExplicitlyReferenced: 0
   validateReferences: 1
   platformData:
+  - first:
+      Android: Android
+    second:
+      enabled: 0
+      settings:
+        Is16KbAligned: false
   - first:
       Any: 
     second:
@@ -30,7 +34,7 @@ PluginImporter:
     second:
       enabled: 1
       settings:
-        CPU: AnyCPU
+        CPU: x86_64
   - first:
       Standalone: OSXUniversal
     second:
