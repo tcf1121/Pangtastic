@@ -33519,7 +33519,7 @@ MonoBehaviour:
   - {fileID: 1621895537}
   questionMarkImage: {fileID: 21300000, guid: f87e2beafba114f038d68229ff50ff89, type: 3}
   stringSO: {fileID: 11400000, guid: 6aa1ebeed429562489caa124a0bf1dfb, type: 2}
-  _fallHeartPopup: {fileID: 0}
+  _fallHeartPopup: {fileID: 818666011}
   _emptyButton:
   - {fileID: 732519994}
   - {fileID: 792553582}
@@ -36193,7 +36193,10 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 8283875098935013146, guid: 2d8241bbf389c46218b1bdd53d8d3a71, type: 3}
       insertIndex: -1
       addedObject: {fileID: 1168459519}
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 475819311222283705, guid: 2d8241bbf389c46218b1bdd53d8d3a71, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1571807376}
   m_SourcePrefab: {fileID: 100100000, guid: 2d8241bbf389c46218b1bdd53d8d3a71, type: 3}
 --- !u!224 &1571807371 stripped
 RectTransform:
@@ -36221,12 +36224,31 @@ MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 7191452213173705808, guid: 2d8241bbf389c46218b1bdd53d8d3a71, type: 3}
   m_PrefabInstance: {fileID: 1571807370}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
+  m_GameObject: {fileID: 1571807375}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: f4688fdb7df04437aeb418b961361dc5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!1 &1571807375 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 475819311222283705, guid: 2d8241bbf389c46218b1bdd53d8d3a71, type: 3}
+  m_PrefabInstance: {fileID: 1571807370}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &1571807376
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1571807375}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9e62c0c4ef0aefd4db75c986fd14efca, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _stringSO: {fileID: 0}
+  _text: {fileID: 1571807374}
 --- !u!1 &1577209181
 GameObject:
   m_ObjectHideFlags: 0
