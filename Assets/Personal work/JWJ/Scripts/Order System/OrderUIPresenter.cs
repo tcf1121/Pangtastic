@@ -175,7 +175,7 @@ public class OrderUIPresenter : MonoBehaviour
 
         while (elapsed < _dialogueDuration)
         {
-            elapsed += Time.deltaTime;
+            elapsed += Time.unscaledDeltaTime;
             float t = elapsed / _dialogueDuration; // 0 → 1
 
             // 위치 보간

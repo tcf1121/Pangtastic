@@ -15,6 +15,6 @@ public class ShopToggle : MonoBehaviour
 
     private void IsOnToggle(bool value)
     {
-        _isOnGO.SetActive(!value);
+        _isOnGO.SetActive(value);
     }
 }
