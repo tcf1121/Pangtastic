@@ -1,3 +1,4 @@
+using System;
 using TMPro;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
@@ -8,13 +9,14 @@ using UnityEngine.SceneManagement;
 public class LanguageSystem : Singleton<LanguageSystem>
 {
     private LanguageList languageList;
-    //private readonly string excludeTag = "NoFontChange"; // 제외 태그
+    private readonly string savedLanguage = "SavedLanguage"; // 제외 태그
     private Language currentLang;
+    public Action ChangedLanguage;
 
     protected override void Awake()
     {
         base.Awake();
-        Debug.Log($"스테이지 매니저 준비");
+        Debug.Log($"언어 매니저 준비");
         AsyncOperationHandle<LanguageList> handle = Addressables.LoadAssetAsync<LanguageList>("Language");
         handle.Completed += OnLanguageListLoaded;
         SceneManager.sceneLoaded += OnSceneLoaded;
@@ -68,11 +70,14 @@ public class LanguageSystem : Singleton<LanguageSystem>
         {
             text.ChangeLanguage();
         }
+        ChangedLanguage?.Invoke();
     }
 
     private void SetSystemLanguage()
     {
-        SystemLanguage sysLanguage = Application.systemLanguage;
+        int sysNum = PlayerPrefs.GetInt(savedLanguage, (int)Application.systemLanguage);
+
+        SystemLanguage sysLanguage = (SystemLanguage)sysNum;
         if (sysLanguage == SystemLanguage.Korean) SetLanguage(Language.Korean);
         else if (sysLanguage == SystemLanguage.ChineseSimplified) SetLanguage(Language.Chinese);
         else if (sysLanguage == SystemLanguage.French) SetLanguage(Language.French);
@@ -86,5 +91,7 @@ public class LanguageSystem : Singleton<LanguageSystem>
         else if (sysLanguage == SystemLanguage.ChineseTraditional) SetLanguage(Language.Taiwanese);
         else if (sysLanguage == SystemLanguage.Turkish) SetLanguage(Language.Turkish);
         else SetLanguage(Language.English);
+        PlayerPrefs.SetInt(savedLanguage, (int)sysLanguage);
     }
+
 }

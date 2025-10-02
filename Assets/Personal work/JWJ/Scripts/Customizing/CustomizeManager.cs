@@ -1,9 +1,12 @@
 using UnityEngine;
+using UnityEngine.UI;
 
 public class CustomizeManager : MonoBehaviour
 {
     [SerializeField] private GameObject _character;
     [SerializeField] private Renderer _skinRenderer;
+    [SerializeField] private Image _profilePic;
+    [SerializeField] private Image _profilePicButton;
 
     [Header("스킨")]
     [SerializeField] private Material[] _skins;
@@ -23,6 +26,9 @@ public class CustomizeManager : MonoBehaviour
     [Header("악세서리")]
     [SerializeField] private GameObject[] _accessories;
 
+    [Header("프로필 이미지")]
+    [SerializeField] private Sprite[] _profilePics;
+
     //[SerializeField] private string _testSaveData;
     [SerializeField] private GameObject _uis;
 
@@ -32,6 +38,7 @@ public class CustomizeManager : MonoBehaviour
     private int _curFacewearIndex;
     private int _curBagIndex;
     private int _curAccessoriesIndex;
+    private int _curProfilePicIndex;
 
     private void Awake()
     {
@@ -183,11 +190,29 @@ public class CustomizeManager : MonoBehaviour
             _curAccessoriesIndex = index;
         }
     }
+
+    private void ChangeProfilePic(int index)
+    {
+        //Debug.LogError($"인데스 {index}");
+        if (index < 0 || index >= _profilePics.Length)
+        {
+            _profilePic.sprite = _profilePics[0];
+            _profilePicButton.sprite = _profilePics[0];
+            _curProfilePicIndex = -1;
+        }
+        else
+        {
+            _profilePic.sprite = _profilePics[index];
+            _profilePicButton.sprite = _profilePics[index];
+            _curProfilePicIndex = index;
+        }
+    }
+
     private void LoadCustomize()
     {
         string customizeData = Manager.User.GetCustomize();
         string[] splitData = customizeData.Split(',');
-        if (splitData.Length < 6)
+        if (splitData.Length < 7)
         {
             Debug.LogWarning("커스터마이즈 저장 데이터 이상함. 기본 세팅으로 불러옴");
             ChangeSkin(0);
@@ -196,14 +221,15 @@ public class CustomizeManager : MonoBehaviour
             ChangeFacewear(-1);
             ChangeBag(-1);
             ChangeAccessory(-1);
+            ChangeProfilePic(0);
 
             return;
         }
         else
         {
-            int[] saveData = new int[6];
+            int[] saveData = new int[7];
 
-            for (int i = 0; i < 6; i++)
+            for (int i = 0; i < 7; i++)
             {
                 bool ok = int.TryParse(splitData[i], out int index);
 
@@ -223,6 +249,7 @@ public class CustomizeManager : MonoBehaviour
             ChangeFacewear(saveData[3]);
             ChangeBag(saveData[4]);
             ChangeAccessory(saveData[5]);
+            ChangeProfilePic(saveData[6]);
         }
     }
 
@@ -234,9 +261,10 @@ public class CustomizeManager : MonoBehaviour
         string saveFacewear = _curFacewearIndex.ToString();
         string saveBag = _curBagIndex.ToString();
         string saveAcc = _curAccessoriesIndex.ToString();
+        string savePic = _curProfilePicIndex.ToString();
 
-        string saveCustomize = $"{saveSkin}, {saveFace}, {saveHeadwear}, {saveFacewear}, {saveBag}, {saveAcc}";
-        Debug.Log($"세이브 : {saveSkin}, {saveFace}, {saveHeadwear}, {saveFacewear}, {saveBag}, {saveAcc}");
+        string saveCustomize = $"{saveSkin}, {saveFace}, {saveHeadwear}, {saveFacewear}, {saveBag}, {saveAcc}, {savePic}";
+        Debug.Log($"세이브 : {saveSkin}, {saveFace}, {saveHeadwear}, {saveFacewear}, {saveBag}, {saveAcc}, {savePic}");
 
         Manager.User.SetCustomize(saveCustomize);
         Manager.Audio.PlaySFX("Touch");
@@ -256,6 +284,7 @@ public class CustomizeManager : MonoBehaviour
         int randFW = Random.Range(-1, _facewears.Length);
         int randBag = Random.Range(-1, _bags.Length);
         int randAcc = Random.Range(-1, _accessories.Length);
+        int randPic = Random.Range(0, _profilePics.Length);
 
         ChangeSkin(randSkin);
         ChangeFace(randFace);
@@ -263,6 +292,7 @@ public class CustomizeManager : MonoBehaviour
         ChangeFacewear(randFW);
         ChangeBag(randBag);
         ChangeAccessory(randAcc);
+        ChangeProfilePic(randPic);
 
         ResetButtons();
         Manager.Audio.PlaySFX("Touch");
@@ -306,6 +336,9 @@ public class CustomizeManager : MonoBehaviour
 
             case CosmeticCategory.Accessory:
                 return _accessories.Length;
+
+            case CosmeticCategory.ProfilePic:
+                return _profilePics.Length;
         }
         return 0;
     }
@@ -334,6 +367,9 @@ public class CustomizeManager : MonoBehaviour
 
             case CosmeticCategory.Accessory:
                 return _curAccessoriesIndex;
+
+            case CosmeticCategory.ProfilePic:
+                return _curProfilePicIndex;
         }
         return 0;
     }
@@ -367,6 +403,10 @@ public class CustomizeManager : MonoBehaviour
 
             case CosmeticCategory.Accessory:
                 ChangeAccessory(index);
+                return;
+
+            case CosmeticCategory.ProfilePic:
+                ChangeProfilePic(index);
                 return;
         }
         return;

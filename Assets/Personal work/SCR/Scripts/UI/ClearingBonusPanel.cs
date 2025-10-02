@@ -16,7 +16,7 @@ public class ClearingBonusPanel : MonoBehaviour
         {
             obj.SetActive(false);
         }
-        int clearing = Manager.Stage.GetClearing();
+        int clearing = Manager.User.GetClearing();
         for (int i = 0; i < 3; i++)
         {
             if (i < clearing) onObj[i].SetActive(true);

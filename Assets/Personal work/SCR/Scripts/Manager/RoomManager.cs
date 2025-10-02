@@ -16,6 +16,8 @@ public class RoomManager : MonoBehaviour
     void Awake()
     {
         curPlace = Manager.User.GetCurPlace();
+        // TODO: TEST
+        // curPlace = Manager.UserInfoSystem.GetCurPlace();
         for (int i = 0; i < _places.Count; i++)
         {
             if (i < (int)curPlace) _places[i].AllClear();
@@ -26,11 +28,13 @@ public class RoomManager : MonoBehaviour
 
     public void ClearPlace(Action openPopup = null)
     {
-        if (curPlace < MissionPlace.Greengrocery)
+        if (curPlace <= MissionPlace.Greengrocery)
         {
-            curPlace++;
+            if (curPlace < MissionPlace.Greengrocery)
+                curPlace++;
             Manager.User.SetCurPlace(curPlace);
             Manager.User.NewMissionList(GetMaxMission());
+            Manager.User.ChapterClear();
             missonBtn.Refresh();
             menuUI.GoHome(() =>
             {
@@ -59,6 +63,7 @@ public class RoomManager : MonoBehaviour
             _places[(int)curPlace].MissionClear(index, openPopup);
             missonBtn.Refresh();
         }
+        Manager.User.PlaceFurniture();
         _scenario.PlayScenario(curPlace, missonBtn.Percent);
     }
 

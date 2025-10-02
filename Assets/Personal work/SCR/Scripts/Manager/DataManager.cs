@@ -94,6 +94,7 @@ public class DataManager : Singleton<DataManager>
         Manager.User.SetUser(newUserData);
         Manager.User.NewMissionList(16);
         PlayerPrefs.SetString(NewUserKey, "newUser");
+        Manager.Date.NewUser();
     }
 
     public void HistoryUser()
