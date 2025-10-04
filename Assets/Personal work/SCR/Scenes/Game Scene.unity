@@ -4673,14 +4673,18 @@ PrefabInstance:
     - target: {fileID: 5266263310930390250, guid: 7bbc72687f4523646ad4978aac87d61b, type: 3}
       propertyPath: _emptyTile
       value: 
-      objectReference: {fileID: 11400000, guid: fa1c4a984f1da8d42b18e5fe4fa4aba5, type: 2}
+      objectReference: {fileID: 11400000, guid: 5d8a9edf120d56043b7eb1095b185cbe, type: 2}
+    - target: {fileID: 5266263310930390250, guid: 7bbc72687f4523646ad4978aac87d61b, type: 3}
+      propertyPath: _blockTiles
+      value: 
+      objectReference: {fileID: 11400000, guid: 773b507db51b79e41991cb2e735acaa9, type: 2}
     - target: {fileID: 5266263310930390250, guid: 7bbc72687f4523646ad4978aac87d61b, type: 3}
       propertyPath: BlockPlateSize
       value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 5266263310930390250, guid: 7bbc72687f4523646ad4978aac87d61b, type: 3}
       propertyPath: _blockTiles.Array.size
-      value: 5
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 5266263310930390250, guid: 7bbc72687f4523646ad4978aac87d61b, type: 3}
       propertyPath: _blockTiles.Array.data[0]
@@ -4702,6 +4706,42 @@ PrefabInstance:
       propertyPath: _blockTiles.Array.data[4]
       value: 
       objectReference: {fileID: 11400000, guid: cbebdf3a0a6383d4da194a248dbcfe0e, type: 2}
+    - target: {fileID: 5266263310930390250, guid: 7bbc72687f4523646ad4978aac87d61b, type: 3}
+      propertyPath: _blockTileOutlines.Array.size
+      value: 8
+      objectReference: {fileID: 0}
+    - target: {fileID: 5266263310930390250, guid: 7bbc72687f4523646ad4978aac87d61b, type: 3}
+      propertyPath: _blockTileOutlines.Array.data[0]
+      value: 
+      objectReference: {fileID: 11400000, guid: 9e037b9757b5cea46b15bf9a3d0ad902, type: 2}
+    - target: {fileID: 5266263310930390250, guid: 7bbc72687f4523646ad4978aac87d61b, type: 3}
+      propertyPath: _blockTileOutlines.Array.data[1]
+      value: 
+      objectReference: {fileID: 11400000, guid: 24b1767e91723e14e8bfc6075dd84f31, type: 2}
+    - target: {fileID: 5266263310930390250, guid: 7bbc72687f4523646ad4978aac87d61b, type: 3}
+      propertyPath: _blockTileOutlines.Array.data[2]
+      value: 
+      objectReference: {fileID: 11400000, guid: 6282ff0b82039f4458230586d1914372, type: 2}
+    - target: {fileID: 5266263310930390250, guid: 7bbc72687f4523646ad4978aac87d61b, type: 3}
+      propertyPath: _blockTileOutlines.Array.data[3]
+      value: 
+      objectReference: {fileID: 11400000, guid: 7ce57f4be5ce3634baf03242263b6e2b, type: 2}
+    - target: {fileID: 5266263310930390250, guid: 7bbc72687f4523646ad4978aac87d61b, type: 3}
+      propertyPath: _blockTileOutlines.Array.data[4]
+      value: 
+      objectReference: {fileID: 11400000, guid: b063389d6433d9c4ab70e8c802b0d51f, type: 2}
+    - target: {fileID: 5266263310930390250, guid: 7bbc72687f4523646ad4978aac87d61b, type: 3}
+      propertyPath: _blockTileOutlines.Array.data[5]
+      value: 
+      objectReference: {fileID: 11400000, guid: 428ad5826f30e9b46a4dcd40d3544134, type: 2}
+    - target: {fileID: 5266263310930390250, guid: 7bbc72687f4523646ad4978aac87d61b, type: 3}
+      propertyPath: _blockTileOutlines.Array.data[6]
+      value: 
+      objectReference: {fileID: 11400000, guid: afaa7acb656496146b75d83d3cddf6b0, type: 2}
+    - target: {fileID: 5266263310930390250, guid: 7bbc72687f4523646ad4978aac87d61b, type: 3}
+      propertyPath: _blockTileOutlines.Array.data[7]
+      value: 
+      objectReference: {fileID: 11400000, guid: 55fa79525e99bb44f90f022c983f0bdd, type: 2}
     - target: {fileID: 7101584776311492427, guid: 7bbc72687f4523646ad4978aac87d61b, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0
@@ -6545,7 +6585,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: 871d33bffa8a5eb498bdffacf02fd3f8, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 4234c29cf6533134ba398f1eeb057c7e, type: 3}
   m_Type: 0
   m_PreserveAspect: 1
   m_FillCenter: 1
@@ -11358,27 +11398,27 @@ PrefabInstance:
     - target: {fileID: 8579344169084250576, guid: a6c91df400f25084193b8dfb89592778, type: 3}
       propertyPath: normalBlockSprites.Array.data[0]
       value: 
-      objectReference: {fileID: 21300000, guid: 2e019fb624f0d7344950fe1b9fde453d, type: 3}
+      objectReference: {fileID: 21300000, guid: 9c5319a0f0d6d27449cefcab5e141c44, type: 3}
     - target: {fileID: 8579344169084250576, guid: a6c91df400f25084193b8dfb89592778, type: 3}
       propertyPath: normalBlockSprites.Array.data[1]
       value: 
-      objectReference: {fileID: 21300000, guid: 907bf43fd61aa4e4aac445684361cb3b, type: 3}
+      objectReference: {fileID: 21300000, guid: 9eca8a591a39eba409fca854a6afae2f, type: 3}
     - target: {fileID: 8579344169084250576, guid: a6c91df400f25084193b8dfb89592778, type: 3}
       propertyPath: normalBlockSprites.Array.data[2]
       value: 
-      objectReference: {fileID: 21300000, guid: 76662e40946e282498c46cdcf51bfb72, type: 3}
+      objectReference: {fileID: 21300000, guid: 16ba061382226bd439df2f6b50644cde, type: 3}
     - target: {fileID: 8579344169084250576, guid: a6c91df400f25084193b8dfb89592778, type: 3}
       propertyPath: normalBlockSprites.Array.data[3]
       value: 
-      objectReference: {fileID: 21300000, guid: 73ddf303f3e534d4a9b2bc92f0cca348, type: 3}
+      objectReference: {fileID: 21300000, guid: 284f8fedcbf5be04bba8a3040f190b06, type: 3}
     - target: {fileID: 8579344169084250576, guid: a6c91df400f25084193b8dfb89592778, type: 3}
       propertyPath: normalBlockSprites.Array.data[4]
       value: 
-      objectReference: {fileID: 21300000, guid: 8ecdc1e0efca63442a072dba151cc981, type: 3}
+      objectReference: {fileID: 21300000, guid: 6fb80da0b670fee4a835a7a43aac1a64, type: 3}
     - target: {fileID: 8579344169084250576, guid: a6c91df400f25084193b8dfb89592778, type: 3}
       propertyPath: normalBlockSprites.Array.data[5]
       value: 
-      objectReference: {fileID: 21300000, guid: 179a5ae75eae2a949a2f304111578fac, type: 3}
+      objectReference: {fileID: 21300000, guid: 311ecc6569ae1d24ca18400ef3d5b81e, type: 3}
     - target: {fileID: 8579344169084250576, guid: a6c91df400f25084193b8dfb89592778, type: 3}
       propertyPath: _test_blockOverrides.Array.data[0].x
       value: 2
@@ -20916,7 +20956,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_Color: {r: 1, g: 0.827451, b: 0.7411765, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
