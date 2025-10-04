@@ -98,15 +98,23 @@ namespace KDJ
             for (int i = 0; i < rewards.Count; i++)
             {
                 Vector2Int randPos;
+                int attempts = 0;
                 while (true)
                 {
                     randPos = new Vector2Int(Random.Range(0, _width), Random.Range(0, _boardHeight));
-                    if (_initialBoardState.BlockPlate.BlockPlateArray[randPos.y, randPos.x] && 
+                    if (_initialBoardState.BlockPlate.BlockPlateArray[randPos.y, randPos.x] &&
                         _virtualBoard[randPos.y, randPos.x] != null &&
-                        _virtualBoard[randPos.y, randPos.x].IsNormal && 
+                        _virtualBoard[randPos.y, randPos.x].IsNormal &&
                         !(_virtualOverlay[randPos.y, randPos.x] is Ice))
                     {
                         break;
+                    }
+
+                    attempts++;
+                    if (attempts > _width * _height)
+                    {
+                        Debug.Log("SkipLogic: 보상 블록을 놓을 유효한 위치를 찾지 못했습니다. 루프를 중단합니다.");
+                        break; 
                     }
                 }
                 _virtualBoard[randPos.y, randPos.x] = CreateNewBlock_DataOnly(rewards[i], randPos.x, randPos.y);

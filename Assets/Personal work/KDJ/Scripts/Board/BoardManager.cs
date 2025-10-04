@@ -169,6 +169,7 @@ namespace KDJ
             yield return new WaitForSeconds(0.1f); // 타일이 그려질 시간을 줍니다.
 
             blockPlate.DrawTile();
+            blockPlate.SetOutlineTile();
             // 새로운 구조에 맞게 Spawner를 초기화합니다.
             Spawner.Initialize(this, loadedBoardData, blockPlate, BlockMover);
             Debug.Log($"보드 초기화 완료. 가로: {Spawner.GameBoardData.Width}, 세로: {Spawner.GameBoardData.Height}");
@@ -803,17 +804,20 @@ namespace KDJ
                 }
             }
 
+            int index = 0;
+            
             foreach (var reward in rewards)
             {
                 if (IsRewardSkipped) break;
 
                 // 2. 시작 좌표에서 보상 블록 오브젝트만 생성(데이터는 생성 X)
+
                 var tempBlock = Spawner.SpawnBlockObject(reward);
                 tempBlock.transform.position = flyStartPos;
                 tempBlock.transform.localScale = Vector3.zero;
 
                 GameObject capturedTempBlock = tempBlock;
-                Vector2Int capturedRandPos = randPositions[rewards.IndexOf(reward)];
+                Vector2Int capturedRandPos = randPositions[index];
                 GemType capturedReward = reward;
                 // 3. 지정 위치로 날아가는 DOTween 애니메이션 실행
                 Tween move = tempBlock.transform.DOMove(BlockMover.GridToWorld(capturedRandPos, Spawner.GameBoardData.Width, Spawner.GameBoardData.Height), 1f).SetEase(Ease.InOutQuad);
@@ -838,6 +842,7 @@ namespace KDJ
 
                 float delay = Random.Range(0.1f, 0.25f);
                 startTime += delay;
+                index++;
             }
 
             yield return new WaitUntil(() => !mySequence.IsPlaying() || IsRewardSkipped);

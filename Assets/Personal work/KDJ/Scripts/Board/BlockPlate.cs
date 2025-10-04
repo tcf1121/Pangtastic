@@ -9,7 +9,8 @@ namespace KDJ
     public class BlockPlate : MonoBehaviour
     {
         [SerializeField] private Tilemap _blockPlate;
-        [SerializeField] private List<TileBase> _blockTiles;
+        [SerializeField] private TileBase _blockTiles;
+        [SerializeField] private List<TileBase> _blockTileOutlines;
         [SerializeField] private TileBase _emptyTile;
         [SerializeField] private GameObject _backPlate;
 
@@ -42,7 +43,7 @@ namespace KDJ
                     if (!BlockPlateArray[y, x])
                         tile = _emptyTile;
                     else
-                        tile = GetRandomBlockTile();
+                        tile = _blockTiles;
 
                     // 블록판 가로칸이 짝수일때 생성
                     if (BlockPlateArray.GetLength(1) % 2 == 0)
@@ -63,77 +64,66 @@ namespace KDJ
             }
         }
 
-        private void SetBackPlate(int value)
+        public void SetOutlineTile()
         {
-            switch (value)
-            {
-                case 1:
-                    BlockPlateArray = new bool[,]
-                    {
-                        { true, true, true, true, true, true },
-                        { true, true, true, true, true, true },
-                        { true, true, true, true, true, true },
-                        { true, true, true, true, true, true },
-                        { true, true, true, true, true, true },
-                        { true, true, true, true, true, true }
-                    };
-                    break;
-                case 2:
-                    BlockPlateArray = new bool[,]
-                    {
-                        { false, false, true, true, true, false, false },
-                        { false, true, true, true, true, true, false },
-                        { true, true, true, true, true, true, true },
-                        { true, true, true, true, true, true, true },
-                        { true, true, true, true, true, true, true },
-                        { true, true, true, true, true, true, true },
-                        { true, true, true, true, true, true, true }
-                    };
-                    break;
-                case 3:
-                    BlockPlateArray = new bool[,]
-                    {
-                        { true, true, true, true, true, true, true, true },
-                        { true, true, true, true, true, true, true, true },
-                        { true, true, true, true, true, true, true, true },
-                        { true, true, true, true, true, true, true, true },
-                        { true, true, true, true, true, true, true, true },
-                        { true, true, true, true, true, true, true, true },
-                        { true, true, true, true, true, true, true, true },
-                        { true, true, true, true, true, true, true, true }
-                    };
-                    break;
-                case 4:
-                    BlockPlateArray = new bool[,]
-                    {
-                        { true, true, true, true, true, true, true, true },
-                        { true, true, true, true, true, true, true, true },
-                        { true, true, true, true, true, true, true, true },
-                        { true, true, true, true, true, true, true, true },
-                        { true, true, true, true, true, true, true, true },
-                        { true, true, true, true, true, true, true, true },
-                        { true, true, true, true, true, true, true, true },
-                        { true, true, true, true, true, true, true, true },
-                        { true, true, true, true, true, true, true, true },
-                        { true, true, true, true, true, true, true, true }
-                    };
-                    break;
-            }
+            // 현재 보드 크기에 맞게 테두리 타일 설정
+            // 0 = UL, 1 = U, 2 = UR, 3 = R, 4 = DR, 5 = D, 6 = DL, 7 = L
+            TileBase UL = _blockTileOutlines[0];
+            TileBase U = _blockTileOutlines[1];
+            TileBase UR = _blockTileOutlines[2];
+            TileBase R = _blockTileOutlines[3];
+            TileBase DR = _blockTileOutlines[4];
+            TileBase D = _blockTileOutlines[5];
+            TileBase DL = _blockTileOutlines[6];
+            TileBase L = _blockTileOutlines[7];
 
-            BlockPlateWidth = BlockPlateArray.GetLength(1);
-            BlockPlateHeight = BlockPlateArray.GetLength(0);
+            // 보드 크기가 짝수일 때
+            if (BlockPlateWidth % 2 == 0)
+            {
+                // 각 배치는 보드 크기보다 1칸 더 크거나 작음(테두리 이기에)
+                // 먼저 각 모서리에 해당하는 타일 배치
+                _blockPlate.SetTile(new Vector3Int(-BlockPlateWidth / 2 - 1, BlockPlateHeight / 2, 0), UL);
+                _blockPlate.SetTile(new Vector3Int(BlockPlateWidth / 2, BlockPlateHeight / 2, 0), UR);
+                _blockPlate.SetTile(new Vector3Int(-BlockPlateWidth / 2 - 1, -BlockPlateHeight / 2 - 1, 0), DL);
+                _blockPlate.SetTile(new Vector3Int(BlockPlateWidth / 2, -BlockPlateHeight / 2 - 1, 0), DR);
+                // 그 다음 각 변에 해당하는 타일 배치
+                for (int x = -BlockPlateWidth / 2; x < BlockPlateWidth / 2; x++)
+                {
+                    _blockPlate.SetTile(new Vector3Int(x, BlockPlateHeight / 2, 0), U);
+                    _blockPlate.SetTile(new Vector3Int(x, -BlockPlateHeight / 2 - 1, 0), D);
+                }
+                for (int y = -BlockPlateHeight / 2; y < BlockPlateHeight / 2; y++)
+                {
+                    _blockPlate.SetTile(new Vector3Int(-BlockPlateWidth / 2 - 1, y, 0), L);
+                    _blockPlate.SetTile(new Vector3Int(BlockPlateWidth / 2, y, 0), R);
+                }
+            }
+            // 보드 크기가 홀수일 때
+            else
+            {
+                // 각 배치는 보드 크기보다 1칸 더 크거나 작음(테두리 이기에)
+                // 먼저 각 모서리에 해당하는 타일 배치
+                _blockPlate.SetTile(new Vector3Int(-BlockPlateWidth / 2 - 1, BlockPlateHeight / 2 + 1, 0), UL);
+                _blockPlate.SetTile(new Vector3Int(BlockPlateWidth / 2 + 1, BlockPlateHeight / 2 + 1, 0), UR);
+                _blockPlate.SetTile(new Vector3Int(-BlockPlateWidth / 2 - 1, -BlockPlateHeight / 2 - 1, 0), DL);
+                _blockPlate.SetTile(new Vector3Int(BlockPlateWidth / 2 + 1, -BlockPlateHeight / 2 - 1, 0), DR);
+                // 그 다음 각 변에 해당하는 타일 배치
+                for (int x = -BlockPlateWidth / 2; x <= BlockPlateWidth / 2; x++)
+                {
+                    _blockPlate.SetTile(new Vector3Int(x, BlockPlateHeight / 2 + 1, 0), U);
+                    _blockPlate.SetTile(new Vector3Int(x, -BlockPlateHeight / 2 - 1, 0), D);
+                }
+                for (int y = -BlockPlateHeight / 2; y <= BlockPlateHeight / 2; y++)
+                {
+                    _blockPlate.SetTile(new Vector3Int(-BlockPlateWidth / 2 - 1, y, 0), L);
+                    _blockPlate.SetTile(new Vector3Int(BlockPlateWidth / 2 + 1, y, 0), R);
+                }
+            }
         }
 
         public TileBase GetRandomBlockTile()
         {
-            if (_blockTiles == null || _blockTiles.Count == 0)
-            {
-                Debug.LogWarning("블록 타일 리스트가 비어 있습니다.");
-                return null;
-            }
-
-            int randomIndex = Random.Range(0, _blockTiles.Count);
-            return _blockTiles[randomIndex];
+            return _blockTiles;
         }
 
         public bool IsBlockTile(int x, int y)
