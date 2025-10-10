@@ -154,30 +154,53 @@ namespace LHJ
             GameObject fx = Instantiate(fxPrefab, board.transform);
 
             bool leftToRight = true;
+
             if (isHorizontal && board.BlockMover != null)
-            {
-                Vector2Int s = board.BlockMover.StartBlockPos;
-                Vector2Int e = board.BlockMover.EndBlockPos;
-
-                if (s.y == e.y && Mathf.Abs(e.x - s.x) == 1 && (pos == s || pos == e))
-                {
-                    int dirX = e.x - s.x;
-                    int appliedDir = (pos == e) ? dirX : -dirX;
-                    leftToRight = appliedDir > 0;
-                }
-            }
-
-            bool bottomToTop = false;
-            if (!isHorizontal && board.BlockMover != null)
             {
                 Vector2Int s = board.BlockMover.StartBlockPos;
                 Vector2Int e = board.BlockMover.EndBlockPos;
 
                 if (s.x == e.x && Mathf.Abs(e.y - s.y) == 1 && (pos == s || pos == e))
                 {
+                    int midX = gameBoard.Width / 2; 
+                    leftToRight = (pos.x < midX); 
+                }
+                else if (s.y == e.y && Mathf.Abs(e.x - s.x) == 1 && (pos == s || pos == e))
+                {
+                    int dirX = e.x - s.x;
+                    int appliedDir = (pos == e) ? dirX : -dirX;
+                    leftToRight = (appliedDir > 0);
+                }
+            }
+            else if (isHorizontal && board.BlockMover != null)
+            {
+                Vector2Int s = board.BlockMover.StartBlockPos;
+                Vector2Int e = board.BlockMover.EndBlockPos;
+
+                if (s.x == e.x && Mathf.Abs(e.y - s.y) == 1 && (pos == s || pos == e))
+                {
+                    int midX = gameBoard.Width / 2;
+                    leftToRight = pos.x < midX;
+                }
+            }
+
+            bool bottomToTop = false;
+
+            if (!isHorizontal && board.BlockMover != null)
+            {
+                Vector2Int s = board.BlockMover.StartBlockPos;
+                Vector2Int e = board.BlockMover.EndBlockPos;
+
+                if (s.y == e.y && Mathf.Abs(e.x - s.x) == 1 && (pos == s || pos == e))
+                {
+                    int midY = gameBoard.Height / 2; 
+                    bottomToTop = (pos.y < midY);    
+                }
+                else if (s.x == e.x && Mathf.Abs(e.y - s.y) == 1 && (pos == s || pos == e))
+                {
                     int dirY = e.y - s.y;
                     int appliedDir = (pos == e) ? dirY : -dirY;
-                    bottomToTop = appliedDir > 0;
+                    bottomToTop = (appliedDir > 0);
                 }
             }
 

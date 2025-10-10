@@ -25,8 +25,11 @@ namespace LHJ
 
         [Header("도넛판")]
         [SerializeField] private Transform _boardRoot;
-        [SerializeField] private Transform _poolsRoot;
         [SerializeField] private float _donutMoveDist;
+        [SerializeField] private GameObject _leftCatHand;
+        [SerializeField] private GameObject _rightCatHand;
+        [SerializeField] private Vector2 _leftHandOffset;
+        [SerializeField] private Vector2 _rightHandOffset;
 
         [Header("커피")]
         [SerializeField] private RectTransform _coffeeIconRt;
@@ -511,23 +514,38 @@ namespace LHJ
             float moveDuration = 2.0f;
 
             Vector3 boardStart = _boardRoot.localPosition;
-            Vector3 poolStart = _poolsRoot.position;
+
+            GameObject left = SpawnCatHand(_leftCatHand, _leftHandOffset);
+            GameObject right = SpawnCatHand(_rightCatHand, _rightHandOffset);
+
+            float leftStartY = (left != null) ? left.transform.position.y : 0f;
+            float rightStartY = (right != null) ? right.transform.position.y : 0f;
 
             var down = DOTween.Sequence()
-                .Join(_boardRoot.DOLocalMoveY(boardStart.y - _donutMoveDist, moveDuration))
-                .Join(_poolsRoot.DOLocalMoveY(poolStart.y - _donutMoveDist, moveDuration));
+                .Join(_boardRoot.DOLocalMoveY(boardStart.y - _donutMoveDist, moveDuration).SetEase(Ease.OutQuad));
+
+            if (left != null)
+                down.Join(left.transform.DOMoveY(leftStartY - _donutMoveDist, moveDuration).SetEase(Ease.OutQuad));
+            if (right != null)
+                down.Join(right.transform.DOMoveY(rightStartY - _donutMoveDist, moveDuration).SetEase(Ease.OutQuad));
+
             yield return down.WaitForCompletion();
 
             _board.Spawner.Shuffle(_board);
             yield return null;
             _board.ChangeState(new RefillState());
             InjectRandomSpecial();
-
-            Manager.Audio.PlaySFX("DonutPan_Use");
             var up = DOTween.Sequence()
-                .Join(_boardRoot.DOLocalMove(boardStart, moveDuration))
-                .Join(_poolsRoot.DOLocalMove(poolStart, moveDuration));
+                .Join(_boardRoot.DOLocalMove(boardStart, moveDuration).SetEase(Ease.InQuad));
+            if (left != null)
+                up.Join(left.transform.DOMoveY(leftStartY, moveDuration).SetEase(Ease.InQuad));
+            if (right != null)
+                up.Join(right.transform.DOMoveY(rightStartY, moveDuration).SetEase(Ease.InQuad));
+            Manager.Audio.PlaySFX("DonutPan_Use");
             yield return up.WaitForCompletion();
+            if (left != null) Destroy(left);
+            if (right != null) Destroy(right);
+
             BoardManager.Instance.HintManager.StopHintTimer();
             _board.IsItemEffectRunning = false;
             BoardManager.Instance.ChangeState(new ReadyState());
@@ -577,12 +595,26 @@ namespace LHJ
             {
                 Transform t = cell.BlockInstance.transform;
 
-                if (_poolsRoot != null && !t.IsChildOf(_poolsRoot) && !_boardRoot.IsChildOf(t))
+                if (!_board.Spawner.transform.IsChildOf(t))
                 {
-                    t.SetParent(_poolsRoot, true);
+                    t.SetParent(_board.Spawner.transform, true);
                 }
+
                 t.localPosition = new Vector3(t.localPosition.x, t.localPosition.y - _donutMoveDist, t.localPosition.z);
             }
+        }
+        private GameObject SpawnCatHand(GameObject prefab, Vector2 fixedOffset)
+        {
+            if (prefab == null) return null;
+
+            Transform parent = _boardRoot.parent;
+            GameObject hand = Instantiate(prefab, parent);
+            if (!hand.activeSelf) hand.SetActive(true);
+
+            Vector3 pos = _boardRoot.position + new Vector3(fixedOffset.x, fixedOffset.y, 0f);
+            hand.transform.position = pos;
+
+            return hand;
         }
         private void TriggerSpecial(Vector2Int p, GemType t)
         {

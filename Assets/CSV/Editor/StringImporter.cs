@@ -8,7 +8,7 @@ public class StringImporter // 레시피 CSV를 RecipeSO로 변환하는 클래�
     private static string csvPath = "Assets/CSV/String.csv"; // 레시피 CSV 경로
     private static string stringSoDir = "Assets/ScriptableObject/String"; // 레시피 SO 저장 경로
     private static int startRow = 1; // 데이터 시작 행
-    private static int columnCount = 5; //열 개수
+    private static int columnCount = 1; //열 개수
                                         //private static bool isNew;
 
     // 메뉴 경로
@@ -52,8 +52,8 @@ public class StringImporter // 레시피 CSV를 RecipeSO로 변환하는 클래�
 
             if (splitData.Count < columnCount) // 열이 부족하면
             {
-                Debug.LogError("열 개수 부족함(행 " + i + "): " + line);
-                return;
+                Debug.LogWarning("열 개수 부족함(행 " + i + "): " + line);
+                continue;
             }
 
 
@@ -63,6 +63,7 @@ public class StringImporter // 레시피 CSV를 RecipeSO로 변환하는 클래�
             string chinese = GetString(splitData, 3).Trim('"').Trim('”').Trim('“');
             string taiwanese = GetString(splitData, 4).Trim('"').Trim('」').Trim('「');
             string japanese = GetString(splitData, 5).Trim('"').Trim('」').Trim('「');
+            string german = GetString(splitData, 6).Trim('"');
 
             string soPath = stringSoDir + "/" + String_id + ".asset"; // SO파일 저장경로/파일이름
 
@@ -88,10 +89,12 @@ public class StringImporter // 레시피 CSV를 RecipeSO로 변환하는 클래�
 
             strings.ID = String_id;
             strings.value[0] = english;
+            strings.value[2] = german;
             strings.value[3] = chinese;
             strings.value[4] = taiwanese;
             strings.value[5] = japanese;
             strings.value[6] = korean;
+            
 
             EditorUtility.SetDirty(strings); // 변경사항 저장에 포함
         }

@@ -19,6 +19,20 @@ public class LobbyADUI : MonoBehaviour
         RefreshLayout();
     }
 
+    void Start()
+    {
+        if (Manager.Ad.RemovedAD)
+            Manager.Ad.BannerAdLoad += CheckPanel;
+        else
+            gameObject.SetActive(false);
+    }
+
+    void OnDestroy()
+    {
+        if (Manager.Ad.RemovedAD)
+            Manager.Ad.BannerAdLoad -= CheckPanel;
+    }
+
     private void RefreshLayout()
     {
         LayoutRebuilder.ForceRebuildLayoutImmediate(parentPanel);
@@ -27,17 +41,17 @@ public class LobbyADUI : MonoBehaviour
         offsetMin.y = height;
         mainPanel.offsetMin = offsetMin;
 
-        if(_customizePanel != null)
+        if (_customizePanel != null)
         {
             float bannerHeight = thisPanel.rect.height;
             var customizeOffset = _customizePanel.offsetMin;
             customizeOffset.y = bannerHeight;
             _customizePanel.offsetMin = customizeOffset;
         }
-        
+
     }
 
-    void Start()
+    private void CheckPanel()
     {
         float bannerHeightInPixels = Manager.Ad.bannerHeight;
         float canvasHeight = parentCanvasRect.rect.height;

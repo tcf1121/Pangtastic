@@ -23888,8 +23888,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 1}
   m_AnchorMax: {x: 0.5, y: 1}
-  m_AnchoredPosition: {x: 0, y: 80}
-  m_SizeDelta: {x: 270, y: 150}
+  m_AnchoredPosition: {x: 0, y: 147}
+  m_SizeDelta: {x: 300, y: 200}
   m_Pivot: {x: 0.5, y: 1}
 --- !u!1 &995581365
 GameObject:
@@ -27184,6 +27184,10 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 6378134695496327388, guid: 789c3facf6034c2429274e19144ec6c3, type: 3}
     - target: {fileID: 7085172997495155829, guid: e18bdeefcce5d304e84da3a5664879c5, type: 3}
+      propertyPath: _leftCatHand
+      value: 
+      objectReference: {fileID: 6897526785569262846, guid: e96ccc5a8f80ea946a94044ad6b21a1f, type: 3}
+    - target: {fileID: 7085172997495155829, guid: e18bdeefcce5d304e84da3a5664879c5, type: 3}
       propertyPath: _scissorFxMs
       value: 800
       objectReference: {fileID: 0}
@@ -27199,6 +27203,10 @@ PrefabInstance:
       propertyPath: _coffeeIconRt
       value: 
       objectReference: {fileID: 1279167819}
+    - target: {fileID: 7085172997495155829, guid: e18bdeefcce5d304e84da3a5664879c5, type: 3}
+      propertyPath: _rightCatHand
+      value: 
+      objectReference: {fileID: 3242598515194525831, guid: 093e8a1e329c59644a5ffea355d79d4e, type: 3}
     - target: {fileID: 7085172997495155829, guid: e18bdeefcce5d304e84da3a5664879c5, type: 3}
       propertyPath: _donutMoveDist
       value: 10
@@ -27232,6 +27240,14 @@ PrefabInstance:
       value: 2000
       objectReference: {fileID: 0}
     - target: {fileID: 7085172997495155829, guid: e18bdeefcce5d304e84da3a5664879c5, type: 3}
+      propertyPath: _leftHandOffset.x
+      value: -3
+      objectReference: {fileID: 0}
+    - target: {fileID: 7085172997495155829, guid: e18bdeefcce5d304e84da3a5664879c5, type: 3}
+      propertyPath: _leftHandOffset.y
+      value: -3
+      objectReference: {fileID: 0}
+    - target: {fileID: 7085172997495155829, guid: e18bdeefcce5d304e84da3a5664879c5, type: 3}
       propertyPath: _scissorFxPrefabH
       value: 
       objectReference: {fileID: 8948550414140682282, guid: a3035a5245f618048ac6ee5670294929, type: 3}
@@ -27239,6 +27255,14 @@ PrefabInstance:
       propertyPath: _scissorFxPrefabV
       value: 
       objectReference: {fileID: 451048349482114044, guid: 28c46f7fb83183b4bb398dcabe34fb5a, type: 3}
+    - target: {fileID: 7085172997495155829, guid: e18bdeefcce5d304e84da3a5664879c5, type: 3}
+      propertyPath: _rightHandOffset.x
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 7085172997495155829, guid: e18bdeefcce5d304e84da3a5664879c5, type: 3}
+      propertyPath: _rightHandOffset.y
+      value: -3
+      objectReference: {fileID: 0}
     - target: {fileID: 7085172997495155829, guid: e18bdeefcce5d304e84da3a5664879c5, type: 3}
       propertyPath: _coffeeZigzagHeight
       value: 260
@@ -38623,7 +38647,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &1637396699
 RectTransform:
   m_ObjectHideFlags: 0
@@ -38638,10 +38662,10 @@ RectTransform:
   m_Children: []
   m_Father: {fileID: 1031755624}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 1}
-  m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 540, y: -250}
-  m_SizeDelta: {x: 1080, y: 100}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 0, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1637396700
 MonoBehaviour:
@@ -49680,7 +49704,7 @@ MonoBehaviour:
   m_fontSizeBase: 36
   m_fontWeight: 400
   m_enableAutoSizing: 1
-  m_fontSizeMin: 30
+  m_fontSizeMin: 20
   m_fontSizeMax: 40
   m_fontStyle: 1
   m_HorizontalAlignment: 2
