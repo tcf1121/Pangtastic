@@ -42,6 +42,7 @@ namespace KDJ
             while (timer < 0.15f)
             {
                 timer += Time.deltaTime;
+                if (blockObject == null) yield break;
                 blockObject.transform.localScale = Vector3.Lerp(Vector3.one, Vector3.zero, timer / 0.1f);
                 yield return null;
             }
