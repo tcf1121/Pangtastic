@@ -21,12 +21,16 @@ public class LobbyADUI : MonoBehaviour
 
     void Start()
     {
-        Manager.Ad.BannerAdLoad += CheckPanel;
+        if (Manager.Ad.RemovedAD)
+            Manager.Ad.BannerAdLoad += CheckPanel;
+        else
+            gameObject.SetActive(false);
     }
 
     void OnDestroy()
     {
-        Manager.Ad.BannerAdLoad -= CheckPanel;
+        if (Manager.Ad.RemovedAD)
+            Manager.Ad.BannerAdLoad -= CheckPanel;
     }
 
     private void RefreshLayout()
