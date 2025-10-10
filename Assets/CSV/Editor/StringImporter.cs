@@ -89,11 +89,12 @@ public class StringImporter // 레시피 CSV를 RecipeSO로 변환하는 클래�
 
             strings.ID = String_id;
             strings.value[0] = english;
+            strings.value[2] = german;
             strings.value[3] = chinese;
             strings.value[4] = taiwanese;
             strings.value[5] = japanese;
             strings.value[6] = korean;
-            strings.value[7] = german;
+            
 
             EditorUtility.SetDirty(strings); // 변경사항 저장에 포함
         }
