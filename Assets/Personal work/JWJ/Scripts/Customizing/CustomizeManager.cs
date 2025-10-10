@@ -45,6 +45,11 @@ public class CustomizeManager : MonoBehaviour
     private void Awake()
     {
         LoadCustomize();
+
+        if(_profilePicture == null)
+        {
+            _profilePicture = FindObjectOfType<ProfilePicture>();
+        }
     }
     private void ChangeSkin(int index)
     {
