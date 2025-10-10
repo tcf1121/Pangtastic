@@ -351,7 +351,6 @@ namespace LHJ
             BeginEffect();
             Manager.Audio.PlaySFX("Milk_Use");
             List<Vector2Int> targets = GetMilkTargets(gameBoard, count, _milkUsedTargets);
-            if (targets.Count == 0) { EndEffect(); yield break; }
 
             for (int i = 0; i < targets.Count; i++)
                 _milkUsedTargets.Add(targets[i]);
@@ -412,6 +411,7 @@ namespace LHJ
             }
 
             onCompleted?.Invoke(targets);
+            _milkUsedTargets.Clear();
             EndEffect();
         }
         private List<Vector2Int> GetMilkTargets(GameBoardData gb, int count, HashSet<Vector2Int> exclude = null)
