@@ -390,7 +390,7 @@ public class ResidentController : MonoBehaviour
         if (_curState != ResidentState.Talk)
         {
             ChangeState(ResidentState.Touched);
-
+            _stateBubble.IconUI(false);
             Vector3 dir = Camera.main.transform.position - transform.position;
             dir.y = 0f;
 
