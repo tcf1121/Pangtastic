@@ -25,12 +25,12 @@ public class AchievementPanel : MonoBehaviour
             if (i == index)
             {
                 _panels[i].SetActive(true);
-                _offObj[i].SetActive(false);
+                _offObj[i].SetActive(true);
             }
             else
             {
                 _panels[i].SetActive(false);
-                _offObj[i].SetActive(true);
+                _offObj[i].SetActive(false);
             }
         }
     }

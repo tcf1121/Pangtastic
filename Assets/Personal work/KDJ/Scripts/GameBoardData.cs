@@ -71,5 +71,18 @@ namespace KDJ
                 OverlayArray[y, x] = block;
             }
         }
+
+        public bool IsOverLayBlockInBoard()
+        {
+            for (int y = 0; y < Height; y++)
+            {
+                for (int x = 0; x < Width; x++)
+                {
+                    if (OverlayArray[y, x] != null)
+                        return true;
+                }
+            }
+            return false;
+        }
     }
 }

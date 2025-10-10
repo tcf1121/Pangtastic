@@ -17,6 +17,7 @@ public class ADManager : Singleton<ADManager>
     // ===================== Rewarded Interstitial (보상형) =====================
     private RewardedInterstitialAd _rewardedInterstitialAd;
     public Action OnRewardAdClosed;
+    private bool _getReward = false;
 
     // ===================== App Open Event Ad (오프닝) =====================
     private AppOpenAd _appOpenAd;
@@ -26,12 +27,25 @@ public class ADManager : Singleton<ADManager>
     // ===================== Interstitial Ad (전면) =====================
     private InterstitialAd _interstitialAd;
     public Action OnInterstitialAdClosed;
+    private float prevTimeScale;
 
     // ===================== Banner Ad (배너) =====================
     private BannerView _bannerView;
+    public Action BannerAdLoad;
     public float bannerHeight;
 
     private int adDay = 2;
+
+    // 광고 ID (테스트 용)
+    // private string rewardedInterstitialAdID = "ca-app-pub-3940256099942544/5354046379";
+    // private string appOpenAdID = "ca-app-pub-3940256099942544/9257395921";
+    // private string interstitialAdID = "ca-app-pub-3940256099942544/1033173712";
+    // private string bannerAdID = "ca-app-pub-3940256099942544/6300978111";
+    // 광고 ID (실제 사용)
+    private string rewardedInterstitialAdID = "ca-app-pub-6717704131793477/7329232893";
+    private string appOpenAdID = "ca-app-pub-6717704131793477/6016151222";
+    private string interstitialAdID = "ca-app-pub-6717704131793477/7421874537";
+    private string bannerAdID = "ca-app-pub-6717704131793477/2547679507";
 
     protected override void Awake()
     {
@@ -108,7 +122,7 @@ public class ADManager : Singleton<ADManager>
         adRequest.Keywords.Add("unity-admob-sample");
 
         // send the request to load the ad.
-        RewardedInterstitialAd.Load("ca-app-pub-3940256099942544/5354046379", adRequest,
+        RewardedInterstitialAd.Load(rewardedInterstitialAdID, adRequest,
         (RewardedInterstitialAd ad, LoadAdError error) =>
         {
             // if error is not null, the load request failed.
@@ -148,6 +162,7 @@ public class ADManager : Singleton<ADManager>
             _rewardedInterstitialAd.Show((Reward reward) =>
             {
                 Debug.Log($"User earned reward: {reward.Amount} {reward.Type}");
+                _getReward = true;
             });
 
             _rewardedInterstitialAd = null;
@@ -158,38 +173,25 @@ public class ADManager : Singleton<ADManager>
         }
     }
 
-
-    public bool CheckDays(int day)
-    {
-        // Json 저장 데이터 
-        DateTime startDay = DateTime.Parse(Manager.Date.GetDate());
-
-        // 현재 UTC → 한국시간(+9)
-        DateTime kstNow = DateTime.UtcNow.AddHours(9);
-
-        // 기준일을 00시로 맞춤
-        DateTime baseDate = new DateTime(startDay.Year, startDay.Month, startDay.Day, 0, 0, 0);
-
-        // 2일(48시간) 경과 여부 체크
-        bool isOverDays = (kstNow - baseDate).TotalDays >= day;
-
-        Debug.Log($"dddddd 기준일: {baseDate:yyyy-MM-dd HH:mm:ss}");
-        Debug.Log($"dddddd 현재 한국 시간: {kstNow:yyyy-MM-dd HH:mm:ss}");
-        Debug.Log($"dddddd {day}일 지났는가? {isOverDays}");
-
-        return isOverDays;
-    }
-
     public void ShowAdClosed()
     {
         Debug.Log("RewardAdClosed ad closed. Notifying subscribers.");
         // 광고 닫힘 이벤트를 외부에 알림
-        StartCoroutine(WaitAndInvokeRewoard());
+        if (_getReward)
+            StartCoroutine(WaitAndInvokeRewoard());
+        else
+        {
+            if (OnRewardAdClosed != null)
+            {
+                OnRewardAdClosed = null;
+            }
+        }
         // 이벤트 핸들러 해제 (중복 호출 방지)
         if (_rewardedInterstitialAd != null)
         {
             _rewardedInterstitialAd.OnAdFullScreenContentClosed -= ShowAdClosed;
         }
+
 
     }
 
@@ -197,6 +199,7 @@ public class ADManager : Singleton<ADManager>
     {
         yield return new WaitForSeconds(0.1f);
 
+        _getReward = false;
         OnRewardAdClosed?.Invoke();
         OnRewardAdClosed = null;
     }
@@ -217,7 +220,7 @@ public class ADManager : Singleton<ADManager>
         var adRequest = new AdRequest();
 
         // send the request to load the ad.
-        AppOpenAd.Load("ca-app-pub-3940256099942544/9257395921", adRequest,
+        AppOpenAd.Load(appOpenAdID, adRequest,
             (AppOpenAd ad, LoadAdError error) =>
             {
                 // if error is not null, the load request failed.
@@ -358,7 +361,7 @@ public class ADManager : Singleton<ADManager>
         Debug.Log("Loading interstitial ad...");
 
         var adRequest = new AdRequest();
-        InterstitialAd.Load("ca-app-pub-3940256099942544/1033173712", adRequest,
+        InterstitialAd.Load(interstitialAdID, adRequest,
             (InterstitialAd ad, LoadAdError error) =>
             {
                 if (error != null || ad == null)
@@ -381,6 +384,8 @@ public class ADManager : Singleton<ADManager>
             return;
         if (_interstitialAd != null && _interstitialAd.CanShowAd())
         {
+            prevTimeScale = Time.timeScale;
+            Time.timeScale = 1;
             Debug.Log("Showing interstitial ad.");
             _interstitialAd.OnAdFullScreenContentClosed += InterstitialAdClosed;
             _interstitialAd.Show();
@@ -395,6 +400,7 @@ public class ADManager : Singleton<ADManager>
 
     private void InterstitialAdClosed()
     {
+        Time.timeScale = prevTimeScale;
         Debug.Log("Interstitial ad closed. Notifying subscribers.");
         // 광고 닫힘 이벤트를 외부에 알림
         StartCoroutine(WaitAndInvokeInterstitial());
@@ -458,26 +464,32 @@ public class ADManager : Singleton<ADManager>
         // 화면 폭(dp 단위) 구하기
         // int width = Screen.width / (int)(Screen.dpi / 160f);
         // 적응형 배너 크기 얻기
-        // AdSize adaptiveSize = AdSize.GetCurrentOrientationAnchoredAdaptiveBannerAdSizeWithWidth(width);
-        AdSize adaptiveSize = new AdSize(320, 50);
-        bannerHeight = DipsToPixels(adaptiveSize.Height);
-
+        AdSize adaptiveSize = AdSize.GetCurrentOrientationAnchoredAdaptiveBannerAdSizeWithWidth(AdSize.FullWidth);
+        //AdSize adaptiveSize = AdSize.Banner;
         // 배너 생성
         // _bannerView = new BannerView("ca-app-pub-3940256099942544/6300978111", AdSize.Banner, AdPosition.Bottom);
-        _bannerView = new BannerView("ca-app-pub-3940256099942544/6300978111", adaptiveSize, AdPosition.Bottom);
+        _bannerView = new BannerView(bannerAdID, adaptiveSize, AdPosition.Bottom);
 
         BannerListenToAdEvents();
 
         // 보이기
+        _bannerView.OnBannerAdLoaded += OnBannerLoaded;
+        _bannerView.OnBannerAdLoadFailed += (LoadAdError error) =>
+        {
+            Debug.LogError("배너 로드 실패: " + error);
+        };
         var adRequest = new AdRequest();
+
         _bannerView.LoadAd(adRequest);
     }
 
-    public float DipsToPixels(float dips)
+    private void OnBannerLoaded()
     {
-        Debug.Log($"dips:{dips}");
-        Debug.Log($"Pixels: {dips * Screen.dpi / 160f}");
-        return dips * Screen.dpi / 160f;
+        Debug.Log("배너 로드 완료!");
+
+        // 광고 로드 후 실제 높이 가져오기
+        bannerHeight = _bannerView.GetHeightInPixels();
+        BannerAdLoad?.Invoke();
     }
 
     private void BannerListenToAdEvents()

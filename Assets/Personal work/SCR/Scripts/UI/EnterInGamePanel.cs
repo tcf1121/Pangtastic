@@ -87,6 +87,7 @@ public class EnterInGamePanel : MonoBehaviour
             go.SetActive(false);
         }
         GetRecipe();
+        _level.text = $"{Manager.Stage.CurrentStageIndex + 1}{stringSO.GetText(Manager.Language.GetLanguage())}";
         _rollerNum.text = $"{Manager.User.GetItem().Roller}";
         _donutBoxNum.text = $"{Manager.User.GetItem().DonutBox}";
         _ovenNum.text = $"{Manager.User.GetItem().Oven}";
@@ -192,7 +193,16 @@ public class EnterInGamePanel : MonoBehaviour
         for (int i = 0; i < _emptyButton.Count; i++)
         {
             int index = i;
-            _emptyButton[index].onClick.AddListener(() => _buyButton[index].SetActive(!_buyButton[index].activeSelf));
+            _emptyButton[index].onClick.AddListener(() => ActiveBuyButton(index));
+        }
+    }
+
+    private void ActiveBuyButton(int index)
+    {
+        for (int i = 0; i < _buyButton.Count; i++)
+        {
+            if (i == index) _buyButton[i].SetActive(true);
+            else _buyButton[i].SetActive(false);
         }
     }
 
