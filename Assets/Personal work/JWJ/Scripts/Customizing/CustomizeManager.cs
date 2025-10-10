@@ -1,12 +1,14 @@
 using UnityEngine;
+using UnityEngine.TextCore.Text;
 using UnityEngine.UI;
 
 public class CustomizeManager : MonoBehaviour
 {
     [SerializeField] private GameObject _character;
     [SerializeField] private Renderer _skinRenderer;
-    [SerializeField] private Image _profilePic;
-    [SerializeField] private Image _profilePicButton;
+    [SerializeField] private ProfilePicture _profilePicture;
+    //[SerializeField] private Image _profilePic;
+    //[SerializeField] private Image _profilePicButton;
 
     [Header("스킨")]
     [SerializeField] private Material[] _skins;
@@ -26,8 +28,8 @@ public class CustomizeManager : MonoBehaviour
     [Header("악세서리")]
     [SerializeField] private GameObject[] _accessories;
 
-    [Header("프로필 이미지")]
-    [SerializeField] private Sprite[] _profilePics;
+    //[Header("프로필 이미지")]
+    //[SerializeField] private Sprite[] _profilePics;
 
     //[SerializeField] private string _testSaveData;
     [SerializeField] private GameObject _uis;
@@ -43,6 +45,11 @@ public class CustomizeManager : MonoBehaviour
     private void Awake()
     {
         LoadCustomize();
+
+        if(_profilePicture == null)
+        {
+            _profilePicture = FindObjectOfType<ProfilePicture>();
+        }
     }
     private void ChangeSkin(int index)
     {
@@ -54,6 +61,7 @@ public class CustomizeManager : MonoBehaviour
         materials[0] = _skins[index];
         _skinRenderer.materials = materials;
         Debug.Log($"스킨 변경 : {_skins[index].name}");
+        _profilePicture.ProfileSkin(index);
         _curSkinIndex = index;
     }
 
@@ -68,6 +76,7 @@ public class CustomizeManager : MonoBehaviour
         materials[1] = _faces[index];
         _skinRenderer.materials = materials;
         Debug.Log($"얼굴 변경 : {_faces[index].name}");
+        _profilePicture.ProfileFace(index);
         _curFaceIndex = index;
     }
 
@@ -98,6 +107,7 @@ public class CustomizeManager : MonoBehaviour
             }
             _curHeadwearIndex = index;
         }
+        _profilePicture.ProfileHeadwear(index);
     }
 
     private void ChangeFacewear(int index)
@@ -128,7 +138,7 @@ public class CustomizeManager : MonoBehaviour
             _curFacewearIndex = index;
         }
 
-
+        _profilePicture.ProfileFacewear(index);
     }
 
     private void ChangeBag(int index)
@@ -191,22 +201,22 @@ public class CustomizeManager : MonoBehaviour
         }
     }
 
-    private void ChangeProfilePic(int index)
-    {
-        //Debug.LogError($"인데스 {index}");
-        if (index < 0 || index >= _profilePics.Length)
-        {
-            _profilePic.sprite = _profilePics[0];
-            _profilePicButton.sprite = _profilePics[0];
-            _curProfilePicIndex = -1;
-        }
-        else
-        {
-            _profilePic.sprite = _profilePics[index];
-            _profilePicButton.sprite = _profilePics[index];
-            _curProfilePicIndex = index;
-        }
-    }
+    //private void ChangeProfilePic(int index)
+    //{
+    //    //Debug.LogError($"인데스 {index}");
+    //    if (index < 0 || index >= _profilePics.Length)
+    //    {
+    //        _profilePic.sprite = _profilePics[0];
+    //        _profilePicButton.sprite = _profilePics[0];
+    //        _curProfilePicIndex = -1;
+    //    }
+    //    else
+    //    {
+    //        _profilePic.sprite = _profilePics[index];
+    //        _profilePicButton.sprite = _profilePics[index];
+    //        _curProfilePicIndex = index;
+    //    }
+    //}
 
     private void LoadCustomize()
     {
@@ -221,7 +231,7 @@ public class CustomizeManager : MonoBehaviour
             ChangeFacewear(-1);
             ChangeBag(-1);
             ChangeAccessory(-1);
-            ChangeProfilePic(0);
+            //ChangeProfilePic(0);
 
             return;
         }
@@ -249,7 +259,7 @@ public class CustomizeManager : MonoBehaviour
             ChangeFacewear(saveData[3]);
             ChangeBag(saveData[4]);
             ChangeAccessory(saveData[5]);
-            ChangeProfilePic(saveData[6]);
+            //ChangeProfilePic(saveData[6]);
         }
     }
 
@@ -284,7 +294,7 @@ public class CustomizeManager : MonoBehaviour
         int randFW = Random.Range(-1, _facewears.Length);
         int randBag = Random.Range(-1, _bags.Length);
         int randAcc = Random.Range(-1, _accessories.Length);
-        int randPic = Random.Range(0, _profilePics.Length);
+        //int randPic = Random.Range(0, _profilePics.Length);
 
         ChangeSkin(randSkin);
         ChangeFace(randFace);
@@ -292,7 +302,7 @@ public class CustomizeManager : MonoBehaviour
         ChangeFacewear(randFW);
         ChangeBag(randBag);
         ChangeAccessory(randAcc);
-        ChangeProfilePic(randPic);
+        //ChangeProfilePic(randPic);
 
         ResetButtons();
         Manager.Audio.PlaySFX("Touch");
@@ -337,8 +347,8 @@ public class CustomizeManager : MonoBehaviour
             case CosmeticCategory.Accessory:
                 return _accessories.Length;
 
-            case CosmeticCategory.ProfilePic:
-                return _profilePics.Length;
+            //case CosmeticCategory.ProfilePic:
+            //    return _profilePics.Length;
         }
         return 0;
     }
@@ -405,9 +415,9 @@ public class CustomizeManager : MonoBehaviour
                 ChangeAccessory(index);
                 return;
 
-            case CosmeticCategory.ProfilePic:
-                ChangeProfilePic(index);
-                return;
+            //case CosmeticCategory.ProfilePic:
+            //    ChangeProfilePic(index);
+            //    return;
         }
         return;
     }
