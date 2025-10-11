@@ -37,8 +37,11 @@ namespace KDJ.States
                 }
                 _matchDelayCoroutine = boardManager.StartCoroutine(MatchDelayCoroutine(boardManager));
             }
-
-            BoardManager.SetTouch(true);
+            else
+            {
+                // 없으면 터치 가능
+                BoardManager.SetTouch(true);
+            }
         }
 
         public void OnUpdate(BoardManager boardManager)
