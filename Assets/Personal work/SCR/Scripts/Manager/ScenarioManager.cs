@@ -33,7 +33,7 @@ public class ScenarioManager : MonoBehaviour
         }
         else if (currentScenario == 3)
         {
-            if (missionPlace == MissionPlace.Donut && percent >= 0.5f)
+            if (currentStage >= 2)
             {
                 _dialoguePlayer.ShowById(currentScenario);
                 Manager.User.ClearScenario();
@@ -41,7 +41,7 @@ public class ScenarioManager : MonoBehaviour
         }
         else if (currentScenario == 4)
         {
-            if (missionPlace == MissionPlace.MiniCafe && percent == 0)
+            if (missionPlace == MissionPlace.Donut && percent > 0)
             {
                 _dialoguePlayer.ShowById(currentScenario);
                 Manager.User.ClearScenario();
@@ -49,7 +49,7 @@ public class ScenarioManager : MonoBehaviour
         }
         else if (currentScenario == 5)
         {
-            if (missionPlace == MissionPlace.MiniCafe && percent >= 0.5f)
+            if (currentStage >= 3)
             {
                 _dialoguePlayer.ShowById(currentScenario);
                 Manager.User.ClearScenario();
@@ -57,7 +57,7 @@ public class ScenarioManager : MonoBehaviour
         }
         else if (currentScenario == 6)
         {
-            if (missionPlace == MissionPlace.Cafe && percent == 0)
+            if (missionPlace == MissionPlace.Donut && percent >= 0.5f)
             {
                 _dialoguePlayer.ShowById(currentScenario);
                 Manager.User.ClearScenario();
@@ -65,7 +65,7 @@ public class ScenarioManager : MonoBehaviour
         }
         else if (currentScenario == 7)
         {
-            if (missionPlace == MissionPlace.Cafe && percent >= 0.5f)
+            if (missionPlace == MissionPlace.MiniCafe && percent == 0)
             {
                 _dialoguePlayer.ShowById(currentScenario);
                 Manager.User.ClearScenario();
@@ -73,7 +73,7 @@ public class ScenarioManager : MonoBehaviour
         }
         else if (currentScenario == 8)
         {
-            if (missionPlace == MissionPlace.IceCream && percent == 0)
+            if (missionPlace == MissionPlace.MiniCafe && percent >= 0)
             {
                 _dialoguePlayer.ShowById(currentScenario);
                 Manager.User.ClearScenario();
@@ -81,7 +81,7 @@ public class ScenarioManager : MonoBehaviour
         }
         else if (currentScenario == 9)
         {
-            if (missionPlace == MissionPlace.IceCream && percent >= 0.5f)
+            if (missionPlace == MissionPlace.MiniCafe && percent >= 0.5f)
             {
                 _dialoguePlayer.ShowById(currentScenario);
                 Manager.User.ClearScenario();
@@ -89,7 +89,7 @@ public class ScenarioManager : MonoBehaviour
         }
         else if (currentScenario == 10)
         {
-            if (missionPlace == MissionPlace.Bakery && percent == 0)
+            if (missionPlace == MissionPlace.Cafe && percent == 0)
             {
                 _dialoguePlayer.ShowById(currentScenario);
                 Manager.User.ClearScenario();
@@ -97,7 +97,7 @@ public class ScenarioManager : MonoBehaviour
         }
         else if (currentScenario == 11)
         {
-            if (missionPlace == MissionPlace.Bakery && percent >= 0.5f)
+            if (missionPlace == MissionPlace.Cafe && percent >= 0)
             {
                 _dialoguePlayer.ShowById(currentScenario);
                 Manager.User.ClearScenario();
@@ -105,7 +105,7 @@ public class ScenarioManager : MonoBehaviour
         }
         else if (currentScenario == 12)
         {
-            if (missionPlace == MissionPlace.Pizzeria && percent == 0)
+            if (missionPlace == MissionPlace.Cafe && percent >= 0.5f)
             {
                 _dialoguePlayer.ShowById(currentScenario);
                 Manager.User.ClearScenario();
@@ -113,7 +113,7 @@ public class ScenarioManager : MonoBehaviour
         }
         else if (currentScenario == 13)
         {
-            if (missionPlace == MissionPlace.Pizzeria && percent >= 0.5f)
+            if (missionPlace == MissionPlace.IceCream && percent == 0)
             {
                 _dialoguePlayer.ShowById(currentScenario);
                 Manager.User.ClearScenario();
@@ -121,7 +121,7 @@ public class ScenarioManager : MonoBehaviour
         }
         else if (currentScenario == 14)
         {
-            if (missionPlace == MissionPlace.Bar && percent == 0)
+            if (missionPlace == MissionPlace.IceCream && percent >= 0)
             {
                 _dialoguePlayer.ShowById(currentScenario);
                 Manager.User.ClearScenario();
@@ -129,7 +129,7 @@ public class ScenarioManager : MonoBehaviour
         }
         else if (currentScenario == 15)
         {
-            if (missionPlace == MissionPlace.Bar && percent >= 0.5f)
+            if (missionPlace == MissionPlace.IceCream && percent >= 0.5f)
             {
                 _dialoguePlayer.ShowById(currentScenario);
                 Manager.User.ClearScenario();
@@ -137,7 +137,7 @@ public class ScenarioManager : MonoBehaviour
         }
         else if (currentScenario == 16)
         {
-            if (missionPlace == MissionPlace.Greengrocery && percent == 0)
+            if (missionPlace == MissionPlace.Bakery && percent == 0)
             {
                 _dialoguePlayer.ShowById(currentScenario);
                 Manager.User.ClearScenario();
@@ -145,7 +145,95 @@ public class ScenarioManager : MonoBehaviour
         }
         else if (currentScenario == 17)
         {
+            if (missionPlace == MissionPlace.Bakery && percent >= 0)
+            {
+                _dialoguePlayer.ShowById(currentScenario);
+                Manager.User.ClearScenario();
+            }
+        }
+        else if (currentScenario == 18)
+        {
+            if (missionPlace == MissionPlace.Bakery && percent >= 0.5f)
+            {
+                _dialoguePlayer.ShowById(currentScenario);
+                Manager.User.ClearScenario();
+            }
+        }
+        else if (currentScenario == 19)
+        {
+            if (missionPlace == MissionPlace.Pizzeria && percent == 0)
+            {
+                _dialoguePlayer.ShowById(currentScenario);
+                Manager.User.ClearScenario();
+            }
+        }
+        else if (currentScenario == 20)
+        {
+            if (missionPlace == MissionPlace.Pizzeria && percent >= 0)
+            {
+                _dialoguePlayer.ShowById(currentScenario);
+                Manager.User.ClearScenario();
+            }
+        }
+        else if (currentScenario == 21)
+        {
+            if (missionPlace == MissionPlace.Pizzeria && percent >= 0.5f)
+            {
+                _dialoguePlayer.ShowById(currentScenario);
+                Manager.User.ClearScenario();
+            }
+        }
+        else if (currentScenario == 22)
+        {
+            if (missionPlace == MissionPlace.Bar && percent == 0)
+            {
+                _dialoguePlayer.ShowById(currentScenario);
+                Manager.User.ClearScenario();
+            }
+        }
+        else if (currentScenario == 23)
+        {
+            if (missionPlace == MissionPlace.Bar && percent >= 0)
+            {
+                _dialoguePlayer.ShowById(currentScenario);
+                Manager.User.ClearScenario();
+            }
+        }
+        else if (currentScenario == 24)
+        {
+            if (missionPlace == MissionPlace.Bar && percent >= 0.5f)
+            {
+                _dialoguePlayer.ShowById(currentScenario);
+                Manager.User.ClearScenario();
+            }
+        }
+        else if (currentScenario == 25)
+        {
+            if (missionPlace == MissionPlace.Greengrocery && percent == 0)
+            {
+                _dialoguePlayer.ShowById(currentScenario);
+                Manager.User.ClearScenario();
+            }
+        }
+        else if (currentScenario == 26)
+        {
+            if (missionPlace == MissionPlace.Greengrocery && percent >= 0)
+            {
+                _dialoguePlayer.ShowById(currentScenario);
+                Manager.User.ClearScenario();
+            }
+        }
+        else if (currentScenario == 27)
+        {
             if (missionPlace == MissionPlace.Greengrocery && percent >= 0.5f)
+            {
+                _dialoguePlayer.ShowById(currentScenario);
+                Manager.User.ClearScenario();
+            }
+        }
+        else if (currentScenario == 28)
+        {
+            if (missionPlace == MissionPlace.Greengrocery && percent == 1f)
             {
                 _dialoguePlayer.ShowById(currentScenario);
                 Manager.User.ClearScenario();
@@ -153,5 +241,6 @@ public class ScenarioManager : MonoBehaviour
         }
         currentScenario = Manager.User.GetScenario() + 1;
         currentStage = Manager.Stage.CurrentStageIndex + 1;
+
     }
 }

@@ -104,7 +104,8 @@ public class DialogueController : MonoBehaviour
     {
         StopCoroutine(_playCo);
         _playCo = null;
-        OnDialogueGroupEnd?.Invoke();
         _dialogueUI.SetActive(false);
+        OnDialogueGroupEnd?.Invoke();
+
     }
 }

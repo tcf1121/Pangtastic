@@ -17,6 +17,7 @@ public class DialoguePlayer : MonoBehaviour
         {
             _controller = FindObjectOfType<DialogueController>();
         }
+        _controller.OnDialogueGroupEnd += () => _scenario.PlayScenario(Manager.User.GetCurPlace());
     }
 
     private void LoadAllGroup()
