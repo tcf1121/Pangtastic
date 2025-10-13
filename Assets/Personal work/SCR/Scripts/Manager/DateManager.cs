@@ -105,6 +105,7 @@ public class DateManager : Singleton<DateManager>
     {
         Manager.User.ResetReceived();
         Manager.User.ResetWeeklyLevel();
+        CheckReceived();
     }
 
     public void CheckReceived()
