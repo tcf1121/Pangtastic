@@ -50,6 +50,9 @@ namespace KDJ
         [Header("거품기 선택 UI")]
         [SerializeField] private GameObject _whiskUseUI;
 
+        [Header("가위, 거품기 공통 UI")]
+        [SerializeField] private GameObject _itemUseUI;
+
         public IGameState CurrentState { get; private set; }
         public BlockSpawner Spawner { get; private set; }
         public BoardMatchChecker MatchChecker { get; private set; }
@@ -261,6 +264,9 @@ namespace KDJ
         {
             SelectedItemType = type;
             IsItemSelected = true;
+
+            if (_itemUseUI != null)
+                _itemUseUI.SetActive(true);
             if (type == ItemType.Scissors && _scissorUseUI != null)
                 _scissorUseUI.SetActive(true);
             if (type == ItemType.Whisk && _whiskUseUI != null)
@@ -271,6 +277,9 @@ namespace KDJ
         public void ClearItemSelection()
         {
             IsItemSelected = false;
+
+            if (_itemUseUI != null)
+                _itemUseUI.SetActive(false);
             if (_scissorUseUI != null)
                 _scissorUseUI.SetActive(false);
             if (_whiskUseUI != null)
