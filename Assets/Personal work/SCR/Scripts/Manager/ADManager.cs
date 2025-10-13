@@ -15,7 +15,7 @@ public class ADManager : Singleton<ADManager>
     private bool _removedAD;
 
     // ===================== Rewarded Interstitial (보상형) =====================
-    private RewardedInterstitialAd _rewardedInterstitialAd;
+    private RewardedAd _rewardedInterstitialAd;
     public Action OnRewardAdClosed;
     private bool _getReward = false;
 
@@ -37,15 +37,15 @@ public class ADManager : Singleton<ADManager>
     private int adDay = 2;
 
     // 광고 ID (테스트 용)
-    // private string rewardedInterstitialAdID = "ca-app-pub-3940256099942544/5354046379";
-    // private string appOpenAdID = "ca-app-pub-3940256099942544/9257395921";
-    // private string interstitialAdID = "ca-app-pub-3940256099942544/1033173712";
-    // private string bannerAdID = "ca-app-pub-3940256099942544/6300978111";
+    private string rewardedInterstitialAdID = "ca-app-pub-3940256099942544/5354046379";
+    private string appOpenAdID = "ca-app-pub-3940256099942544/9257395921";
+    private string interstitialAdID = "ca-app-pub-3940256099942544/1033173712";
+    private string bannerAdID = "ca-app-pub-3940256099942544/6300978111";
     // 광고 ID (실제 사용)
-    private string rewardedInterstitialAdID = "ca-app-pub-6717704131793477/7329232893";
-    private string appOpenAdID = "ca-app-pub-6717704131793477/6016151222";
-    private string interstitialAdID = "ca-app-pub-6717704131793477/7421874537";
-    private string bannerAdID = "ca-app-pub-6717704131793477/2547679507";
+    // private string rewardedInterstitialAdID = "ca-app-pub-6717704131793477/7329232893";
+    // private string appOpenAdID = "ca-app-pub-6717704131793477/6016151222";
+    // private string interstitialAdID = "ca-app-pub-6717704131793477/7421874537";
+    // private string bannerAdID = "ca-app-pub-6717704131793477/2547679507";
 
     protected override void Awake()
     {
@@ -122,8 +122,8 @@ public class ADManager : Singleton<ADManager>
         adRequest.Keywords.Add("unity-admob-sample");
 
         // send the request to load the ad.
-        RewardedInterstitialAd.Load(rewardedInterstitialAdID, adRequest,
-        (RewardedInterstitialAd ad, LoadAdError error) =>
+        RewardedAd.Load(rewardedInterstitialAdID, adRequest,
+        (RewardedAd ad, LoadAdError error) =>
         {
             // if error is not null, the load request failed.
             if (error != null || ad == null)
@@ -169,7 +169,8 @@ public class ADManager : Singleton<ADManager>
         }
         else
         {
-            Debug.Log("광고 준비 안 됨!");
+            Debug.Log("보상형 광고 준비 안 됨!");
+            LoadAD();
         }
     }
 
@@ -262,7 +263,7 @@ public class ADManager : Singleton<ADManager>
         }
         else
         {
-            Debug.LogError("App open ad is not ready yet.");
+            Debug.LogError("오픈형 광고 준비 안 됨!");
             LoadAppOpenAd();
         }
     }
@@ -393,7 +394,7 @@ public class ADManager : Singleton<ADManager>
         }
         else
         {
-            Debug.LogWarning("Interstitial ad not ready.");
+            Debug.LogWarning("전면 광고 준비 안 됨!");
             LoadInterstitialAd();
         }
     }

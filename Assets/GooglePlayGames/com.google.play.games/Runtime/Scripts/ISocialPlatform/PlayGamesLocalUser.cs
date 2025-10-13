@@ -52,7 +52,7 @@ namespace GooglePlayGames
 
         /// <summary>
         /// Authenticates the local user. This is equivalent to calling
-        /// <see cref="PlayGamesPlatform.Authenticate(GooglePlayGames.BasicApi.SignInInteractivity,System.Action{GooglePlayGames.BasicApi.SignInStatus})"/>.
+        /// <see cref="PlayGamesPlatform.Authenticate(Action{SignInStatus})"/>.
         /// </summary>
         /// <param name="callback">A callback to invoke with a boolean indicating success.</param>
         public void Authenticate(Action<bool> callback)
@@ -62,7 +62,7 @@ namespace GooglePlayGames
 
         /// <summary>
         /// Authenticates the local user with an extended callback that includes the reason for failure.
-        /// This is equivalent to calling <see cref="PlayGamesPlatform.Authenticate(GooglePlayGames.BasicApi.SignInInteractivity,System.Action{GooglePlayGames.BasicApi.SignInStatus})"/>.
+        /// This is equivalent to calling <see cref="PlayGamesPlatform.Authenticate(Action{SignInStatus})"/>.
         /// </summary>
         /// <param name="callback">
         /// A callback to invoke with a boolean indicating success and a string containing the status.
