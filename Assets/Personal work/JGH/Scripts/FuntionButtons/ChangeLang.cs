@@ -9,6 +9,7 @@ public class ChangeLang : MonoBehaviour
 {
     [SerializeField] Language language;
     [SerializeField] LanguageList languageList;
+    [SerializeField] Button _homeButton;
     private Button _button;
 
     void Awake()
@@ -22,6 +23,7 @@ public class ChangeLang : MonoBehaviour
     {
         Manager.Language.SetLanguage(language);
         Manager.Language.ChangeLanguage();
+        _homeButton.onClick?.Invoke();
         //SceneManager.LoadScene(2/*로비씬*/);
     }
 }
