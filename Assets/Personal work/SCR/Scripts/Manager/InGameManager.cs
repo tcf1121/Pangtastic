@@ -23,6 +23,7 @@ public class InGameManager : MonoBehaviour
     [SerializeField] Button _watchAddContinueButton;
     [SerializeField] List<Button> _gameButtons;
     [SerializeField] GameObject _adPanel;
+    [SerializeField] GameObject _fallCoinPopup;
 
     public static InGameManager Instate;
     private int _score;
@@ -36,8 +37,6 @@ public class InGameManager : MonoBehaviour
         _showInterstitialAd = false;
 
         Manager.User.UseHeart();
-        // TODO: TEST
-        // Manager.UserInfoSystem.UseHeart();
         Instate = this;
         _customerFlowController.OnStageCleared += StageClear;
         _customerFlowController.OnStageFailed += StageFail;
@@ -199,10 +198,6 @@ public class InGameManager : MonoBehaviour
         Instate._winCoinText.text = $"{GetCoin()}";
         Instate._clearUI.SetActive(true);
 
-        // TODO: 퀘스트 - 일일 리워드 1개 추가
-        // Manager.UserInfoSystem.DailyAddSlot();
-        // TODO: 퀘스트 - 주간 퀘스트
-        // Manager.UserInfoSystem.WeeklyOnStageClear();
     }
 
     public static void StageFail()
@@ -211,8 +206,6 @@ public class InGameManager : MonoBehaviour
         Manager.Audio.PlaySFX("Stage_Fail");
         KDJ.BoardManager.SetTouch(false);
 
-        // TODO: 퀘스트 - 일일 리워드 1개 빼기
-        // Manager.UserInfoSystem.DailyDropSlot();
 
         if (Instate._firstfail)
         {
@@ -229,30 +222,20 @@ public class InGameManager : MonoBehaviour
         if (!Manager.Ad.RemovedAD)
         {
             Manager.Ad.ShowAD();
-
-            // TODO: 퀘스트 - 일일 퀘스트 1개 추가
-            // Manager.UserInfoSystem.DailyAddSlot();
         }
         else ContinueGame();
     }
 
     private void GoldContinueGame()
     {
-        // TODO: TEST
-        // if (Manager.UserInfoSystem.CanUseCoin(_useCoin))
-        // {
-        //     Manager.UserInfoSystem.UseCoin(_useCoin);
-        //     
-        //     // TODO: 퀘스트 - 일일 퀘스트 1개 추가
-        //     Manager.UserInfoSystem.DailyAddSlot();
-        //     
-        //     ContinueGame();
-        // }
-
         if (Manager.User.CanUseCoin(_useCoin))
         {
             Manager.User.UseCoin(_useCoin);
             ContinueGame();
+        }
+        else
+        {
+            _fallCoinPopup.SetActive(true);
         }
     }
 

@@ -38,7 +38,23 @@ public class AchivementObject : MonoBehaviour
 
     public void SetAchivement(int index)
     {
-        _achvLevel = index;
+        Debug.Log($"{index}{rewards.achivements.Count}");
+        if (index >= rewards.achivements.Count)
+        {
+            _achvLevel = rewards.achivements.Count - 1;
+            _buttonText.SetActive(false);
+            _completeText.SetActive(true);
+            _rewardButton.interactable = false;
+        }
+
+        else
+        {
+            _achvLevel = index;
+            _buttonText.SetActive(true);
+            _completeText.SetActive(false);
+            _rewardButton.interactable = true;
+        }
+
         SetTitle();
         SetProgressBar(_achvLevel);
         SetReward(_achvLevel);
@@ -86,16 +102,16 @@ public class AchivementObject : MonoBehaviour
 
     private void CheckAllComplete()
     {
-        if (Manager.User.GetAchievementLevel(_achivementIndex) > rewards.achivements.Count)
+        if (Manager.User.GetAchievementLevel(_achivementIndex) >= rewards.achivements.Count)
         {
-            _achvLevel = Manager.User.GetAchievementLevel(_achivementIndex);
-            _title.text = rewards.achivements[_achvLevel - 1].Title.GetText(Manager.Language.GetLanguage());
+            _achvLevel = Manager.User.GetAchievementLevel(_achivementIndex) - 1;
+            _title.text = rewards.achivements[_achvLevel].Title.GetText(Manager.Language.GetLanguage());
             _explane.text = $"({rewards.achivements[_achvLevel].Explane.GetText(Manager.Language.GetLanguage())})";
             _progressBar.minValue = 0;
             _progressBar.maxValue = 1;
             _progressBar.value = 1;
             _progressValue.text = $"{Manager.User.GetAchievementProgress(_achivementIndex)}";
-            SetReward(_achvLevel - 1);
+            SetReward(_achvLevel);
             _buttonText.SetActive(false);
             _completeText.SetActive(true);
             _rewardButton.interactable = false;
@@ -103,9 +119,6 @@ public class AchivementObject : MonoBehaviour
         else
         {
             SetAchivement(Manager.User.GetAchievementLevel(_achivementIndex));
-            _buttonText.SetActive(true);
-            _completeText.SetActive(false);
-            _rewardButton.interactable = true;
         }
     }
 
