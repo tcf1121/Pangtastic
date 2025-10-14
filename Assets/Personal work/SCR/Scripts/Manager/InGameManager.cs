@@ -21,6 +21,7 @@ public class InGameManager : MonoBehaviour
     [SerializeField] TMP_Text _useCoinText;
     [SerializeField] Button _useCoinContinueButton;
     [SerializeField] Button _watchAddContinueButton;
+    [SerializeField] Button _justContinueButton;
     [SerializeField] List<Button> _gameButtons;
     [SerializeField] GameObject _adPanel;
     [SerializeField] GameObject _fallCoinPopup;
@@ -42,6 +43,7 @@ public class InGameManager : MonoBehaviour
         _customerFlowController.OnStageFailed += StageFail;
         _useCoinContinueButton.onClick.AddListener(GoldContinueGame);
         _watchAddContinueButton.onClick.AddListener(AdContinueGame);
+        _justContinueButton.onClick.AddListener(ContinueGame);
         _score = 0;
         _coin = 0;
         Manager.Audio.PlayPuzzleBGM();
@@ -219,25 +221,26 @@ public class InGameManager : MonoBehaviour
 
     private void AdContinueGame()
     {
-        if (!Manager.Ad.RemovedAD)
-        {
-            Manager.Ad.ShowAD();
-        }
-        else ContinueGame();
+        Manager.Audio.PlaySFX("Touch");
+        Manager.Ad.ShowAD();
     }
 
     private void GoldContinueGame()
     {
         if (Manager.User.CanUseCoin(_useCoin))
         {
+            Manager.Audio.PlaySFX("Touch");
             Manager.User.UseCoin(_useCoin);
             ContinueGame();
         }
         else
         {
+            Manager.Audio.PlaySFX("Item_fail");
             _fallCoinPopup.SetActive(true);
         }
     }
+
+
 
     private void ContinueGame()
     {
