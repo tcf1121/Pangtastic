@@ -104,10 +104,10 @@ public class EnterInGamePanel : MonoBehaviour
             _emptyButton[0].gameObject.SetActive(false);
             donutBoxToggle.isOn = true;
             donutBoxToggle.interactable = false;
-            _emptyButton[0].gameObject.SetActive(false);
+            _emptyButton[1].gameObject.SetActive(false);
             ovenToggle.isOn = true;
             ovenToggle.interactable = false;
-            _emptyButton[0].gameObject.SetActive(false);
+            _emptyButton[2].gameObject.SetActive(false);
         }
         else
         {

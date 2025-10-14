@@ -474,7 +474,7 @@ public class ADManager : Singleton<ADManager>
         BannerListenToAdEvents();
 
         // 보이기
-        _bannerView.OnBannerAdLoaded += OnBannerLoaded;
+        _bannerView.OnAdImpressionRecorded += OnBannerLoaded;
         _bannerView.OnBannerAdLoadFailed += (LoadAdError error) =>
         {
             Debug.LogError("배너 로드 실패: " + error);

@@ -21,8 +21,10 @@ public class InGameManager : MonoBehaviour
     [SerializeField] TMP_Text _useCoinText;
     [SerializeField] Button _useCoinContinueButton;
     [SerializeField] Button _watchAddContinueButton;
+    [SerializeField] Button _justContinueButton;
     [SerializeField] List<Button> _gameButtons;
     [SerializeField] GameObject _adPanel;
+    [SerializeField] GameObject _fallCoinPopup;
 
     public static InGameManager Instate;
     private int _score;
@@ -34,6 +36,29 @@ public class InGameManager : MonoBehaviour
     void Awake()
     {
         _showInterstitialAd = false;
+
+        Manager.User.UseHeart();
+        Instate = this;
+        _customerFlowController.OnStageCleared += StageClear;
+        _customerFlowController.OnStageFailed += StageFail;
+        _useCoinContinueButton.onClick.AddListener(GoldContinueGame);
+        _watchAddContinueButton.onClick.AddListener(AdContinueGame);
+        _justContinueButton.onClick.AddListener(ContinueGame);
+        _score = 0;
+        _coin = 0;
+        Manager.Audio.PlayPuzzleBGM();
+        foreach (var btn in _gameButtons)
+            btn.onClick.AddListener(PushButton);
+    }
+
+    void Start()
+    {
+        StartCoroutine(AdStart());
+    }
+
+    private IEnumerator AdStart()
+    {
+        yield return new WaitForSeconds(1f);
         if (!Manager.Ad.RemovedAD)
         {
             _adPanel.SetActive(true);
@@ -48,19 +73,10 @@ public class InGameManager : MonoBehaviour
                 Manager.Ad.OnInterstitialAdClosed += GoLobby;
             }
         }
-        Manager.User.UseHeart();
-        // TODO: TEST
-        // Manager.UserInfoSystem.UseHeart();
-        Instate = this;
-        _customerFlowController.OnStageCleared += StageClear;
-        _customerFlowController.OnStageFailed += StageFail;
-        _useCoinContinueButton.onClick.AddListener(GoldContinueGame);
-        _watchAddContinueButton.onClick.AddListener(AdContinueGame);
-        _score = 0;
-        _coin = 0;
-        Manager.Audio.PlayPuzzleBGM();
-        foreach (var btn in _gameButtons)
-            btn.onClick.AddListener(PushButton);
+        else
+        {
+            _adPanel.SetActive(false);
+        }
     }
 
     void OnDestroy()
@@ -183,11 +199,7 @@ public class InGameManager : MonoBehaviour
         KDJ.BoardManager.SetTouch(false);
         Instate._winCoinText.text = $"{GetCoin()}";
         Instate._clearUI.SetActive(true);
-        
-        // TODO: 퀘스트 - 일일 리워드 1개 추가
-        // Manager.UserInfoSystem.DailyAddSlot();
-        // TODO: 퀘스트 - 주간 퀘스트
-        // Manager.UserInfoSystem.WeeklyOnStageClear();
+
     }
 
     public static void StageFail()
@@ -195,10 +207,8 @@ public class InGameManager : MonoBehaviour
         if (Instate == null) Instate = GameObject.Find("InGameManager").GetComponent<InGameManager>();
         Manager.Audio.PlaySFX("Stage_Fail");
         KDJ.BoardManager.SetTouch(false);
-        
-        // TODO: 퀘스트 - 일일 리워드 1개 빼기
-        // Manager.UserInfoSystem.DailyDropSlot();
-        
+
+
         if (Instate._firstfail)
         {
             Instate._firstfail = false;
@@ -211,35 +221,26 @@ public class InGameManager : MonoBehaviour
 
     private void AdContinueGame()
     {
-        if (!Manager.Ad.RemovedAD)
-        {
-            Manager.Ad.ShowAD();
-            
-            // TODO: 퀘스트 - 일일 퀘스트 1개 추가
-            // Manager.UserInfoSystem.DailyAddSlot();
-        }
-        else ContinueGame();
+        Manager.Audio.PlaySFX("Touch");
+        Manager.Ad.ShowAD();
     }
 
     private void GoldContinueGame()
     {
-        // TODO: TEST
-        // if (Manager.UserInfoSystem.CanUseCoin(_useCoin))
-        // {
-        //     Manager.UserInfoSystem.UseCoin(_useCoin);
-        //     
-        //     // TODO: 퀘스트 - 일일 퀘스트 1개 추가
-        //     Manager.UserInfoSystem.DailyAddSlot();
-        //     
-        //     ContinueGame();
-        // }
-        
         if (Manager.User.CanUseCoin(_useCoin))
         {
+            Manager.Audio.PlaySFX("Touch");
             Manager.User.UseCoin(_useCoin);
             ContinueGame();
         }
+        else
+        {
+            Manager.Audio.PlaySFX("Item_fail");
+            _fallCoinPopup.SetActive(true);
+        }
     }
+
+
 
     private void ContinueGame()
     {
