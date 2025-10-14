@@ -34,6 +34,30 @@ public class InGameManager : MonoBehaviour
     void Awake()
     {
         _showInterstitialAd = false;
+
+        Manager.User.UseHeart();
+        // TODO: TEST
+        // Manager.UserInfoSystem.UseHeart();
+        Instate = this;
+        _customerFlowController.OnStageCleared += StageClear;
+        _customerFlowController.OnStageFailed += StageFail;
+        _useCoinContinueButton.onClick.AddListener(GoldContinueGame);
+        _watchAddContinueButton.onClick.AddListener(AdContinueGame);
+        _score = 0;
+        _coin = 0;
+        Manager.Audio.PlayPuzzleBGM();
+        foreach (var btn in _gameButtons)
+            btn.onClick.AddListener(PushButton);
+    }
+
+    void Start()
+    {
+        StartCoroutine(AdStart());
+    }
+
+    private IEnumerator AdStart()
+    {
+        yield return new WaitForSeconds(1f);
         if (!Manager.Ad.RemovedAD)
         {
             _adPanel.SetActive(true);
@@ -48,19 +72,10 @@ public class InGameManager : MonoBehaviour
                 Manager.Ad.OnInterstitialAdClosed += GoLobby;
             }
         }
-        Manager.User.UseHeart();
-        // TODO: TEST
-        // Manager.UserInfoSystem.UseHeart();
-        Instate = this;
-        _customerFlowController.OnStageCleared += StageClear;
-        _customerFlowController.OnStageFailed += StageFail;
-        _useCoinContinueButton.onClick.AddListener(GoldContinueGame);
-        _watchAddContinueButton.onClick.AddListener(AdContinueGame);
-        _score = 0;
-        _coin = 0;
-        Manager.Audio.PlayPuzzleBGM();
-        foreach (var btn in _gameButtons)
-            btn.onClick.AddListener(PushButton);
+        else
+        {
+            _adPanel.SetActive(false);
+        }
     }
 
     void OnDestroy()
@@ -183,7 +198,7 @@ public class InGameManager : MonoBehaviour
         KDJ.BoardManager.SetTouch(false);
         Instate._winCoinText.text = $"{GetCoin()}";
         Instate._clearUI.SetActive(true);
-        
+
         // TODO: 퀘스트 - 일일 리워드 1개 추가
         // Manager.UserInfoSystem.DailyAddSlot();
         // TODO: 퀘스트 - 주간 퀘스트
@@ -195,10 +210,10 @@ public class InGameManager : MonoBehaviour
         if (Instate == null) Instate = GameObject.Find("InGameManager").GetComponent<InGameManager>();
         Manager.Audio.PlaySFX("Stage_Fail");
         KDJ.BoardManager.SetTouch(false);
-        
+
         // TODO: 퀘스트 - 일일 리워드 1개 빼기
         // Manager.UserInfoSystem.DailyDropSlot();
-        
+
         if (Instate._firstfail)
         {
             Instate._firstfail = false;
@@ -214,7 +229,7 @@ public class InGameManager : MonoBehaviour
         if (!Manager.Ad.RemovedAD)
         {
             Manager.Ad.ShowAD();
-            
+
             // TODO: 퀘스트 - 일일 퀘스트 1개 추가
             // Manager.UserInfoSystem.DailyAddSlot();
         }
@@ -233,7 +248,7 @@ public class InGameManager : MonoBehaviour
         //     
         //     ContinueGame();
         // }
-        
+
         if (Manager.User.CanUseCoin(_useCoin))
         {
             Manager.User.UseCoin(_useCoin);

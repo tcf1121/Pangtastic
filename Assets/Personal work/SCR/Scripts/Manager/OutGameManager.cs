@@ -25,21 +25,7 @@ public class OutGameManager : MonoBehaviour
     void Awake()
     {
         instate = this;
-        if (!Manager.Ad.RemovedAD)                                           
-        {                                                                    
-            if (Manager.IAP.CheckNonConsumableOwned("noads"))                
-            {                                                                
-                Debug.Log("광고제거 구매이력 발견. 배너 광고제거 적용");     
-                Manager.Ad.BuyRemoveAD();                                    
-            }                                                                
-            else                                                             
-            {                                                                
-                Debug.Log("배너 광고활성화");                                
-                _adPanel.SetActive(true);                                    
-                Manager.Ad.LoadAD();                                         
-                Manager.Ad.BannerCreateView();                               
-            }                                                                
-        }
+
 
         _settingBtn.onClick.AddListener(SetStage);
         foreach (var btn in _lobbyButtons)
@@ -49,6 +35,21 @@ public class OutGameManager : MonoBehaviour
 
     void Start()
     {
+        if (!Manager.Ad.RemovedAD)
+        {
+            if (Manager.IAP.CheckNonConsumableOwned("noads"))
+            {
+                Debug.Log("광고제거 구매이력 발견. 배너 광고제거 적용");
+                Manager.Ad.BuyRemoveAD();
+            }
+            else
+            {
+                Debug.Log("배너 광고활성화");
+                _adPanel.SetActive(true);
+                Manager.Ad.LoadAD();
+                Manager.Ad.BannerCreateView();
+            }
+        }
         Time.timeScale = 1f;
         UserInfoUI.Instance.SetActive(true);
         int index = Manager.Stage.CurrentStageIndex;
@@ -57,11 +58,11 @@ public class OutGameManager : MonoBehaviour
         else _currentPlace = PlayerPrefs.GetInt(DROPDOWN_KEY);
         Manager.Audio.SetLobbyPlace((MissionPlace)_currentPlace);
         Manager.Audio.PlayLobbyBGM();
-        
+
         // TODO: 광고 로그 쌓기
         // Manager.UserInfoSystem.SetLogAccessDates();
         // Manager.UserInfoSystem.GetLogAccessDates();
-        
+
         // TODO: 주간 퀘스트
         // Manager.UserInfoSystem.CheckAndResetIfNewWeek();
     }

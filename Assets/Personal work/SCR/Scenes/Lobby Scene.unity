@@ -18855,6 +18855,14 @@ PrefabInstance:
       propertyPath: m_Navigation.m_Mode
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 5525046099663368037, guid: 2f7768ea460ee494db0096b890eff37d, type: 3}
+      propertyPath: m_SizeDelta.x
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5525046099663368037, guid: 2f7768ea460ee494db0096b890eff37d, type: 3}
+      propertyPath: m_SizeDelta.y
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 5526568634058182810, guid: 2f7768ea460ee494db0096b890eff37d, type: 3}
       propertyPath: m_Sprite
       value: 
@@ -234083,7 +234091,6 @@ GameObject:
   m_Component:
   - component: {fileID: 2142535346}
   - component: {fileID: 2142535348}
-  - component: {fileID: 2142535347}
   m_Layer: 0
   m_Name: Camera (1)
   m_TagString: Untagged
@@ -234106,14 +234113,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 2136165075}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!81 &2142535347
-AudioListener:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2142535345}
-  m_Enabled: 1
 --- !u!20 &2142535348
 Camera:
   m_ObjectHideFlags: 0

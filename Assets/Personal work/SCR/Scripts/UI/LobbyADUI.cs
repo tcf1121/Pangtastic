@@ -8,23 +8,26 @@ public class LobbyADUI : MonoBehaviour
     [SerializeField] RectTransform thisPanel;
     [SerializeField] RectTransform parentCanvasRect;
     [SerializeField] RectTransform _customizePanel;
+    private CanvasScaler bannerCanvas;
 
     void OnEnable()
     {
-        if (Manager.Ad.RemovedAD)
-            RefreshLayout();
+        RefreshLayout();
     }
 
     void OnDisable()
     {
-        if (Manager.Ad.RemovedAD)
-            RefreshLayout();
+        RefreshLayout();
     }
 
-    void Start()
+    void Awake()
     {
         if (!Manager.Ad.RemovedAD)
+        {
+            Debug.Log("배너 광고 생성 이벤트 추가");
             Manager.Ad.BannerAdLoad += CheckPanel;
+        }
+
         else
         {
             gameObject.SetActive(false);
@@ -57,7 +60,24 @@ public class LobbyADUI : MonoBehaviour
 
     }
 
-    private void CheckPanel()
+    private void ChangerCanvasF()
+    {
+        GameObject go = GameObject.Find("ADAPTIVE(Clone)");
+        if (go == null) return;
+
+        Debug.Log($"배너 광고창 찾음{go}");
+        bannerCanvas = go.GetComponent<CanvasScaler>();
+        bannerCanvas.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
+        bannerCanvas.referenceResolution = new Vector2(1080, 1920);
+        bannerCanvas.screenMatchMode = CanvasScaler.ScreenMatchMode.Expand;
+        bannerCanvas.referencePixelsPerUnit = 100f;
+        float bannerHeightInPixels = Manager.Ad.bannerHeight;
+        Vector2 size = thisPanel.sizeDelta;
+        size.y = bannerHeightInPixels;
+        thisPanel.sizeDelta = size;
+    }
+
+    private void ChangerCanvasS()
     {
         float bannerHeightInPixels = Manager.Ad.bannerHeight;
         float canvasHeight = parentCanvasRect.rect.height;
@@ -67,6 +87,15 @@ public class LobbyADUI : MonoBehaviour
         Vector2 size = thisPanel.sizeDelta;
         size.y = finalHeightForUI;
         thisPanel.sizeDelta = size;
+    }
+
+    private void CheckPanel()
+    {
+        Debug.Log("배너 광고 생성 후 사이즈 측정");
+        ChangerCanvasF();
+        //ChangerCanvasS();
         RefreshLayout();
     }
+
+
 }
