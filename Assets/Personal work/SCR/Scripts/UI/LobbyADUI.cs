@@ -1,3 +1,4 @@
+using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -60,20 +61,25 @@ public class LobbyADUI : MonoBehaviour
 
     }
 
-    private void ChangerCanvasF()
+    private IEnumerator ChangerCanvasF()
     {
-        GameObject go = GameObject.Find("ADAPTIVE(Clone)");
-        if (go == null) return;
-
+        GameObject go = null;
+        while (go == null)
+        {
+            Debug.Log("인게임 배너 광고창 찾는 중...");
+            go = GameObject.Find("ADAPTIVE(Clone)");
+            yield return null; // 다음 프레임까지 기다림
+        }
         Debug.Log($"배너 광고창 찾음{go}");
         bannerCanvas = go.GetComponent<CanvasScaler>();
         bannerCanvas.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
         bannerCanvas.referenceResolution = new Vector2(1080, 1920);
         bannerCanvas.screenMatchMode = CanvasScaler.ScreenMatchMode.Expand;
         bannerCanvas.referencePixelsPerUnit = 100f;
-        float bannerHeightInPixels = Manager.Ad.bannerHeight;
+        //float bannerHeightInPixels = Manager.Ad.bannerHeight;
+        float height = go.transform.GetChild(0).GetComponent<RectTransform>().rect.height;
         Vector2 size = thisPanel.sizeDelta;
-        size.y = bannerHeightInPixels;
+        size.y = height;
         thisPanel.sizeDelta = size;
     }
 
@@ -92,8 +98,11 @@ public class LobbyADUI : MonoBehaviour
     private void CheckPanel()
     {
         Debug.Log("배너 광고 생성 후 사이즈 측정");
-        ChangerCanvasF();
-        //ChangerCanvasS();
+#if UNITY_EDITOR
+        StartCoroutine(ChangerCanvasF());
+#elif UNITY_ANDROID
+        ChangerCanvasS();
+#endif
         RefreshLayout();
     }
 
