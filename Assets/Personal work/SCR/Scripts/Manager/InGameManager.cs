@@ -65,7 +65,7 @@ public class InGameManager : MonoBehaviour
             Manager.Ad.BannerCreateView();
             Manager.Ad.LoadAD();
             // 2일 이상부터만 적용
-            if (Manager.Date.LoginStreak > 1)
+            if (Manager.Date.GetLoginStreak(2))
             {
                 Manager.Ad.LoadInterstitialAd();
                 Manager.Timer.ADFin += ReadyShowAD;

@@ -5,6 +5,7 @@ using UnityEngine.UI;
 public class LobbyADUI : MonoBehaviour
 {
     [SerializeField] RectTransform parentPanel;
+    [SerializeField] RectTransform dialogPanel;
     [SerializeField] RectTransform mainPanel;
     [SerializeField] RectTransform thisPanel;
     [SerializeField] RectTransform parentCanvasRect;
@@ -57,6 +58,13 @@ public class LobbyADUI : MonoBehaviour
             var customizeOffset = _customizePanel.offsetMin;
             customizeOffset.y = bannerHeight;
             _customizePanel.offsetMin = customizeOffset;
+        }
+        if (dialogPanel != null)
+        {
+            float bannerHeight = thisPanel.rect.height;
+            var dialogOffset = dialogPanel.offsetMin;
+            dialogOffset.y = bannerHeight;
+            dialogPanel.offsetMin = dialogOffset;
         }
 
     }

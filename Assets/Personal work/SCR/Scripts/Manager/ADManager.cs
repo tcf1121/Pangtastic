@@ -37,7 +37,7 @@ public class ADManager : Singleton<ADManager>
     private int adDay = 2;
 
     // 광고 ID (테스트 용)
-    private string rewardedInterstitialAdID = "ca-app-pub-3940256099942544/5354046379";
+    private string rewardedInterstitialAdID = "ca-app-pub-3940256099942544/5224354917";
     private string appOpenAdID = "ca-app-pub-3940256099942544/9257395921";
     private string interstitialAdID = "ca-app-pub-3940256099942544/1033173712";
     private string bannerAdID = "ca-app-pub-3940256099942544/6300978111";
